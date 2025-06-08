@@ -8,7 +8,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bojang'),
+        title: const Text('བོད་སྦྱངས་།  Bojang'),
         centerTitle: true,
       ),
       body: Center(
@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
               ),
             );
           },
-          child: const Text('Learn Now'),
+          child: const Text('ད་ལྟ་སྦྱོང་ཤོག Lets learn'),
         ),
       ),
     );
