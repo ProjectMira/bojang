@@ -1,0 +1,49 @@
+{
+  "questions": [
+    {
+      "tibetanText": "ང་བོད་པ་ཡིན།",
+      "options": [
+        "I am Tibetan.",
+        "You are Tibetan.",
+        "He is Tibetan."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ག་པར་ཕེབས་ཀྱི་ཡོད།",
+      "options": [
+        "Where are you going?",
+        "What are you doing?",
+        "How are you?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "དེ་རིང་གནམ་གཤིས་ཡག་པོ་འདུག",
+      "options": [
+        "The weather is nice today.",
+        "Today is Monday.",
+        "I like this weather."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་དཔེ་ཆ་ལྟ་གི་ཡོད།",
+      "options": [
+        "I am studying.",
+        "I am walking.",
+        "I am eating."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་བདེ་པོ་ཡིན་པས།",
+      "options": [
+        "How are you?",
+        "Where are you?",
+        "What is your name?"
+      ],
+      "correctAnswerIndex": 0
+    }
+  ]
+} 

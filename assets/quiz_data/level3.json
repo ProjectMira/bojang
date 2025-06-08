@@ -1,0 +1,49 @@
+{
+  "questions": [
+    {
+      "tibetanText": "ང་ཚོས་བོད་ཀྱི་སྐད་ཡིག་སྲུང་སྐྱོབ་བྱེད་དགོས།",
+      "options": [
+        "We must preserve Tibetan language.",
+        "Tibetan is an ancient language.",
+        "I like Tibetan language."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "བོད་ཀྱི་རིག་གཞུང་ཧ་ཅང་ཕྱུག་པོ་རེད།",
+      "options": [
+        "Tibetan culture is very rich.",
+        "Tibet has many traditions.",
+        "I study Tibetan culture."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ཚོ་ཚང་མས་མཉམ་རུབ་བྱས་ནས་ལས་ཀ་བྱེད་དགོས།",
+      "options": [
+        "We all need to work together.",
+        "Everyone is working hard.",
+        "The work is finished."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "བོད་ཀྱི་གནམ་གཤིས་གྲང་མོ་ཡོད།",
+      "options": [
+        "The weather in Tibet is cold.",
+        "Tibet has four seasons.",
+        "I like cold weather."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་རྒྱ་གར་ལ་སློབ་སྦྱོང་བྱེད་དུ་ཕྱིན་པ་ཡིན།",
+      "options": [
+        "I went to India to study.",
+        "I am studying in India.",
+        "India has good schools."
+      ],
+      "correctAnswerIndex": 0
+    }
+  ]
+} 

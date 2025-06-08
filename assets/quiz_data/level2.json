@@ -1,0 +1,49 @@
+{
+  "questions": [
+    {
+      "tibetanText": "ང་ཚོ་ལྷ་སར་འགྲོ་གི་ཡིན།",
+      "options": [
+        "We are going to Lhasa.",
+        "I am going to Lhasa.",
+        "They are going to Lhasa."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་བོད་སྐད་ཤེས་ཀྱི་ཡོད་པས།",
+      "options": [
+        "Do you know Tibetan?",
+        "Can you speak English?",
+        "Are you Tibetan?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "སང་ཉིན་ང་ཚོ་མཉམ་དུ་ཞལ་ལག་མཆོད།",
+      "options": [
+        "Let's eat together tomorrow.",
+        "I ate yesterday.",
+        "I am hungry now."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་དེ་རིང་ཁོམ་ལ་འགྲོ་དགོས།",
+      "options": [
+        "I need to go to market today.",
+        "I went to market yesterday.",
+        "The market is closed today."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་པར་འདི་ཡག་པོ་འདུག",
+      "options": [
+        "Your photo is nice.",
+        "This is a good camera.",
+        "I like photography."
+      ],
+      "correctAnswerIndex": 0
+    }
+  ]
+} 
