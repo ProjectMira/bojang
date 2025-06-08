@@ -89,7 +89,7 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                isCorrect ? 'You are right!' : 'Try again!',
+                isCorrect ? 'ལེགས་སོ། Amazing!' : 'སེམས་ཤུགས་མ་ཆག Think again!',
                 style: TextStyle(
                   fontSize: 24,
                   color: isCorrect ? Colors.green : Colors.red,
