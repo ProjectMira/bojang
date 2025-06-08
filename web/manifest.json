@@ -1,6 +1,6 @@
 {
-    "name": "word_train",
-    "short_name": "word_train",
+    "name": "bojang",
+    "short_name": "bojang",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
