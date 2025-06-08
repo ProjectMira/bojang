@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'screens/home_page.dart';
+import 'screens/home_screen.dart';
 
 void main() {
-  runApp(const TibetanLearningApp());
+  runApp(const MyApp());
 }
 
-class TibetanLearningApp extends StatelessWidget {
-  const TibetanLearningApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Tibetan Learning App',
+      title: 'Bojang - Tibetan Learning',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const HomeScreen(),
     );
   }
 }
