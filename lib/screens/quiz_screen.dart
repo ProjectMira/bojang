@@ -78,14 +78,14 @@ class _QuizScreenState extends State<QuizScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: isCorrect ? Colors.green.shade100 : Colors.red.shade100,
+          backgroundColor: isCorrect ? Colors.green.shade100 : Colors.purple.shade100,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 isCorrect ? Icons.check_circle : Icons.error,
-                color: isCorrect ? Colors.green : Colors.red,
+                color: isCorrect ? Colors.green : Colors.purple,
                 size: 64,
               ),
               const SizedBox(height: 16),
@@ -93,7 +93,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 isCorrect ? 'ལེགས་སོ། Amazing!' : 'སེམས་ཤུགས་མ་ཆག \nThink again!',
                 style: TextStyle(
                   fontSize: 24,
-                  color: isCorrect ? Colors.green : Colors.red,
+                  color: isCorrect ? Colors.green : Colors.purple,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
