@@ -81,6 +81,7 @@ class _QuizScreenState extends State<QuizScreen> {
           backgroundColor: isCorrect ? Colors.green.shade100 : Colors.red.shade100,
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 isCorrect ? Icons.check_circle : Icons.error,
@@ -89,12 +90,13 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                isCorrect ? 'ལེགས་སོ། Amazing!' : 'སེམས་ཤུགས་མ་ཆག Think again!',
+                isCorrect ? 'ལེགས་སོ། Amazing!' : 'སེམས་ཤུགས་མ་ཆག \nThink again!',
                 style: TextStyle(
                   fontSize: 24,
                   color: isCorrect ? Colors.green : Colors.red,
                   fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
