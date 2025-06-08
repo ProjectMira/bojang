@@ -16,6 +16,7 @@ class _QuizScreenState extends State<QuizScreen> {
   List<QuizQuestion> questions = [];
   int currentQuestionIndex = 0;
   int? selectedAnswerIndex;
+  bool showFeedback = false;
 
   @override
   void initState() {
@@ -30,22 +31,76 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _handleAnswer(int answerIndex) {
+    final isCorrect = answerIndex == questions[currentQuestionIndex].correctAnswerIndex;
+    
     setState(() {
       selectedAnswerIndex = answerIndex;
+      showFeedback = true;
     });
 
-    // Show feedback and move to next question after a delay
-    Future.delayed(const Duration(seconds: 1), () {
-      if (currentQuestionIndex < questions.length - 1) {
-        setState(() {
-          currentQuestionIndex++;
-          selectedAnswerIndex = null;
-        });
-      } else {
-        // Quiz completed
-        Navigator.pop(context);
-      }
-    });
+    // Show feedback and handle navigation
+    if (isCorrect) {
+      // Show success feedback and move to next question after delay
+      _showFeedbackDialog(true);
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.of(context).pop(); // Close the dialog
+          if (currentQuestionIndex < questions.length - 1) {
+            setState(() {
+              currentQuestionIndex++;
+              selectedAnswerIndex = null;
+              showFeedback = false;
+            });
+          } else {
+            // Quiz completed
+            Navigator.pop(context);
+          }
+        }
+      });
+    } else {
+      // Show error feedback and allow retry
+      _showFeedbackDialog(false);
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.of(context).pop(); // Close the dialog
+          setState(() {
+            selectedAnswerIndex = null;
+            showFeedback = false;
+          });
+        }
+      });
+    }
+  }
+
+  void _showFeedbackDialog(bool isCorrect) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: isCorrect ? Colors.green.shade100 : Colors.red.shade100,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isCorrect ? Icons.check_circle : Icons.error,
+                color: isCorrect ? Colors.green : Colors.red,
+                size: 64,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                isCorrect ? 'You are right!' : 'Try again!',
+                style: TextStyle(
+                  fontSize: 24,
+                  color: isCorrect ? Colors.green : Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -113,11 +168,11 @@ class _QuizScreenState extends State<QuizScreen> {
                     final isCorrect = index == question.correctAnswerIndex;
                     
                     Color? buttonColor;
-                    if (selectedAnswerIndex != null) {
+                    if (showFeedback) {
                       if (isSelected) {
-                        buttonColor = isCorrect ? Colors.green : Colors.red;
+                        buttonColor = isCorrect ? Colors.green.shade100 : Colors.red.shade100;
                       } else if (isCorrect) {
-                        buttonColor = Colors.green;
+                        buttonColor = Colors.green.shade100;
                       }
                     }
 
@@ -128,9 +183,7 @@ class _QuizScreenState extends State<QuizScreen> {
                           backgroundColor: buttonColor,
                           padding: const EdgeInsets.all(16),
                         ),
-                        onPressed: selectedAnswerIndex == null
-                            ? () => _handleAnswer(index)
-                            : null,
+                        onPressed: showFeedback ? null : () => _handleAnswer(index),
                         child: Text(
                           question.options[index],
                           style: const TextStyle(fontSize: 18),
