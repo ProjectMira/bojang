@@ -1,10 +1,37 @@
-# bojang
+# Bojang
 
-A new Flutter project.
+A Tibetan Learning Flutter application.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This project is a Flutter application for learning Tibetan language.
+
+### Running the Application
+
+#### Check Available Devices
+To see all available devices and emulators:
+```bash
+flutter devices
+```
+
+#### Android Emulator
+1. List available emulators:
+```bash
+flutter emulators
+```
+
+2. Launch an emulator (replace `Medium_Phone_API_36` with your emulator name):
+```bash
+flutter emulators --launch Medium_Phone_API_36
+```
+
+3. Run the app on the emulator:
+```bash
+flutter run -d emulator-5554
+```
+Note: The device ID (emulator-5554) might be different on your system. Check the device ID using `flutter devices`.
+
+### Development Resources
 
 A few resources to get you started if this is your first Flutter project:
 
