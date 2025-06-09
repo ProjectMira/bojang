@@ -1,47 +1,191 @@
 {
   "questions": [
     {
-      "tibetanText": "ང་ཚོས་བོད་ཀྱི་སྐད་ཡིག་སྲུང་སྐྱོབ་བྱེད་དགོས།",
+      "tibetanText": "བོད་ཀྱི་རིག་གཞུང་དང་སྐད་ཡིག་སྲུང་སྐྱོབ་བྱེད་རྒྱུ་དེ་ང་ཚོའི་ལས་འགན་གལ་ཆེན་ཞིག་རེད།",
       "options": [
-        "We must preserve Tibetan language.",
-        "Tibetan is an ancient language.",
-        "I like Tibetan language."
+        "Preserving Tibetan culture and language is our important responsibility.",
+        "Tibetan culture and language are very beautiful.",
+        "We should learn Tibetan culture and language."
       ],
       "correctAnswerIndex": 0
     },
     {
-      "tibetanText": "བོད་ཀྱི་རིག་གཞུང་ཧ་ཅང་ཕྱུག་པོ་རེད།",
+      "tibetanText": "དེང་སང་གི་གཞོན་སྐྱེས་ཚོས་དེང་རབས་ཀྱི་ཤེས་ཡོན་དང་སྲོལ་རྒྱུན་གྱི་རིག་གནས་གཉིས་ཀ་སྦྱང་དགོས།",
       "options": [
-        "Tibetan culture is very rich.",
-        "Tibet has many traditions.",
-        "I study Tibetan culture."
+        "Today's youth should learn both modern education and traditional knowledge.",
+        "Modern education is more important than traditional knowledge.",
+        "Traditional knowledge is more important than modern education."
       ],
       "correctAnswerIndex": 0
     },
     {
-      "tibetanText": "ང་ཚོ་ཚང་མས་མཉམ་རུབ་བྱས་ནས་ལས་ཀ་བྱེད་དགོས།",
+      "tibetanText": "འཛམ་གླིང་ཚ་དྲོད་རྒྱས་པའི་དཀའ་ངལ་སེལ་བར་ང་ཚོ་ཚང་མས་འགན་ཁུར་ལེན་དགོས།",
       "options": [
-        "We all need to work together.",
-        "Everyone is working hard.",
-        "The work is finished."
+        "We all must take responsibility to solve the global warming problem.",
+        "Global warming is a serious problem.",
+        "The earth is getting warmer every year."
       ],
       "correctAnswerIndex": 0
     },
     {
-      "tibetanText": "བོད་ཀྱི་གནམ་གཤིས་གྲང་མོ་ཡོད།",
+      "tibetanText": "རི་དྭགས་སེམས་ཅན་རྣམས་ཀྱི་འཚོ་གནས་སྲུང་སྐྱོབ་བྱེད་རྒྱུ་དེ་ཧ་ཅང་གལ་ཆེན་པོ་རེད།",
       "options": [
-        "The weather in Tibet is cold.",
-        "Tibet has four seasons.",
-        "I like cold weather."
+        "Protecting wildlife habitats is very important.",
+        "There are many wild animals in the mountains.",
+        "Wild animals are dangerous."
       ],
       "correctAnswerIndex": 0
     },
     {
-      "tibetanText": "ང་རྒྱ་གར་ལ་སློབ་སྦྱོང་བྱེད་དུ་ཕྱིན་པ་ཡིན།",
+      "tibetanText": "ང་ཚོས་རང་བྱུང་ཁོར་ཡུག་སྲུང་སྐྱོབ་བྱེད་པར་ཚང་མས་མཉམ་རུབ་བྱེད་དགོས།",
       "options": [
-        "I went to India to study.",
-        "I am studying in India.",
-        "India has good schools."
+        "We all need to work together to protect the natural environment.",
+        "The natural environment is very beautiful.",
+        "Nature is very powerful."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "དཔེ་ཆ་བལྟ་རྒྱུ་དེ་ཤེས་ཡོན་གོང་འཕེལ་གཏོང་བའི་ཐབས་ལམ་ཡག་ཤོས་དེ་རེད།",
+      "options": [
+        "Reading books is the best way to improve knowledge.",
+        "Books are very expensive.",
+        "We should write more books."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "གློག་ཀླད་དང་དྲ་རྒྱའི་བེད་སྤྱོད་གཏོང་སྐབས་སྐད་ཡིག་གི་ཚད་གཞི་ཡག་པོ་ཟིན་དགོས།",
+      "options": [
+        "We should maintain good language standards when using computers and internet.",
+        "Computers and internet are very useful.",
+        "We should learn computer skills."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "བོད་ཀྱི་གནའ་བོའི་རིག་གཞུང་ནང་སྨན་དང་རྩིས་ཀྱི་ཤེས་བྱ་ཧ་ཅང་ཕྱུག་པོ་ཡོད།",
+      "options": [
+        "Ancient Tibetan culture has rich knowledge of medicine and astrology.",
+        "Tibetan medicine is very effective.",
+        "We should learn Tibetan astrology."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "དེང་སང་གི་འཛམ་གླིང་ནང་སྐད་ཡིག་མི་འདྲ་བ་མང་པོ་ཡོད་པ་དེ་ནི་དཔལ་ཡོན་གྱི་ཕྱུག་པོ་ཞིག་རེད།",
+      "options": [
+        "The diversity of languages in today's world is a cultural richness.",
+        "There are too many languages in the world.",
+        "We should learn many languages."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "གཞོན་སྐྱེས་ཚོས་རང་གི་མི་རིགས་ཀྱི་སྐད་ཡིག་དང་རིག་གཞུང་ལ་དོ་སྣང་དང་སློབ་སྦྱོང་བྱེད་རྒྱུ་གལ་ཆེན་པོ་རེད།",
+      "options": [
+        "It is important for young people to pay attention to and study their ethnic language and culture.",
+        "Young people should learn foreign languages.",
+        "Culture is not important for young people."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "འཕྲུལ་ཆས་གསར་པ་དེ་ཚོ་བེད་སྤྱོད་གཏོང་བའི་སྐབས་སུ་ཉེན་ཁ་ཡོད་མེད་ལ་དོ་སྣང་བྱེད་དགོས།",
+      "options": [
+        "We should be careful about safety when using new machines.",
+        "New machines are very useful.",
+        "We should not use new machines."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "དེང་སང་གི་སློབ་ཕྲུག་ཚོས་དཔེ་དེབ་ལས་གློག་ཀླད་དང་ཁ་པར་ལ་དུས་ཚོད་མང་བ་གཏོང་གི་ཡོད།",
+      "options": [
+        "Today's students spend more time on computers and phones than books.",
+        "Books are better than computers.",
+        "Students should not use phones."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "རྒྱལ་སྤྱིའི་ནང་བོད་ཀྱི་ཐུན་མོང་མ་ཡིན་པའི་རིག་གཞུང་ལ་དོ་སྣང་ཆེན་པོ་བྱེད་ཀྱི་ཡོད།",
+      "options": [
+        "There is great international interest in Tibet's unique culture.",
+        "Tibetan culture is disappearing.",
+        "We should preserve Tibetan culture."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཕ་མ་རྒན་པ་ཚོས་རང་གི་ཕྲུ་གུ་ཚོར་མི་ཚེའི་ནང་གི་བཟང་སྤྱོད་ཀྱི་བསླབ་བྱ་རྒྱག་རྒྱུ་གལ་ཆེན་པོ་རེད།",
+      "options": [
+        "It is important for parents to teach moral values to their children.",
+        "Children should respect their parents.",
+        "Parents should be strict with their children."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ཚོས་རང་གི་མི་ཚེའི་ནང་དཀའ་ངལ་ག་རེ་འཕྲད་ནའང་སེམས་ཤུགས་ཆག་རྒྱུ་མེད།",
+      "options": [
+        "We should not lose hope no matter what difficulties we face in life.",
+        "Life is full of difficulties.",
+        "We should avoid difficulties."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "འཛམ་གླིང་ནང་ཞི་བདེ་བསྐྲུན་རྒྱུར་མི་རིགས་དང་ཆོས་ལུགས་ཚང་མས་མཉམ་རུབ་བྱེད་དགོས།",
+      "options": [
+        "All races and religions must work together to create world peace.",
+        "World peace is impossible.",
+        "Religion causes conflicts."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "དེང་རབས་ཀྱི་འཕྲུལ་ཆས་ཡར་རྒྱས་ཕྱིན་པ་དང་མཉམ་དུ་འགྲོ་བ་མིའི་འཚོ་བའི་གནས་སྟངས་ཀྱང་འགྱུར་བ་ཆེན་པོ་ཕྱིན་ཡོད།",
+      "options": [
+        "Human life has changed greatly with the development of modern technology.",
+        "Modern technology is harmful.",
+        "We should avoid modern technology."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "སློབ་གྲྭའི་ནང་སློབ་ཕྲུག་ཚོས་དགེ་རྒན་གྱི་བཀའ་སློབ་ལ་ཉན་འཇོག་ཡག་པོ་བྱེད་དགོས།",
+      "options": [
+        "Students should pay good attention to teachers' instructions in school.",
+        "Teachers should be strict with students.",
+        "School is not important."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ཚོས་རང་གི་ལས་ཀ་ག་རེ་ཡིན་ནའང་སེམས་ཁུར་དང་འགན་ཁུར་ཆེན་པོས་བྱེད་དགོས།",
+      "options": [
+        "We should do any work with great care and responsibility.",
+        "Work is not important.",
+        "We should work less."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "དེང་སང་གི་གཞོན་སྐྱེས་ཚོས་གློག་ཀླད་དང་དྲ་རྒྱའི་བེད་སྤྱོད་གཏོང་སྟངས་ཡག་པོ་ཤེས་དགོས།",
+      "options": [
+        "Today's youth should know how to properly use computers and the internet.",
+        "Computers are dangerous.",
+        "The internet is not useful."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ཚོས་རང་གི་སྐད་ཡིག་དང་རིག་གཞུང་མི་ཉམས་རྒྱུན་འཛིན་བྱེད་པར་ཚང་མས་འབད་བརྩོན་བྱེད་དགོས།",
+      "options": [
+        "We all must strive to preserve our language and culture from decline.",
+        "Our culture is changing.",
+        "Language is not important."
       ],
       "correctAnswerIndex": 0
     }

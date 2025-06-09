@@ -1,47 +1,488 @@
 {
   "questions": [
     {
-      "tibetanText": "ང་ཚོ་ལྷ་སར་འགྲོ་གི་ཡིན།",
+      "tibetanText": "ཁྱེད་རང་བདེ་པོ་ཡིན་པས།",
       "options": [
-        "We are going to Lhasa.",
-        "I am going to Lhasa.",
-        "They are going to Lhasa."
+        "How are you?",
+        "Where are you?",
+        "What is your name?"
       ],
       "correctAnswerIndex": 0
     },
     {
-      "tibetanText": "ཁྱེད་རང་བོད་སྐད་ཤེས་ཀྱི་ཡོད་པས།",
+      "tibetanText": "ང་བདེ་པོ་ཡིན།",
+      "options": [
+        "I am fine.",
+        "I am tired.",
+        "I am hungry."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་མིང་ལ་ག་རེ་ཞུ་གི་ཡོད།",
+      "options": [
+        "What is your name?",
+        "How old are you?",
+        "Where are you from?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་བོད་པ་ཡིན།",
+      "options": [
+        "I am Tibetan.",
+        "You are Tibetan.",
+        "He is Tibetan."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ག་པར་ཕེབས་ཀྱི་ཡོད།",
+      "options": [
+        "Where are you going?",
+        "Where are you from?",
+        "Where do you live?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ལྡི་ལི་ལ་འགྲོ་གི་ཡོད།",
+      "options": [
+        "I am going to Delhi.",
+        "I am coming from Delhi.",
+        "I live in Delhi."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "དེ་རིང་གནམ་གཤིས་ཡག་པོ་འདུག",
+      "options": [
+        "The weather is nice today.",
+        "Today is Monday.",
+        "It will rain today."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "སང་ཉིན་ཆར་པ་འབབ་ཀྱི་རེད།",
+      "options": [
+        "It will rain tomorrow.",
+        "It rained yesterday.",
+        "It is raining now."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ག་རེ་གནང་གི་ཡོད།",
+      "options": [
+        "What are you doing?",
+        "What did you do?",
+        "What will you do?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་དཔེ་ཆ་ལྟ་གི་ཡོད།",
+      "options": [
+        "I am studying.",
+        "I am reading.",
+        "I am writing."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ལ་དུས་ཚོད་ཡོད་པས།",
+      "options": [
+        "Do you have time?",
+        "What time is it?",
+        "Is it time?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "དགོངས་དག ང་ལ་དུས་ཚོད་མི་འདུག",
+      "options": [
+        "Sorry, I don't have time.",
+        "Yes, I have time.",
+        "Maybe later."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁ་ལག་ཟ་འདོད་འདུག་གས།",
+      "options": [
+        "Are you hungry?",
+        "Are you thirsty?",
+        "Are you tired?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ཐང་ཆད་འདུག",
+      "options": [
+        "I am tired.",
+        "I am hungry.",
+        "I am thirsty."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ལ་བོད་སྐད་ཤེས་ཀྱི་ཡོད་པས།",
       "options": [
         "Do you know Tibetan?",
-        "Can you speak English?",
+        "Do you speak Tibetan?",
         "Are you Tibetan?"
       ],
       "correctAnswerIndex": 0
     },
     {
-      "tibetanText": "སང་ཉིན་ང་ཚོ་མཉམ་དུ་ཞལ་ལག་མཆོད།",
+      "tibetanText": "ང་ཏོག་ཙམ་ཤེས་ཀྱི་ཡོད།",
       "options": [
-        "Let's eat together tomorrow.",
-        "I ate yesterday.",
-        "I am hungry now."
+        "I know a little.",
+        "I know a lot.",
+        "I don't know."
       ],
       "correctAnswerIndex": 0
     },
     {
-      "tibetanText": "ང་དེ་རིང་ཁོམ་ལ་འགྲོ་དགོས།",
+      "tibetanText": "ཁྱེད་རང་གི་ནང་མི་ག་པར་བཞུགས་ཀྱི་ཡོད།",
       "options": [
-        "I need to go to market today.",
-        "I went to market yesterday.",
-        "The market is closed today."
+        "Where does your family live?",
+        "How many family members do you have?",
+        "Do you live with your family?"
       ],
       "correctAnswerIndex": 0
     },
     {
-      "tibetanText": "ཁྱེད་རང་གི་པར་འདི་ཡག་པོ་འདུག",
+      "tibetanText": "ངའི་ནང་མི་རྒྱ་གར་ལ་བཞུགས་ཀྱི་ཡོད།",
       "options": [
-        "Your photo is nice.",
-        "This is a good camera.",
-        "I like photography."
+        "My family lives in India.",
+        "My family is from India.",
+        "I live with my family in India."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ལ་སྤུན་མཆེད་ག་ཚོད་ཡོད།",
+      "options": [
+        "How many siblings do you have?",
+        "Do you have siblings?",
+        "Where are your siblings?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ལ་སྤུན་མཆེད་གསུམ་ཡོད།",
+      "options": [
+        "I have three siblings.",
+        "I have two siblings.",
+        "I have no siblings."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ག་དུས་ཕེབས་པ་ཡིན།",
+      "options": [
+        "When did you come?",
+        "When will you come?",
+        "When are you coming?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ཁ་སང་འབྱོར་པ་ཡིན།",
+      "options": [
+        "I arrived yesterday.",
+        "I will arrive tomorrow.",
+        "I am arriving today."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ལ་ལས་ཀ་ག་རེ་གནང་གི་ཡོད།",
+      "options": [
+        "What is your job?",
+        "Do you have a job?",
+        "Where do you work?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་དགེ་རྒན་ཡིན།",
+      "options": [
+        "I am a teacher.",
+        "I am a student.",
+        "I am a doctor."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་སྐད་ཡིག་ག་རེ་ཡིན།",
+      "options": [
+        "What is your language?",
+        "Do you speak any languages?",
+        "Which language do you prefer?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ངའི་སྐད་ཡིག་བོད་ཡིག་ཡིན།",
+      "options": [
+        "My language is Tibetan.",
+        "I speak Tibetan.",
+        "I am learning Tibetan."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ལ་དཀའ་ངལ་ག་རེ་འདུག",
+      "options": [
+        "What problem do you have?",
+        "Do you have any problems?",
+        "How can I help you?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ལ་དཀའ་ངལ་གང་ཡང་མི་འདུག",
+      "options": [
+        "I don't have any problems.",
+        "I have many problems.",
+        "I need help."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ལ་རོགས་པ་དགོས་ཀྱི་འདུག་གས།",
+      "options": [
+        "Do you need help?",
+        "Can you help me?",
+        "Should I help you?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ལགས་རེད། ང་ལ་རོགས་པ་དགོས་ཀྱི་འདུག",
+      "options": [
+        "Yes, I need help.",
+        "No, I don't need help.",
+        "Maybe I need help."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ག་དུས་ལོག་ཕེབས་ཀྱི་ཡིན།",
+      "options": [
+        "When will you return?",
+        "When did you return?",
+        "Are you returning?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་སང་ཉིན་ལོག་འགྲོ་གི་ཡིན།",
+      "options": [
+        "I will return tomorrow.",
+        "I returned yesterday.",
+        "I am returning today."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་ལ་དགའ་པོ་བྱུང་ངས།",
+      "options": [
+        "Did you like it?",
+        "Do you like it?",
+        "Will you like it?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ལ་ཧ་ཅང་དགའ་པོ་བྱུང་།",
+      "options": [
+        "I liked it very much.",
+        "I don't like it.",
+        "It's okay."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གིས་ག་རེ་མཐོང་གི་འདུག",
+      "options": [
+        "What do you see?",
+        "Can you see?",
+        "Where do you look?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་ག་རེ་ཡང་མཐོང་གི་མི་འདུག",
+      "options": [
+        "I don't see anything.",
+        "I see everything.",
+        "I can't see clearly."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གིས་ག་རེ་གསན་གྱི་འདུག",
+      "options": [
+        "What do you hear?",
+        "Can you hear?",
+        "Do you listen?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ང་སྒྲ་ཞིག་གོ་གི་འདུག",
+      "options": [
+        "I hear a sound.",
+        "I don't hear anything.",
+        "The sound is loud."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་ཁ་པར་ཨང་གྲངས་ག་ཚོད་རེད།",
+      "options": [
+        "What is your phone number?",
+        "Do you have a phone?",
+        "Can I call you?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ངའི་ཁ་པར་ཨང་གྲངས་བརྗེད་སོང་།",
+      "options": [
+        "I forgot my phone number.",
+        "I don't have a phone number.",
+        "Here's my phone number."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་སྐྱེས་སྐར་ག་དུས་རེད།",
+      "options": [
+        "When is your birthday?",
+        "How old are you?",
+        "Is it your birthday?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ངའི་སྐྱེས་སྐར་ཟླ་བ་བདུན་པའི་ནང་རེད།",
+      "options": [
+        "My birthday is in July.",
+        "My birthday was last month.",
+        "My birthday is next month."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་དགའ་ཤོས་ཟ་མ་ག་རེ་རེད།",
+      "options": [
+        "What is your favorite food?",
+        "Do you like food?",
+        "Are you hungry?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ངའི་དགའ་ཤོས་མོག་མོག་རེད།",
+      "options": [
+        "My favorite is momos.",
+        "I don't like momos.",
+        "I want momos."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་དགའ་ཤོས་ཚོན་མདོག་ག་རེ་རེད།",
+      "options": [
+        "What is your favorite color?",
+        "Do you like colors?",
+        "Which color is this?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ངའི་དགའ་ཤོས་ཚོན་མདོག་སྔོན་པོ་རེད།",
+      "options": [
+        "My favorite color is blue.",
+        "I like all colors.",
+        "Blue is a nice color."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་དགའ་ཤོས་དུས་ཚོད་ག་དུས་རེད།",
+      "options": [
+        "What is your favorite time?",
+        "Do you have time?",
+        "What time is it?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ངའི་དགའ་ཤོས་དཔྱིད་ཀ་རེད།",
+      "options": [
+        "My favorite time is evening.",
+        "I like mornings.",
+        "Evening is nice."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་དགའ་ཤོས་ས་ཆ་ག་པར་རེད།",
+      "options": [
+        "What is your favorite place?",
+        "Where do you live?",
+        "Do you like this place?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ངའི་དགའ་ཤོས་ས་ཆ་ལྷ་ས་རེད།",
+      "options": [
+        "My favorite place is Lhasa.",
+        "I live in Lhasa.",
+        "Lhasa is beautiful."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་དགའ་ཤོས་ལོ་དུས་ག་དུས་རེད།",
+      "options": [
+        "What is your favorite season?",
+        "Which season is it now?",
+        "Do you like seasons?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ངའི་དགའ་ཤོས་དཔྱིད་ཀ་རེད།",
+      "options": [
+        "My favorite season is spring.",
+        "Spring is coming.",
+        "I like all seasons."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ཁྱེད་རང་གི་དགའ་ཤོས་སྤྲོ་སྐྱིད་ག་རེ་རེད།",
+      "options": [
+        "What is your favorite hobby?",
+        "Do you have hobbies?",
+        "What do you like to do?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "tibetanText": "ངའི་དགའ་ཤོས་སྤྲོ་སྐྱིད་རྐང་རྩེད་སྤོ་ལོ་རེད།",
+      "options": [
+        "My favorite hobby is football.",
+        "I play football.",
+        "Football is fun."
       ],
       "correctAnswerIndex": 0
     }
