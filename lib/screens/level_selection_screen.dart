@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'quiz_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LevelSelectionScreen extends StatelessWidget {
   const LevelSelectionScreen({super.key});
@@ -8,11 +9,12 @@ class LevelSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Learning Path',
-          style: TextStyle(
-            fontSize: 24,
+        title: Text(
+          'Bojang',
+          style: GoogleFonts.kalam(
+            fontSize: 32,
             fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
         ),
         centerTitle: true,
@@ -164,7 +166,7 @@ class LevelSelectionScreen extends StatelessWidget {
                     ] else ...[
                       Text(
                         '$level',
-                        style: TextStyle(
+                        style: GoogleFonts.kalam(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: isUnlocked ? color : Colors.grey,
@@ -207,7 +209,7 @@ class LevelSelectionScreen extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: TextStyle(
+                        style: GoogleFonts.kalam(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: isUnlocked ? Colors.black87 : Colors.grey,

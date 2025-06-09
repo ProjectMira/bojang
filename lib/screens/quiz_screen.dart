@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/quiz_data.dart';
 import '../models/quiz_question.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class QuizScreen extends StatefulWidget {
   final int level;
@@ -109,11 +110,19 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               const SizedBox(height: 16),
               Text(
                 'Your Score: $score/${questions.length}',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: GoogleFonts.kalam(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[700],
+                ),
               ),
               Text(
                 '${percentage.toStringAsFixed(0)}%',
-                style: const TextStyle(fontSize: 18),
+                style: GoogleFonts.kalam(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: percentage >= 70 ? Colors.green[700] : Colors.blue[700],
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -182,8 +191,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       appBar: AppBar(
         title: Text(
           'Level ${widget.level}',
-          style: const TextStyle(
+          style: GoogleFonts.kalam(
+            fontSize: 24,
             fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
         ),
         centerTitle: true,
@@ -233,9 +244,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                   children: [
                     Text(
                       'Score: $score',
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: GoogleFonts.kalam(
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
+                        color: Colors.blue[700],
                       ),
                     ),
                   ],
