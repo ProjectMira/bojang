@@ -22,12 +22,20 @@ class LevelSelectionScreen extends StatelessWidget {
           color: Colors.grey[100],
         ),
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
-            child: Column(
-              children: [
-                _buildPath(context),
-              ],
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height - AppBar().preferredSize.height,
+            ),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildPath(context),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -86,7 +94,7 @@ class LevelSelectionScreen extends StatelessWidget {
   }
 
   Widget _buildConnector() {
-    return const SizedBox(height: 15);
+    return const SizedBox(height: 30);
   }
 
   Widget _buildLevel(
@@ -100,7 +108,7 @@ class LevelSelectionScreen extends StatelessWidget {
     return Opacity(
       opacity: isUnlocked ? 1.0 : 0.6,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 15),
+        margin: const EdgeInsets.only(bottom: 30),
         child: InkWell(
           onTap: isUnlocked
               ? () {
