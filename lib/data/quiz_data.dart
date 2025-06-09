@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/services.dart';
 import '../models/quiz_question.dart';
 
@@ -9,11 +10,18 @@ class QuizData {
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       final List<dynamic> questionsJson = jsonData['questions'];
       
-      return questionsJson.map((questionJson) => QuizQuestion(
+      // Convert JSON to QuizQuestion objects
+      final questions = questionsJson.map((questionJson) => QuizQuestion(
         tibetanText: questionJson['tibetanText'],
         options: List<String>.from(questionJson['options']),
         correctAnswerIndex: questionJson['correctAnswerIndex'],
       )).toList();
+
+      // Shuffle the questions
+      final random = Random();
+      questions.shuffle(random);
+      
+      return questions;
     } catch (e) {
       print('Error loading questions for level $level: $e');
       return [];
