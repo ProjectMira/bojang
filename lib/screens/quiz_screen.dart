@@ -229,15 +229,8 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               Container(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(
-                      'Question ${currentQuestionIndex + 1}/${questions.length}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                     Text(
                       'Score: $score',
                       style: const TextStyle(
@@ -254,7 +247,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
-                    value: (currentQuestionIndex + 1) / questions.length,
+                    value: currentQuestionIndex / questions.length,
                     backgroundColor: Colors.grey.shade200,
                     valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
                     minHeight: 10,
