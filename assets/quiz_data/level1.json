@@ -1,472 +1,472 @@
 {
-  "questions": [
-    {
-      "tibetanText": "ཆུ",
-      "options": [
-        "Water",
-        "Fire",
-        "Earth"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "མེ",
-      "options": [
-        "Fire",
-        "Water",
-        "Air"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ས",
-      "options": [
-        "Earth",
-        "Sky",
-        "Water"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "རླུང",
-      "options": [
-        "Air",
-        "Fire",
-        "Water"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཉི་མ",
-      "options": [
-        "Sun",
-        "Moon",
-        "Star"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཟླ་བ",
-      "options": [
-        "Moon",
-        "Sun",
-        "Cloud"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སྐར་མ",
-      "options": [
-        "Star",
-        "Sun",
-        "Moon"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ནམ་མཁའ",
-      "options": [
-        "Sky",
-        "Earth",
-        "Ocean"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "རི",
-      "options": [
-        "Mountain",
-        "River",
-        "Lake"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "མཚོ",
-      "options": [
-        "Lake",
-        "River",
-        "Ocean"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཤིང",
-      "options": [
-        "Tree",
-        "Flower",
-        "Grass"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "མེ་ཏོག",
-      "options": [
-        "Flower",
-        "Tree",
-        "Grass"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "རྩྭ",
-      "options": [
-        "Grass",
-        "Tree",
-        "Flower"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སྤྱང་ཀི",
-      "options": [
-        "Wolf",
-        "Dog",
-        "Cat"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཁྱི",
-      "options": [
-        "Dog",
-        "Cat",
-        "Bird"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཞི་མི",
-      "options": [
-        "Cat",
-        "Dog",
-        "Mouse"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "བྱ",
-      "options": [
-        "Bird",
-        "Fish",
-        "Snake"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཉ",
-      "options": [
-        "Fish",
-        "Bird",
-        "Snake"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སྦྲུལ",
-      "options": [
-        "Snake",
-        "Fish",
-        "Bird"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "གཡག",
-      "options": [
-        "Yak",
-        "Cow",
-        "Horse"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "རྟ",
-      "options": [
-        "Horse",
-        "Yak",
-        "Sheep"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ལུག",
-      "options": [
-        "Sheep",
-        "Goat",
-        "Horse"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ར",
-      "options": [
-        "Goat",
-        "Sheep",
-        "Cow"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཁང་པ",
-      "options": [
-        "House",
-        "Door",
-        "Window"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སྒོ",
-      "options": [
-        "Door",
-        "Window",
-        "Wall"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སྒེའུ་ཁུང",
-      "options": [
-        "Window",
-        "Door",
-        "Roof"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ལྕགས",
-      "options": [
-        "Iron",
-        "Gold",
-        "Silver"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "གསེར",
-      "options": [
-        "Gold",
-        "Silver",
-        "Iron"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "དངུལ",
-      "options": [
-        "Silver",
-        "Gold",
-        "Iron"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ལག་པ",
-      "options": [
-        "Hand",
-        "Foot",
-        "Head"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "རྐང་པ",
-      "options": [
-        "Foot",
-        "Hand",
-        "Leg"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "མགོ",
-      "options": [
-        "Head",
-        "Face",
-        "Neck"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "མིག",
-      "options": [
-        "Eye",
-        "Nose",
-        "Mouth"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སྣ",
-      "options": [
-        "Nose",
-        "Mouth",
-        "Eye"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཁ",
-      "options": [
-        "Mouth",
-        "Eye",
-        "Nose"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "རྣ་བ",
-      "options": [
-        "Ear",
-        "Eye",
-        "Nose"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སོ",
-      "options": [
-        "Tooth",
-        "Tongue",
-        "Lip"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ལྕེ",
-      "options": [
-        "Tongue",
-        "Tooth",
-        "Lip"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སྐྲ",
-      "options": [
-        "Hair",
-        "Face",
-        "Head"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "རྒྱལ་ཁབ",
-      "options": [
-        "Country",
-        "City",
-        "Village"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "གྲོང་ཁྱེར",
-      "options": [
-        "City",
-        "Village",
-        "Town"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "གྲོང་གསེབ",
-      "options": [
-        "Village",
-        "City",
-        "Town"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཟ་ཁང",
-      "options": [
-        "Restaurant",
-        "Shop",
-        "House"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཚོང་ཁང",
-      "options": [
-        "Shop",
-        "Restaurant",
-        "Market"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སློབ་གྲྭ",
-      "options": [
-        "School",
-        "Hospital",
-        "Library"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སྨན་ཁང",
-      "options": [
-        "Hospital",
-        "School",
-        "Library"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "དཔེ་མཛོད",
-      "options": [
-        "Library",
-        "School",
-        "Hospital"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "དེབ",
-      "options": [
-        "Book",
-        "Paper",
-        "Pen"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "སྨྱུ་གུ",
-      "options": [
-        "Pen",
-        "Pencil",
-        "Book"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "ཤོག་བུ",
-      "options": [
-        "Paper",
-        "Book",
-        "Pen"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "གཟའ་ཉི་མ",
-      "options": [
-        "Sunday",
-        "Monday",
-        "Saturday"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "tibetanText": "གཟའ་ཟླ་བ",
-      "options": [
-        "Monday",
-        "Sunday",
-        "Tuesday"
-      ],
-      "correctAnswerIndex": 0
-    }
-  ]
-} 
+    "questions": [
+        {
+            "tibetanText": "ཆུ",
+            "options": [
+                "Fire",
+                "Water",
+                "Earth"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "མེ",
+            "options": [
+                "Fire",
+                "Water",
+                "Air"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "ས",
+            "options": [
+                "Sky",
+                "Earth",
+                "Water"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "རླུང",
+            "options": [
+                "Fire",
+                "Air",
+                "Water"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "ཉི་མ",
+            "options": [
+                "Moon",
+                "Sun",
+                "Star"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "ཟླ་བ",
+            "options": [
+                "Moon",
+                "Sun",
+                "Cloud"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "སྐར་མ",
+            "options": [
+                "Moon",
+                "Sun",
+                "Star"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "ནམ་མཁའ",
+            "options": [
+                "Sky",
+                "Earth",
+                "Ocean"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "རི",
+            "options": [
+                "River",
+                "Mountain",
+                "Lake"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "མཚོ",
+            "options": [
+                "River",
+                "Lake",
+                "Ocean"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "ཤིང",
+            "options": [
+                "Flower",
+                "Tree",
+                "Grass"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "མེ་ཏོག",
+            "options": [
+                "Flower",
+                "Tree",
+                "Grass"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "རྩྭ",
+            "options": [
+                "Flower",
+                "Tree",
+                "Grass"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "སྤྱང་ཀི",
+            "options": [
+                "Dog",
+                "Wolf",
+                "Cat"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "ཁྱི",
+            "options": [
+                "Cat",
+                "Dog",
+                "Bird"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "ཞི་མི",
+            "options": [
+                "Mouse",
+                "Dog",
+                "Cat"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "བྱ",
+            "options": [
+                "Snake",
+                "Fish",
+                "Bird"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "ཉ",
+            "options": [
+                "Snake",
+                "Bird",
+                "Fish"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "སྦྲུལ",
+            "options": [
+                "Fish",
+                "Snake",
+                "Bird"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "གཡག",
+            "options": [
+                "Horse",
+                "Cow",
+                "Yak"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "རྟ",
+            "options": [
+                "Horse",
+                "Yak",
+                "Sheep"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "ལུག",
+            "options": [
+                "Sheep",
+                "Goat",
+                "Horse"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "ར",
+            "options": [
+                "Sheep",
+                "Goat",
+                "Cow"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "ཁང་པ",
+            "options": [
+                "Door",
+                "House",
+                "Window"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "སྒོ",
+            "options": [
+                "Window",
+                "Door",
+                "Wall"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "སྒེའུ་ཁུང",
+            "options": [
+                "Door",
+                "Window",
+                "Roof"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "ལྕགས",
+            "options": [
+                "Silver",
+                "Gold",
+                "Iron"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "གསེར",
+            "options": [
+                "Gold",
+                "Silver",
+                "Iron"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "དངུལ",
+            "options": [
+                "Gold",
+                "Silver",
+                "Iron"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "ལག་པ",
+            "options": [
+                "Hand",
+                "Foot",
+                "Head"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "རྐང་པ",
+            "options": [
+                "Foot",
+                "Hand",
+                "Leg"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "མགོ",
+            "options": [
+                "Neck",
+                "Face",
+                "Head"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "མིག",
+            "options": [
+                "Nose",
+                "Eye",
+                "Mouth"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "སྣ",
+            "options": [
+                "Nose",
+                "Mouth",
+                "Eye"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "ཁ",
+            "options": [
+                "Mouth",
+                "Eye",
+                "Nose"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "རྣ་བ",
+            "options": [
+                "Eye",
+                "Ear",
+                "Nose"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "སོ",
+            "options": [
+                "Lip",
+                "Tongue",
+                "Tooth"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "ལྕེ",
+            "options": [
+                "Lip",
+                "Tooth",
+                "Tongue"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "སྐྲ",
+            "options": [
+                "Head",
+                "Face",
+                "Hair"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "རྒྱལ་ཁབ",
+            "options": [
+                "Country",
+                "City",
+                "Village"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "གྲོང་ཁྱེར",
+            "options": [
+                "Town",
+                "Village",
+                "City"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "གྲོང་གསེབ",
+            "options": [
+                "Town",
+                "City",
+                "Village"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "ཟ་ཁང",
+            "options": [
+                "House",
+                "Shop",
+                "Restaurant"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "ཚོང་ཁང",
+            "options": [
+                "Restaurant",
+                "Shop",
+                "Market"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "སློབ་གྲྭ",
+            "options": [
+                "Hospital",
+                "School",
+                "Library"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "སྨན་ཁང",
+            "options": [
+                "Hospital",
+                "School",
+                "Library"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "དཔེ་མཛོད",
+            "options": [
+                "Library",
+                "School",
+                "Hospital"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "དེབ",
+            "options": [
+                "Book",
+                "Paper",
+                "Pen"
+            ],
+            "correctAnswerIndex": 0
+        },
+        {
+            "tibetanText": "སྨྱུ་གུ",
+            "options": [
+                "Pencil",
+                "Pen",
+                "Book"
+            ],
+            "correctAnswerIndex": 1
+        },
+        {
+            "tibetanText": "ཤོག་བུ",
+            "options": [
+                "Pen",
+                "Book",
+                "Paper"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "གཟའ་ཉི་མ",
+            "options": [
+                "Saturday",
+                "Monday",
+                "Sunday"
+            ],
+            "correctAnswerIndex": 2
+        },
+        {
+            "tibetanText": "གཟའ་ཟླ་བ",
+            "options": [
+                "Sunday",
+                "Monday",
+                "Tuesday"
+            ],
+            "correctAnswerIndex": 1
+        }
+    ]
+}
