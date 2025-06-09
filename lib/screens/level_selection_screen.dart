@@ -217,12 +217,28 @@ class LevelSelectionScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            'Start Learning',
+                            level == 1
+                                ? 'Learn Basic Words'
+                                : level == 2
+                                    ? 'Practice Simple Sentences'
+                                    : 'Master Complex Sentences',
                             style: TextStyle(
                               color: color,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          level == 1
+                              ? 'Start with basic vocabulary and essential words'
+                              : level == 2
+                                  ? 'Form basic sentences and simple conversations'
+                                  : 'Learn advanced grammar and complex expressions',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
                           ),
                         ),
                       ],
