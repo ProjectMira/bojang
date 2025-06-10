@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   provider: ^6.1.1
   google_fonts: ^6.1.0
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +64,8 @@ flutter:
     - assets/quiz_data/level1.json
     - assets/quiz_data/level2.json
     - assets/quiz_data/level3.json
+    - assets/audio/correct.mp3
+    - assets/audio/incorrect.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
