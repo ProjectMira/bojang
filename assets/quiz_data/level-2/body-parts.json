@@ -1,0 +1,534 @@
+{
+    "level": 2.1,
+    "title": "Body Parts",
+    "description": "Learn Tibetan names for body parts and anatomy",
+    "exercises": [
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལུས",
+        "options": [
+          "Body",
+          "Head",
+          "Soul"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མགོ",
+        "options": [
+          "Neck",
+          "Head",
+          "Face"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཞལ",
+        "options": [
+          "Head",
+          "Face",
+          "Forehead"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དཔྲལ་བ",
+        "options": [
+          "Forehead",
+          "Eyebrow",
+          "Temple"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མིག",
+        "options": [
+          "Nose",
+          "Eye",
+          "Ear"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མིག་སྨན",
+        "options": [
+          "Eyebrow",
+          "Eyelash",
+          "Eyelid"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རྣ",
+        "options": [
+          "Eye",
+          "Ear",
+          "Mouth"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྣ",
+        "options": [
+          "Nose",
+          "Mouth",
+          "Chin"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཁ",
+        "options": [
+          "Nose",
+          "Mouth",
+          "Throat"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལྕེ",
+        "options": [
+          "Lip",
+          "Tongue",
+          "Tooth"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སོ",
+        "options": [
+          "Tongue",
+          "Tooth",
+          "Gum"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མཆུ",
+        "options": [
+          "Lip",
+          "Cheek",
+          "Chin"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མགྲིན་པ",
+        "options": [
+          "Throat",
+          "Neck",
+          "Chest"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྐྲ",
+        "options": [
+          "Hair",
+          "Beard",
+          "Mustache"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཞ་འཛིན",
+        "options": [
+          "Hair",
+          "Beard",
+          "Sideburn"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དཔུང་པ",
+        "options": [
+          "Shoulder",
+          "Arm",
+          "Elbow"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལག",
+        "options": [
+          "Shoulder",
+          "Hand",
+          "Finger"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལག་པ",
+        "options": [
+          "Arm",
+          "Hand",
+          "Wrist"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མཛུབ་མོ",
+        "options": [
+          "Thumb",
+          "Finger",
+          "Index finger"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མཐེ་བོ",
+        "options": [
+          "Thumb",
+          "Index finger",
+          "Pinky"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བྲང",
+        "options": [
+          "Back",
+          "Chest",
+          "Stomach"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རྒྱབ",
+        "options": [
+          "Chest",
+          "Back",
+          "Side"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཕོ་བ",
+        "options": [
+          "Stomach",
+          "Chest",
+          "Waist"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྐེད་པ",
+        "options": [
+          "Hip",
+          "Waist",
+          "Lower back"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རྐང་པ",
+        "options": [
+          "Leg",
+          "Foot",
+          "Knee"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "པུས་མོ",
+        "options": [
+          "Ankle",
+          "Knee",
+          "Thigh"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སེན་མོ",
+        "options": [
+          "Nail",
+          "Toe",
+          "Heel"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྙིང",
+        "options": [
+          "Lung",
+          "Heart",
+          "Liver"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གློ",
+        "options": [
+          "Heart",
+          "Lung",
+          "Kidney"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མཆིན་པ",
+        "options": [
+          "Kidney",
+          "Liver",
+          "Spleen"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མཁལ་མ",
+        "options": [
+          "Liver",
+          "Kidney",
+          "Bladder"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རུས་པ",
+        "options": [
+          "Muscle",
+          "Bone",
+          "Joint"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཤ",
+        "options": [
+          "Bone",
+          "Meat/Flesh",
+          "Fat"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཚིལ",
+        "options": [
+          "Meat",
+          "Fat",
+          "Skin"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "པགས་པ",
+        "options": [
+          "Fat",
+          "Skin",
+          "Hair"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཁྲག",
+        "options": [
+          "Water",
+          "Blood",
+          "Sweat"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རྔུལ",
+        "options": [
+          "Blood",
+          "Sweat",
+          "Tears"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མཆི་མ",
+        "options": [
+          "Sweat",
+          "Tears",
+          "Saliva"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཀ་ལ",
+        "options": [
+          "Tears",
+          "Saliva",
+          "Mucus"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གྲང་འཇམས",
+        "options": [
+          "Elbow",
+          "Wrist",
+          "Joint"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དཔུང་ཚིགས",
+        "options": [
+          "Shoulder joint",
+          "Elbow joint",
+          "Wrist joint"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མཇིང་པ",
+        "options": [
+          "Neck",
+          "Throat",
+          "Windpipe"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བུ་ག",
+        "options": [
+          "Hole",
+          "Joint",
+          "Bone"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཚིགས",
+        "options": [
+          "Bone",
+          "Joint",
+          "Muscle"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གཅིན",
+        "options": [
+          "Blood",
+          "Urine",
+          "Bile"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དྲི",
+        "options": [
+          "Smell",
+          "Taste",
+          "Touch"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རོ",
+        "options": [
+          "Smell",
+          "Taste",
+          "Sound"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རེག",
+        "options": [
+          "Hear",
+          "Touch",
+          "See"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མཐོང",
+        "options": [
+          "See",
+          "Hear",
+          "Feel"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཐོས",
+        "options": [
+          "See",
+          "Hear",
+          "Smell"
+        ],
+        "correctAnswerIndex": 1
+      }
+    ],
+    "metadata": {
+      "totalExercises": 50,
+      "exerciseTypes": [
+        "word_meaning"
+      ],
+      "contentMix": {
+        "meaningfulWords": 50
+      },
+      "estimatedTime": "25-30 minutes",
+      "difficulty": "beginner-intermediate",
+      "skillsLearned": [
+        "Body part vocabulary in Tibetan",
+        "Internal organ names",
+        "Facial features terminology",
+        "Limb and joint vocabulary",
+        "Body fluids and substances",
+        "Five senses terminology"
+      ],
+      "prereq": "Level 2 completion",
+      "vocabularyIntroduced": [
+        "ལུས (body)", "མགོ (head)", "ཞལ (face)", "མིག (eye)", "རྣ (ear)",
+        "སྣ (nose)", "ཁ (mouth)", "ལྕེ (tongue)", "སོ (tooth)", "སྐྲ (hair)",
+        "ལག (hand)", "རྐང་པ (foot)", "སྙིང (heart)", "གློ (lung)", "མཆིན་པ (liver)",
+        "རུས་པ (bone)", "ཤ (meat/flesh)", "ཁྲག (blood)", "པགས་པ (skin)", "མཆི་མ (tears)",
+        "མཐོང (see)", "ཐོས (hear)", "དྲི (smell)", "རོ (taste)", "རེག (touch)"
+      ]
+    }
+  }
