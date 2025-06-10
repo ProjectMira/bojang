@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/quiz_data.dart';
 import '../models/quiz_question.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class QuizScreen extends StatefulWidget {
   final int level;
@@ -21,6 +22,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   int score = 0;
   late AnimationController _animationController;
   late Animation<double> _animation;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -40,6 +42,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   @override
   void dispose() {
     _animationController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -48,9 +51,13 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     setState(() {});
   }
 
-  void _handleAnswer(int answerIndex) {
+  void _handleAnswer(int answerIndex) async {
     final isCorrect = answerIndex == questions[currentQuestionIndex].correctAnswerIndex;
     
+    // Play audio feedback
+    final audioPath = isCorrect ? 'audio/correct.mp3' : 'audio/incorrect.mp3';
+    await _audioPlayer.play(AssetSource(audioPath));
+
     setState(() {
       selectedAnswerIndex = answerIndex;
       showFeedback = true;
