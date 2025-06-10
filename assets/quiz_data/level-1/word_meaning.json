@@ -1,0 +1,549 @@
+{
+    "level": 1.3,
+    "title": "Mixed Review with Meaningful Words",
+    "description": "Review alphabet and vowels with real Tibetan words including basic stacked letters",
+    "exercises": [
+      {
+        "type": "word_meaning",
+        "tibetanText": "མི",
+        "options": [
+          "Person",
+          "Water",
+          "Fire"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "character_recognition",
+        "tibetanText": "ས",
+        "options": [
+          "sha",
+          "sa",
+          "za"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ས",
+        "options": [
+          "Sky",
+          "Earth",
+          "Water"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "syllable_recognition",
+        "tibetanText": "ཆུ",
+        "options": [
+          "chu",
+          "cha",
+          "che"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཆུ",
+        "options": [
+          "Fire",
+          "Air",
+          "Water"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "stack_recognition",
+        "tibetanText": "སྐ",
+        "options": [
+          "ka",
+          "ska",
+          "ga"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མེ",
+        "options": [
+          "Fire",
+          "Earth",
+          "Person"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "character_recognition",
+        "tibetanText": "རླུང",
+        "options": [
+          "rlung",
+          "lung",
+          "rlang"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རླུང",
+        "options": [
+          "Water",
+          "Wind/Air",
+          "Earth"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "syllable_recognition",
+        "tibetanText": "བུ",
+        "options": [
+          "ba",
+          "bu",
+          "bo"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བུ",
+        "options": [
+          "Son/Boy",
+          "Daughter",
+          "Mother"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "stack_recognition",
+        "tibetanText": "རྐ",
+        "options": [
+          "rka",
+          "ka",
+          "ga"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མོ",
+        "options": [
+          "Man",
+          "Woman/Female",
+          "Child"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "character_recognition",
+        "tibetanText": "ཡ",
+        "options": [
+          "ra",
+          "ya",
+          "wa"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "syllable_recognition",
+        "tibetanText": "རི",
+        "options": [
+          "re",
+          "ra",
+          "ri"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རི",
+        "options": [
+          "Valley",
+          "Mountain",
+          "River"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "stack_recognition",
+        "tibetanText": "སྟ",
+        "options": [
+          "ta",
+          "sta",
+          "da"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལོ",
+        "options": [
+          "Day",
+          "Month",
+          "Year"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "character_recognition",
+        "tibetanText": "ཁ",
+        "options": [
+          "kha",
+          "ka",
+          "ga"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཁ",
+        "options": [
+          "Eye",
+          "Mouth",
+          "Ear"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "syllable_recognition",
+        "tibetanText": "མིག",
+        "options": [
+          "mig",
+          "mag",
+          "meg"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མིག",
+        "options": [
+          "Nose",
+          "Eye",
+          "Hand"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "stack_recognition",
+        "tibetanText": "གླ",
+        "options": [
+          "la",
+          "gla",
+          "ga"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རྣ",
+        "options": [
+          "Mouth",
+          "Nose",
+          "Ear"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "character_recognition",
+        "tibetanText": "ལག",
+        "options": [
+          "lag",
+          "log",
+          "leg"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལག",
+        "options": [
+          "Hand",
+          "Foot",
+          "Head"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "syllable_recognition",
+        "tibetanText": "ནམ",
+        "options": [
+          "nam",
+          "num",
+          "nem"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ནམ",
+        "options": [
+          "Day",
+          "Sky",
+          "Night"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "stack_recognition",
+        "tibetanText": "སྤ",
+        "options": [
+          "pa",
+          "spa",
+          "pha"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཉི",
+        "options": [
+          "Moon",
+          "Star",
+          "Sun"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "character_recognition",
+        "tibetanText": "ཟླ",
+        "options": [
+          "zla",
+          "za",
+          "la"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཟླ",
+        "options": [
+          "Sun",
+          "Moon",
+          "Cloud"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "syllable_recognition",
+        "tibetanText": "སྐར",
+        "options": [
+          "kar",
+          "skar",
+          "gar"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྐར",
+        "options": [
+          "Star",
+          "Cloud",
+          "Rain"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "character_recognition",
+        "tibetanText": "ཤིང",
+        "options": [
+          "shing",
+          "sing",
+          "shang"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཤིང",
+        "options": [
+          "Flower",
+          "Tree/Wood",
+          "Grass"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "stack_recognition",
+        "tibetanText": "གྲ",
+        "options": [
+          "gra",
+          "ra",
+          "ga"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རྩ",
+        "options": [
+          "Root/Grass",
+          "Branch",
+          "Leaf"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "syllable_recognition",
+        "tibetanText": "མེ་ཏོག",
+        "options": [
+          "metog",
+          "matog",
+          "motog"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མེ་ཏོག",
+        "options": [
+          "Tree",
+          "Flower",
+          "Fruit"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "character_recognition",
+        "tibetanText": "ཁྱི",
+        "options": [
+          "khyi",
+          "khi",
+          "gyi"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཁྱི",
+        "options": [
+          "Cat",
+          "Dog",
+          "Bird"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "stack_recognition",
+        "tibetanText": "རྟ",
+        "options": [
+          "ta",
+          "rta",
+          "da"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རྟ",
+        "options": [
+          "Horse",
+          "Cow",
+          "Sheep"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "syllable_recognition",
+        "tibetanText": "བྱ",
+        "options": [
+          "bya",
+          "ba",
+          "ja"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བྱ",
+        "options": [
+          "Fish",
+          "Bird",
+          "Insect"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "character_recognition",
+        "tibetanText": "གླང",
+        "options": [
+          "gang",
+          "glang",
+          "lang"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གླང",
+        "options": [
+          "Horse",
+          "Ox/Bull",
+          "Goat"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "stack_recognition",
+        "tibetanText": "སྦ",
+        "options": [
+          "ba",
+          "sba",
+          "spa"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཁྱིམ",
+        "options": [
+          "Village",
+          "House",
+          "Road"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "syllable_recognition",
+        "tibetanText": "གྲོང",
+        "options": [
+          "grong",
+          "gong",
+          "rong"
+        ],
+        "correctAnswerIndex": 0
+      }
+    ],
+    "metadata": {
+      "totalExercises": 50,
+      "exerciseTypes": [
+        "character_recognition",
+        "syllable_recognition", 
+        "word_meaning",
+        "stack_recognition"
+      ],
+      "contentMix": {
+        "alphabetReview": 15,
+        "vowelCombinations": 15,
+        "meaningfulWords": 15,
+        "stackedLetters": 5
+      },
+      "estimatedTime": "25-30 minutes",
+      "difficulty": "beginner-intermediate",
+      "skillsLearned": [
+        "Real Tibetan vocabulary",
+        "Character recognition review",
+        "Syllable formation review",
+        "Basic stacked consonants",
+        "Word-meaning association"
+      ],
+      "prereq": "Level 1.1 and 1.2 completion",
+      "vocabularyIntroduced": [
+        "མི (person)", "ས (earth)", "ཆུ (water)", "མེ (fire)", "རླུང (wind)",
+        "བུ (son)", "མོ (woman)", "རི (mountain)", "ལོ (year)", "ཁ (mouth)",
+        "མིག (eye)", "རྣ (ear)", "ལག (hand)", "ནམ (sky)", "ཉི (sun)",
+        "ཟླ (moon)", "སྐར (star)", "ཤིང (tree)", "རྩ (grass)", "མེ་ཏོག (flower)",
+        "ཁྱི (dog)", "རྟ (horse)", "བྱ (bird)", "གླང (ox)", "ཁྱིམ (house)"
+      ]
+    }
+  }
