@@ -5,9 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class QuizScreen extends StatefulWidget {
-  final int level;
+  final String topicFilePath;
 
-  const QuizScreen({super.key, required this.level});
+  const QuizScreen({super.key, required this.topicFilePath});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -15,7 +15,6 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateMixin {
   late Future<List<QuizQuestion>> questionsFuture;
-  List<QuizQuestion> questions = [];
   int currentQuestionIndex = 0;
   int? selectedAnswerIndex;
   bool showFeedback = false;
@@ -27,8 +26,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    questionsFuture = QuizData.getQuestionsForLevel(widget.level);
-    _loadQuestions();
+    questionsFuture = QuizData.getQuestionsForTopicFile(widget.topicFilePath);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -46,24 +44,23 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  Future<void> _loadQuestions() async {
-    questions = await questionsFuture;
-    setState(() {});
-  }
-
-  void _handleAnswer(int answerIndex) async {
+  void _handleAnswer(int answerIndex, List<QuizQuestion> questions) async {
     final isCorrect = answerIndex == questions[currentQuestionIndex].correctAnswerIndex;
-    
-    // Play audio feedback
     final audioPath = isCorrect ? 'audio/correct.mp3' : 'audio/incorrect.mp3';
-    await _audioPlayer.play(AssetSource(audioPath));
+
+    try {
+      print('Attempting to play audio: $audioPath');
+      await _audioPlayer.play(AssetSource(audioPath));
+      print('Audio played successfully.');
+    } catch (e) {
+      print('Error playing audio: $e');
+    }
 
     setState(() {
       selectedAnswerIndex = answerIndex;
       showFeedback = true;
       if (isCorrect) score++;
     });
-
     if (isCorrect) {
       _showFeedbackDialog(true);
       Future.delayed(const Duration(seconds: 2), () {
@@ -78,7 +75,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
             _animationController.reset();
             _animationController.forward();
           } else {
-            _showCompletionDialog();
+            _showCompletionDialog(questions.length);
           }
         }
       });
@@ -96,12 +93,12 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     }
   }
 
-  void _showCompletionDialog() {
+  void _showCompletionDialog(int totalQuestions) {
+    final percentage = (score / totalQuestions) * 100;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        final percentage = (score / questions.length) * 100;
         return AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -116,7 +113,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               ),
               const SizedBox(height: 16),
               Text(
-                'Your Score: $score/${questions.length}',
+                'Your Score: $score/totalQuestions',
                 style: GoogleFonts.kalam(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -148,7 +145,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).pop(); // Return to level selection
+                Navigator.of(context).pop(); // Return to sublevel selection
               },
               child: const Text('Continue'),
             ),
@@ -197,7 +194,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Level ${widget.level}',
+          _getDisplayNameFromFilePath(widget.topicFilePath),
           style: GoogleFonts.kalam(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -214,11 +211,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               child: CircularProgressIndicator(),
             );
           }
-
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Error loading questions: ${snapshot.error}',
+                'Error loading questions: snapshot.error',
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.red,
@@ -226,11 +222,11 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               ),
             );
           }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          final questions = snapshot.data ?? [];
+          if (questions.isEmpty) {
             return const Center(
               child: Text(
-                'No questions available for this level.',
+                'No questions available for this sublevel.',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
@@ -238,7 +234,6 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               ),
             );
           }
-
           final question = questions[currentQuestionIndex];
 
           return Column(
@@ -336,7 +331,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 child: InkWell(
-                                  onTap: showFeedback ? null : () => _handleAnswer(index),
+                                  onTap: showFeedback ? null : () => _handleAnswer(index, questions),
                                   borderRadius: BorderRadius.circular(15),
                                   child: Container(
                                     decoration: BoxDecoration(
@@ -393,5 +388,14 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
         },
       ),
     );
+  }
+
+  String _getDisplayNameFromFilePath(String filePath) {
+    if (filePath.contains('alphabet')) return 'Alphabet';
+    if (filePath.contains('vowels')) return 'Vowels';
+    if (filePath.contains('word_meaning')) return 'Word Meaning';
+    if (filePath.contains('body-parts')) return 'Body Parts';
+    if (filePath.contains('fruits_and_vegetables')) return 'Fruits and Vegetables';
+    return filePath.split('/').last.split('.').first.replaceAll('_', ' ').replaceAll('-', ' ').toUpperCase();
   }
 } 
