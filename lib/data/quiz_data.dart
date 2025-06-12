@@ -7,13 +7,13 @@ class QuizData {
   // Map of level to their corresponding topic files
   static const Map<int, Map<String, String>> levelTopics = {
     1: {
-      'alphabet': 'assets/quiz_data/level-1/alphabet.json',
-      'vowels': 'assets/quiz_data/level-1/vowels.json',
-      'word_meaning': 'assets/quiz_data/level-1/word_meaning.json',
+      'alphabet': 'assets/quiz_data/alphabet.json',
+      'vowels': 'assets/quiz_data/vowels.json',
+      'word_meaning': 'assets/quiz_data/word_meaning.json',
     },
     2: {
-      'body_parts': 'assets/quiz_data/level-2/body-parts.json',
-      'fruits_vegetables': 'assets/quiz_data/level-2/fruits_and_vegetables.json',
+      'body_parts': 'assets/quiz_data/body-parts.json',
+      'fruits_vegetables': 'assets/quiz_data/fruits_and_vegetables.json',
     },
   };
 
