@@ -1,0 +1,548 @@
+{
+    "level": 1.3,
+    "title": "Stacked Words - Compound Characters",
+    "description": "Learn to read Tibetan stacked consonants and compound characters with proper pronunciation",
+    "exercises": [
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རྐ",
+        "options": [
+          "ka",
+          "rka",
+          "ska"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རྒ",
+        "options": [
+          "rga",
+          "sga",
+          "lga"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རྟ",
+        "options": [
+          "sta",
+          "lta",
+          "rta"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རྡ",
+        "options": [
+          "rda",
+          "sda",
+          "lda"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རྤ",
+        "options": [
+          "lpa",
+          "rpa",
+          "spa"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རབ",
+        "options": [
+          "sba",
+          "lba",
+          "rba"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རམ",
+        "options": [
+          "rma",
+          "sma",
+          "lma"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རྩ",
+        "options": [
+          "ltsa",
+          "rtsa",
+          "stsa"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རྫ",
+        "options": [
+          "sdza",
+          "ldza",
+          "rdza"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རྣ",
+        "options": [
+          "rna",
+          "sna",
+          "lna"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རླ",
+        "options": [
+          "sla",
+          "rla",
+          "lla"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "རྷ",
+        "options": [
+          "lha",
+          "sha",
+          "rha"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སྐ",
+        "options": [
+          "ska",
+          "rka",
+          "ga"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སྒ",
+        "options": [
+          "rga",
+          "sga",
+          "lga"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སྟ",
+        "options": [
+          "rta",
+          "lta",
+          "sta"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སྡ",
+        "options": [
+          "sda",
+          "rda",
+          "lda"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སྤ",
+        "options": [
+          "rpa",
+          "spa",
+          "lpa"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སབ",
+        "options": [
+          "lba",
+          "rba",
+          "sba"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སམ",
+        "options": [
+          "sma",
+          "rma",
+          "lma"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སྩ",
+        "options": [
+          "rtsa",
+          "stsa",
+          "ltsa"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སྫ",
+        "options": [
+          "rdza",
+          "ldza",
+          "sdza"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སྣ",
+        "options": [
+          "sna",
+          "rna",
+          "lna"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "སླ",
+        "options": [
+          "rla",
+          "sla",
+          "lla"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལྐ",
+        "options": [
+          "ska",
+          "rka",
+          "lka"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལྒ",
+        "options": [
+          "lga",
+          "sga",
+          "rga"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལྟ",
+        "options": [
+          "rta",
+          "lta",
+          "sta"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལྡ",
+        "options": [
+          "sda",
+          "rda",
+          "lda"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལྤ",
+        "options": [
+          "lpa",
+          "spa",
+          "rpa"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལབ",
+        "options": [
+          "rba",
+          "lba",
+          "sba"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལམ",
+        "options": [
+          "sma",
+          "rma",
+          "lma"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལྩ",
+        "options": [
+          "ltsa",
+          "stsa",
+          "rtsa"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལྫ",
+        "options": [
+          "rdza",
+          "ldza",
+          "sdza"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལྣ",
+        "options": [
+          "sna",
+          "rna",
+          "lna"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལླ",
+        "options": [
+          "lla",
+          "sla",
+          "rla"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ལྷ",
+        "options": [
+          "rha",
+          "lha",
+          "sha"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "གྲ",
+        "options": [
+          "dra",
+          "bra",
+          "gra"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "དྲ",
+        "options": [
+          "dra",
+          "gra",
+          "bra"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "བྲ",
+        "options": [
+          "gra",
+          "bra",
+          "dra"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "པྲ",
+        "options": [
+          "pra",
+          "tra",
+          "kra"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ཏྲ",
+        "options": [
+          "kra",
+          "tra",
+          "pra"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ཀྲ",
+        "options": [
+          "tra",
+          "pra",
+          "kra"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "གླ",
+        "options": [
+          "bla",
+          "dla",
+          "gla"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "དླ",
+        "options": [
+          "dla",
+          "gla",
+          "bla"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "བླ",
+        "options": [
+          "gla",
+          "bla",
+          "dla"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ཟླ",
+        "options": [
+          "zla",
+          "sla",
+          "la"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ཕྱ",
+        "options": [
+          "chya",
+          "khya",
+          "phya"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ཆྱ",
+        "options": [
+          "chya",
+          "phya",
+          "khya"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "ཁྱ",
+        "options": [
+          "phya",
+          "khya",
+          "chya"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "གྱ",
+        "options": [
+          "gya",
+          "bya",
+          "pya"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "བྱ",
+        "options": [
+          "pya",
+          "bya",
+          "gya"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "pronunciation_recognition",
+        "tibetanText": "པྱ",
+        "options": [
+          "bya",
+          "gya",
+          "pya"
+        ],
+        "correctAnswerIndex": 2
+      }
+    ],
+    "metadata": {
+      "totalExercises": 50,
+      "exerciseTypes": [
+        "pronunciation_recognition"
+      ],
+      "contentMix": {
+        "stackedConsonants": 50
+      },
+      "estimatedTime": "25-30 minutes",
+      "difficulty": "intermediate",
+      "skillsLearned": [
+        "Reading stacked Tibetan consonants",
+        "Pronunciation of compound characters",
+        "Recognition of r-prefix stacks",
+        "Recognition of s-prefix stacks", 
+        "Recognition of l-prefix stacks",
+        "Recognition of subscript ra-btags",
+        "Recognition of subscript la-btags",
+        "Recognition of ya-btags"
+      ],
+      "prereq": "Level 2.3 completion",
+      "stackPatternsIntroduced": [
+        "r-prefix stacks (རྐ, རྒ, རྟ, རྡ, རྤ, རབ, རམ, རྩ, རྫ, རྣ, རླ, རྷ)",
+        "s-prefix stacks (སྐ, སྒ, སྟ, སྡ, སྤ, སབ, སམ, སྩ, སྫ, སྣ, སླ)",
+        "l-prefix stacks (ལྐ, ལྒ, ལྟ, ལྡ, ལྤ, ལབ, ལམ, ལྩ, ལྫ, ལྣ, ལླ, ལྷ)",
+        "ra-btags (གྲ, དྲ, བྲ)",
+        "la-btags (གླ, དླ, བླ)",
+        "ya-btags (ཕྱ, ཆྱ, ཁྱ)",
+        "compound words (རབ་ཏ, ལབ་ཏ, ཡ་ཏ, རང་གོ, ལང་གོ, སང་གོ)"
+      ]
+    }
+  }

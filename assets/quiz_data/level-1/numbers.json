@@ -1,0 +1,535 @@
+{
+    "level": 1.4,
+    "title": "Tibetan Numbers",
+    "description": "Learn Tibetan number system from 0 to millions with frequently used numbers",
+    "exercises": [
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཀླད",
+        "options": [
+          "chik (One)",
+          "le (Zero)",
+          "chu (Ten)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གཅིག",
+        "options": [
+          "chik (One)",
+          "nyi (Two)",
+          "sum (Three)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གཉིས",
+        "options": [
+          "chik (One)",
+          "sum (Three)",
+          "nyi (Two)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གསུམ",
+        "options": [
+          "zhi (Four)",
+          "sum (Three)",
+          "nga (Five)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བཞི",
+        "options": [
+          "sum (Three)",
+          "nga (Five)",
+          "zhi (Four)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལྔ",
+        "options": [
+          "nga (Five)",
+          "zhi (Four)",
+          "druk (Six)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དྲུག",
+        "options": [
+          "dun (Seven)",
+          "nga (Five)",
+          "druk (Six)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བདུན",
+        "options": [
+          "druk (Six)",
+          "dun (Seven)",
+          "gye (Eight)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བརྒྱད",
+        "options": [
+          "gu (Nine)",
+          "dun (Seven)",
+          "gye (Eight)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དགུ",
+        "options": [
+          "gye (Eight)",
+          "gu (Nine)",
+          "chu (Ten)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བཅུ",
+        "options": [
+          "gu (Nine)",
+          "chu chik (Eleven)",
+          "chu (Ten)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བཅུ་གཅིག",
+        "options": [
+          "chu chik (Eleven)",
+          "chu nyi (Twelve)",
+          "chu (Ten)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བཅུ་གཉིས",
+        "options": [
+          "chu chik (Eleven)",
+          "chu sum (Thirteen)",
+          "chu nyi (Twelve)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བཅུ་གསུམ",
+        "options": [
+          "chu nyi (Twelve)",
+          "chu sum (Thirteen)",
+          "cho nga (Fifteen)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བཅོ་ལྔ",
+        "options": [
+          "chu zhi (Fourteen)",
+          "chu druk (Sixteen)",
+          "cho nga (Fifteen)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཉི་ཤུ",
+        "options": [
+          "nyi shu (Twenty)",
+          "cho nga (Fifteen)",
+          "nyer nga (Twenty-five)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཉེར་ལྔ",
+        "options": [
+          "nyi shu (Twenty)",
+          "sum chu (Thirty)",
+          "nyer nga (Twenty-five)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སུམ་ཅུ",
+        "options": [
+          "nyi shu (Twenty)",
+          "sum chu (Thirty)",
+          "zhi chu (Forty)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བཞི་བཅུ",
+        "options": [
+          "sum chu (Thirty)",
+          "nga chu (Fifty)",
+          "zhi chu (Forty)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལྔ་བཅུ",
+        "options": [
+          "nga chu (Fifty)",
+          "zhi chu (Forty)",
+          "druk chu (Sixty)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དྲུག་ཅུ",
+        "options": [
+          "nga chu (Fifty)",
+          "dun chu (Seventy)",
+          "druk chu (Sixty)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བདུན་ཅུ",
+        "options": [
+          "druk chu (Sixty)",
+          "dun chu (Seventy)",
+          "gye chu (Eighty)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བརྒྱད་ཅུ",
+        "options": [
+          "gu chu (Ninety)",
+          "dun chu (Seventy)",
+          "gye chu (Eighty)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དགུ་བཅུ",
+        "options": [
+          "gye chu (Eighty)",
+          "gu chu (Ninety)",
+          "gya (Hundred)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བརྒྱ",
+        "options": [
+          "gya (Hundred)",
+          "gu chu (Ninety)",
+          "tong (Thousand)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཉིས་བརྒྱ",
+        "options": [
+          "chik gya (One hundred)",
+          "sum gya (Three hundred)",
+          "nyi gya (Two hundred)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གསུམ་བརྒྱ",
+        "options": [
+          "nyi gya (Two hundred)",
+          "sum gya (Three hundred)",
+          "zhi gya (Four hundred)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལྔ་བརྒྱ",
+        "options": [
+          "zhi gya (Four hundred)",
+          "druk gya (Six hundred)",
+          "nga gya (Five hundred)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྟོང",
+        "options": [
+          "tong (Thousand)",
+          "gya (Hundred)",
+          "tri (Ten thousand)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གཉིས་སྟོང",
+        "options": [
+          "chik tong (One thousand)",
+          "sum tong (Three thousand)",
+          "nyi tong (Two thousand)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལྔ་སྟོང",
+        "options": [
+          "nga tong (Five thousand)",
+          "zhi tong (Four thousand)",
+          "druk tong (Six thousand)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཁྲི",
+        "options": [
+          "tong (Thousand)",
+          "tri (Ten thousand)",
+          "bum (Hundred thousand)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ལྔ་ཁྲི",
+        "options": [
+          "zhi tri (Forty thousand)",
+          "druk tri (Sixty thousand)",
+          "nga tri (Fifty thousand)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "འབུམ",
+        "options": [
+          "bum (Hundred thousand)",
+          "tri (Ten thousand)",
+          "sa ya (Million)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གཉིས་འབུམ",
+        "options": [
+          "chik bum (One hundred thousand)",
+          "nyi bum (Two hundred thousand)",
+          "sum bum (Three hundred thousand)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ས་ཡ",
+        "options": [
+          "sa ya (Million)",
+          "bum (Hundred thousand)",
+          "bye wa (Ten million)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གཉིས་ས་ཡ",
+        "options": [
+          "chik sa ya (One million)",
+          "sum sa ya (Three million)",
+          "nyi sa ya (Two million)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བྱེ་བ",
+        "options": [
+          "sa ya (Million)",
+          "bye wa (Ten million)",
+          "dung chur (Hundred million)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དུང་ཕྱུར",
+        "options": [
+          "bye wa (Ten million)",
+          "dung chur (Hundred million)",
+          "ter bum (Billion)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཐེར་འབུམ",
+        "options": [
+          "ter bum (Billion)",
+          "dung chur (Hundred million)",
+          "chik khyung (Trillion)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གྲངས",
+        "options": [
+          "yi ge (Letter)",
+          "tshig (Word)",
+          "drang (Number)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རྩིས",
+        "options": [
+          "tsi (Calculate)",
+          "bri (Write)",
+          "klog (Read)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མང་པོ",
+        "options": [
+          "nyung ngu (Few)",
+          "mang po (Many)",
+          "ga re (Some)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཉུང་ངུ",
+        "options": [
+          "mang po (Many)",
+          "med pa (None)",
+          "nyung ngu (Few)"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཚང་མ",
+        "options": [
+          "tsang ma (All)",
+          "ga re (Some)",
+          "med pa (None)"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཕྱེད་ཀ",
+        "options": [
+          "zhi cha (Quarter)",
+          "che ka (Half)",
+          "sum cha (Three-quarters)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གསུམ་ཆ",
+        "options": [
+          "nyi cha (Two-thirds)",
+          "sum cha (One-third)",
+          "zhi cha (Three-quarters)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྐར་མ",
+        "options": [
+          "chu tsö (Hour)",
+          "kar ma (Minute)",
+          "kar cha (Second)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཆུ་ཚོད",
+        "options": [
+          "kar ma (Minute)",
+          "chu tsö (Hour)",
+          "zhag (Day)"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དང་པོ",
+        "options": [
+          "dang po (First)",
+          "gnyis pa (Second)",
+          "tha ma (Last)"
+        ],
+        "correctAnswerIndex": 0
+      }
+    ],
+    "metadata": {
+      "totalExercises": 50,
+      "exerciseTypes": [
+        "word_meaning"
+      ],
+      "contentMix": {
+        "meaningfulWords": 50
+      },
+      "estimatedTime": "25-30 minutes",
+      "difficulty": "beginner-intermediate",
+      "skillsLearned": [
+        "Complete Tibetan number system (0-billions)",
+        "Frequently used numbers in daily life",
+        "Mathematical terminology",
+        "Quantity expressions",
+        "Time units",
+        "Ordinal numbers"
+      ],
+      "prereq": "Level 2.1 completion",
+      "vocabularyIntroduced": [
+        "ཀླད (zero)", "གཅིག (one)", "གཉིས (two)", "གསུམ (three)", "བཞི (four)", "ལྔ (five)",
+        "དྲུག (six)", "བདུན (seven)", "བརྒྱད (eight)", "དགུ (nine)", "བཅུ (ten)",
+        "ཉི་ཤུ (twenty)", "སུམ་ཅུ (thirty)", "བརྒྱ (hundred)", "སྟོང (thousand)",
+        "ཁྲི (ten thousand)", "འབུམ (hundred thousand)", "ས་ཡ (million)", "བྱེ་བ (ten million)",
+        "དུང་ཕྱུར (hundred million)", "ཐེར་འབུམ (billion)", "གྲངས (number)", "རྩིས (calculate)",
+        "མང་པོ (many)", "ཉུང་ངུ (few)", "ཚང་མ (all)", "ཕྱེད་ཀ (half)", "དང་པོ (first)"
+      ]
+    }
+  }
