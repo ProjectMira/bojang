@@ -1,46 +1,72 @@
 {
-  "levels": [
-    {
-      "level": 1,
-      "title": "Beginner",
-      "sublevels": [
+    "levels": [
         {
-          "level": 1.1,
-          "name": "Alphabet",
-          "path": "assets/quiz_data/alphabet.json"
+            "level": 1,
+            "title": "Beginner",
+            "sublevels": [
+                {
+                    "level": 1.1,
+                    "name": "Alphabet",
+                    "path": "assets/quiz_data/level-1/alphabet.json"
+                },
+                {
+                    "level": 1.2,
+                    "name": "Vowels",
+                    "path": "assets/quiz_data/level-1/vowels.json"
+                },
+                {
+                    "level": 1.3,
+                    "name": "Stacked Words",
+                    "path": "assets/quiz_data/level-1/stacked_words.json"
+                },
+                {
+                    "level": 1.4,
+                    "name": "Numbers",
+                    "path": "assets/quiz_data/level-1/numbers.json"
+                },
+                {
+                    "level": 1.5,
+                    "name": "Word Meaning",
+                    "path": "assets/quiz_data/level-1/word_meaning.json"
+                },
+                {
+                    "level": 1.6,
+                    "name": "Calendar",
+                    "path": "assets/quiz_data/level-1/calender.json"
+                }
+            ]
         },
         {
-          "level": 1.2,
-          "name": "Vowels",
-          "path": "assets/quiz_data/vowels.json"
+            "level": 2,
+            "title": "Intermediate",
+            "sublevels": [
+                {
+                    "level": 2.1,
+                    "name": "Body Parts",
+                    "path": "assets/quiz_data/level-2/body-parts.json"
+                },
+                {
+                    "level": 2.2,
+                    "name": "Fruits and Vegetables",
+                    "path": "assets/quiz_data/level-2/fruits_and_vegetables.json"
+                }
+            ]
         },
         {
-          "level": 1.3,
-          "name": "Word Meaning",
-          "path": "assets/quiz_data/word_meaning.json"
+            "level": 3,
+            "title": "Advanced",
+            "sublevels": [
+                {
+                    "level": 3.1,
+                    "name": "Introduction",
+                    "path": "assets/quiz_data/level-3/introduction.json"
+                },
+                {
+                    "level": 3.2,
+                    "name": "Restaurants",
+                    "path": "assets/quiz_data/level-3/resturants.json"
+                }
+            ]
         }
-      ]
-    },
-    {
-      "level": 2,
-      "title": "Intermediate",
-      "sublevels": [
-        {
-          "level": 2.1,
-          "name": "Body Parts",
-          "path": "assets/quiz_data/body-parts.json"
-        },
-        {
-          "level": 2.2,
-          "name": "Fruits and Vegetables",
-          "path": "assets/quiz_data/fruits_and_vegetables.json"
-        }
-      ]
-    },
-    {
-      "level": 3,
-      "title": "Advanced",
-      "sublevels": []
-    }
-  ]
+    ]
 }
