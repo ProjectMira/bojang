@@ -63,18 +63,28 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
       margin: const EdgeInsets.only(bottom: 16.0),
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ExpansionTile(
-        title: Text(
-          level.title,
-          style: GoogleFonts.kalam(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        backgroundColor: color.withOpacity(0.1),
-        collapsedBackgroundColor: color.withOpacity(0.1),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            child: Text(
+              level.title,
+              style: GoogleFonts.kalam(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
           if (level.sublevels.isEmpty)
             Padding(
               padding: const EdgeInsets.all(16.0),
