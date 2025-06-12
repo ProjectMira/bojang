@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/quiz_data.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart';
 import '../models/quiz_question.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -26,7 +27,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    questionsFuture = QuizData.getQuestionsForTopicFile(widget.topicFilePath);
+    questionsFuture = _loadQuestions();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -35,6 +36,68 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       parent: _animationController,
       curve: Curves.easeInOut,
     );
+  }
+
+  Future<List<QuizQuestion>> _loadQuestions() async {
+    try {
+      print('Loading quiz from: ${widget.topicFilePath}');
+      
+      // Try to load the JSON file
+      String jsonString;
+      try {
+        jsonString = await rootBundle.loadString(widget.topicFilePath);
+        if (jsonString.isEmpty) {
+          throw FormatException('Quiz file is empty');
+        }
+      } catch (e) {
+        throw FormatException('Failed to load quiz file: ${e.toString()}');
+      }
+
+      // Try to parse the JSON
+      Map<String, dynamic> jsonMap;
+      try {
+        jsonMap = json.decode(jsonString);
+      } catch (e) {
+        throw FormatException('Invalid JSON format: ${e.toString()}');
+      }
+      
+      // Validate the JSON structure
+      if (!jsonMap.containsKey('exercises')) {
+        throw FormatException('Missing required key: "exercises"');
+      }
+
+      final exercises = jsonMap['exercises'];
+      if (exercises is! List) {
+        throw FormatException('"exercises" must be an array');
+      }
+
+      final List<dynamic> exercisesJson = exercises;
+      if (exercisesJson.isEmpty) {
+        throw FormatException('No exercises found in the quiz');
+      }
+
+      // Convert JSON to QuizQuestion objects with validation
+      final questions = exercisesJson.map((exerciseJson) {
+        if (exerciseJson is! Map<String, dynamic>) {
+          throw FormatException('Invalid exercise format: must be an object');
+        }
+
+        try {
+          return QuizQuestion.fromJson(exerciseJson);
+        } catch (e) {
+          throw FormatException('Invalid exercise data: ${e.toString()}');
+        }
+      }).toList();
+
+      print('Successfully loaded ${questions.length} questions');
+      
+      // Shuffle the questions for variety
+      questions.shuffle();
+      return questions;
+    } catch (e) {
+      print('Error loading questions from ${widget.topicFilePath}: $e');
+      rethrow;
+    }
   }
 
   @override
@@ -202,38 +265,128 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
           ),
         ),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: FutureBuilder<List<QuizQuestion>>(
         future: questionsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading questions...',
+                    style: GoogleFonts.kalam(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
             );
           }
+
           if (snapshot.hasError) {
             return Center(
-              child: Text(
-                'Error loading questions: snapshot.error',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.red,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: Colors.red[400],
+                      size: 64,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error loading questions',
+                      style: GoogleFonts.kalam(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red[700],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      snapshot.error.toString(),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[700],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          questionsFuture = _loadQuestions(); // Retry loading
+                        });
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Try Again'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
           }
+
           final questions = snapshot.data ?? [];
           if (questions.isEmpty) {
-            return const Center(
-              child: Text(
-                'No questions available for this sublevel.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.quiz_outlined,
+                      color: Colors.grey[400],
+                      size: 64,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No Questions Available',
+                      style: GoogleFonts.kalam(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'This quiz section is currently empty. Please try another section.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text('Go Back'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
           }
+
           final question = questions[currentQuestionIndex];
 
           return Column(
@@ -391,11 +544,25 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   }
 
   String _getDisplayNameFromFilePath(String filePath) {
-    if (filePath.contains('alphabet')) return 'Alphabet';
-    if (filePath.contains('vowels')) return 'Vowels';
-    if (filePath.contains('word_meaning')) return 'Word Meaning';
-    if (filePath.contains('body-parts')) return 'Body Parts';
-    if (filePath.contains('fruits_and_vegetables')) return 'Fruits and Vegetables';
-    return filePath.split('/').last.split('.').first.replaceAll('_', ' ').replaceAll('-', ' ').toUpperCase();
+    // Extract the filename without extension
+    final filename = filePath.split('/').last.split('.').first;
+    
+    // Map of known quiz types to their display names
+    const displayNames = {
+      'alphabet': 'Alphabet',
+      'vowels': 'Vowels',
+      'word_meaning': 'Word Meaning',
+      'body-parts': 'Body Parts',
+      'fruits_and_vegetables': 'Fruits and Vegetables',
+      'stacked_words': 'Stacked Words',
+      'numbers': 'Numbers',
+      'calender': 'Calendar',
+      'introduction': 'Introduction',
+      'resturants': 'Restaurants'
+    };
+
+    // Return the mapped display name or format the filename as a fallback
+    return displayNames[filename] ?? 
+           filename.replaceAll('_', ' ').replaceAll('-', ' ').toUpperCase();
   }
 } 

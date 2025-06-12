@@ -64,11 +64,9 @@ flutter:
     - assets/audio/correct.mp3
     - assets/audio/incorrect.mp3
     - assets/quiz_data/levels.json
-    - assets/quiz_data/alphabet.json
-    - assets/quiz_data/vowels.json
-    - assets/quiz_data/word_meaning.json
-    - assets/quiz_data/body-parts.json
-    - assets/quiz_data/fruits_and_vegetables.json
+    - assets/quiz_data/level-1/
+    - assets/quiz_data/level-2/
+    - assets/quiz_data/level-3/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
