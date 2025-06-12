@@ -63,6 +63,7 @@ flutter:
   assets:
     - assets/audio/correct.mp3
     - assets/audio/incorrect.mp3
+    - assets/quiz_data/levels.json
     - assets/quiz_data/alphabet.json
     - assets/quiz_data/vowels.json
     - assets/quiz_data/word_meaning.json
