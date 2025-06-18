@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 class Sublevel {
   final double level;
