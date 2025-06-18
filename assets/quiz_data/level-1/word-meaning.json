@@ -1,0 +1,233 @@
+{
+  "level": 1.4,
+  "title": "Most Common Single-Syllable Nouns & Verbs",
+  "description": "Learn the 20 most frequently used single consonant or consonant+vowel nouns and verbs in Tibetan",
+  "exercises": [
+    {
+      "type": "word_meaning",
+      "tibetanText": "ས",
+      "options": [
+        "Earth",
+        "Sky",
+        "Water"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མི",
+      "options": [
+        "Water",
+        "Person",
+        "Fire"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བུ",
+      "options": [
+        "Daughter",
+        "Mother",
+        "Son"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མོ",
+      "options": [
+        "Woman",
+        "Man",
+        "Child"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རི",
+      "options": [
+        "Valley",
+        "Mountain",
+        "River"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལོ",
+      "options": [
+        "Day",
+        "Month",
+        "Year"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁ",
+      "options": [
+        "Mouth",
+        "Eye",
+        "Ear"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉི",
+      "options": [
+        "Moon",
+        "Sun",
+        "Star"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཟླ",
+      "options": [
+        "Sun",
+        "Cloud",
+        "Moon"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མེ",
+      "options": [
+        "Fire",
+        "Earth",
+        "Water"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཆུ",
+      "options": [
+        "Fire",
+        "Water",
+        "Air"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྱི",
+      "options": [
+        "Cat",
+        "Bird",
+        "Dog"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྟ",
+      "options": [
+        "Horse",
+        "Cow",
+        "Sheep"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལུག",
+      "options": [
+        "Goat",
+        "Sheep",
+        "Pig"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉ",
+      "options": [
+        "Bird",
+        "Fish",
+        "Meat"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བྱ",
+      "options": [
+        "Fish",
+        "Insect",
+        "Bird"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཤ",
+      "options": [
+        "Meat",
+        "Bone",
+        "Fat"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྱིམ",
+      "options": [
+        "Village",
+        "House",
+        "Road"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཞིང",
+      "options": [
+        "Garden",
+        "Forest",
+        "Field"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཡོང",
+      "options": [
+        "Come",
+        "Go",
+        "Run"
+      ],
+      "correctAnswerIndex": 0
+    }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": [
+      "word_meaning"
+    ],
+    "contentMix": {
+      "nouns": 16,
+      "verbs": 4
+    },
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "Essential Tibetan nouns",
+      "Basic action verbs",
+      "Animal names",
+      "Body parts and nature",
+      "Family terms"
+    ],
+    "prereq": "Level 1.1 and 1.2 completion",
+    "vocabularyIntroduced": [
+      "ས (earth)", "མི (person)", "བུ (son)", "མོ (woman)", "རི (mountain)", "ལོ (year)",
+      "ཁ (mouth)", "ཉི (sun)", "ཟླ (moon)", "མེ (fire)", "ཆུ (water)", "ཁྱི (dog)",
+      "རྟ (horse)", "ལུག (sheep)", "ཉ (fish)", "བྱ (bird)", "ཟ (eat)", "འགྲོ (go)",
+      "ཉལ (sleep)", "ཡོང (come)"
+    ]
+  }
+}

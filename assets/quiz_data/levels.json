@@ -17,7 +17,7 @@
                 {
                     "level": 1.3,
                     "name": "Stacked Words",
-                    "path": "assets/quiz_data/level-1/stacked_words.json"
+                    "path": "assets/quiz_data/level-1/stacked-words.json"
                 },
                 {
                     "level": 1.4,
@@ -27,12 +27,27 @@
                 {
                     "level": 1.5,
                     "name": "Word Meaning",
-                    "path": "assets/quiz_data/level-1/word_meaning.json"
+                    "path": "assets/quiz_data/level-1/word-meaning.json"
                 },
                 {
                     "level": 1.6,
                     "name": "Calendar",
                     "path": "assets/quiz_data/level-1/calender.json"
+                },
+                {
+                    "level": 1.7,
+                    "name": "Body Parts",
+                    "path": "assets/quiz_data/level-1/body-parts.json"
+                },
+                {
+                    "level": 1.8,
+                    "name": "Fruits and Vegetables",
+                    "path": "assets/quiz_data/level-1/fruits-and-vegetables.json"
+                },
+                {
+                    "level": 1.9,
+                    "name": "Household Items",
+                    "path": "assets/quiz_data/level-1/household-items.json"
                 }
             ]
         },
