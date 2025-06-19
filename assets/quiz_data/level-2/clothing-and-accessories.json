@@ -1,0 +1,46 @@
+{
+  "level": 2.4,
+  "title": "Clothing and Accessories",
+  "description": "Learn Tibetan names for common clothing and accessories",
+  "exercises": [
+    { "type": "word_meaning", "tibetanText": "གོས", "options": ["Clothes", "Shoes", "Bag"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "གོས་ཕྲ", "options": ["Shirt", "Pants", "Hat"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "གོས་རགས", "options": ["Pants", "Shirt", "Robe"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཞྭ་མོ", "options": ["Hat", "Bag", "Shoes"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཞྭ་བུ", "options": ["Cap", "Scarf", "Belt"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "གོས་ཆེན", "options": ["Robe", "Shirt", "Pants"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཞྭ་བུ", "options": ["Cap", "Scarf", "Belt"], "correctAnswerIndex": 1 },
+    { "type": "word_meaning", "tibetanText": "གོས་རགས", "options": ["Pants", "Shirt", "Robe"], "correctAnswerIndex": 1 },
+    { "type": "word_meaning", "tibetanText": "གོས་ཕྲ", "options": ["Shirt", "Pants", "Hat"], "correctAnswerIndex": 1 },
+    { "type": "word_meaning", "tibetanText": "གོས་ཆེན", "options": ["Robe", "Shirt", "Pants"], "correctAnswerIndex": 1 },
+    { "type": "word_meaning", "tibetanText": "ཞྭ་མོ", "options": ["Hat", "Bag", "Shoes"], "correctAnswerIndex": 1 },
+    { "type": "word_meaning", "tibetanText": "གོས", "options": ["Clothes", "Shoes", "Bag"], "correctAnswerIndex": 1 },
+    { "type": "word_meaning", "tibetanText": "ཞྭ་བུ", "options": ["Cap", "Scarf", "Belt"], "correctAnswerIndex": 2 },
+    { "type": "word_meaning", "tibetanText": "གོས་རགས", "options": ["Pants", "Shirt", "Robe"], "correctAnswerIndex": 2 },
+    { "type": "word_meaning", "tibetanText": "གོས་ཕྲ", "options": ["Shirt", "Pants", "Hat"], "correctAnswerIndex": 2 },
+    { "type": "word_meaning", "tibetanText": "གོས", "options": ["Clothes", "Shoes", "Bag"], "correctAnswerIndex": 2 },
+    { "type": "word_meaning", "tibetanText": "ཞྭ་མོ", "options": ["Hat", "Bag", "Shoes"], "correctAnswerIndex": 2 },
+    { "type": "word_meaning", "tibetanText": "གོས་ཆེན", "options": ["Robe", "Shirt", "Pants"], "correctAnswerIndex": 2 },
+    { "type": "word_meaning", "tibetanText": "གོས་རགས", "options": ["Pants", "Shirt", "Robe"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བཞུགས་སྒམ", "options": ["Bag", "Shoes", "Belt"], "correctAnswerIndex": 0 }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": ["word_meaning"],
+    "contentMix": {"meaningfulWords": 20},
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "Clothing vocabulary in Tibetan",
+      "Accessory vocabulary in Tibetan",
+      "Describing clothing and accessories",
+      "Talking about what people wear",
+      "Expanding daily life vocabulary"
+    ],
+    "prereq": "Level 2.3 completion",
+    "vocabularyIntroduced": [
+      "གོས (clothes)", "གོས་ཕྲ (shirt)", "གོས་རགས (pants)", "ཞྭ་མོ (hat)", "ཞྭ་བུ (cap)",
+      "གོས་ཆེན (robe)", "བཞུགས་སྒམ (bag)"
+    ]
+  }
+} 

@@ -1,0 +1,48 @@
+{
+  "level": 2.3,
+  "title": "Occupations",
+  "description": "Learn Tibetan names for common occupations and professions",
+  "exercises": [
+    { "type": "word_meaning", "tibetanText": "སློབ་དཔོན", "options": ["Teacher", "Doctor", "Engineer"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ནད་པོ", "options": ["Doctor", "Nurse", "Farmer"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བཟོ་བཅོས་པ", "options": ["Mechanic", "Engineer", "Artist"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "རྩིས་པ", "options": ["Accountant", "Lawyer", "Cook"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བཟོ་བ", "options": ["Artist", "Builder", "Engineer"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "འཁྲིད་པ", "options": ["Guide", "Driver", "Pilot"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "འཛིན་པ", "options": ["Leader", "Teacher", "Doctor"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སྲོལ་པ", "options": ["Farmer", "Cook", "Nurse"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཉི་མའི་སྤྱི་བོ", "options": ["Nurse", "Doctor", "Teacher"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "མི་དམངས", "options": ["Civil servant", "Soldier", "Merchant"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "དགེ་སློང", "options": ["Monk", "Nun", "Judge"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "དགེ་བཤེས", "options": ["Geshe (scholar)", "Doctor", "Artist"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "དགེ་སློང་མ", "options": ["Nun", "Monk", "Nurse"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "དཔེ་མཛོད", "options": ["Librarian", "Accountant", "Cook"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "མཁན་པོ", "options": ["Abbot", "Judge", "Merchant"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "དམག་པ", "options": ["Soldier", "Police", "Driver"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཚོང་པ", "options": ["Merchant", "Farmer", "Cook"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཁྲིམས་པ", "options": ["Judge", "Lawyer", "Accountant"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཁྲིམས་རྩོད་པ", "options": ["Lawyer", "Judge", "Teacher"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "མཁན་སྐྱོང", "options": ["Manager", "Leader", "Guide"], "correctAnswerIndex": 0 }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": ["word_meaning"],
+    "contentMix": {"meaningfulWords": 20},
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "Occupation vocabulary in Tibetan",
+      "Describing professions",
+      "Talking about jobs and roles",
+      "Identifying occupations by Tibetan names",
+      "Expanding work-related vocabulary"
+    ],
+    "prereq": "Level 2.2 completion",
+    "vocabularyIntroduced": [
+      "སློབ་དཔོན (teacher)", "ནད་པོ (doctor)", "བཟོ་བཅོས་པ (mechanic)", "རྩིས་པ (accountant)", "བཟོ་བ (artist)",
+      "འཁྲིད་པ (guide)", "འཛིན་པ (leader)", "སྲོལ་པ (farmer)", "ཉི་མའི་སྤྱི་བོ (nurse)", "མི་དམངས (civil servant)",
+      "དགེ་སློང (monk)", "དགེ་བཤེས (geshe)", "དགེ་སློང་མ (nun)", "དཔེ་མཛོད (librarian)", "མཁན་པོ (abbot)",
+      "དམག་པ (soldier)", "ཚོང་པ (merchant)", "ཁྲིམས་པ (judge)", "ཁྲིམས་རྩོད་པ (lawyer)", "མཁན་སྐྱོང (manager)"
+    ]
+  }
+} 

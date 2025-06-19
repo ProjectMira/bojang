@@ -1,0 +1,48 @@
+{
+  "level": 2.2,
+  "title": "Animals",
+  "description": "Learn Tibetan names for common animals",
+  "exercises": [
+    { "type": "word_meaning", "tibetanText": "གཟིགས", "options": ["Tiger", "Leopard", "Lion"], "correctAnswerIndex": 2 },
+    { "type": "word_meaning", "tibetanText": "གླང་པོ", "options": ["Yak", "Cow", "Horse"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "རྒྱུད་སྤྱི", "options": ["Wolf", "Dog", "Fox"], "correctAnswerIndex": 1 },
+    { "type": "word_meaning", "tibetanText": "བྱ", "options": ["Bird", "Fish", "Dog"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "རྟ", "options": ["Horse", "Donkey", "Mule"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "གླང་མོ", "options": ["Cow", "Sheep", "Goat"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བོང་བ", "options": ["Donkey", "Mule", "Goat"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཁྱི", "options": ["Dog", "Wolf", "Fox"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཤིང་བྱ", "options": ["Woodpecker", "Sparrow", "Crow"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བྱ་རུང", "options": ["Bee", "Butterfly", "Ant"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "རྒྱ་མཚོའི་འབྲིང", "options": ["Dolphin", "Whale", "Seal"], "correctAnswerIndex": 1 },
+    { "type": "word_meaning", "tibetanText": "བྱི", "options": ["Mouse", "Rat", "Squirrel"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "རྒྱལ་བྱ", "options": ["Peacock", "Pigeon", "Parrot"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བྱ་བ", "options": ["Duck", "Goose", "Swan"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "རྒྱ་མཚོའི་སྤུས", "options": ["Seal", "Otter", "Walrus"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "རྒྱ་མཚོའི་འབྲིང", "options": ["Dolphin", "Whale", "Seal"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བྱ་མོ", "options": ["Hen", "Duck", "Goose"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "རྒྱལ་བྱ", "options": ["Peacock", "Pigeon", "Parrot"], "correctAnswerIndex": 2 },
+    { "type": "word_meaning", "tibetanText": "བྱ་རུང", "options": ["Bee", "Butterfly", "Ant"], "correctAnswerIndex": 1 },
+    { "type": "word_meaning", "tibetanText": "བྱི", "options": ["Mouse", "Rat", "Squirrel"], "correctAnswerIndex": 2 }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": ["word_meaning"],
+    "contentMix": {"meaningfulWords": 20},
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "Animal vocabulary in Tibetan",
+      "Describing animals",
+      "Talking about pets and wild animals",
+      "Identifying animals by Tibetan names",
+      "Expanding nature-related vocabulary"
+    ],
+    "prereq": "Level 2.1 completion",
+    "vocabularyIntroduced": [
+      "གཟིགས (lion)", "གླང་པོ (yak)", "རྒྱུད་སྤྱི (dog)", "བྱ (bird)", "རྟ (horse)",
+      "གླང་མོ (cow)", "བོང་བ (donkey)", "ཁྱི (dog)", "ཤིང་བྱ (woodpecker)", "བྱ་རུང (bee)",
+      "རྒྱ་མཚོའི་འབྲིང (whale)", "བྱི (mouse)", "རྒྱལ་བྱ (peacock)", "བྱ་བ (duck)", "རྒྱ་མཚོའི་སྤུས (seal)",
+      "བྱ་མོ (hen)"
+    ]
+  }
+} 
