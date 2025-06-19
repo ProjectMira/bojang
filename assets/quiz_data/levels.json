@@ -41,12 +41,12 @@
                 },
                 {
                     "level": "1.8",
-                    "name": "Fruits and Vegetables",
+                    "name": "Fruits and Vegs",
                     "path": "assets/quiz_data/level-1/fruits-and-vegetables.json"
                 },
                 {
                     "level": "1.9",
-                    "name": "Household Items",
+                    "name": "House Items",
                     "path": "assets/quiz_data/level-1/household-items.json"
                 }
             ]
@@ -57,7 +57,7 @@
             "sublevels": [
                 {
                     "level": "2.1",
-                    "name": "Emotions and Feelings",
+                    "name": "Emotions",
                     "path": "assets/quiz_data/level-2/emotions-and-feelings.json"
                 },
                 {
@@ -72,17 +72,17 @@
                 },
                 {
                     "level": "2.4",
-                    "name": "Clothing and Accessories",
+                    "name": "Clothing",
                     "path": "assets/quiz_data/level-2/clothing-and-accessories.json"
                 },
                 {
                     "level": "2.5",
-                    "name": "Weather and Nature",
+                    "name": "Nature",
                     "path": "assets/quiz_data/level-2/weather-and-nature.json"
                 },
                 {
                     "level": "2.6",
-                    "name": "Basic Actions and Verbs",
+                    "name": "Basic Actions",
                     "path": "assets/quiz_data/level-2/basic-actions-verbs.json"
                 },
                 {
@@ -92,17 +92,17 @@
                 },
                 {
                     "level": "2.8",
-                    "name": "People and Relationships",
+                    "name": "Relationships",
                     "path": "assets/quiz_data/level-2/people-and-relationships.json"
                 },
                 {
                     "level": "2.9",
-                    "name": "Directions and Places",
+                    "name": "Directions",
                     "path": "assets/quiz_data/level-2/directions-and-places.json"
                 },
                 {
                     "level": "2.10",
-                    "name": "Time and Daily Routine",
+                    "name": "Time & Routine",
                     "path": "assets/quiz_data/level-2/time-and-daily-routine.json"
                 }
             ]
