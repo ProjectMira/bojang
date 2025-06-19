@@ -1,0 +1,232 @@
+{
+    "level": 1.9,
+    "title": "Household Items",
+    "description": "Learn common household items and objects in Tibetan",
+    "exercises": [
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཁྱིམ",
+        "options": [
+          "Room",
+          "House",
+          "Kitchen"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རྐང་ཁྲི",
+        "options": [
+          "Table",
+          "Chair",
+          "Bed"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཁྲི",
+        "options": [
+          "Chair",
+          "Table",
+          "Desk"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཉལ་ཁྲི",
+        "options": [
+          "Sofa",
+          "Bed",
+          "Chair"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྒེའུ་ཁུང",
+        "options": [
+          "Door",
+          "Window",
+          "Wall"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྒོ",
+        "options": [
+          "Window",
+          "Door",
+          "Gate"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མར་མེ",
+        "options": [
+          "Candle",
+          "Lamp",
+          "Light"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྟན",
+        "options": [
+          "Blanket",
+          "Carpet",
+          "Pillow"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གདན",
+        "options": [
+          "Cushion",
+          "Blanket",
+          "Sheet"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "མགོ་སྟེགས",
+        "options": [
+          "Blanket",
+          "Pillow",
+          "Mattress"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཚོན་ཁྲ",
+        "options": [
+          "Mirror",
+          "Picture",
+          "Frame"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "སྒམ",
+        "options": [
+          "Bag",
+          "Box",
+          "Basket"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "གཡུགས",
+        "options": [
+          "Pot",
+          "Pan",
+          "Bowl"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཕོར",
+        "options": [
+          "Cup",
+          "Bowl",
+          "Plate"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཇ་ཕོར",
+        "options": [
+          "Water glass",
+          "Tea cup",
+          "Wine cup"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "དེབ",
+        "options": [
+          "Paper",
+          "Book",
+          "Letter"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "པར",
+        "options": [
+          "Picture",
+          "Mirror",
+          "Frame"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "བློན་ཆེན",
+        "options": [
+          "Computer",
+          "Television",
+          "Radio"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "ཐལ་བ",
+        "options": [
+          "Dust",
+          "Dirt",
+          "Mud"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "word_meaning",
+        "tibetanText": "རྭ་བ",
+        "options": [
+          "Broom",
+          "Brush",
+          "Mop"
+        ],
+        "correctAnswerIndex": 0
+      }
+    ],
+    "metadata": {
+      "totalExercises": 20,
+      "exerciseTypes": [
+        "word_meaning"
+      ],
+      "contentMix": {
+        "household_items": 20
+      },
+      "estimatedTime": "15-20 minutes",
+      "difficulty": "beginner-intermediate",
+      "skillsLearned": [
+        "Common household vocabulary",
+        "Furniture names",
+        "Kitchen items",
+        "Cleaning supplies",
+        "Room components"
+      ],
+      "prereq": "Level 3.2 completion",
+      "vocabularyIntroduced": [
+        "ཁྱིམ (house)", "རྐང་ཁྲི (chair)", "ཁྲི (table)", "ཉལ་ཁྲི (bed)", "སྒེའུ་ཁུང (window)",
+        "སྒོ (door)", "མར་མེ (lamp)", "སྟན (carpet)", "གདན (cushion)", "མགོ་སྟེགས (pillow)",
+        "ཚོན་ཁྲ (mirror)", "སྒམ (box)", "གཡུགས (pot)", "ཕོར (bowl)", "ཇ་ཕོར (tea cup)",
+        "དེབ (book)", "པར (picture)", "བློན་ཆེན (television)", "ཐལ་བ (dust)", "རྭ་བ (broom)"
+      ]
+    }
+  }

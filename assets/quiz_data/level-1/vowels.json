@@ -1,520 +1,225 @@
 {
-    "level": 1.2,
-    "title": "Tibetan Vowel Combinations",
-    "description": "Learn Tibetan vowel marks and common syllable combinations",
-    "exercises": [
-      {
-        "type": "vowel_recognition",
-        "tibetanText": "ཀི",
-        "options": [
-          "ka",
-          "ki",
-          "ku"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "vowel_recognition",
-        "tibetanText": "ཀེ",
-        "options": [
-          "ko",
-          "ka",
-          "ke"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "vowel_recognition",
-        "tibetanText": "ཀུ",
-        "options": [
-          "ku",
-          "ki",
-          "ke"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "vowel_recognition",
-        "tibetanText": "ཀོ",
-        "options": [
-          "ku",
-          "ko",
-          "ka"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "མི",
-        "options": [
-          "ma",
-          "mi",
-          "mu"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ལེ",
-        "options": [
-          "le",
-          "la",
-          "lo"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "སུ",
-        "options": [
-          "se",
-          "sa",
-          "su"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "དོ",
-        "options": [
-          "do",
-          "da",
-          "du"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "བུ",
-        "options": [
-          "ba",
-          "bu",
-          "bo"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "རི",
-        "options": [
-          "re",
-          "ra",
-          "ri"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "པོ",
-        "options": [
-          "pu",
-          "po",
-          "pa"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཡེ",
-        "options": [
-          "ye",
-          "ya",
-          "yu"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཝི",
-        "options": [
-          "wa",
-          "wi",
-          "we"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཞུ",
-        "options": [
-          "zhu",
-          "zha",
-          "zhi"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "གེ",
-        "options": [
-          "ga",
-          "ge",
-          "go"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཧི",
-        "options": [
-          "hi",
-          "ha",
-          "hu"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཟོ",
-        "options": [
-          "zu",
-          "zo",
-          "za"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཇེ",
-        "options": [
-          "je",
-          "ja",
-          "ji"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཅུ",
-        "options": [
-          "ca",
-          "ce",
-          "cu"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཕི",
-        "options": [
-          "phi",
-          "pha",
-          "phu"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཐོ",
-        "options": [
-          "ta",
-          "tho",
-          "thu"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཤེ",
-        "options": [
-          "she",
-          "sha",
-          "shi"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཆུ",
-        "options": [
-          "cha",
-          "chu",
-          "che"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཚི",
-        "options": [
-          "tshi",
-          "tsha",
-          "tshu"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ནོ",
-        "options": [
-          "nu",
-          "no",
-          "na"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཉེ",
-        "options": [
-          "nye",
-          "nya",
-          "nyi"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཁུ",
-        "options": [
-          "kha",
-          "khu",
-          "khi"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཟུ",
-        "options": [
-          "zu",
-          "za",
-          "ze"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཏི",
-        "options": [
-          "ta",
-          "ti",
-          "tu"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "རེ",
-        "options": [
-          "ra",
-          "re",
-          "ri"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ལུ",
-        "options": [
-          "lu",
-          "la",
-          "le"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "སི",
-        "options": [
-          "sa",
-          "si",
-          "su"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "གུ",
-        "options": [
-          "ga",
-          "gu",
-          "go"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "དེ",
-        "options": [
-          "de",
-          "da",
-          "di"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཙེ",
-        "options": [
-          "tsa",
-          "tse",
-          "tsu"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "འི",
-        "options": [
-          "a",
-          "i",
-          "u"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཡུ",
-        "options": [
-          "yu",
-          "ya",
-          "ye"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཝོ",
-        "options": [
-          "wa",
-          "wo",
-          "wu"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཛེ",
-        "options": [
-          "dze",
-          "dza",
-          "dzu"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཧུ",
-        "options": [
-          "ha",
-          "hu",
-          "he"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ངོ",
-        "options": [
-          "ngo",
-          "nga",
-          "ngu"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཞི",
-        "options": [
-          "zha",
-          "zhi",
-          "zhu"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཇུ",
-        "options": [
-          "ju",
-          "ja",
-          "je"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཆེ",
-        "options": [
-          "cha",
-          "che",
-          "chu"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཚོ",
-        "options": [
-          "tshi",
-          "tsho",
-          "tsha"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "བེ",
-        "options": [
-          "be",
-          "ba",
-          "bu"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཕོ",
-        "options": [
-          "pha",
-          "pho",
-          "phu"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཐུ",
-        "options": [
-          "thu",
-          "tha",
-          "the"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ནུ",
-        "options": [
-          "na",
-          "nu",
-          "ne"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "syllable_recognition",
-        "tibetanText": "ཤུ",
-        "options": [
-          "shu",
-          "sha",
-          "she"
-        ],
-        "correctAnswerIndex": 0
-      }
-    ],
-    "metadata": {
-      "totalExercises": 50,
-      "vowelMarks": ["ི", "ུ", "ེ", "ོ"],
-      "estimatedTime": "20-25 minutes",
-      "difficulty": "beginner",
-      "skillsLearned": [
-        "Tibetan vowel mark recognition",
-        "Syllable formation",
-        "Consonant-vowel combinations",
-        "Reading basic Tibetan syllables"
+  "level": 1.2,
+  "title": "Most Common Tibetan Vowel Combinations",
+  "description": "Learn the 20 most frequently used Tibetan vowel combinations and syllables",
+  "exercises": [
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ཀི",
+      "options": [
+        "ki",
+        "ka",
+        "ku"
       ],
-      "prereq": "Level 1 - Alphabet Recognition"
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ཀུ",
+      "options": [
+        "ka",
+        "ku",
+        "ke"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ཀེ",
+      "options": [
+        "ko",
+        "ka",
+        "ke"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ཀོ",
+      "options": [
+        "ko",
+        "ku",
+        "ka"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "བུ",
+      "options": [
+        "ba",
+        "bu",
+        "bo"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "མི",
+      "options": [
+        "mu",
+        "ma",
+        "mi"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "རི",
+      "options": [
+        "ri",
+        "ra",
+        "re"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "པོ",
+      "options": [
+        "pu",
+        "po",
+        "pa"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ལེ",
+      "options": [
+        "la",
+        "lo",
+        "le"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "སུ",
+      "options": [
+        "su",
+        "sa",
+        "se"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "དེ",
+      "options": [
+        "da",
+        "de",
+        "di"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ཆུ",
+      "options": [
+        "cha",
+        "che",
+        "chu"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ཡེ",
+      "options": [
+        "ye",
+        "ya",
+        "yu"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ནོ",
+      "options": [
+        "nu",
+        "no",
+        "na"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "གུ",
+      "options": [
+        "ga",
+        "go",
+        "gu"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ཏི",
+      "options": [
+        "ti",
+        "ta",
+        "tu"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "རེ",
+      "options": [
+        "ra",
+        "re",
+        "ri"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ལུ",
+      "options": [
+        "la",
+        "le",
+        "lu"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ཟོ",
+      "options": [
+        "zo",
+        "za",
+        "zu"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "syllable_recognition",
+      "tibetanText": "ངེ",
+      "options": [
+        "nga",
+        "nge",
+        "ngo"
+      ],
+      "correctAnswerIndex": 1
     }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "vowelMarks": ["ི", "ུ", "ེ", "ོ"],
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "beginner",
+    "skillsLearned": [
+      "Most common Tibetan vowel combinations",
+      "Essential syllable recognition", 
+      "Consonant-vowel patterns",
+      "Foundation for reading Tibetan words"
+    ],
+    "prereq": "Level 1.1 - Alphabet Recognition",
+    "vocabularyIntroduced": [
+      "ཀི (ki)", "ཀུ (ku)", "ཀེ (ke)", "ཀོ (ko)", "བུ (bu)", "མི (mi)", "རི (ri)",
+      "པོ (po)", "ལེ (le)", "སུ (su)", "དེ (de)", "ཆུ (chu)", "ཡེ (ye)", "ནོ (no)",
+      "གུ (gu)", "ཏི (ti)", "རེ (re)", "ལུ (lu)", "ཟོ (zo)", "ངེ (nge)"
+    ]
   }
+}

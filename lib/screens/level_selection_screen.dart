@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import '../models/level_models.dart';
 import 'quiz_screen.dart';
+import 'notification_settings_screen.dart';
 
 class LevelSelectionScreen extends StatefulWidget {
   const LevelSelectionScreen({super.key});
@@ -45,9 +46,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
       final String jsonString = await rootBundle.loadString('assets/quiz_data/levels.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       setState(() {
-        levels = (jsonData['levels'] as List)
-            .map((level) => Level.fromJson(level))
-            .toList();
+        levels = (jsonData['levels'] as List).map((level) => Level.fromJson(level)).toList();
         isLoading = false;
       });
     } catch (e) {
@@ -65,11 +64,11 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
   Color _getLevelColor(int level) {
     switch (level) {
       case 1:
-        return const Color(0xFF58CC02); // Duolingo green
+        return const Color(0xFF58CC02); // Green
       case 2:
-        return const Color(0xFF1CB0F6); // Duolingo blue
+        return const Color(0xFF1CB0F6); // Blue
       case 3:
-        return const Color(0xFFCE82FF); // Duolingo purple
+        return const Color(0xFFCE82FF); // Purple
       default:
         return Colors.grey;
     }
@@ -83,7 +82,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
       itemBuilder: (context, levelIndex) {
         final level = levels[levelIndex];
         final color = _getLevelColor(level.level);
-        
+
         return Column(
           children: [
             if (levelIndex > 0)
@@ -153,23 +152,19 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                     ),
                   ],
                 ),
-                if (level.sublevels.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  _buildSublevels(level, color),
-                ] else
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Center(
-                      child: Text(
-                        '🔒 Coming Soon!',
-                        style: GoogleFonts.kalam(
-                          fontSize: 20,
-                          color: Colors.grey,
-                          fontStyle: FontStyle.italic,
+                const SizedBox(height: 16),
+                level.sublevels.isEmpty
+                    ? Center(
+                        child: Text(
+                          '🔒 Coming Soon!',
+                          style: GoogleFonts.kalam(
+                            fontSize: 20,
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
+                      )
+                    : _buildSublevels(level, color),
               ],
             ),
           ),
@@ -191,7 +186,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
       itemCount: level.sublevels.length,
       itemBuilder: (context, index) {
         final sublevel = level.sublevels[index];
-        final isLocked = index > 0; // Demo: only first level is unlocked
+        final isLocked = index > 0;
 
         return Hero(
           tag: 'sublevel_${sublevel.level}_${sublevel.name}',
@@ -211,9 +206,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => QuizScreen(
-                            topicFilePath: sublevel.path,
-                          ),
+                          builder: (context) => QuizScreen(topicFilePath: sublevel.path),
                         ),
                       );
                     },
@@ -281,6 +274,19 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotificationSettingsScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())

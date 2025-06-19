@@ -1,0 +1,148 @@
+{
+  "level": 2.1,
+  "title": "Emotions and Feelings",
+  "description": "Learn Tibetan names for common emotions and feelings",
+  "exercises": [
+    {
+      "type": "word_meaning",
+      "tibetanText": "དགའ་པོ",
+      "options": ["Happy", "Sad", "Angry"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སེམས་ཁུར",
+      "options": ["Worried", "Excited", "Calm"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁོང་ཁྲོ",
+      "options": ["Angry", "Surprised", "Proud"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྐྱོ་བ",
+      "options": ["Sad", "Happy", "Afraid"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འཇིགས་པ",
+      "options": ["Afraid", "Excited", "Calm"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བསུན་པ",
+      "options": ["Jealous", "Proud", "Shy"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྗེས་དགའ",
+      "options": ["Proud", "Jealous", "Calm"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྱད་པར",
+      "options": ["Special", "Lonely", "Excited"],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འདུག་སྐུལ",
+      "options": ["Encouraged", "Embarrassed", "Tired"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྲེལ་བ",
+      "options": ["Embarrassed", "Excited", "Calm"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དགའ་བ",
+      "options": ["Like", "Dislike", "Fear"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མི་དགའ",
+      "options": ["Dislike", "Like", "Angry"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འདོད་པ",
+      "options": ["Desire", "Fear", "Sadness"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དགའ་སྟོན",
+      "options": ["Joyful", "Angry", "Worried"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འཁྲུགས་པ",
+      "options": ["Disturbed", "Calm", "Excited"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཞི་བ",
+      "options": ["Calm", "Angry", "Sad"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འདུག་སྐུལ",
+      "options": ["Motivated", "Tired", "Lonely"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁོང་ཁྲོ",
+      "options": ["Angry", "Happy", "Surprised"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བསུན་པ",
+      "options": ["Jealous", "Proud", "Shy"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྲེལ་བ",
+      "options": ["Embarrassed", "Excited", "Calm"],
+      "correctAnswerIndex": 0
+    }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": ["word_meaning"],
+    "contentMix": {"meaningfulWords": 20},
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "Emotion vocabulary in Tibetan",
+      "Feeling vocabulary in Tibetan",
+      "Describing emotional states",
+      "Expressing likes and dislikes",
+      "Talking about moods"
+    ],
+    "prereq": "Level 1.10 completion",
+    "vocabularyIntroduced": [
+      "དགའ་པོ (happy)", "སེམས་ཁུར (worried)", "ཁོང་ཁྲོ (angry)", "སྐྱོ་བ (sad)", "འཇིགས་པ (afraid)",
+      "བསུན་པ (jealous)", "རྗེས་དགའ (proud)", "ཁྱད་པར (lonely)", "འདུག་སྐུལ (encouraged)", "ཁྲེལ་བ (embarrassed)",
+      "དགའ་བ (like)", "མི་དགའ (dislike)", "འདོད་པ (desire)", "དགའ་སྟོན (joyful)", "འཁྲུགས་པ (disturbed)",
+      "ཞི་བ (calm)"
+    ]
+  }
+} 

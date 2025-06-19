@@ -1,317 +1,223 @@
 {
-    "level": 1.1,
-    "title": "Complete Tibetan Alphabet Recognition",
-    "description": "Learn all 30 basic Tibetan consonants",
-    "exercises": [
-      {
-        "type": "character_recognition",
-        "tibetanText": "མ",
-        "options": [
-          "na",
-          "wa",
-          "ma"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཞ",
-        "options": [
-          "zha",
-          "sha",
-          "za"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ད",
-        "options": [
-          "ba",
-          "da",
-          "ta"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཀ",
-        "options": [
-          "kha",
-          "ga",
-          "ka"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཡ",
-        "options": [
-          "ya",
-          "ra",
-          "wa"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཚ",
-        "options": [
-          "cha",
-          "tsha",
-          "sha"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ལ",
-        "options": [
-          "na",
-          "ra",
-          "la"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཇ",
-        "options": [
-          "ja",
-          "dza",
-          "ca"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཧ",
-        "options": [
-          "kha",
-          "ha",
-          "a"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "པ",
-        "options": [
-          "pha",
-          "ba",
-          "pa"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཆ",
-        "options": [
-          "cha",
-          "tsha",
-          "sha"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཟ",
-        "options": [
-          "sa",
-          "za",
-          "zha"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཐ",
-        "options": [
-          "pha",
-          "ta",
-          "tha"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ང",
-        "options": [
-          "nga",
-          "nya",
-          "na"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ས",
-        "options": [
-          "za",
-          "sha",
-          "sa"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཝ",
-        "options": [
-          "ra",
-          "wa",
-          "ya"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཅ",
-        "options": [
-          "ja",
-          "ca",
-          "tsa"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "བ",
-        "options": [
-          "ma",
-          "pa",
-          "ba"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཛ",
-        "options": [
-          "dza",
-          "ja",
-          "za"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ར",
-        "options": [
-          "ya",
-          "ra",
-          "la"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཁ",
-        "options": [
-          "cha",
-          "ka",
-          "kha"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཏ",
-        "options": [
-          "ta",
-          "tha",
-          "da"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཤ",
-        "options": [
-          "zha",
-          "sha",
-          "sa"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "འ",
-        "options": [
-          "wa",
-          "ha",
-          "a"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ན",
-        "options": [
-          "na",
-          "ma",
-          "nga"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཕ",
-        "options": [
-          "fa",
-          "pha",
-          "pa"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཉ",
-        "options": [
-          "ya",
-          "nga",
-          "nya"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ག",
-        "options": [
-          "ga",
-          "ka",
-          "nga"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཙ",
-        "options": [
-          "za",
-          "tsa",
-          "ca"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "character_recognition",
-        "tibetanText": "ཨ",
-        "options": [
-          "wa",
-          "a",
-          "ha"
-        ],
-        "correctAnswerIndex": 1
-      }
-    ],
-    "metadata": {
-      "totalExercises": 30,
-      "estimatedTime": "15-20 minutes",
-      "difficulty": "beginner",
-      "skillsLearned": [
-        "Tibetan alphabet recognition",
-        "Character-to-sound mapping",
-        "Basic pronunciation awareness"
-      ]
+  "level": 1.1,
+  "title": "Most Common Tibetan Consonants",
+  "description": "Learn the 20 most frequently used Tibetan consonants",
+  "exercises": [
+    {
+      "type": "character_recognition",
+      "tibetanText": "ཀ",
+      "options": [
+        "ka",
+        "ga",
+        "kha"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ག",
+      "options": [
+        "ka",
+        "ga",
+        "nga"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ང",
+      "options": [
+        "nya",
+        "na",
+        "nga"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ཅ",
+      "options": [
+        "ca",
+        "ja",
+        "tsa"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ཆ",
+      "options": [
+        "tsha",
+        "cha",
+        "sha"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ཇ",
+      "options": [
+        "dza",
+        "ca",
+        "ja"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ཉ",
+      "options": [
+        "nya",
+        "nga",
+        "ya"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ཏ",
+      "options": [
+        "tha",
+        "ta",
+        "da"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ད",
+      "options": [
+        "ta",
+        "ba",
+        "da"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ན",
+      "options": [
+        "na",
+        "ma",
+        "nga"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "པ",
+      "options": [
+        "pha",
+        "pa",
+        "ba"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "བ",
+      "options": [
+        "pa",
+        "ma",
+        "ba"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "མ",
+      "options": [
+        "ma",
+        "wa",
+        "na"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ཙ",
+      "options": [
+        "za",
+        "tsa",
+        "ca"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ཞ",
+      "options": [
+        "sha",
+        "za",
+        "zha"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ཟ",
+      "options": [
+        "za",
+        "zha",
+        "sa"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ཡ",
+      "options": [
+        "ra",
+        "ya",
+        "wa"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ར",
+      "options": [
+        "ya",
+        "la",
+        "ra"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ལ",
+      "options": [
+        "la",
+        "ra",
+        "na"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "character_recognition",
+      "tibetanText": "ས",
+      "options": [
+        "sha",
+        "sa",
+        "za"
+      ],
+      "correctAnswerIndex": 1
     }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "beginner",
+    "skillsLearned": [
+      "Most common Tibetan consonants",
+      "Essential character-to-sound mapping",
+      "Foundation for reading basic words"
+    ],
+    "alphabetSelection": "20 most frequently used consonants in Tibetan texts",
+    "vocabularyIntroduced": [
+      "ཀ (ka)", "ག (ga)", "ང (nga)", "ཅ (ca)", "ཆ (cha)", "ཇ (ja)", "ཉ (nya)",
+      "ཏ (ta)", "ད (da)", "ན (na)", "པ (pa)", "བ (ba)", "མ (ma)", "ཙ (tsa)",
+      "ཞ (zha)", "ཟ (za)", "ཡ (ya)", "ར (ra)", "ལ (la)", "ས (sa)"
+    ]
   }
+}

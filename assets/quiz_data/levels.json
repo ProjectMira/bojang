@@ -5,34 +5,49 @@
             "title": "Beginner",
             "sublevels": [
                 {
-                    "level": 1.1,
+                    "level": "1.1",
                     "name": "Alphabet",
                     "path": "assets/quiz_data/level-1/alphabet.json"
                 },
                 {
-                    "level": 1.2,
+                    "level": "1.2",
                     "name": "Vowels",
                     "path": "assets/quiz_data/level-1/vowels.json"
                 },
                 {
-                    "level": 1.3,
+                    "level": "1.3",
                     "name": "Stacked Words",
-                    "path": "assets/quiz_data/level-1/stacked_words.json"
+                    "path": "assets/quiz_data/level-1/stacked-words.json"
                 },
                 {
-                    "level": 1.4,
+                    "level": "1.4",
                     "name": "Numbers",
                     "path": "assets/quiz_data/level-1/numbers.json"
                 },
                 {
-                    "level": 1.5,
+                    "level": "1.5",
                     "name": "Word Meaning",
-                    "path": "assets/quiz_data/level-1/word_meaning.json"
+                    "path": "assets/quiz_data/level-1/word-meaning.json"
                 },
                 {
-                    "level": 1.6,
+                    "level": "1.6",
                     "name": "Calendar",
                     "path": "assets/quiz_data/level-1/calender.json"
+                },
+                {
+                    "level": "1.7",
+                    "name": "Body Parts",
+                    "path": "assets/quiz_data/level-1/body-parts.json"
+                },
+                {
+                    "level": "1.8",
+                    "name": "Fruits and Vegetables",
+                    "path": "assets/quiz_data/level-1/fruits-and-vegetables.json"
+                },
+                {
+                    "level": "1.9",
+                    "name": "Household Items",
+                    "path": "assets/quiz_data/level-1/household-items.json"
                 }
             ]
         },
@@ -41,14 +56,54 @@
             "title": "Intermediate",
             "sublevels": [
                 {
-                    "level": 2.1,
-                    "name": "Body Parts",
-                    "path": "assets/quiz_data/level-2/body-parts.json"
+                    "level": "2.1",
+                    "name": "Emotions and Feelings",
+                    "path": "assets/quiz_data/level-2/emotions-and-feelings.json"
                 },
                 {
-                    "level": 2.2,
-                    "name": "Fruits & Vegs",
-                    "path": "assets/quiz_data/level-2/fruits_and_vegetables.json"
+                    "level": "2.2",
+                    "name": "Animals",
+                    "path": "assets/quiz_data/level-2/animals.json"
+                },
+                {
+                    "level": "2.3",
+                    "name": "Occupation",
+                    "path": "assets/quiz_data/level-2/occupation.json"
+                },
+                {
+                    "level": "2.4",
+                    "name": "Clothing and Accessories",
+                    "path": "assets/quiz_data/level-2/clothing-and-accessories.json"
+                },
+                {
+                    "level": "2.5",
+                    "name": "Weather and Nature",
+                    "path": "assets/quiz_data/level-2/weather-and-nature.json"
+                },
+                {
+                    "level": "2.6",
+                    "name": "Basic Actions and Verbs",
+                    "path": "assets/quiz_data/level-2/basic-actions-verbs.json"
+                },
+                {
+                    "level": "2.7",
+                    "name": "Food and Drinks",
+                    "path": "assets/quiz_data/level-2/food-and-drinks.json"
+                },
+                {
+                    "level": "2.8",
+                    "name": "People and Relationships",
+                    "path": "assets/quiz_data/level-2/people-and-relationships.json"
+                },
+                {
+                    "level": "2.9",
+                    "name": "Directions and Places",
+                    "path": "assets/quiz_data/level-2/directions-and-places.json"
+                },
+                {
+                    "level": "2.10",
+                    "name": "Time and Daily Routine",
+                    "path": "assets/quiz_data/level-2/time-and-daily-routine.json"
                 }
             ]
         },
@@ -57,12 +112,12 @@
             "title": "Advanced",
             "sublevels": [
                 {
-                    "level": 3.1,
+                    "level": "3.1",
                     "name": "Introduction",
                     "path": "assets/quiz_data/level-3/introduction.json"
                 },
                 {
-                    "level": 3.2,
+                    "level": "3.2",
                     "name": "Restaurants",
                     "path": "assets/quiz_data/level-3/resturants.json"
                 }

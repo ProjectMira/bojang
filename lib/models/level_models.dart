@@ -1,6 +1,6 @@
 
 class Sublevel {
-  final double level;
+  final String level;
   final String name;
   final String path;
 
@@ -12,7 +12,7 @@ class Sublevel {
 
   factory Sublevel.fromJson(Map<String, dynamic> json) {
     return Sublevel(
-      level: json['level']?.toDouble() ?? 0.0,
+      level: json['level'].toString(),
       name: json['name'] ?? '',
       path: json['path'] ?? '',
     );
