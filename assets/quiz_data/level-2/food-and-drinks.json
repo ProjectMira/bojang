@@ -1,0 +1,49 @@
+{
+  "level": 2.7,
+  "title": "Food and Drinks",
+  "description": "Learn Tibetan words for common foods and drinks",
+  "exercises": [
+    { "type": "word_meaning", "tibetanText": "བག་ལེབ", "options": ["Bread", "Rice", "Noodles"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "འབྲས", "options": ["Rice", "Bread", "Soup"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཇ", "options": ["Tea", "Water", "Milk"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཆུ", "options": ["Water", "Tea", "Juice"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཤ", "options": ["Meat", "Fish", "Egg"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "མར", "options": ["Butter", "Cheese", "Milk"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཞོ", "options": ["Cheese", "Butter", "Soup"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བཤེར་ཁོག", "options": ["Soup", "Noodles", "Bread"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཐུག་པ", "options": ["Noodles", "Soup", "Rice"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "འོག་ཇ", "options": ["Milk", "Tea", "Water"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སོར་ཚོགས", "options": ["Salt", "Sugar", "Chili"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཟས་ཏོག", "options": ["Sugar", "Salt", "Butter"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སོགས་འབྲས", "options": ["Chili", "Rice", "Soup"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "མོག་མོག", "options": ["Momo", "Bread", "Cheese"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "རྩམ་པ", "options": ["Tsampa", "Rice", "Soup"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "འཐུང་ཆང", "options": ["Beer", "Wine", "Juice"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཞོ་ཆང", "options": ["Wine", "Beer", "Juice"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སྐྱིད་ལེབ", "options": ["Apple", "Orange", "Banana"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སེར་ཕྲུག", "options": ["Orange", "Apple", "Banana"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཞིབ་འབྲས", "options": ["Potato", "Egg", "Meat"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སྒོར་ཁུ", "options": ["Egg", "Potato", "Meat"], "correctAnswerIndex": 0 }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": ["word_meaning"],
+    "contentMix": {"meaningfulWords": 20},
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "Food vocabulary in Tibetan",
+      "Drink vocabulary in Tibetan",
+      "Describing meals and ingredients",
+      "Talking about eating and drinking",
+      "Expanding daily life vocabulary"
+    ],
+    "prereq": "Level 2.6 completion",
+    "vocabularyIntroduced": [
+      "བག་ལེབ (bread)", "འབྲས (rice)", "ཇ (tea)", "ཆུ (water)", "ཤ (meat)",
+      "མར (butter)", "ཞོ (cheese)", "བཤེར་ཁོག (soup)", "ཐུག་པ (noodles)", "འོག་ཇ (milk)",
+      "སོར་ཚོགས (salt)", "ཟས་ཏོག (sugar)", "སོགས་འབྲས (chili)", "མོག་མོག (momo)", "རྩམ་པ (tsampa)",
+      "འཐུང་ཆང (beer)", "ཞོ་ཆང (wine)", "སྐྱིད་ལེབ (apple)", "སེར་ཕྲུག (orange)", "ཞིབ་འབྲས (potato)", "སྒོར་ཁུ (egg)"
+    ]
+  }
+} 

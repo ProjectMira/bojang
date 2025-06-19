@@ -1,0 +1,48 @@
+{
+  "level": 2.10,
+  "title": "Time and Daily Routine",
+  "description": "Learn Tibetan words for time and daily routine",
+  "exercises": [
+    { "type": "word_meaning", "tibetanText": "ཞོགས་ཀས", "options": ["Morning", "Evening", "Night"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཉིན་གུང", "options": ["Afternoon", "Morning", "Night"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "དགོང་དག", "options": ["Evening", "Morning", "Afternoon"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "མཚན", "options": ["Night", "Morning", "Evening"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "དེ་རིང", "options": ["Today", "Tomorrow", "Yesterday"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སང་ཉིན", "options": ["Tomorrow", "Today", "Yesterday"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཁ་སང", "options": ["Yesterday", "Today", "Tomorrow"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཆུ་ཚོད", "options": ["Hour", "Minute", "Second"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སྐར་མ", "options": ["Minute", "Hour", "Second"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སྐར་ཆ", "options": ["Second", "Minute", "Hour"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བདུན་ཕྲག", "options": ["Week", "Month", "Year"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཟླ", "options": ["Month", "Week", "Year"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ལོ", "options": ["Year", "Month", "Week"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "དུས་རབས", "options": ["Always", "Sometimes", "Never"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "འཛིན་སྐབས", "options": ["Sometimes", "Always", "Never"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཡང་ན", "options": ["Or", "And", "But"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "གང་རུང", "options": ["Any", "All", "None"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ད་ལྟ", "options": ["Now", "Soon", "Later"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "མར་མེད", "options": ["Never", "Always", "Sometimes"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "གཟའ", "options": ["Day", "Night", "Week"], "correctAnswerIndex": 0 }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": ["word_meaning"],
+    "contentMix": {"meaningfulWords": 20},
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "Time vocabulary in Tibetan",
+      "Daily routine vocabulary in Tibetan",
+      "Describing time and schedules",
+      "Talking about daily activities",
+      "Expanding daily life vocabulary"
+    ],
+    "prereq": "Level 2.9 completion",
+    "vocabularyIntroduced": [
+      "ཞོགས་ཀས (morning)", "ཉིན་གུང (afternoon)", "དགོང་དག (evening)", "མཚན (night)", "དེ་རིང (today)",
+      "སང་ཉིན (tomorrow)", "ཁ་སང (yesterday)", "ཆུ་ཚོད (hour)", "སྐར་མ (minute)", "སྐར་ཆ (second)",
+      "བདུན་ཕྲག (week)", "ཟླ (month)", "ལོ (year)", "དུས་རབས (always)", "འཛིན་སྐབས (sometimes)",
+      "ཡང་ན (or)", "གང་རུང (any)", "ད་ལྟ (now)", "མར་མེད (never)", "གཟའ (day)"
+    ]
+  }
+} 

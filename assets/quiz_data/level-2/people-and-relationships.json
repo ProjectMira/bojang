@@ -1,0 +1,48 @@
+{
+  "level": 2.8,
+  "title": "People and Relationships",
+  "description": "Learn Tibetan words for people and relationships",
+  "exercises": [
+    { "type": "word_meaning", "tibetanText": "ཕ", "options": ["Father", "Mother", "Brother"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "མ", "options": ["Mother", "Father", "Sister"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཨ་ཅག", "options": ["Older brother", "Younger brother", "Friend"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཨ་ཅག་མོ", "options": ["Older sister", "Younger sister", "Friend"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "གྲོགས་པོ", "options": ["Friend", "Neighbor", "Cousin"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སློབ་དཔོན", "options": ["Teacher", "Student", "Parent"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སློབ་ཕྲུག", "options": ["Student", "Teacher", "Child"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བུ", "options": ["Son", "Daughter", "Child"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སྲས", "options": ["Daughter", "Son", "Child"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཕ་མ", "options": ["Parents", "Children", "Grandparents"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ནུས་པ", "options": ["Family", "Neighbor", "Friend"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "མི་མང", "options": ["People", "Family", "Neighbor"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "མཆོག", "options": ["Husband", "Wife", "Couple"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "བུ་མོ", "options": ["Girl", "Daughter", "Sister"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཁྱིམ་ཚང", "options": ["Family", "Neighbor", "Friend"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "གྲོང་ཚོ", "options": ["Neighbor", "Friend", "Family"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཡུན་ངུ", "options": ["Grandfather", "Grandmother", "Uncle"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "རྨོ", "options": ["Grandmother", "Grandfather", "Aunt"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཨ་ཞང", "options": ["Uncle", "Aunt", "Cousin"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཨ་ནེ", "options": ["Aunt", "Uncle", "Cousin"], "correctAnswerIndex": 0 }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": ["word_meaning"],
+    "contentMix": {"meaningfulWords": 20},
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "People vocabulary in Tibetan",
+      "Relationship vocabulary in Tibetan",
+      "Describing family and friends",
+      "Talking about people and relationships",
+      "Expanding daily life vocabulary"
+    ],
+    "prereq": "Level 2.7 completion",
+    "vocabularyIntroduced": [
+      "ཕ (father)", "མ (mother)", "ཨ་ཅག (older brother)", "ཨ་ཅག་མོ (older sister)", "གྲོགས་པོ (friend)",
+      "སློབ་དཔོན (teacher)", "སློབ་ཕྲུག (student)", "བུ (son)", "སྲས (daughter)", "ཕ་མ (parents)",
+      "ནུས་པ (family)", "མི་མང (people)", "མཆོག (husband)", "བུ་མོ (girl)", "ཁྱིམ་ཚང (family)",
+      "གྲོང་ཚོ (neighbor)", "ཡུན་ངུ (grandfather)", "རྨོ (grandmother)", "ཨ་ཞང (uncle)", "ཨ་ནེ (aunt)"
+    ]
+  }
+} 
