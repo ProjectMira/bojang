@@ -244,6 +244,18 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                         color: isLocked ? Colors.grey[600] : color,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      sublevel.name,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.kalam(
+                        fontSize: 14,
+                        color: isLocked ? Colors.grey[600] : color,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
