@@ -201,7 +201,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
-                                    '${sublevel.level}',
+                                    sublevel.level,
                                     style: GoogleFonts.kalam(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
