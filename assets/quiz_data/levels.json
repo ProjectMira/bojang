@@ -113,13 +113,38 @@
             "sublevels": [
                 {
                     "level": "3.1",
-                    "name": "Introduction",
+                    "name": "Introducing",
                     "path": "assets/quiz_data/level-3/introduction.json"
                 },
                 {
                     "level": "3.2",
-                    "name": "Restaurants",
+                    "name": "Order Food",
                     "path": "assets/quiz_data/level-3/resturants.json"
+                },
+                {
+                    "level": "3.3",
+                    "name": "Dharamsala",
+                    "path": "assets/quiz_data/level-3/exploring_dhasa.json"
+                },
+                {
+                    "level": "3.4",
+                    "name": "Order Grocery",
+                    "path": "assets/quiz_data/level-3/grocery_shopping.json"
+                },
+                {
+                    "level": "3.5",
+                    "name": "Happy Losar",
+                    "path": "assets/quiz_data/level-3/losar_celebration.json"
+                },
+                {
+                    "level": "3.6",
+                    "name": "Hospital Visit",
+                    "path": "assets/quiz_data/level-3/hospital_visit.json"
+                },
+                {
+                    "level": "3.7",
+                    "name": "Monastery",
+                    "path": "assets/quiz_data/level-3/visiting_monastery.json"
                 }
             ]
         }
