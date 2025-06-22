@@ -105,16 +105,6 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "ལྷག་པ",
-        "options": [
-          "Saturn",
-          "Mars",
-          "Mercury"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
         "tibetanText": "ཕུར་བུ",
         "options": [
           "Jupiter",
@@ -122,26 +112,6 @@
           "Mercury"
         ],
         "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "པ་སངས",
-        "options": [
-          "Saturn",
-          "Venus",
-          "Jupiter"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "སྤེན་པ",
-        "options": [
-          "Mars",
-          "Venus",
-          "Saturn"
-        ],
-        "correctAnswerIndex": 2
       },
       {
         "type": "word_meaning",
@@ -175,16 +145,6 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "ཡོས",
-        "options": [
-          "Rabbit",
-          "Snake",
-          "Tiger"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
         "tibetanText": "འབྲུག",
         "options": [
           "Horse",
@@ -192,76 +152,6 @@
           "Rabbit"
         ],
         "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "སྦྲུལ",
-        "options": [
-          "Sheep",
-          "Dragon",
-          "Snake"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "རྟ",
-        "options": [
-          "Horse",
-          "Monkey",
-          "Snake"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ལུག",
-        "options": [
-          "Bird",
-          "Sheep",
-          "Horse"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "སྤྲེའུ",
-        "options": [
-          "Dog",
-          "Sheep",
-          "Monkey"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "བྱ",
-        "options": [
-          "Bird",
-          "Pig",
-          "Monkey"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཁྱི",
-        "options": [
-          "Rat",
-          "Dog",
-          "Bird"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཕག",
-        "options": [
-          "Ox",
-          "Dog",
-          "Pig"
-        ],
-        "correctAnswerIndex": 2
       },
       {
         "type": "word_meaning",
@@ -285,46 +175,6 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "ཆོས་འཁོར",
-        "options": [
-          "Descending Day",
-          "Buddha Day",
-          "Dharma Day"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ལྷ་བསབ",
-        "options": [
-          "Descending Day",
-          "Ganden Day",
-          "Dharma Day"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "དགའ་ལྡན",
-        "options": [
-          "Lamp Festival",
-          "Ganden Day",
-          "Descending Day"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "མར་མེ",
-        "options": [
-          "New Year",
-          "Ganden Day",
-          "Lamp Festival"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
         "tibetanText": "ཟླ",
         "options": [
           "Month",
@@ -345,16 +195,6 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "ཚེས",
-        "options": [
-          "Time",
-          "Year",
-          "Date"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
         "tibetanText": "དུས་ཚོད",
         "options": [
           "Week",
@@ -362,185 +202,32 @@
           "Month"
         ],
         "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "གནམ་ལོ",
-        "options": [
-          "Fire Year",
-          "Sky Year",
-          "Earth Year"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ས་ལོ",
-        "options": [
-          "Water Year",
-          "Sky Year",
-          "Earth Year"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "མེ་ལོ",
-        "options": [
-          "Fire Year",
-          "Wind Year",
-          "Earth Year"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཆུ་ལོ",
-        "options": [
-          "Wood Year",
-          "Water Year",
-          "Fire Year"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཤིང་ལོ",
-        "options": [
-          "Iron Year",
-          "Water Year",
-          "Wood Year"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ལྕགས་ལོ",
-        "options": [
-          "Iron Year",
-          "Sky Year",
-          "Wood Year"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "སྔ་དྲོ",
-        "options": [
-          "Evening",
-          "Morning",
-          "Afternoon"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཕྱི་དྲོ",
-        "options": [
-          "Night",
-          "Morning",
-          "Afternoon"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "དགོང་དག",
-        "options": [
-          "Evening",
-          "Midnight",
-          "Afternoon"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "མཚན",
-        "options": [
-          "Dawn",
-          "Night",
-          "Evening"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ནམ་གུང",
-        "options": [
-          "Midnight",
-          "Morning",
-          "Noon"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ནམ་གུང་སར",
-        "options": [
-          "Midnight",
-          "Dawn",
-          "Noon"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཤར་ཀ",
-        "options": [
-          "Sunset",
-          "Dawn",
-          "Night"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཉི་ནུབ",
-        "options": [
-          "Noon",
-          "Dawn",
-          "Sunset"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "རྩིས",
-        "options": [
-          "Calendar",
-          "Write",
-          "Read"
-        ],
-        "correctAnswerIndex": 0
       }
     ],
     "metadata": {
-      "totalExercises": 50,
+      "totalExercises": 20,
       "exerciseTypes": [
         "word_meaning"
       ],
       "contentMix": {
-        "meaningfulWords": 50
+        "meaningfulWords": 20
       },
-      "estimatedTime": "25-30 minutes",
+      "estimatedTime": "10-12 minutes",
       "difficulty": "beginner-intermediate",
       "skillsLearned": [
         "Tibetan days of the week",
         "Planetary names and astronomy",
         "12-year animal cycle",
         "Tibetan festivals and celebrations",
-        "Element years (Wood, Fire, Earth, Iron, Water, Sky)",
-        "Time expressions and calendar terms"
+        "Calendar and time expressions"
       ],
       "prereq": "Level 2.2 completion",
       "vocabularyIntroduced": [
         "གཟའ་ཉི་མ (Sunday)", "གཟའ་ཟླ་བ (Monday)", "གཟའ་མིག་དམར (Tuesday)", "གཟའ་ལྷག་པ (Wednesday)",
         "གཟའ་ཕུར་བུ (Thursday)", "གཟའ་པ་སངས (Friday)", "གཟའ་སྤེན་པ (Saturday)",
-        "ཉི་མ (sun)", "ཟླ་བ (moon)", "མིག་དམར (Mars)", "ལྷག་པ (Mercury)", "ཕུར་བུ (Jupiter)", "པ་སངས (Venus)", "སྤེན་པ (Saturn)",
-        "བྱི་བ (rat)", "གླང (ox)", "སྟག (tiger)", "ཡོས (rabbit)", "འབྲུག (dragon)", "སྦྲུལ (snake)",
-        "རྟ (horse)", "ལུག (sheep)", "སྤྲེའུ (monkey)", "བྱ (bird)", "ཁྱི (dog)", "ཕག (pig)",
-        "ལོ་གསར (New Year)", "ས་ག (Buddha Day)", "ཆོས་འཁོར (Dharma Day)", "ལྷ་བསབ (Descending Day)", "དགའ་ལྡན (Ganden Day)", "མར་མེ (Lamp Festival)",
-        "གནམ་ལོ (sky year)", "ས་ལོ (earth year)", "མེ་ལོ (fire year)", "ཆུ་ལོ (water year)", "ཤིང་ལོ (wood year)", "ལྕགས་ལོ (iron year)"
+        "ཉི་མ (sun)", "ཟླ་བ (moon)", "མིག་དམར (Mars)", "ཕུར་བུ (Jupiter)",
+        "བྱི་བ (rat)", "གླང (ox)", "སྟག (tiger)", "འབྲུག (dragon)",
+        "ལོ་གསར (New Year)", "ས་ག (Buddha Day)", "ཟླ (month)", "ལོ (year)", "དུས་ཚོད (week)"
       ]
     }
   }
