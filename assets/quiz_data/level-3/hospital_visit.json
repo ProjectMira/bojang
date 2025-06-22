@@ -1,0 +1,185 @@
+{
+  "level": 3.6,
+  "title": "A Visit to the Hospital",
+  "description": "Follow a patient through a hospital visit, learning Tibetan sentences for health, symptoms, and basic medical conversations.",
+  "exercises": [
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ག་འདྲ་ཡོད་པས།",
+      "options": [
+        "How are you feeling?",
+        "Where are you going?",
+        "What is your name?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ན་ཚ་ཡོད",
+      "options": [
+        "I am hungry",
+        "I am sick",
+        "I am tired"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ག་ནས་ཕེབས་པ?",
+      "options": [
+        "Where are you from?",
+        "Where does it hurt?",
+        "Where do you live?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལ་མིག་ན་ཡོད",
+      "options": [
+        "I have a headache",
+        "I have a stomach ache",
+        "I have a fever"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ལ་ཚ་བ་ཡོད་པས།",
+      "options": [
+        "Do you have a fever?",
+        "Do you have medicine?",
+        "Do you have a friend?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལ་སྨན་དགོས",
+      "options": [
+        "I need water",
+        "I need medicine",
+        "I need food"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "དགའ་གནང་བ་ལགས།",
+      "options": [
+        "Please wait",
+        "Please sit",
+        "Please come in"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་གི་མིང་ག་རེ་རེད།",
+      "options": [
+        "What is your name?",
+        "What is your age?",
+        "What is your problem?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ངའི་མིང་...",
+      "options": [
+        "My name is ...",
+        "I am ... years old",
+        "I am from ..."
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་གི་ལོ་ག་ཚོད་རེད།",
+      "options": [
+        "How old are you?",
+        "Where do you live?",
+        "What do you do?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལོ་...ཡིན",
+      "options": [
+        "I am ... years old",
+        "I am a student",
+        "I am a patient"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ལ་སྨན་བཟོ་ཡོད་པས།",
+      "options": [
+        "Do you have medicine?",
+        "Do you have a doctor?",
+        "Do you have a friend?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལ་སྨན་མེད",
+      "options": [
+        "I have no money",
+        "I have no medicine",
+        "I have no pain"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ལ་གནོད་སྐྱོན་ཡོད་པས།",
+      "options": [
+        "Do you have an injury?",
+        "Do you have a family?",
+        "Do you have a job?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལ་རྒྱུན་སྤྱོད་སྨན་དགོས",
+      "options": [
+        "I need regular medicine",
+        "I need a new doctor",
+        "I need to rest"
+      ],
+      "correctAnswerIndex": 0
+    }
+  ],
+  "metadata": {
+    "totalExercises": 15,
+    "exerciseTypes": [
+      "sentence_meaning"
+    ],
+    "contentMix": {
+      "greetings": 2,
+      "symptoms": 5,
+      "doctor_patient": 5,
+      "personal_info": 3
+    },
+    "estimatedTime": "15-20 minutes",
+    "difficulty": "intermediate",
+    "skillsLearned": [
+      "Describing symptoms in Tibetan",
+      "Basic patient-doctor conversation",
+      "Giving and asking for personal information",
+      "Understanding hospital instructions",
+      "Cultural context for medical visits"
+    ],
+    "prereq": "Level 3.1 completion",
+    "topicsIntroduced": [
+      "Symptoms: ན་ཚ (sickness), མིག་ན (headache), ཚ་བ (fever)",
+      "Personal info: མིང (name), ལོ (age)",
+      "Doctor-patient: སྨན (medicine), སྨན་བཟོ (to give medicine), གནོད་སྐྱོན (injury)",
+      "Instructions: དགའ་གནང་བ (please), བཞུགས (sit), ཕེབས (come in)"
+    ]
+  }
+} 

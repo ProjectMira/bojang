@@ -1,0 +1,185 @@
+{
+    "level": 3.4,
+    "title": "Ordering Groceries",
+    "description": "Learn how to order groceries in Tibetan, including common items, quantities, and polite shopping interactions.",
+    "exercises": [
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "ང་ལ་གཞི་ནས་ཁྱེར་ཚོད་དགོས",
+        "options": [
+          "I need some vegetables",
+          "I need a receipt",
+          "I need to go home"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "འབྲས་གང་དགོས།",
+        "options": [
+          "Do you want rice?",
+          "What kind of rice do you want?",
+          "Where is the rice?"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "ང་ལ་ཤ་གསོག་དགོས",
+        "options": [
+          "I want to eat meat",
+          "I need fresh meat",
+          "I want to cook meat"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "ཤ་གསོག་གཅིག་འདོན་རོགས།",
+        "options": [
+          "Please weigh the meat",
+          "Please give me one pack of meat",
+          "Please cut the meat"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "སྒོར་མོ་ག་ཚོད་རེད།",
+        "options": [
+          "How much does it cost?",
+          "How much do you have?",
+          "How many items are there?"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "ང་ལ་ལེན་གྱི་ཡོད",
+        "options": [
+          "I already paid",
+          "I want to pay",
+          "I have change"
+        ],
+        "correctAnswerIndex": 1
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "དེ་ལ་སྒོར་མོ་གཉིས་རེད།",
+        "options": [
+          "It is two rupees",
+          "That’s two bags",
+          "It weighs two kilograms"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "ཤོག་བཤེར་ཞུགས་ཨིན།",
+        "options": [
+          "The receipt is included",
+          "The receipt is missing",
+          "It’s a plastic bag"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "ང་ལ་ཆུ་ཤོག་གཉིས་དགོས",
+        "options": [
+          "I need two bottles of water",
+          "I need two cups of tea",
+          "I need water and soap"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "འདི་ཁ་ལག་ཡིན་ན?",
+        "options": [
+          "Is this food?",
+          "Is this yours?",
+          "Is this enough?"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "དགའ་གནང་བ་ལགས།",
+        "options": [
+          "Please come again",
+          "Please come in",
+          "Please give it to me"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "ཁྱེད་ལ་ཕུར་ལེན་ཡོད་པས།",
+        "options": [
+          "Do you accept card?",
+          "Do you have change?",
+          "Do you want to pay now?"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "དེ་གཉིས་བཙོས་རོགས།",
+        "options": [
+          "Pack two of those, please",
+          "Give me a discount, please",
+          "Weigh two of those, please"
+        ],
+        "correctAnswerIndex": 0
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "དེ་གི་གཞི་ནས་མེད",
+        "options": [
+          "There are no vegetables",
+          "That one is not fresh",
+          "That is not available"
+        ],
+        "correctAnswerIndex": 2
+      },
+      {
+        "type": "sentence_meaning",
+        "tibetanText": "ངས་ཐུགས་རྗེ་ཆེ་ཞུ།",
+        "options": [
+          "Thank you very much",
+          "I’m sorry",
+          "You are welcome"
+        ],
+        "correctAnswerIndex": 0
+      }
+    ],
+    "metadata": {
+      "totalExercises": 15,
+      "exerciseTypes": [
+        "sentence_meaning"
+      ],
+      "contentMix": {
+        "greetings": 1,
+        "food_items": 6,
+        "payment": 4,
+        "shopping_phrases": 4
+      },
+      "estimatedTime": "15-20 minutes",
+      "difficulty": "intermediate",
+      "skillsLearned": [
+        "Identifying and requesting grocery items",
+        "Handling pricing and quantity in Tibetan",
+        "Polite expressions in a shopping context",
+        "Understanding basic grocery store interactions"
+      ],
+      "prereq": "Level 3.2 completion",
+      "topicsIntroduced": [
+        "Food items: འབྲས (rice), ཤ (meat), གཞི་ནས (vegetables), ཆུ (water)",
+        "Quantities: གཉིས (two), གཅིག (one), འདོན (pack)",
+        "Shopping actions: ཁྱེར (carry), བཙོས (pack), བསྒྲགས (announce)",
+        "Payments: སྒོར་མོ (money), ལེན (pay), ཕུར་ལེན (card)"
+      ]
+    }
+  }
+  
