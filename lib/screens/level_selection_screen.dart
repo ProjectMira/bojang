@@ -186,37 +186,28 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
       itemCount: level.sublevels.length,
       itemBuilder: (context, index) {
         final sublevel = level.sublevels[index];
-        final isLocked = index > 0;
+        final isLocked = false;
 
         return Hero(
           tag: 'sublevel_${sublevel.level}_${sublevel.name}',
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: isLocked
-                  ? () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Complete previous levels to unlock!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    }
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => QuizScreen(topicFilePath: sublevel.path),
-                        ),
-                      );
-                    },
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuizScreen(topicFilePath: sublevel.path),
+                  ),
+                );
+              },
               borderRadius: BorderRadius.circular(16),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isLocked ? Colors.grey[200] : color.withOpacity(0.1),
+                  color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isLocked ? Colors.grey[400]! : color,
+                    color: color,
                     width: 2,
                   ),
                 ),
@@ -224,8 +215,8 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      isLocked ? Icons.lock : Icons.play_circle_fill,
-                      color: isLocked ? Colors.grey[400] : color,
+                      Icons.play_circle_fill,
+                      color: color,
                       size: 32,
                     ),
                     const SizedBox(height: 8),
@@ -234,7 +225,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                       style: GoogleFonts.kalam(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: isLocked ? Colors.grey[600] : color,
+                        color: color,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -243,7 +234,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                       textAlign: TextAlign.center,
                       style: GoogleFonts.kalam(
                         fontSize: 14,
-                        color: isLocked ? Colors.grey[600] : color,
+                        color: color,
                         fontStyle: FontStyle.italic,
                       ),
                       maxLines: 2,
