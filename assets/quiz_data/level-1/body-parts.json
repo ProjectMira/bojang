@@ -1,233 +1,233 @@
 {
-    "level": 1.7,
-    "title": "Body Parts",
-    "description": "Learn Tibetan names for body parts and anatomy",
-    "exercises": [
-      {
-        "type": "word_meaning",
-        "tibetanText": "ལུས",
-        "options": [
-          "Body",
-          "Head",
-          "Soul"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "མགོ",
-        "options": [
-          "Neck",
-          "Head",
-          "Face"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཞལ",
-        "options": [
-          "Head",
-          "Face",
-          "Forehead"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "མིག",
-        "options": [
-          "Nose",
-          "Eye",
-          "Ear"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "རྣ",
-        "options": [
-          "Eye",
-          "Ear",
-          "Mouth"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "སྣ",
-        "options": [
-          "Nose",
-          "Mouth",
-          "Chin"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཁ",
-        "options": [
-          "Nose",
-          "Mouth",
-          "Throat"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ལྕེ",
-        "options": [
-          "Lip",
-          "Tongue",
-          "Tooth"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "སོ",
-        "options": [
-          "Tongue",
-          "Tooth",
-          "Gum"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "སྐྲ",
-        "options": [
-          "Hair",
-          "Beard",
-          "Mustache"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ལག",
-        "options": [
-          "Shoulder",
-          "Hand",
-          "Finger"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "རྐང་པ",
-        "options": [
-          "Leg",
-          "Foot",
-          "Knee"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "སྙིང",
-        "options": [
-          "Lung",
-          "Heart",
-          "Liver"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "གློ",
-        "options": [
-          "Heart",
-          "Lung",
-          "Kidney"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "མཆིན་པ",
-        "options": [
-          "Kidney",
-          "Liver",
-          "Spleen"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "རུས་པ",
-        "options": [
-          "Muscle",
-          "Bone",
-          "Joint"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "པགས་པ",
-        "options": [
-          "Fat",
-          "Skin",
-          "Hair"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཁྲག",
-        "options": [
-          "Water",
-          "Blood",
-          "Sweat"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "མཐོང",
-        "options": [
-          "See",
-          "Hear",
-          "Feel"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཐོས",
-        "options": [
-          "See",
-          "Hear",
-          "Smell"
-        ],
-        "correctAnswerIndex": 1
-      }
-    ],
-    "metadata": {
-      "totalExercises": 20,
-      "exerciseTypes": [
-        "word_meaning"
+  "level": 1.7,
+  "title": "Body Parts",
+  "description": "Learn Tibetan names for body parts and anatomy",
+  "exercises": [
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལུས",
+      "options": [
+        "Body",
+        "Head",
+        "Arm"
       ],
-      "contentMix": {
-        "meaningfulWords": 20
-      },
-      "estimatedTime": "10-12 minutes",
-      "difficulty": "beginner-intermediate",
-      "skillsLearned": [
-        "Body part vocabulary in Tibetan",
-        "Internal organ names",
-        "Facial features terminology",
-        "Limb and joint vocabulary",
-        "Body fluids and substances",
-        "Five senses terminology"
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མགོ",
+      "options": [
+        "Neck",
+        "Head",
+        "Face"
       ],
-      "prereq": "Level 2 completion",
-      "vocabularyIntroduced": [
-        "ལུས (body)", "མགོ (head)", "ཞལ (face)", "མིག (eye)", "རྣ (ear)",
-        "སྣ (nose)", "ཁ (mouth)", "ལྕེ (tongue)", "སོ (tooth)", "སྐྲ (hair)",
-        "ལག (hand)", "རྐང་པ (foot)", "སྙིང (heart)", "གློ (lung)", "མཆིན་པ (liver)",
-        "རུས་པ (bone)", "པགས་པ (skin)", "ཁྲག (blood)", "མཐོང (see)", "ཐོས (hear)"
-      ]
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཞལ",
+      "options": [
+        "Head",
+        "Face",
+        "Forehead"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མིག",
+      "options": [
+        "Nose",
+        "Eye",
+        "Ear"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྣ",
+      "options": [
+        "Eye",
+        "Ear",
+        "Mouth"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྣ",
+      "options": [
+        "Nose",
+        "Mouth",
+        "Chin"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁ",
+      "options": [
+        "Nose",
+        "Mouth",
+        "Throat"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལྕེ",
+      "options": [
+        "Lip",
+        "Tongue",
+        "Tooth"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སོ",
+      "options": [
+        "Tongue",
+        "Tooth",
+        "Gum"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྐྲ",
+      "options": [
+        "Hair",
+        "Beard",
+        "Mustache"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལག",
+      "options": [
+        "Shoulder",
+        "Hand",
+        "Finger"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྐང་པ",
+      "options": [
+        "Leg",
+        "Foot",
+        "Knee"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྙིང",
+      "options": [
+        "Lung",
+        "Heart",
+        "Liver"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གློ",
+      "options": [
+        "Heart",
+        "Lung",
+        "Kidney"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མཆིན་པ",
+      "options": [
+        "Kidney",
+        "Liver",
+        "Spleen"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རུས་པ",
+      "options": [
+        "Muscle",
+        "Bone",
+        "Joint"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "པགས་པ",
+      "options": [
+        "Fat",
+        "Skin",
+        "Hair"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྲག",
+      "options": [
+        "Saliva",
+        "Blood",
+        "Sweat"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མཐོང",
+      "options": [
+        "See",
+        "Eye",
+        "Eyelid"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཐོས",
+      "options": [
+        "Ear",
+        "Hear",
+        "Temple"
+      ],
+      "correctAnswerIndex": 1
     }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": [
+      "word_meaning"
+    ],
+    "contentMix": {
+      "meaningfulWords": 20
+    },
+    "estimatedTime": "10-12 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "Body part vocabulary in Tibetan",
+      "Internal organ names",
+      "Facial features terminology",
+      "Limb and joint vocabulary",
+      "Body fluids and substances",
+      "Five senses terminology"
+    ],
+    "prereq": "Level 2 completion",
+    "vocabularyIntroduced": [
+      "ལུས (body)", "མགོ (head)", "ཞལ (face)", "མིག (eye)", "རྣ (ear)",
+      "སྣ (nose)", "ཁ (mouth)", "ལྕེ (tongue)", "སོ (tooth)", "སྐྲ (hair)",
+      "ལག (hand)", "རྐང་པ (foot)", "སྙིང (heart)", "གློ (lung)", "མཆིན་པ (liver)",
+      "རུས་པ (bone)", "པགས་པ (skin)", "ཁྲག (blood)", "མཐོང (see)", "ཐོས (hear)"
+    ]
   }
+}
