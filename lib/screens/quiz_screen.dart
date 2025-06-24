@@ -92,7 +92,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       print('Successfully loaded ${questions.length} questions');
       
       // Shuffle the questions for variety
-      questions.shuffle();
+      // questions.shuffle();
       return questions;
     } catch (e) {
       print('Error loading questions from ${widget.topicFilePath}: $e');
