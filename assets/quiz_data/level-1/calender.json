@@ -45,6 +45,16 @@
     },
     {
       "type": "word_meaning",
+      "tibetanText": "གཟའ་ཕུར་བུ",
+      "options": [
+        "Thursday",
+        "Saturday",
+        "Wednesday"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
       "tibetanText": "གཟའ་ཟླ་བ",
       "options": [
         "Wednesday",
@@ -52,16 +62,6 @@
         "Monday"
       ],
       "correctAnswerIndex": 2
-    },
-    {
-      "type": "word_meaning",
-      "tibetanText": "གཟའ་མིག་དམར",
-      "options": [
-        "Monday",
-        "Tuesday",
-        "Thursday"
-      ],
-      "correctAnswerIndex": 1
     },
     {
       "type": "word_meaning",
@@ -75,13 +75,13 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཟའ་ཕུར་བུ",
+      "tibetanText": "གཟའ་མིག་དམར",
       "options": [
-        "Thursday",
-        "Saturday",
-        "Wednesday"
+        "Monday",
+        "Tuesday",
+        "Thursday"
       ],
-      "correctAnswerIndex": 0
+      "correctAnswerIndex": 1
     },
     {
       "type": "word_meaning",
