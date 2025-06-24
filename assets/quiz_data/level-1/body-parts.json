@@ -45,16 +45,6 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྣ",
-      "options": [
-        "Eye",
-        "Ear",
-        "Mouth"
-      ],
-      "correctAnswerIndex": 1
-    },
-    {
-      "type": "word_meaning",
       "tibetanText": "སྣ",
       "options": [
         "Nose",
@@ -70,6 +60,36 @@
         "Nose",
         "Mouth",
         "Throat"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྣ",
+      "options": [
+        "Eye",
+        "Ear",
+        "Mouth"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལག",
+      "options": [
+        "Shoulder",
+        "Hand",
+        "Finger"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྐང་པ",
+      "options": [
+        "Leg",
+        "Foot",
+        "Knee"
       ],
       "correctAnswerIndex": 1
     },
@@ -102,26 +122,6 @@
         "Mustache"
       ],
       "correctAnswerIndex": 0
-    },
-    {
-      "type": "word_meaning",
-      "tibetanText": "ལག",
-      "options": [
-        "Shoulder",
-        "Hand",
-        "Finger"
-      ],
-      "correctAnswerIndex": 1
-    },
-    {
-      "type": "word_meaning",
-      "tibetanText": "རྐང་པ",
-      "options": [
-        "Leg",
-        "Foot",
-        "Knee"
-      ],
-      "correctAnswerIndex": 1
     },
     {
       "type": "word_meaning",
@@ -185,21 +185,21 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མཐོང",
+      "tibetanText": "མཛུབ",
       "options": [
-        "See",
-        "Eye",
-        "Eyelid"
+        "Finger",
+        "Thumb",
+        "Palm"
       ],
       "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཐོས",
+      "tibetanText": "སེན་མོ",
       "options": [
-        "Ear",
-        "Hear",
-        "Temple"
+        "Knuckle",
+        "Nail",
+        "Wrist"
       ],
       "correctAnswerIndex": 1
     }
