@@ -1,233 +1,233 @@
 {
-    "level": 1.6,
-    "title": "Tibetan Calendar & Celebrations",
-    "description": "Learn Tibetan calendar system, days of the week, planetary names, and important festivals",
-    "exercises": [
-      {
-        "type": "word_meaning",
-        "tibetanText": "གཟའ་ཉི་མ",
-        "options": [
-          "Sunday",
-          "Monday",
-          "Tuesday"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "གཟའ་ཟླ་བ",
-        "options": [
-          "Wednesday",
-          "Sunday",
-          "Monday"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "གཟའ་མིག་དམར",
-        "options": [
-          "Monday",
-          "Tuesday",
-          "Thursday"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "གཟའ་ལྷག་པ",
-        "options": [
-          "Friday",
-          "Tuesday",
-          "Wednesday"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "གཟའ་ཕུར་བུ",
-        "options": [
-          "Thursday",
-          "Saturday",
-          "Wednesday"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "གཟའ་པ་སངས",
-        "options": [
-          "Sunday",
-          "Thursday",
-          "Friday"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "གཟའ་སྤེན་པ",
-        "options": [
-          "Friday",
-          "Saturday",
-          "Monday"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཉི་མ",
-        "options": [
-          "Star",
-          "Moon",
-          "Sun"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཟླ་བ",
-        "options": [
-          "Moon",
-          "Sun",
-          "Earth"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "མིག་དམར",
-        "options": [
-          "Jupiter",
-          "Mars",
-          "Venus"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཕུར་བུ",
-        "options": [
-          "Jupiter",
-          "Venus",
-          "Mercury"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "བྱི་བ",
-        "options": [
-          "Rat",
-          "Ox",
-          "Tiger"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "གླང",
-        "options": [
-          "Rabbit",
-          "Ox",
-          "Rat"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "སྟག",
-        "options": [
-          "Dragon",
-          "Ox",
-          "Tiger"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "འབྲུག",
-        "options": [
-          "Horse",
-          "Dragon",
-          "Rabbit"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ལོ་གསར",
-        "options": [
-          "New Year",
-          "Buddha Day",
-          "Dharma Day"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ས་ག",
-        "options": [
-          "Ganden Day",
-          "Buddha Day",
-          "New Year"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ཟླ",
-        "options": [
-          "Month",
-          "Day",
-          "Year"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "ལོ",
-        "options": [
-          "Week",
-          "Year",
-          "Month"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "word_meaning",
-        "tibetanText": "དུས་ཚོད",
-        "options": [
-          "Week",
-          "Day",
-          "Month"
-        ],
-        "correctAnswerIndex": 0
-      }
-    ],
-    "metadata": {
-      "totalExercises": 20,
-      "exerciseTypes": [
-        "word_meaning"
+  "level": 1.6,
+  "title": "Tibetan Calendar & Celebrations",
+  "description": "Learn Tibetan calendar system, days of the week, planetary names, and important festivals",
+  "exercises": [
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཟླ",
+      "options": [
+        "Month",
+        "Day",
+        "Year"
       ],
-      "contentMix": {
-        "meaningfulWords": 20
-      },
-      "estimatedTime": "10-12 minutes",
-      "difficulty": "beginner-intermediate",
-      "skillsLearned": [
-        "Tibetan days of the week",
-        "Planetary names and astronomy",
-        "12-year animal cycle",
-        "Tibetan festivals and celebrations",
-        "Calendar and time expressions"
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལོ",
+      "options": [
+        "Week",
+        "Year",
+        "Month"
       ],
-      "prereq": "Level 2.2 completion",
-      "vocabularyIntroduced": [
-        "གཟའ་ཉི་མ (Sunday)", "གཟའ་ཟླ་བ (Monday)", "གཟའ་མིག་དམར (Tuesday)", "གཟའ་ལྷག་པ (Wednesday)",
-        "གཟའ་ཕུར་བུ (Thursday)", "གཟའ་པ་སངས (Friday)", "གཟའ་སྤེན་པ (Saturday)",
-        "ཉི་མ (sun)", "ཟླ་བ (moon)", "མིག་དམར (Mars)", "ཕུར་བུ (Jupiter)",
-        "བྱི་བ (rat)", "གླང (ox)", "སྟག (tiger)", "འབྲུག (dragon)",
-        "ལོ་གསར (New Year)", "ས་ག (Buddha Day)", "ཟླ (month)", "ལོ (year)", "དུས་ཚོད (week)"
-      ]
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དུས་ཚོད",
+      "options": [
+        "Week",
+        "Day",
+        "Month"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཟའ་ཉི་མ",
+      "options": [
+        "Sunday",
+        "Monday",
+        "Tuesday"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཟའ་ཟླ་བ",
+      "options": [
+        "Wednesday",
+        "Sunday",
+        "Monday"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཟའ་མིག་དམར",
+      "options": [
+        "Monday",
+        "Tuesday",
+        "Thursday"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཟའ་ལྷག་པ",
+      "options": [
+        "Friday",
+        "Tuesday",
+        "Wednesday"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཟའ་ཕུར་བུ",
+      "options": [
+        "Thursday",
+        "Saturday",
+        "Wednesday"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཟའ་པ་སངས",
+      "options": [
+        "Sunday",
+        "Thursday",
+        "Friday"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཟའ་སྤེན་པ",
+      "options": [
+        "Friday",
+        "Saturday",
+        "Monday"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉི་མ",
+      "options": [
+        "Star",
+        "Moon",
+        "Sun"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཟླ་བ",
+      "options": [
+        "Moon",
+        "Sun",
+        "Earth"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མིག་དམར",
+      "options": [
+        "Jupiter",
+        "Mars",
+        "Venus"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཕུར་བུ",
+      "options": [
+        "Jupiter",
+        "Venus",
+        "Mercury"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལོ་གསར",
+      "options": [
+        "New Year",
+        "Buddha Day",
+        "Dharma Day"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ས་ག",
+      "options": [
+        "Ganden Day",
+        "Buddha Day",
+        "New Year"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བྱི་བ",
+      "options": [
+        "Rat",
+        "Ox",
+        "Tiger"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གླང",
+      "options": [
+        "Rabbit",
+        "Ox",
+        "Rat"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྟག",
+      "options": [
+        "Dragon",
+        "Ox",
+        "Tiger"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འབྲུག",
+      "options": [
+        "Horse",
+        "Dragon",
+        "Rabbit"
+      ],
+      "correctAnswerIndex": 1
     }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": [
+      "word_meaning"
+    ],
+    "contentMix": {
+      "meaningfulWords": 20
+    },
+    "estimatedTime": "10-12 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "Tibetan days of the week",
+      "Planetary names and astronomy",
+      "12-year animal cycle",
+      "Tibetan festivals and celebrations",
+      "Calendar and time expressions"
+    ],
+    "prereq": "Level 2.2 completion",
+    "vocabularyIntroduced": [
+      "གཟའ་ཉི་མ (Sunday)", "གཟའ་ཟླ་བ (Monday)", "གཟའ་མིག་དམར (Tuesday)", "གཟའ་ལྷག་པ (Wednesday)",
+      "གཟའ་ཕུར་བུ (Thursday)", "གཟའ་པ་སངས (Friday)", "གཟའ་སྤེན་པ (Saturday)",
+      "ཉི་མ (sun)", "ཟླ་བ (moon)", "མིག་དམར (Mars)", "ཕུར་བུ (Jupiter)",
+      "བྱི་བ (rat)", "གླང (ox)", "སྟག (tiger)", "འབྲུག (dragon)",
+      "ལོ་གསར (New Year)", "ས་ག (Buddha Day)", "ཟླ (month)", "ལོ (year)", "དུས་ཚོད (week)"
+    ]
   }
+}
