@@ -5,7 +5,7 @@
     "exercises": [
       {
         "type": "word_meaning",
-        "tibetanText": "ཁྱིམ",
+        "tibetanText": "ཁང་པ",
         "options": [
           "Room",
           "House",
@@ -15,7 +15,7 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "རྐང་ཁྲི",
+        "tibetanText": "རྐུབ་ཀྱག",
         "options": [
           "Table",
           "Chair",
@@ -25,7 +25,7 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "ཁྲི",
+        "tibetanText": "ཅོག་ཙེ",
         "options": [
           "Chair",
           "Table",
@@ -65,7 +65,7 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "མར་མེ",
+        "tibetanText": "ཞུ་མར",
         "options": [
           "Candle",
           "Lamp",
@@ -75,7 +75,7 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "སྟན",
+        "tibetanText": "ས་གདན",
         "options": [
           "Blanket",
           "Carpet",
@@ -95,7 +95,7 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "མགོ་སྟེགས",
+        "tibetanText": "སྔས་མགོ",
         "options": [
           "Blanket",
           "Pillow",
@@ -105,7 +105,7 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "ཚོན་ཁྲ",
+        "tibetanText": "ཤེལ་སྒོ",
         "options": [
           "Mirror",
           "Picture",
@@ -125,7 +125,7 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "གཡུགས",
+        "tibetanText": "རྫ་མ",
         "options": [
           "Pot",
           "Pan",
@@ -135,7 +135,7 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "ཕོར",
+        "tibetanText": "ཕོར་པ",
         "options": [
           "Cup",
           "Bowl",
@@ -175,7 +175,7 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "བློན་ཆེན",
+        "tibetanText": "བརྙན་འཕྲིན",
         "options": [
           "Computer",
           "Television",
@@ -195,7 +195,7 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "རྭ་བ",
+        "tibetanText": "ཕྱགས་མ",
         "options": [
           "Broom",
           "Brush",
