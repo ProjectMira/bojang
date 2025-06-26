@@ -5,23 +5,13 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "ཀླད",
+      "tibetanText": "ཀླད་ཀོར",
       "options": [
         "chik (One)",
-        "le (Zero)",
+        "lekor (Zero)",
         "chu (Ten)"
       ],
       "correctAnswerIndex": 1
-    },
-    {
-      "type": "word_meaning",
-      "tibetanText": "གཅིག",
-      "options": [
-        "chik (One)",
-        "nyi (Two)",
-        "sum (Three)"
-      ],
-      "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
@@ -30,6 +20,16 @@
         "chik (One)",
         "sum (Three)",
         "nyi (Two)"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བཞི",
+      "options": [
+        "sum (Three)",
+        "nga (Five)",
+        "zhi (Four)"
       ],
       "correctAnswerIndex": 2
     },
@@ -45,13 +45,13 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བཞི",
+      "tibetanText": "གཅིག",
       "options": [
-        "sum (Three)",
-        "nga (Five)",
-        "zhi (Four)"
+        "chik (One)",
+        "nyi (Two)",
+        "sum (Three)"
       ],
-      "correctAnswerIndex": 2
+      "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
@@ -65,16 +65,6 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དྲུག",
-      "options": [
-        "dun (Seven)",
-        "nga (Five)",
-        "druk (Six)"
-      ],
-      "correctAnswerIndex": 2
-    },
-    {
-      "type": "word_meaning",
       "tibetanText": "བདུན",
       "options": [
         "druk (Six)",
@@ -82,6 +72,16 @@
         "gye (Eight)"
       ],
       "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བཅོ་ལྔ",
+      "options": [
+        "chu zhi (Fourteen)",
+        "chu druk (Sixteen)",
+        "cho nga (Fifteen)"
+      ],
+      "correctAnswerIndex": 2
     },
     {
       "type": "word_meaning",
@@ -115,21 +115,21 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བཅོ་ལྔ",
-      "options": [
-        "chu zhi (Fourteen)",
-        "chu druk (Sixteen)",
-        "cho nga (Fifteen)"
-      ],
-      "correctAnswerIndex": 2
-    },
-    {
-      "type": "word_meaning",
       "tibetanText": "ཉི་ཤུ",
       "options": [
         "nyi shu (Twenty)",
         "cho nga (Fifteen)",
         "nyer nga (Twenty-five)"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལྔ་བཅུ",
+      "options": [
+        "nga chu (Fifty)",
+        "zhi chu (Forty)",
+        "druk chu (Sixty)"
       ],
       "correctAnswerIndex": 0
     },
@@ -145,11 +145,11 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལྔ་བཅུ",
+      "tibetanText": "སྟོང",
       "options": [
-        "nga chu (Fifty)",
-        "zhi chu (Forty)",
-        "druk chu (Sixty)"
+        "tong (Thousand)",
+        "gya (Hundred)",
+        "tri (Ten thousand)"
       ],
       "correctAnswerIndex": 0
     },
@@ -165,13 +165,13 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྟོང",
+      "tibetanText": "དྲུག",
       "options": [
-        "tong (Thousand)",
-        "gya (Hundred)",
-        "tri (Ten thousand)"
+        "dun (Seven)",
+        "nga (Five)",
+        "druk (Six)"
       ],
-      "correctAnswerIndex": 0
+      "correctAnswerIndex": 2
     },
     {
       "type": "word_meaning",
