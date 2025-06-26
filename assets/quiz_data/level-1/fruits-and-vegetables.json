@@ -85,13 +85,13 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཆུ་ཀུ་བ",
+      "tibetanText": "ཙོང",
       "options": [
-        "Melon",
-        "Cucumber",
-        "Watermelon"
+        "Onion",
+        "Pepper",
+        "Tomato"
       ],
-      "correctAnswerIndex": 2
+      "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
