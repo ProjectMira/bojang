@@ -15,16 +15,6 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཚོད",
-      "options": [
-        "Fruit",
-        "Vegetable",
-        "Grain"
-      ],
-      "correctAnswerIndex": 1
-    },
-    {
-      "type": "word_meaning",
       "tibetanText": "རྐུ་ཤིང",
       "options": [
         "Orange",
@@ -55,36 +45,6 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཆུ་ཚོད",
-      "options": [
-        "Melon",
-        "Cucumber",
-        "Watermelon"
-      ],
-      "correctAnswerIndex": 2
-    },
-    {
-      "type": "word_meaning",
-      "tibetanText": "རྒུན་འབྲུམ",
-      "options": [
-        "Raisins",
-        "Grapes",
-        "Berries"
-      ],
-      "correctAnswerIndex": 1
-    },
-    {
-      "type": "word_meaning",
-      "tibetanText": "བ་ན་ན",
-      "options": [
-        "Mango",
-        "Banana",
-        "Orange"
-      ],
-      "correctAnswerIndex": 1
-    },
-    {
-      "type": "word_meaning",
       "tibetanText": "སེར་ཕྲུག",
       "options": [
         "Lemon",
@@ -105,23 +65,53 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གོ་ལ",
+      "tibetanText": "བ་ན་ན",
       "options": [
-        "Cabbage",
-        "Lettuce",
-        "Spinach"
+        "Mango",
+        "Banana",
+        "Orange"
       ],
-      "correctAnswerIndex": 0
+      "correctAnswerIndex": 1
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལ་ཕུག",
+      "tibetanText": "རྒུན་འབྲུམ",
       "options": [
-        "Carrot",
-        "Radish",
-        "Turnip"
+        "Raisins",
+        "Grapes",
+        "Berries"
       ],
       "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཆུ་ཚོད",
+      "options": [
+        "Melon",
+        "Cucumber",
+        "Watermelon"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཚོད",
+      "options": [
+        "Fruit",
+        "Vegetable",
+        "Grain"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རེ་སྐུད",
+      "options": [
+        "Potato",
+        "Onion",
+        "Garlic"
+      ],
+      "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
@@ -135,11 +125,21 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རེ་སྐུད",
+      "tibetanText": "ལ་ཕུག",
       "options": [
-        "Potato",
-        "Onion",
-        "Garlic"
+        "Carrot",
+        "Radish",
+        "Turnip"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གོ་ལ",
+      "options": [
+        "Cabbage",
+        "Lettuce",
+        "Spinach"
       ],
       "correctAnswerIndex": 0
     },
