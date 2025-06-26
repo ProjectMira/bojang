@@ -145,11 +145,11 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "ཇ་ཕོར",
+        "tibetanText": "སྒོ་ལྕགས",
         "options": [
-          "Water glass",
-          "Tea cup",
-          "Wine cup"
+          "Key",
+          "Lock",
+          "Window"
         ],
         "correctAnswerIndex": 1
       },
