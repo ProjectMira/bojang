@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྐུ་ཤིང",
+      "tibetanText": "ཀུ་ཤུ",
       "options": [
         "Orange",
         "Apple",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལི་ཤི",
+      "tibetanText": "ལི",
       "options": [
         "Apple",
         "Pear",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སེར་ཕྲུག",
+      "tibetanText": "ཚ་ལུ་མ",
       "options": [
         "Lemon",
         "Orange",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཅང་ཤེལ",
+      "tibetanText": "ལེ་མོན",
       "options": [
         "Orange",
         "Lemon",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བ་ན་ན",
+      "tibetanText": "ཀེ་ལ",
       "options": [
         "Mango",
         "Banana",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྒུན་འབྲུམ",
+      "tibetanText": "གུན་དྲུམ",
       "options": [
         "Raisins",
         "Grapes",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཆུ་ཚོད",
+      "tibetanText": "ཆུ་བཙག",
       "options": [
         "Melon",
         "Cucumber",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རེ་སྐུད",
+      "tibetanText": "འོ་མ",
       "options": [
         "Potato",
         "Onion",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཨུ་སུ",
+      "tibetanText": "ཨ་ལུ",
       "options": [
         "Radish",
         "Carrot",
@@ -135,7 +135,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གོ་ལ",
+      "tibetanText": "པེ་ཏྲ",
       "options": [
         "Cabbage",
         "Lettuce",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རེ་མ",
+      "tibetanText": "གོ་ལེ",
       "options": [
         "Tomato",
         "Pepper",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཏ་ལི",
+      "tibetanText": "སི་པེན",
       "options": [
         "Tomato",
         "Chili",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མངར་བ",
+      "tibetanText": "མངར་མོ",
       "options": [
         "Sweet",
         "Sour",
@@ -185,7 +185,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྐྱུར་བ",
+      "tibetanText": "སྐྱུར་མོ",
       "options": [
         "Sweet",
         "Sour",
@@ -195,7 +195,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཚ་བ",
+      "tibetanText": "ཚ་མོ",
       "options": [
         "Cold",
         "Hot/Spicy",
