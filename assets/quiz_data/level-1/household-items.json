@@ -65,13 +65,13 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "ཞུ་མར",
+        "tibetanText": "ཡང་ལཱ",
         "options": [
           "Candle",
           "Lamp",
           "Light"
         ],
-        "correctAnswerIndex": 1
+        "correctAnswerIndex": 0
       },
       {
         "type": "word_meaning",
@@ -85,11 +85,11 @@
       },
       {
         "type": "word_meaning",
-        "tibetanText": "གདན",
+        "tibetanText": "རླུང་འཁོར་",
         "options": [
-          "Cushion",
+          "Fan",
           "Blanket",
-          "Sheet"
+          "Phone"
         ],
         "correctAnswerIndex": 0
       },
