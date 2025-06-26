@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "འབྲས་བུ",
+      "tibetanText": "ཤིང་ཏོག",
       "options": [
         "Vegetable",
         "Fruit",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལེ་མོན",
+      "tibetanText": "ལིམ་བུ",
       "options": [
         "Orange",
         "Lemon",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཀེ་ལ",
+      "tibetanText": "ངང་ལག་",
       "options": [
         "Mango",
         "Banana",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གུན་དྲུམ",
+      "tibetanText": "རྒུན་འབྲུམ",
       "options": [
         "Raisins",
         "Grapes",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཆུ་བཙག",
+      "tibetanText": "ཆུ་ཀུ་བ",
       "options": [
         "Melon",
         "Cucumber",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཚོད",
+      "tibetanText": "ཚལ",
       "options": [
         "Fruit",
         "Vegetable",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འོ་མ",
+      "tibetanText": "ཞོག་ཁོག",
       "options": [
         "Potato",
         "Onion",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གོ་ལེ",
+      "tibetanText": "ཀྲོ་མ་ཀྲུ",
       "options": [
         "Tomato",
         "Pepper",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སི་པེན",
+      "tibetanText": "སི་པན",
       "options": [
         "Tomato",
         "Chili",
@@ -222,7 +222,7 @@
     ],
     "prereq": "Level 1.3 completion",
     "vocabularyIntroduced": [
-      "འབྲས་བུ (fruit)", "ཚོད (vegetable)", "རྐུ་ཤིང (apple)", "ལི་ཤི (pear)", "ཁམ་བུ (peach)",
+      "ཤིང་ཏོག (fruit)", "ཚལ (vegetable)", "རྐུ་ཤིང (apple)", "ལི་ཤི (pear)", "ཁམ་བུ (peach)",
       "ཆུ་ཚོད (watermelon)", "རྒུན་འབྲུམ (grapes)", "བ་ན་ན (banana)", "སེར་ཕྲུག (orange)", "ཅང་ཤེལ (lemon)",
       "གོ་ལ (cabbage)", "ལ་ཕུག (radish)", "ཨུ་སུ (carrot)", "རེ་སྐུད (potato)", "སྒོག་པ (garlic)",
       "རེ་མ (tomato)", "ཏ་ལི (chili)", "མངར་བ (sweet)", "སྐྱུར་བ (sour)", "ཚ་བ (hot/spicy)"
