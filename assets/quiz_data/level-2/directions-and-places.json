@@ -3,31 +3,215 @@
   "title": "Directions and Places",
   "description": "Learn Tibetan words for directions and common places",
   "exercises": [
-    { "type": "word_meaning", "tibetanText": "གཡས", "options": ["Right", "Left", "Front"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གཡོན", "options": ["Left", "Right", "Back"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "མདུན", "options": ["Front", "Back", "Up"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "རྒྱབ", "options": ["Back", "Front", "Down"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཡར", "options": ["Up", "Down", "Inside"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "མར", "options": ["Down", "Up", "Outside"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ནང", "options": ["Inside", "Outside", "Near"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཕྱི", "options": ["Outside", "Inside", "Far"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཉེ", "options": ["Near", "Far", "Here"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཐག་རིང", "options": ["Far", "Near", "There"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "འདི", "options": ["Here", "There", "Home"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "དེ", "options": ["There", "Here", "School"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སློབ་གྲྭ", "options": ["School", "Home", "Market"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཁྱིམ", "options": ["Home", "School", "Hospital"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཚོང་ཁང", "options": ["Shop", "Market", "Monastery"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "དགོན་པ", "options": ["Monastery", "Hospital", "Shop"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སྨན་ཁང", "options": ["Hospital", "Monastery", "Park"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ལམ", "options": ["Road", "Bridge", "Park"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཟུར", "options": ["Corner", "Bridge", "Market"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ལྡུམ་ར", "options": ["Park", "Bridge", "Corner"], "correctAnswerIndex": 0 }
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཡས",
+      "options": [
+        "Left",
+        "Right",
+        "Front"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཡོན",
+      "options": [
+        "Left",
+        "Right",
+        "Back"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མདུན",
+      "options": [
+        "Back",
+        "Front",
+        "Up"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྒྱབ",
+      "options": [
+        "Front",
+        "Back",
+        "Down"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཡར",
+      "options": [
+        "Down",
+        "Inside",
+        "Up"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མར",
+      "options": [
+        "Up",
+        "Outside",
+        "Down"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ནང",
+      "options": [
+        "Outside",
+        "Near",
+        "Inside"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཕྱི",
+      "options": [
+        "Inside",
+        "Far",
+        "Outside"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉེ",
+      "options": [
+        "Far",
+        "Here",
+        "Near"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཐག་རིང",
+      "options": [
+        "Near",
+        "Far",
+        "There"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འདི",
+      "options": [
+        "There",
+        "Here",
+        "Home"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དེ",
+      "options": [
+        "Here",
+        "There",
+        "School"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སློབ་གྲྭ",
+      "options": [
+        "Home",
+        "Market",
+        "School"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྱིམ",
+      "options": [
+        "Home",
+        "School",
+        "Hospital"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཚོང་ཁང",
+      "options": [
+        "Market",
+        "Shop",
+        "Monastery"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དགོན་པ",
+      "options": [
+        "Hospital",
+        "Shop",
+        "Monastery"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྨན་ཁང",
+      "options": [
+        "Monastery",
+        "Park",
+        "Hospital"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལམ",
+      "options": [
+        "Bridge",
+        "Park",
+        "Road"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཟུར",
+      "options": [
+        "Bridge",
+        "Corner",
+        "Market"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལྡུམ་ར",
+      "options": [
+        "Bridge",
+        "Park",
+        "Corner"
+      ],
+      "correctAnswerIndex": 1
+    }
   ],
   "metadata": {
     "totalExercises": 20,
-    "exerciseTypes": ["word_meaning"],
-    "contentMix": {"meaningfulWords": 20},
+    "exerciseTypes": [
+      "word_meaning"
+    ],
+    "contentMix": {
+      "meaningfulWords": 20
+    },
     "estimatedTime": "10-15 minutes",
     "difficulty": "beginner-intermediate",
     "skillsLearned": [
@@ -39,10 +223,26 @@
     ],
     "prereq": "Level 2.8 completion",
     "vocabularyIntroduced": [
-      "གཡས (right)", "གཡོན (left)", "མདུན (front)", "རྒྱབ (back)", "ཡར (up)",
-      "མར (down)", "ནང (inside)", "ཕྱི (outside)", "ཉེ (near)", "ཐག་རིང (far)",
-      "འདི (here)", "དེ (there)", "སློབ་གྲྭ (school)", "ཁྱིམ (home)", "ཚོང་ཁང (shop)",
-      "དགོན་པ (monastery)", "སྲོང་ཁང (hospital)", "ལམ (road)", "ཟུར (corner)", "སྐད་འཕྲིན (park)"
+      "གཡས (right)",
+      "གཡོན (left)",
+      "མདུན (front)",
+      "རྒྱབ (back)",
+      "ཡར (up)",
+      "མར (down)",
+      "ནང (inside)",
+      "ཕྱི (outside)",
+      "ཉེ (near)",
+      "ཐག་རིང (far)",
+      "འདི (here)",
+      "དེ (there)",
+      "སློབ་གྲྭ (school)",
+      "ཁྱིམ (home)",
+      "ཚོང་ཁང (shop)",
+      "དགོན་པ (monastery)",
+      "སྲོང་ཁང (hospital)",
+      "ལམ (road)",
+      "ཟུར (corner)",
+      "སྐད་འཕྲིན (park)"
     ]
   }
-} 
+}
