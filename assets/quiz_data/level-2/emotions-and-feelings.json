@@ -5,14 +5,14 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "དགའ་པོ",
+      "tibetanText": "སྐྱིད་པོ",
       "options": ["Happy", "Sad", "Angry"],
       "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སེམས་ཁུར",
-      "options": ["Worried", "Excited", "Calm"],
+      "tibetanText": "སེམས་ཁྲལ",
+      "options": ["Worry", "Excited", "Calm"],
       "correctAnswerIndex": 0
     },
     {
@@ -29,19 +29,19 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འཇིགས་པ",
+      "tibetanText": "ཞེད་བ",
       "options": ["Afraid", "Excited", "Calm"],
       "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བསུན་པ",
+      "tibetanText": "ཕྲག་དོག",
       "options": ["Jealous", "Proud", "Shy"],
       "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྗེས་དགའ",
+      "tibetanText": "སྤོབས་པ",
       "options": ["Proud", "Jealous", "Calm"],
       "correctAnswerIndex": 0
     },
@@ -53,8 +53,8 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འདུག་སྐུལ",
-      "options": ["Encouraged", "Embarrassed", "Tired"],
+      "tibetanText": "སེམས་ཤུགས་སྤེལ་བ",
+      "options": ["Encourage", "Embarrassed", "Tired"],
       "correctAnswerIndex": 0
     },
     {
@@ -83,14 +83,8 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དགའ་སྟོན",
-      "options": ["Joyful", "Angry", "Worried"],
-      "correctAnswerIndex": 0
-    },
-    {
-      "type": "word_meaning",
-      "tibetanText": "འཁྲུགས་པ",
-      "options": ["Disturbed", "Calm", "Excited"],
+      "tibetanText": "དཀྲུག",
+      "options": ["Disturb", "Calm", "Excited"],
       "correctAnswerIndex": 0
     },
     {
@@ -101,26 +95,32 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འདུག་སྐུལ",
-      "options": ["Motivated", "Tired", "Lonely"],
+      "tibetanText": "རེ་བ",
+      "options": ["Hope", "Despair", "Confusion"],
       "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁོང་ཁྲོ",
-      "options": ["Angry", "Happy", "Surprised"],
+      "tibetanText": "ངོ་ཚ་བ",
+      "options": ["Shy", "Bold", "Angry"],
       "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བསུན་པ",
-      "options": ["Jealous", "Proud", "Shy"],
+      "tibetanText": "བློ་ཕམ",
+      "options": ["Disappointed", "Excited", "Proud"],
       "correctAnswerIndex": 0
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁྲེལ་བ",
-      "options": ["Embarrassed", "Excited", "Calm"],
+      "tibetanText": "སེམས་པ",
+      "options": ["Think", "Forget", "Sleep"],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཡིད་ཆེས",
+      "options": ["Trust", "Doubt", "Fear"],
       "correctAnswerIndex": 0
     }
   ],
