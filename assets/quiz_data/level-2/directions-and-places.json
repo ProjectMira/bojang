@@ -19,10 +19,10 @@
     { "type": "word_meaning", "tibetanText": "ཁྱིམ", "options": ["Home", "School", "Hospital"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "ཚོང་ཁང", "options": ["Shop", "Market", "Monastery"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "དགོན་པ", "options": ["Monastery", "Hospital", "Shop"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སྲོང་ཁང", "options": ["Hospital", "Monastery", "Park"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སྨན་ཁང", "options": ["Hospital", "Monastery", "Park"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "ལམ", "options": ["Road", "Bridge", "Park"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "ཟུར", "options": ["Corner", "Bridge", "Market"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སྐད་འཕྲིན", "options": ["Park", "Bridge", "Corner"], "correctAnswerIndex": 0 }
+    { "type": "word_meaning", "tibetanText": "ལྡུམ་ར", "options": ["Park", "Bridge", "Corner"], "correctAnswerIndex": 0 }
   ],
   "metadata": {
     "totalExercises": 20,
