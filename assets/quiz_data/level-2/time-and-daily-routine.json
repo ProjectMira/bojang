@@ -1,33 +1,217 @@
 {
-  "level": 2.10,
+  "level": 2.1,
   "title": "Time and Daily Routine",
   "description": "Learn Tibetan words for time and daily routine",
   "exercises": [
-    { "type": "word_meaning", "tibetanText": "ཞོགས་པ", "options": ["Morning", "Evening", "Night"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཉིན་དགུང", "options": ["Afternoon", "Morning", "Night"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "དགོང་དྲོ", "options": ["Evening", "Morning", "Afternoon"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "མཚན", "options": ["Night", "Morning", "Evening"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "དེ་རིང", "options": ["Today", "Tomorrow", "Yesterday"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སང་ཉིན", "options": ["Tomorrow", "Today", "Yesterday"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཁ་སང", "options": ["Yesterday", "Today", "Tomorrow"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཆུ་ཚོད", "options": ["Hour", "Minute", "Second"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སྐར་མ", "options": ["Minute", "Hour", "Second"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སྐར་ཆ", "options": ["Second", "Minute", "Hour"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "བདུན་ཕྲག", "options": ["Week", "Month", "Year"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཟླ", "options": ["Month", "Week", "Year"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ལོ", "options": ["Year", "Month", "Week"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "རྟག་པར", "options": ["Always", "Sometimes", "Never"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སྐབས་རེ", "options": ["Sometimes", "Always", "Never"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཡང་ན", "options": ["Or", "And", "But"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གང་རུང", "options": ["Any", "All", "None"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ད་ལྟ", "options": ["Now", "Soon", "Later"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "", "options": ["Never", "Always", "Sometimes"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གཟའ", "options": ["Day", "Night", "Week"], "correctAnswerIndex": 0 }
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཞོགས་པ",
+      "options": [
+        "Evening",
+        "Night",
+        "Morning"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉིན་དགུང",
+      "options": [
+        "Morning",
+        "Night",
+        "Afternoon"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དགོང་དྲོ",
+      "options": [
+        "Morning",
+        "Afternoon",
+        "Evening"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མཚན",
+      "options": [
+        "Morning",
+        "Evening",
+        "Night"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དེ་རིང",
+      "options": [
+        "Today",
+        "Tomorrow",
+        "Yesterday"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སང་ཉིན",
+      "options": [
+        "Today",
+        "Yesterday",
+        "Tomorrow"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁ་སང",
+      "options": [
+        "Yesterday",
+        "Today",
+        "Tomorrow"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཆུ་ཚོད",
+      "options": [
+        "Hour",
+        "Minute",
+        "Second"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྐར་མ",
+      "options": [
+        "Minute",
+        "Hour",
+        "Second"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྐར་ཆ",
+      "options": [
+        "Minute",
+        "Second",
+        "Hour"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བདུན་ཕྲག",
+      "options": [
+        "Week",
+        "Month",
+        "Year"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཟླ",
+      "options": [
+        "Month",
+        "Week",
+        "Year"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལོ",
+      "options": [
+        "Year",
+        "Month",
+        "Week"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྟག་པར",
+      "options": [
+        "Sometimes",
+        "Never",
+        "Always"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྐབས་རེ",
+      "options": [
+        "Sometimes",
+        "Always",
+        "Never"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཡང་ན",
+      "options": [
+        "And",
+        "But",
+        "Or"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གང་རུང",
+      "options": [
+        "All",
+        "None",
+        "Any"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ད་ལྟ",
+      "options": [
+        "Soon",
+        "Later",
+        "Now"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "",
+      "options": [
+        "Always",
+        "Sometimes",
+        "Never"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཟའ",
+      "options": [
+        "Night",
+        "Week",
+        "Day"
+      ],
+      "correctAnswerIndex": 2
+    }
   ],
   "metadata": {
     "totalExercises": 20,
-    "exerciseTypes": ["word_meaning"],
-    "contentMix": {"meaningfulWords": 20},
+    "exerciseTypes": [
+      "word_meaning"
+    ],
+    "contentMix": {
+      "meaningfulWords": 20
+    },
     "estimatedTime": "10-15 minutes",
     "difficulty": "beginner-intermediate",
     "skillsLearned": [
@@ -39,10 +223,26 @@
     ],
     "prereq": "Level 2.9 completion",
     "vocabularyIntroduced": [
-      "ཞོགས་ཀས (morning)", "ཉིན་གུང (afternoon)", "དགོང་དག (evening)", "མཚན (night)", "དེ་རིང (today)",
-      "སང་ཉིན (tomorrow)", "ཁ་སང (yesterday)", "ཆུ་ཚོད (hour)", "སྐར་མ (minute)", "སྐར་ཆ (second)",
-      "བདུན་ཕྲག (week)", "ཟླ (month)", "ལོ (year)", "དུས་རབས (always)", "འཛིན་སྐབས (sometimes)",
-      "ཡང་ན (or)", "གང་རུང (any)", "ད་ལྟ (now)", "མར་མེད (never)", "གཟའ (day)"
+      "ཞོགས་ཀས (morning)",
+      "ཉིན་གུང (afternoon)",
+      "དགོང་དག (evening)",
+      "མཚན (night)",
+      "དེ་རིང (today)",
+      "སང་ཉིན (tomorrow)",
+      "ཁ་སང (yesterday)",
+      "ཆུ་ཚོད (hour)",
+      "སྐར་མ (minute)",
+      "སྐར་ཆ (second)",
+      "བདུན་ཕྲག (week)",
+      "ཟླ (month)",
+      "ལོ (year)",
+      "དུས་རབས (always)",
+      "འཛིན་སྐབས (sometimes)",
+      "ཡང་ན (or)",
+      "གང་རུང (any)",
+      "ད་ལྟ (now)",
+      "མར་མེད (never)",
+      "གཟའ (day)"
     ]
   }
-} 
+}
