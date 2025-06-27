@@ -14,14 +14,14 @@
     { "type": "word_meaning", "tibetanText": "ཀློག", "options": ["Read", "Write", "Sleep"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "ཉལ", "options": ["Sleep", "Sit", "Stand"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "བཞུགས", "options": ["Sit", "Stand", "Walk"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ལུས་བཀོལ", "options": ["Stand", "Sit", "Run"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ལང་", "options": ["Stand", "Sit", "Run"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "འཛུལ", "options": ["Enter", "Exit", "Open"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཕྱིར་འཐོན", "options": ["Exit", "Enter", "Close"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "ཕྱིར་ཐོན", "options": ["Exit", "Enter", "Close"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "ཁ་ཕྱེ", "options": ["Open", "Close", "Buy"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "ཁ་རྒྱག", "options": ["Close", "Open", "Sell"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "ཉོ", "options": ["Buy", "Sell", "Give"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "བཙོང", "options": ["Sell", "Buy", "Take"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གཏོང", "options": ["Give", "Take", "Send"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "འཚོང", "options": ["Sell", "Buy", "Take"], "correctAnswerIndex": 0 },
+    { "type": "word_meaning", "tibetanText": "སྤྲོད་པ", "options": ["Give", "Take", "Send"], "correctAnswerIndex": 0 },
     { "type": "word_meaning", "tibetanText": "ལེན", "options": ["Take", "Give", "Send"], "correctAnswerIndex": 0 }
   ],
   "metadata": {
