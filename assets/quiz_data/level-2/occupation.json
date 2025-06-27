@@ -3,31 +3,205 @@
   "title": "Occupations",
   "description": "Learn Tibetan names for common occupations and professions",
   "exercises": [
-    { "type": "word_meaning", "tibetanText": "དགེ་རྒན", "options": ["Teacher", "Doctor", "Engineer"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སྨན་པ", "options": ["Doctor", "Nurse", "Farmer"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "རྩིས་པ", "options": ["Accountant", "Lawyer", "Cook"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "རི་མོ་མཁན", "options": ["Artist", "Builder", "Engineer"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཉེན་རྟོག་པ", "options": ["Police", "Driver", "Pilot"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "མ་བྱན་", "options": ["Chef", "Teacher", "Doctor"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཞིང་པ", "options": ["Farmer", "Cook", "Nurse"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གྲྭ་བ", "options": ["Monk", "Nun", "Judge"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཨ་ནེ", "options": ["Nun", "Monk", "Nurse"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "དཔེ་མཛོད་པ", "options": ["Librarian", "Accountant", "Cook"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "དམག་མི", "options": ["Soldier", "Police", "Driver"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཚོང་པ", "options": ["Merchant", "Farmer", "Cook"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཁྲིམས་དཔོན", "options": ["Judge", "Lawyer", "Accountant"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཚན་རིག་པ", "options": ["Scientist", "Teacher", "Counselor"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཁ་ལོ་པ", "options": ["Driver", "Engineer", "Retail Worker"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཉེན་སྲུང་པ", "options": ["Security Guard", "Nurse", "Designer"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ལོ་ཙཱ་བ", "options": ["Translator", "Photographer", "Leader"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གཞས་པ", "options": ["Singer", "Mechanic", "Pilot"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གནམ་གྲུའི་ཁ་ལོ་པ", "options": ["Pilot", "Journalist", "Cleaner"], "correctAnswerIndex": 0 }
-
+    {
+      "type": "word_meaning",
+      "tibetanText": "དགེ་རྒན",
+      "options": [
+        "Doctor",
+        "Engineer",
+        "Teacher"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྨན་པ",
+      "options": [
+        "Nurse",
+        "Doctor",
+        "Farmer"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྩིས་པ",
+      "options": [
+        "Lawyer",
+        "Cook",
+        "Accountant"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རི་མོ་མཁན",
+      "options": [
+        "Artist",
+        "Builder",
+        "Engineer"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉེན་རྟོག་པ",
+      "options": [
+        "Driver",
+        "Pilot",
+        "Police"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མ་བྱན་",
+      "options": [
+        "Teacher",
+        "Doctor",
+        "Chef"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཞིང་པ",
+      "options": [
+        "Cook",
+        "Nurse",
+        "Farmer"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གྲྭ་བ",
+      "options": [
+        "Nun",
+        "Monk",
+        "Judge"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཨ་ནེ",
+      "options": [
+        "Monk",
+        "Nun",
+        "Nurse"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དཔེ་མཛོད་པ",
+      "options": [
+        "Accountant",
+        "Cook",
+        "Librarian"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དམག་མི",
+      "options": [
+        "Police",
+        "Driver",
+        "Soldier"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཚོང་པ",
+      "options": [
+        "Farmer",
+        "Merchant",
+        "Cook"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྲིམས་དཔོན",
+      "options": [
+        "Judge",
+        "Lawyer",
+        "Accountant"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཚན་རིག་པ",
+      "options": [
+        "Teacher",
+        "Scientist",
+        "Counselor"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁ་ལོ་པ",
+      "options": [
+        "Driver",
+        "Engineer",
+        "Retail Worker"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉེན་སྲུང་པ",
+      "options": [
+        "Nurse",
+        "Designer",
+        "Security Guard"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལོ་ཙཱ་བ",
+      "options": [
+        "Translator",
+        "Photographer",
+        "Leader"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཞས་པ",
+      "options": [
+        "Mechanic",
+        "Singer",
+        "Pilot"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གནམ་གྲུའི་ཁ་ལོ་པ",
+      "options": [
+        "Journalist",
+        "Cleaner",
+        "Pilot"
+      ],
+      "correctAnswerIndex": 2
+    }
   ],
   "metadata": {
     "totalExercises": 20,
-    "exerciseTypes": ["word_meaning"],
-    "contentMix": {"meaningfulWords": 20},
+    "exerciseTypes": [
+      "word_meaning"
+    ],
+    "contentMix": {
+      "meaningfulWords": 20
+    },
     "estimatedTime": "10-15 minutes",
     "difficulty": "beginner-intermediate",
     "skillsLearned": [
@@ -39,10 +213,26 @@
     ],
     "prereq": "Level 2.2 completion",
     "vocabularyIntroduced": [
-      "སློབ་དཔོན (teacher)", "ནད་པོ (doctor)", "བཟོ་བཅོས་པ (mechanic)", "རྩིས་པ (accountant)", "བཟོ་བ (artist)",
-      "འཁྲིད་པ (guide)", "འཛིན་པ (leader)", "སྲོལ་པ (farmer)", "ཉི་མའི་སྤྱི་བོ (nurse)", "མི་དམངས (civil servant)",
-      "དགེ་སློང (monk)", "དགེ་བཤེས (geshe)", "དགེ་སློང་མ (nun)", "དཔེ་མཛོད (librarian)", "མཁན་པོ (abbot)",
-      "དམག་པ (soldier)", "ཚོང་པ (merchant)", "ཁྲིམས་པ (judge)", "ཁྲིམས་རྩོད་པ (lawyer)", "མཁན་སྐྱོང (manager)"
+      "སློབ་དཔོན (teacher)",
+      "ནད་པོ (doctor)",
+      "བཟོ་བཅོས་པ (mechanic)",
+      "རྩིས་པ (accountant)",
+      "བཟོ་བ (artist)",
+      "འཁྲིད་པ (guide)",
+      "འཛིན་པ (leader)",
+      "སྲོལ་པ (farmer)",
+      "ཉི་མའི་སྤྱི་བོ (nurse)",
+      "མི་དམངས (civil servant)",
+      "དགེ་སློང (monk)",
+      "དགེ་བཤེས (geshe)",
+      "དགེ་སློང་མ (nun)",
+      "དཔེ་མཛོད (librarian)",
+      "མཁན་པོ (abbot)",
+      "དམག་པ (soldier)",
+      "ཚོང་པ (merchant)",
+      "ཁྲིམས་པ (judge)",
+      "ཁྲིམས་རྩོད་པ (lawyer)",
+      "མཁན་སྐྱོང (manager)"
     ]
   }
-} 
+}
