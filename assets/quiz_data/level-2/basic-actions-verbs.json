@@ -3,31 +3,215 @@
   "title": "Basic Actions and Verbs",
   "description": "Learn Tibetan words for common actions and verbs",
   "exercises": [
-    { "type": "word_meaning", "tibetanText": "ཟ", "options": ["Eat", "Drink", "Go"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "འཐུང", "options": ["Drink", "Eat", "Sleep"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "འགྲོ", "options": ["Go", "Come", "Run"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཡོང", "options": ["Come", "Go", "Sit"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "མཐོང", "options": ["See", "Hear", "Speak"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཉན", "options": ["Hear", "See", "Write"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཤོད", "options": ["Speak", "Read", "Write"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "འབྲི", "options": ["Write", "Read", "Speak"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཀློག", "options": ["Read", "Write", "Sleep"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཉལ", "options": ["Sleep", "Sit", "Stand"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "བཞུགས", "options": ["Sit", "Stand", "Walk"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ལང་", "options": ["Stand", "Sit", "Run"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "འཛུལ", "options": ["Enter", "Exit", "Open"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཕྱིར་ཐོན", "options": ["Exit", "Enter", "Close"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཁ་ཕྱེ", "options": ["Open", "Close", "Buy"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཁ་རྒྱག", "options": ["Close", "Open", "Sell"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཉོ", "options": ["Buy", "Sell", "Give"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "འཚོང", "options": ["Sell", "Buy", "Take"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སྤྲོད་པ", "options": ["Give", "Take", "Send"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ལེན", "options": ["Take", "Give", "Send"], "correctAnswerIndex": 0 }
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཟ",
+      "options": [
+        "Drink",
+        "Eat",
+        "Go"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འཐུང",
+      "options": [
+        "Eat",
+        "Drink",
+        "Sleep"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འགྲོ",
+      "options": [
+        "Come",
+        "Go",
+        "Run"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཡོང",
+      "options": [
+        "Go",
+        "Sit",
+        "Come"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མཐོང",
+      "options": [
+        "See",
+        "Hear",
+        "Speak"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉན",
+      "options": [
+        "Hear",
+        "See",
+        "Write"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཤོད",
+      "options": [
+        "Read",
+        "Write",
+        "Speak"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འབྲི",
+      "options": [
+        "Read",
+        "Speak",
+        "Write"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཀློག",
+      "options": [
+        "Write",
+        "Read",
+        "Sleep"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉལ",
+      "options": [
+        "Sleep",
+        "Sit",
+        "Stand"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བཞུགས",
+      "options": [
+        "Stand",
+        "Sit",
+        "Walk"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལང་",
+      "options": [
+        "Sit",
+        "Run",
+        "Stand"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འཛུལ",
+      "options": [
+        "Exit",
+        "Enter",
+        "Open"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཕྱིར་ཐོན",
+      "options": [
+        "Enter",
+        "Close",
+        "Exit"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁ་ཕྱེ",
+      "options": [
+        "Close",
+        "Open",
+        "Buy"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁ་རྒྱག",
+      "options": [
+        "Open",
+        "Sell",
+        "Close"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉོ",
+      "options": [
+        "Sell",
+        "Buy",
+        "Give"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "འཚོང",
+      "options": [
+        "Buy",
+        "Sell",
+        "Take"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྤྲོད་པ",
+      "options": [
+        "Give",
+        "Take",
+        "Send"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལེན",
+      "options": [
+        "Take",
+        "Give",
+        "Send"
+      ],
+      "correctAnswerIndex": 0
+    }
   ],
   "metadata": {
     "totalExercises": 20,
-    "exerciseTypes": ["word_meaning"],
-    "contentMix": {"meaningfulWords": 20},
+    "exerciseTypes": [
+      "word_meaning"
+    ],
+    "contentMix": {
+      "meaningfulWords": 20
+    },
     "estimatedTime": "10-15 minutes",
     "difficulty": "beginner-intermediate",
     "skillsLearned": [
@@ -39,10 +223,26 @@
     ],
     "prereq": "Level 2.5 completion",
     "vocabularyIntroduced": [
-      "ཟ (eat)", "འཐུང (drink)", "འགྲོ (go)", "ཡོང (come)", "མཐོང (see)",
-      "ཉན (hear)", "ཤོད (speak)", "འབྲི (write)", "ཀློག (read)", "ཉལ (sleep)",
-      "བཞུགས (sit)", "ལུས་བཀོལ (stand)", "འཛུལ (enter)", "ཕྱིར་འཐོན (exit)", "ཁ་ཕྱེ (open)",
-      "ཁ་རྒྱག (close)", "ཉོ (buy)", "བཙོང (sell)", "གཏོང (give)", "ལེན (take)"
+      "ཟ (eat)",
+      "འཐུང (drink)",
+      "འགྲོ (go)",
+      "ཡོང (come)",
+      "མཐོང (see)",
+      "ཉན (hear)",
+      "ཤོད (speak)",
+      "འབྲི (write)",
+      "ཀློག (read)",
+      "ཉལ (sleep)",
+      "བཞུགས (sit)",
+      "ལུས་བཀོལ (stand)",
+      "འཛུལ (enter)",
+      "ཕྱིར་འཐོན (exit)",
+      "ཁ་ཕྱེ (open)",
+      "ཁ་རྒྱག (close)",
+      "ཉོ (buy)",
+      "བཙོང (sell)",
+      "གཏོང (give)",
+      "ལེན (take)"
     ]
   }
-} 
+}
