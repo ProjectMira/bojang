@@ -3,31 +3,215 @@
   "title": "People and Relationships",
   "description": "Learn Tibetan words for people and relationships",
   "exercises": [
-    { "type": "word_meaning", "tibetanText": "ཕ", "options": ["Father", "Mother", "Brother"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "མ", "options": ["Mother", "Father", "Sister"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གཅེན་པོ", "options": ["Brother", "Singer", "Friend"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གཅེན་མོ", "options": ["Sister", "Brother", "Friend"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གྲོགས་པོ", "options": ["Friend", "Neighbor", "Cousin"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "དགེ་རྒན", "options": ["Teacher", "Student", "Parent"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སློབ་ཕྲུག", "options": ["Student", "Teacher", "Child"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "བུ", "options": ["Son", "Daughter", "Child"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "བུ་མོ", "options": ["Daughter", "Son", "Child"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཕ་མ", "options": ["Parents", "Children", "Grandparents"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ནང་མི", "options": ["Family", "Neighbor", "Friend"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "མི་", "options": ["People", "Family", "Neighbor"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཁྱོ་ག", "options": ["Husband", "Wife", "Couple"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "བཟའ་མོ", "options": ["Wife", "Daughter", "Sister"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཁྱིམ་མཚེས", "options": ["Neighbor", "Friend", "Family"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "པོ་པོ", "options": ["Grandfather", "Grandmother", "Uncle"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "རྨོ་མོ", "options": ["Grandmother", "Grandfather", "Aunt"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཨ་ཞང", "options": ["Uncle", "Aunt", "Cousin"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཨ་ནེ", "options": ["Aunt", "Uncle", "Cousin"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "དཔོན་པོ", "options": ["Boss", "Colleague", "Relative"], "correctAnswerIndex": 0 }
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཕ",
+      "options": [
+        "Mother",
+        "Father",
+        "Brother"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མ",
+      "options": [
+        "Mother",
+        "Father",
+        "Sister"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཅེན་པོ",
+      "options": [
+        "Singer",
+        "Friend",
+        "Brother"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གཅེན་མོ",
+      "options": [
+        "Brother",
+        "Sister",
+        "Friend"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གྲོགས་པོ",
+      "options": [
+        "Neighbor",
+        "Cousin",
+        "Friend"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དགེ་རྒན",
+      "options": [
+        "Student",
+        "Parent",
+        "Teacher"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སློབ་ཕྲུག",
+      "options": [
+        "Student",
+        "Teacher",
+        "Child"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བུ",
+      "options": [
+        "Son",
+        "Daughter",
+        "Child"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བུ་མོ",
+      "options": [
+        "Son",
+        "Daughter",
+        "Child"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཕ་མ",
+      "options": [
+        "Children",
+        "Parents",
+        "Grandparents"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ནང་མི",
+      "options": [
+        "Neighbor",
+        "Friend",
+        "Family"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མི་",
+      "options": [
+        "Family",
+        "Neighbor",
+        "People"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྱོ་ག",
+      "options": [
+        "Husband",
+        "Wife",
+        "Couple"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བཟའ་མོ",
+      "options": [
+        "Daughter",
+        "Sister",
+        "Wife"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྱིམ་མཚེས",
+      "options": [
+        "Neighbor",
+        "Friend",
+        "Family"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "པོ་པོ",
+      "options": [
+        "Grandfather",
+        "Grandmother",
+        "Uncle"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྨོ་མོ",
+      "options": [
+        "Grandmother",
+        "Grandfather",
+        "Aunt"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཨ་ཞང",
+      "options": [
+        "Aunt",
+        "Cousin",
+        "Uncle"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཨ་ནེ",
+      "options": [
+        "Aunt",
+        "Uncle",
+        "Cousin"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དཔོན་པོ",
+      "options": [
+        "Colleague",
+        "Relative",
+        "Boss"
+      ],
+      "correctAnswerIndex": 2
+    }
   ],
   "metadata": {
     "totalExercises": 20,
-    "exerciseTypes": ["word_meaning"],
-    "contentMix": {"meaningfulWords": 20},
+    "exerciseTypes": [
+      "word_meaning"
+    ],
+    "contentMix": {
+      "meaningfulWords": 20
+    },
     "estimatedTime": "10-15 minutes",
     "difficulty": "beginner-intermediate",
     "skillsLearned": [
@@ -39,10 +223,26 @@
     ],
     "prereq": "Level 2.7 completion",
     "vocabularyIntroduced": [
-      "ཕ (father)", "མ (mother)", "ཨ་ཅག (older brother)", "ཨ་ཅག་མོ (older sister)", "གྲོགས་པོ (friend)",
-      "སློབ་དཔོན (teacher)", "སློབ་ཕྲུག (student)", "བུ (son)", "སྲས (daughter)", "ཕ་མ (parents)",
-      "ནུས་པ (family)", "མི་མང (people)", "མཆོག (husband)", "བུ་མོ (girl)", "ཁྱིམ་ཚང (family)",
-      "གྲོང་ཚོ (neighbor)", "ཡུན་ངུ (grandfather)", "རྨོ (grandmother)", "ཨ་ཞང (uncle)", "ཨ་ནེ (aunt)"
+      "ཕ (father)",
+      "མ (mother)",
+      "ཨ་ཅག (older brother)",
+      "ཨ་ཅག་མོ (older sister)",
+      "གྲོགས་པོ (friend)",
+      "སློབ་དཔོན (teacher)",
+      "སློབ་ཕྲུག (student)",
+      "བུ (son)",
+      "སྲས (daughter)",
+      "ཕ་མ (parents)",
+      "ནུས་པ (family)",
+      "མི་མང (people)",
+      "མཆོག (husband)",
+      "བུ་མོ (girl)",
+      "ཁྱིམ་ཚང (family)",
+      "གྲོང་ཚོ (neighbor)",
+      "ཡུན་ངུ (grandfather)",
+      "རྨོ (grandmother)",
+      "ཨ་ཞང (uncle)",
+      "ཨ་ནེ (aunt)"
     ]
   }
-} 
+}
