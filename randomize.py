@@ -2,7 +2,7 @@ import json
 import random
 
 # Path to your JSON file
-file_path = "assets/quiz_data/level-2/time-and-daily-routine.json"
+file_path = "assets/quiz_data/level-2/weather-and-nature.json"
 
 with open(file_path, "r", encoding="utf-8") as f:
     data = json.load(f)
