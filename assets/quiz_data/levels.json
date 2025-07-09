@@ -26,8 +26,8 @@
                 },
                 {
                     "level": "1.5",
-                    "name": "Word Meaning",
-                    "path": "assets/quiz_data/level-1/word-meaning.json"
+                    "name": "Simple Words",
+                    "path": "assets/quiz_data/level-1/simple-words.json"
                 },
                 {
                     "level": "1.6",
