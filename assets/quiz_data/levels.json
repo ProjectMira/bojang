@@ -119,7 +119,7 @@
                 {
                     "level": "3.2",
                     "name": "Order Food",
-                    "path": "assets/quiz_data/level-3/resturants.json"
+                    "path": "assets/quiz_data/level-3/order_food.json"
                 },
                 {
                     "level": "3.3",
