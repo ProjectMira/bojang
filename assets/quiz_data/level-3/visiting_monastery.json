@@ -16,21 +16,21 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "བླ་མ་ལགས་ལ་གུས་པས་ཕྱག་འཚལ།",
+        "tibetanText": "བླ་མ་ལ་ཕྱག་འཚལ།",
         "options": [
-          "I respectfully bow to the Lama",
-          "The Lama is very wise",
-          "Thank you, venerable Lama"
+          "Bow to Lama",
+          "Lama is wise",
+          "Thank you Lama"
         ],
         "correctAnswerIndex": 0
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "མཆོད་ཁང་ནང་ཅི་ཞིག་ཡོད་པ།",
+        "tibetanText": "མཆོད་ཁང་ནང་ག་རེ་ཡོད།",
         "options": [
-          "What is inside the temple?",
-          "Where is the temple?",
-          "When does the temple open?"
+          "What is in temple?",
+          "Where is temple?",
+          "When does temple open?"
         ],
         "correctAnswerIndex": 0
       },
@@ -126,11 +126,11 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "བླ་མ་ལགས་ཀྱིས་གདམས་ངག་གནང་རོགས།",
+        "tibetanText": "བླ་མ་གདམས་ངག་གནང་།",
         "options": [
-          "Please give teachings, venerable Lama",
-          "Thank you for the teachings, Lama",
-          "The Lama's teachings are profound"
+          "Please give teachings Lama",
+          "Thank you for teachings",
+          "Lama's teachings profound"
         ],
         "correctAnswerIndex": 0
       },
@@ -178,7 +178,7 @@
       ],
       "prereq": "Level 4.1 completion",
       "topicsIntroduced": [
-        "Religious titles: བླ་མ་ལགས (venerable Lama), དགེ་འདུན་པ (monks)",
+        "Religious titles: བླ་མ (Lama), དགེ་འདུན་པ (monks)",
         "Sacred objects: སངས་རྒྱས་ཀྱི་སྐུ་འདྲ (Buddha statues), ཆོས་ཀྱི་འཁོར་ལོ (Dharma wheel)",
         "Buddhist concepts: སྡུག་བསྔལ (suffering), ཐུགས་རྗེ (compassion), བསམ་གཏན (meditation)",
         "Religious practices: མཆོད་པ (offerings), སྒོམ (meditate), ཕྱག་འཚལ (prostrate/bow)",
