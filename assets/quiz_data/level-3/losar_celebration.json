@@ -1,195 +1,195 @@
 {
-    "level": 3.5,
-    "title": "Losar Celebration",
-    "description": "Experience the joy of Tibetan New Year (Losar) with the Tenzin family. Learn traditional greetings, festival foods, customs, and family conversations during this most important Tibetan celebration.",
-    "storyContext": "You are visiting your Tibetan friend Pema's family during Losar, the Tibetan New Year. The house is decorated with prayer flags, and everyone is wearing their finest traditional clothes. You'll help prepare special foods, participate in rituals, and join the celebrations while learning the language of this sacred time.",
-    "exercises": [
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ལོ་གསར་ལ་བཀྲ་ཤིས་བདེ་ལེགས།",
-        "options": [
-          "Happy New Year (Losar greeting)",
-          "Merry Christmas",
-          "Happy Birthday"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་གི་ཕ་མ་ག་པར་ཡོད།",
-        "options": [
-          "Where are your parents?",
-          "How are your parents?",
-          "Who are your parents?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཚོས་ཁ་ཟས་སྒྲིག་དགོས།",
-        "options": [
-          "We need to prepare food",
-          "We need to buy food",
-          "We need to eat food"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "མོག་མོག་བཟོས་པ་ཡིན།",
-        "options": [
-          "The momos are made",
-          "I want to make momos",
-          "Momos are delicious"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "དར་ལྕོག་རྒྱག་དགོས།",
-        "options": [
-          "Need to hang prayer flags",
-          "Need to buy prayer flags",
-          "Need to fold prayer flags"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་བོད་ཀྱི་གོས་གྱོན་ནང་།",
-        "options": [
-          "Please wear Tibetan clothes",
-          "Your Tibetan clothes are beautiful",
-          "Where are the Tibetan clothes?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཚོས་གསོལ་ཇ་འཐུང་གི་ཡིན།",
-        "options": [
-          "We will drink butter tea",
-          "We are making butter tea",
-          "Do you like butter tea?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "སྤུན་མཆེད་ཚང་མ་འདུ་འཛོམས་བྱུང་།",
-        "options": [
-          "All the siblings have gathered",
-          "The family is very happy",
-          "Everyone is wearing traditional clothes"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "དེ་རིང་དགའ་སྤྲོ་ཆེན་པོ་ཡོད།",
-        "options": [
-          "Today there is great joy",
-          "Today is very important",
-          "Today we eat a lot"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཨ་མ་ལགས་ཁུར་བ་ལ་གསོལ་ཇ་བླུགས།",
-        "options": [
-          "Mother, please pour tea in the thermos",
-          "Mother is drinking tea from the thermos",
-          "Mother bought a new thermos"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁ་སང་གི་གཏོར་མ་བཟོས་སོང་།",
-        "options": [
-          "Yesterday's ritual cakes were made",
-          "We will make ritual cakes tomorrow",
-          "The ritual cakes are very sweet"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "སང་ཉིན་དགོན་པར་འགྲོ་གི་ཡིན།",
-        "options": [
-          "Tomorrow we will go to the monastery",
-          "Yesterday we went to the monastery",
-          "The monastery is very far"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "འདི་ལོའི་རེ་བ་ག་རེ་ཡོད།",
-        "options": [
-          "What are this year's hopes?",
-          "What happened this year?",
-          "What will you do this year?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཚོའི་མི་རིགས་ཀྱི་རིག་གཞུང་སྲུང་སྐྱོབ་བྱེད་དགོས།",
-        "options": [
-          "We must preserve our ethnic culture",
-          "We should learn about our history",
-          "Our culture is very important"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "བཀྲ་ཤིས་བདེ་ལེགས་ཞུ་རྒྱུ་ཡིན།",
-        "options": [
-          "I will offer auspicious greetings",
-          "I wish you good luck",
-          "Thank you for the blessings"
-        ],
-        "correctAnswerIndex": 0
-      }
-    ],
-    "metadata": {
-      "totalExercises": 15,
-      "exerciseTypes": [
-        "sentence_meaning"
+  "level": 3.5,
+  "title": "Losar Celebration",
+  "description": "Experience the joy of Tibetan New Year (Losar) with the Tenzin family. Learn traditional greetings, festival foods, customs, and family conversations during this most important Tibetan celebration.",
+  "storyContext": "You are visiting your Tibetan friend Pema's family during Losar, the Tibetan New Year. The house is decorated with prayer flags, and everyone is wearing their finest traditional clothes. You'll help prepare special foods, participate in rituals, and join the celebrations while learning the language of this sacred time.",
+  "exercises": [
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ལོ་གསར་ལ་བཀྲ་ཤིས་བདེ་ལེགས།",
+      "options": [
+        "Merry Christmas",
+        "Happy Birthday",
+        "Happy New Year (Losar greeting)"
       ],
-      "contentMix": {
-        "greetings_blessings": 3,
-        "food_preparation": 4,
-        "family_gatherings": 3,
-        "traditions_customs": 3,
-        "cultural_values": 2
-      },
-      "estimatedTime": "20-25 minutes",
-      "difficulty": "intermediate-advanced",
-      "skillsLearned": [
-        "Traditional Losar greetings and blessings",
-        "Festival food vocabulary and preparation",
-        "Family relationship terms and gatherings",
-        "Religious and cultural ceremony language",
-        "Expressing hopes, wishes, and cultural values"
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་གི་ཕ་མ་ག་པར་ཡོད།",
+      "options": [
+        "How are your parents?",
+        "Who are your parents?",
+        "Where are your parents?"
       ],
-      "prereq": "Level 3.3 completion",
-      "topicsIntroduced": [
-        "Festival terms: ལོ་གསར (Losar/New Year), བཀྲ་ཤིས་བདེ་ལེགས (auspicious greetings)",
-        "Food: མོག་མོག (momos), གསོལ་ཇ (butter tea), གཏོར་མ (ritual cakes)",
-        "Family: ཕ་མ (parents), སྤུན་མཆེད (siblings), ཨ་མ་ལགས (respectful term for mother)",
-        "Customs: དར་ལྕོག (prayer flags), བོད་ཀྱི་གོས (Tibetan clothes), འདུ་འཛོམས (gathering)",
-        "Cultural concepts: རིག་གཞུང (culture), རེ་བ (hope/expectation), དགའ་སྤྲོ (joy)"
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཚོས་ཁ་ཟས་སྒྲིག་དགོས།",
+      "options": [
+        "We need to prepare food",
+        "We need to buy food",
+        "We need to eat food"
       ],
-      "culturalNotes": [
-        "Losar is the most important Tibetan festival, lasting 15 days",
-        "Traditional foods like momos and butter tea are essential",
-        "Family reunions and monastery visits are central activities",
-        "Prayer flags and ritual cakes have deep spiritual significance",
-        "The celebration emphasizes cultural preservation and community bonds"
-      ]
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "མོག་མོག་བཟོས་པ་ཡིན།",
+      "options": [
+        "The momos are made",
+        "I want to make momos",
+        "Momos are delicious"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "དར་ལྕོག་རྒྱག་དགོས།",
+      "options": [
+        "Need to buy prayer flags",
+        "Need to hang prayer flags",
+        "Need to fold prayer flags"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་བོད་ཀྱི་གོས་གྱོན་ནང་།",
+      "options": [
+        "Please wear Tibetan clothes",
+        "Your Tibetan clothes are beautiful",
+        "Where are the Tibetan clothes?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཚོས་གསོལ་ཇ་འཐུང་གི་ཡིན།",
+      "options": [
+        "We are making butter tea",
+        "We will drink butter tea",
+        "Do you like butter tea?"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "སྤུན་མཆེད་ཚང་མ་འདུ་འཛོམས་བྱུང་།",
+      "options": [
+        "The family is very happy",
+        "Everyone is wearing traditional clothes",
+        "All the siblings have gathered"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "དེ་རིང་དགའ་སྤྲོ་ཆེན་པོ་ཡོད།",
+      "options": [
+        "Today there is great joy",
+        "Today is very important",
+        "Today we eat a lot"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཨ་མ་ལགས་ཁུར་བ་ལ་གསོལ་ཇ་བླུགས།",
+      "options": [
+        "Mother, please pour tea in the thermos",
+        "Mother is drinking tea from the thermos",
+        "Mother bought a new thermos"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁ་སང་གི་གཏོར་མ་བཟོས་སོང་།",
+      "options": [
+        "We will make ritual cakes tomorrow",
+        "The ritual cakes are very sweet",
+        "Yesterday's ritual cakes were made"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "སང་ཉིན་དགོན་པར་འགྲོ་གི་ཡིན།",
+      "options": [
+        "Tomorrow we will go to the monastery",
+        "Yesterday we went to the monastery",
+        "The monastery is very far"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "འདི་ལོའི་རེ་བ་ག་རེ་ཡོད།",
+      "options": [
+        "What are this year's hopes?",
+        "What happened this year?",
+        "What will you do this year?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཚོའི་མི་རིགས་ཀྱི་རིག་གཞུང་སྲུང་སྐྱོབ་བྱེད་དགོས།",
+      "options": [
+        "We should learn about our history",
+        "We must preserve our ethnic culture",
+        "Our culture is very important"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "བཀྲ་ཤིས་བདེ་ལེགས་ཞུ་རྒྱུ་ཡིན།",
+      "options": [
+        "I wish you good luck",
+        "Thank you for the blessings",
+        "I will offer auspicious greetings"
+      ],
+      "correctAnswerIndex": 2
     }
+  ],
+  "metadata": {
+    "totalExercises": 15,
+    "exerciseTypes": [
+      "sentence_meaning"
+    ],
+    "contentMix": {
+      "greetings_blessings": 3,
+      "food_preparation": 4,
+      "family_gatherings": 3,
+      "traditions_customs": 3,
+      "cultural_values": 2
+    },
+    "estimatedTime": "20-25 minutes",
+    "difficulty": "intermediate-advanced",
+    "skillsLearned": [
+      "Traditional Losar greetings and blessings",
+      "Festival food vocabulary and preparation",
+      "Family relationship terms and gatherings",
+      "Religious and cultural ceremony language",
+      "Expressing hopes, wishes, and cultural values"
+    ],
+    "prereq": "Level 3.3 completion",
+    "topicsIntroduced": [
+      "Festival terms: ལོ་གསར (Losar/New Year), བཀྲ་ཤིས་བདེ་ལེགས (auspicious greetings)",
+      "Food: མོག་མོག (momos), གསོལ་ཇ (butter tea), གཏོར་མ (ritual cakes)",
+      "Family: ཕ་མ (parents), སྤུན་མཆེད (siblings), ཨ་མ་ལགས (respectful term for mother)",
+      "Customs: དར་ལྕོག (prayer flags), བོད་ཀྱི་གོས (Tibetan clothes), འདུ་འཛོམས (gathering)",
+      "Cultural concepts: རིག་གཞུང (culture), རེ་བ (hope/expectation), དགའ་སྤྲོ (joy)"
+    ],
+    "culturalNotes": [
+      "Losar is the most important Tibetan festival, lasting 15 days",
+      "Traditional foods like momos and butter tea are essential",
+      "Family reunions and monastery visits are central activities",
+      "Prayer flags and ritual cakes have deep spiritual significance",
+      "The celebration emphasizes cultural preservation and community bonds"
+    ]
   }
+}
