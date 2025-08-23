@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "sentence_meaning",
-      "tibetanText": "ཁྱེད་རང་ག་འདྲ་ཡོད་པས།",
+      "tibetanText": "ཁྱེད་རང་ག་འདྲ་འདུག་།",
       "options": [
         "How are you feeling?",
         "Where are you going?",
@@ -35,7 +35,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ང་ལ་མིག་ན་ཡོད",
+      "tibetanText": "ང་མགོ་ན་གི་འདུག་།",
       "options": [
         "I have a headache",
         "I have a stomach ache",
@@ -45,7 +45,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ཁྱེད་རང་ལ་ཚ་བ་ཡོད་པས།",
+      "tibetanText": "ཁྱེད་རང་ལ་ཚ་བ་འདུག་པས།",
       "options": [
         "Do you have a fever?",
         "Do you have medicine?",
@@ -65,7 +65,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "དགའ་གནང་བ་ལགས།",
+      "tibetanText": "ནང་ལ་ཕེབས་རོགས",
       "options": [
         "Please wait",
         "Please sit",
@@ -115,7 +115,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ཁྱེད་རང་ལ་སྨན་བཟོ་ཡོད་པས།",
+      "tibetanText": "ཁྱེད་རང་ལ་སྨན་ཡོད་པས།",
       "options": [
         "Do you have medicine?",
         "Do you have a doctor?",
@@ -135,7 +135,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ཁྱེད་རང་ལ་གནོད་སྐྱོན་ཡོད་པས།",
+      "tibetanText": "ཁྱེད་རང་ལ་རྨས་སྐྱོན་ཡོད་པས།",
       "options": [
         "Do you have an injury?",
         "Do you have a family?",
