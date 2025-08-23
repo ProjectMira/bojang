@@ -48,9 +48,9 @@
         "type": "sentence_meaning",
         "tibetanText": "དར་ལྕོག་རྒྱག་དགོས།",
         "options": [
-          "We need to hang prayer flags",
-          "We need to buy prayer flags",
-          "We need to fold prayer flags"
+          "Need to hang prayer flags",
+          "Need to buy prayer flags",
+          "Need to fold prayer flags"
         ],
         "correctAnswerIndex": 0
       },
@@ -116,7 +116,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "ཕྱི་ཉིན་དགོན་པར་འགྲོ་གི་ཡིན།",
+        "tibetanText": "སང་ཉིན་དགོན་པར་འགྲོ་གི་ཡིན།",
         "options": [
           "Tomorrow we will go to the monastery",
           "Yesterday we went to the monastery",
