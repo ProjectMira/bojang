@@ -1,185 +1,185 @@
 {
-    "level": 3.3,
-    "title": "Exploring Dharamsala",
-    "description": "Learn essential Tibetan phrases for visiting Dharamsala, the home of the Dalai Lama and center of Tibetan culture in exile. Practice sentences for directions, cultural sites, and daily interactions.",
-    "exercises": [
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "དྷ་རམ་ས་ལ་ག་པར་ཡོད་རེད་།",
-        "options": [
-          "Where is Dharamsala?",
-          "What is in Dharamsala?",
-          "When is Dharamsala open?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཏཱ་ལའི་བླ་མ་ག་པར་བཞུགས་ཡོད་རེད་།",
-        "options": [
-          "Where does the Dalai Lama live?",
-          "When does the Dalai Lama speak?",
-          "What does the Dalai Lama teach?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་དགོན་པ་ལ་འགྲོ་འདོད་འདུག་།",
-        "options": [
-          "I want to go to the monastery",
-          "I want to see the temple",
-          "I want to meet the monks"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "མཆོད་ཁང་ག་དུས་ཕྱེ་གི་རེད་།",
-        "options": [
-          "When does the temple open?",
-          "Where is the temple?",
-          "Who built the temple?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་མཆོད་ཁང་ལ་འགྲོ་ཡིན་པས།",
-        "options": [
-          "Have you been to the temple?",
-          "Are you going to the temple?",
-          "Do you like the temple?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཆོས་སྤྱོད་ལ་ཞུགས་འདོད།",
-        "options": [
-          "I want to join the religious practice",
-          "I want to learn Buddhism",
-          "I want to become a monk"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཏཱ་ལའི་བླ་མའི་ཕོ་བྲང་ག་པར་ཡོད་རེད་།",
-        "options": [
-          "Where is the Dalai Lama's palace?",
-          "What is the Dalai Lama's palace like?",
-          "When was the palace built?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་བོད་ཀྱི་ཁ་ལག་ཟ་འདོད་འདུག་།",
-        "options": [
-          "I want to eat Tibetan food",
-          "I want to cook Tibetan food",
-          "I want to buy Tibetan food"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "མཆོད་མེ་ག་པར་རྒྱག་གི་ཡོད།",
-        "options": [
-          "Where do we light the butter lamps?",
-          "When do we light the butter lamps?",
-          "Why do we light the butter lamps?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་ལ་ལམ་ཡུལ་ཤེས་ཀྱི་ཡོད་པས།",
-        "options": [
-          "Do you know the way?",
-          "Do you know the place?",
-          "Do you know the time?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "བོད་ཀྱི་དཔེ་མཛོད་ཁང་ག་པར་ཡོད།",
-        "options": [
-          "Where is the Tibetan library?",
-          "What is in the Tibetan library?",
-          "When is the library open?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ནོར་བུ་གླིང་ཀར་འགྲོ་འདོད་འདུག་།",
-        "options": [
-          "I want to go to Norbulingka",
-          "I want to see Norbulingka",
-          "I want to live in Norbulingka"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "དྷ་རམ་ས་ལ་ག་འདྲ་ཡོད།",
-        "options": [
-          "How is Dharamsala?",
-          "Where is Dharamsala?",
-          "What is Dharamsala?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ལ་ཕྱག་དཔེ་འདི་དགོས།",
-        "options": [
-          "I need this guidebook",
-          "I need this map",
-          "I need this ticket"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་ལ་ཐུགས་རྗེ་ཆེ།",
-        "options": [
-          "Thank you very much",
-          "You are welcome",
-          "Excuse me"
-        ],
-        "correctAnswerIndex": 0
-      }
-    ],
-    "metadata": {
-      "totalExercises": 15,
-      "exerciseTypes": [
-        "sentence_meaning"
+  "level": 3.3,
+  "title": "Exploring Dharamsala",
+  "description": "Learn essential Tibetan phrases for visiting Dharamsala, the home of the Dalai Lama and center of Tibetan culture in exile. Practice sentences for directions, cultural sites, and daily interactions.",
+  "exercises": [
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "དྷ་རམ་ས་ལ་ག་པར་ཡོད་རེད་།",
+      "options": [
+        "Where is Dharamsala?",
+        "What is in Dharamsala?",
+        "When is Dharamsala open?"
       ],
-      "contentMix": {
-        "locations": 6,
-        "religious_sites": 4,
-        "cultural_activities": 3,
-        "courtesy": 2
-      },
-      "estimatedTime": "18-25 minutes",
-      "difficulty": "intermediate",
-      "skillsLearned": [
-        "Asking for directions in Dharamsala",
-        "Discussing religious and cultural sites",
-        "Planning visits to monasteries and temples",
-        "Understanding local Tibetan customs",
-        "Basic travel vocabulary for Tibetan areas"
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཏཱ་ལའི་བླ་མ་ག་པར་བཞུགས་ཡོད་རེད་།",
+      "options": [
+        "When does the Dalai Lama speak?",
+        "What does the Dalai Lama teach?",
+        "Where does the Dalai Lama live?"
       ],
-      "prereq": "Level 3.2 completion",
-      "topicsIntroduced": [
-        "Places: དགོན་པ (monastery), མཆོད་ཁང (temple), ཕོ་བྲང (palace), དཔེ་མཛོད་ཁང (library)",
-        "Religious terms: ཆོས་སྤྱོད (religious practice), མཆོད་མེ (butter lamp), ཏཱ་ལའི་བླ་མ (Dalai Lama)",
-        "Activities: ཞུགས (join/enter), ཟ (eat), རྒྱག (light/strike)",
-        "Cultural sites: ནོར་བུ་གླིང་ཀ (Norbulingka), མཆོག་ཀྱང་རི་ཁྲོད (McLeod Ganj)"
-      ]
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་དགོན་པ་ལ་འགྲོ་འདོད་འདུག་།",
+      "options": [
+        "I want to see the temple",
+        "I want to meet the monks",
+        "I want to go to the monastery"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "མཆོད་ཁང་ག་དུས་ཕྱེ་གི་རེད་།",
+      "options": [
+        "Where is the temple?",
+        "Who built the temple?",
+        "When does the temple open?"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་མཆོད་ཁང་ལ་འགྲོ་ཡིན་པས།",
+      "options": [
+        "Have you been to the temple?",
+        "Are you going to the temple?",
+        "Do you like the temple?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཆོས་སྤྱོད་ལ་ཞུགས་འདོད།",
+      "options": [
+        "I want to learn Buddhism",
+        "I want to join the religious practice",
+        "I want to become a monk"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཏཱ་ལའི་བླ་མའི་ཕོ་བྲང་ག་པར་ཡོད་རེད་།",
+      "options": [
+        "What is the Dalai Lama's palace like?",
+        "When was the palace built?",
+        "Where is the Dalai Lama's palace?"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་བོད་ཀྱི་ཁ་ལག་ཟ་འདོད་འདུག་།",
+      "options": [
+        "I want to cook Tibetan food",
+        "I want to buy Tibetan food",
+        "I want to eat Tibetan food"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "མཆོད་མེ་ག་པར་རྒྱག་གི་ཡོད།",
+      "options": [
+        "Where do we light the butter lamps?",
+        "When do we light the butter lamps?",
+        "Why do we light the butter lamps?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ལ་ལམ་ཡུལ་ཤེས་ཀྱི་ཡོད་པས།",
+      "options": [
+        "Do you know the place?",
+        "Do you know the time?",
+        "Do you know the way?"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "བོད་ཀྱི་དཔེ་མཛོད་ཁང་ག་པར་ཡོད།",
+      "options": [
+        "What is in the Tibetan library?",
+        "Where is the Tibetan library?",
+        "When is the library open?"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ནོར་བུ་གླིང་ཀར་འགྲོ་འདོད་འདུག་།",
+      "options": [
+        "I want to go to Norbulingka",
+        "I want to see Norbulingka",
+        "I want to live in Norbulingka"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "དྷ་རམ་ས་ལ་ག་འདྲ་ཡོད།",
+      "options": [
+        "Where is Dharamsala?",
+        "What is Dharamsala?",
+        "How is Dharamsala?"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལ་ཕྱག་དཔེ་འདི་དགོས།",
+      "options": [
+        "I need this map",
+        "I need this guidebook",
+        "I need this ticket"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ལ་ཐུགས་རྗེ་ཆེ།",
+      "options": [
+        "You are welcome",
+        "Thank you very much",
+        "Excuse me"
+      ],
+      "correctAnswerIndex": 1
     }
+  ],
+  "metadata": {
+    "totalExercises": 15,
+    "exerciseTypes": [
+      "sentence_meaning"
+    ],
+    "contentMix": {
+      "locations": 6,
+      "religious_sites": 4,
+      "cultural_activities": 3,
+      "courtesy": 2
+    },
+    "estimatedTime": "18-25 minutes",
+    "difficulty": "intermediate",
+    "skillsLearned": [
+      "Asking for directions in Dharamsala",
+      "Discussing religious and cultural sites",
+      "Planning visits to monasteries and temples",
+      "Understanding local Tibetan customs",
+      "Basic travel vocabulary for Tibetan areas"
+    ],
+    "prereq": "Level 3.2 completion",
+    "topicsIntroduced": [
+      "Places: དགོན་པ (monastery), མཆོད་ཁང (temple), ཕོ་བྲང (palace), དཔེ་མཛོད་ཁང (library)",
+      "Religious terms: ཆོས་སྤྱོད (religious practice), མཆོད་མེ (butter lamp), ཏཱ་ལའི་བླ་མ (Dalai Lama)",
+      "Activities: ཞུགས (join/enter), ཟ (eat), རྒྱག (light/strike)",
+      "Cultural sites: ནོར་བུ་གླིང་ཀ (Norbulingka), མཆོག་ཀྱང་རི་ཁྲོད (McLeod Ganj)"
+    ]
   }
+}
