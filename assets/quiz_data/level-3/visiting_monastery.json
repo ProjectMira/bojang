@@ -1,202 +1,202 @@
 {
-    "level": 3.7,
-    "title": "Sacred Visit to Tashilhunpo Monastery",
-    "description": "Join a respectful visit to a traditional Tibetan monastery. Learn proper etiquette, religious vocabulary, and engage in meaningful dialogue with Lama Tenzin about Buddhist teachings and monastic life.",
-    "storyContext": "You are visiting the ancient Tashilhunpo Monastery in Shigatse. As you enter the sacred grounds, you must observe proper conduct and speak respectfully. Lama Tenzin, a senior monk, has graciously agreed to answer your questions about Buddhism, meditation, and the daily life of monks. This is a rare opportunity to learn both language and wisdom.",
-    "exercises": [
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "དགོན་པ་འདིར་ཕེབས་པར་དགའ་པོ་བྱུང་།",
-        "options": [
-          "Welcome to this monastery",
-          "This monastery is very old",
-          "The monastery is beautiful"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "བླ་མ་ལ་ཕྱག་འཚལ།",
-        "options": [
-          "Bow to Lama",
-          "Lama is wise",
-          "Thank you Lama"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "མཆོད་ཁང་ནང་ག་རེ་ཡོད།",
-        "options": [
-          "What is in temple?",
-          "Where is temple?",
-          "When does temple open?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "འདིར་སངས་རྒྱས་ཀྱི་སྐུ་འདྲ་ཡོད།",
-        "options": [
-          "Here there are Buddha statues",
-          "Here we pray to Buddha",
-          "Here Buddha once lived"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་ནང་པའི་ཆོས་ལ་དད་པ་ཡོད་པས།",
-        "options": [
-          "Do you have faith in Buddhism?",
-          "Do you understand Buddhism?",
-          "Do you practice Buddhism?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་བསམ་གཏན་སྦྱོང་བ་སློབ་འདོད།",
-        "options": [
-          "I want to learn meditation practice",
-          "I want to become a monk",
-          "I want to study Buddhist texts"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "དགེ་འདུན་པ་ཚོས་ཉིན་རེའི་ཅི་བྱེད།",
-        "options": [
-          "What do the monks do daily?",
-          "How many monks are there?",
-          "Where do the monks live?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཚོས་སྔ་དྲོ་མཆོད་པ་ཕུལ་གྱི་ཡོད།",
-        "options": [
-          "We make offerings in the morning",
-          "We eat breakfast in the morning",
-          "We study texts in the morning"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཆོས་ཀྱི་འཁོར་ལོ་ག་རེ་རེད།",
-        "options": [
-          "What is the Dharma wheel?",
-          "Where is the Dharma wheel?",
-          "Who made the Dharma wheel?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "སྡུག་བསྔལ་གྱི་རྒྱུ་ག་རེ་རེད།",
-        "options": [
-          "What is the cause of suffering?",
-          "How do we end suffering?",
-          "Why is there suffering?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཐུགས་རྗེ་ཆེན་པོ་སྒོམ་དགོས།",
-        "options": [
-          "One must meditate on great compassion",
-          "Great compassion is very important",
-          "We should practice great compassion"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "དེབ་ཐེར་འདི་ནས་ཅི་ཤེས་ཐུབ།",
-        "options": [
-          "What can we learn from this scripture?",
-          "Where did this scripture come from?",
-          "Who wrote this scripture?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "བླ་མ་གདམས་ངག་གནང་།",
-        "options": [
-          "Please give teachings Lama",
-          "Thank you for teachings",
-          "Lama's teachings profound"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "སེམས་ཞི་བདེ་ཇི་ལྟར་ཐོབ་ཐུབ།",
-        "options": [
-          "How can one achieve mental peace?",
-          "What is mental peace like?",
-          "Why is mental peace important?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "བཀའ་དྲིན་ཆེ་ལགས། ཕྱིར་འོང་གི་ཡིན།",
-        "options": [
-          "Thank you for your kindness. I will return",
-          "I am grateful for your wisdom",
-          "May I visit again sometime?"
-        ],
-        "correctAnswerIndex": 0
-      }
-    ],
-    "metadata": {
-      "totalExercises": 15,
-      "exerciseTypes": [
-        "sentence_meaning"
+  "level": 3.7,
+  "title": "Sacred Visit to Tashilhunpo Monastery",
+  "description": "Join a respectful visit to a traditional Tibetan monastery. Learn proper etiquette, religious vocabulary, and engage in meaningful dialogue with Lama Tenzin about Buddhist teachings and monastic life.",
+  "storyContext": "You are visiting the ancient Tashilhunpo Monastery in Shigatse. As you enter the sacred grounds, you must observe proper conduct and speak respectfully. Lama Tenzin, a senior monk, has graciously agreed to answer your questions about Buddhism, meditation, and the daily life of monks. This is a rare opportunity to learn both language and wisdom.",
+  "exercises": [
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "དགོན་པ་འདིར་ཕེབས་པར་དགའ་པོ་བྱུང་།",
+      "options": [
+        "This monastery is very old",
+        "The monastery is beautiful",
+        "It is a pleasure that you have come to this monastery."
       ],
-      "contentMix": {
-        "respectful_greetings": 2,
-        "monastery_features": 3,
-        "buddhist_teachings": 5,
-        "monastic_life": 3,
-        "philosophical_questions": 2
-      },
-      "estimatedTime": "25-30 minutes",
-      "difficulty": "advanced",
-      "skillsLearned": [
-        "Respectful and honorific language for religious settings",
-        "Buddhist terminology and philosophical concepts",
-        "Proper etiquette when visiting monasteries",
-        "Asking meaningful questions about spiritual practice",
-        "Understanding monastic daily routines and practices"
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "བླ་མ་ལ་ཕྱག་འཚལ།",
+      "options": [
+        "Bow to Lama",
+        "Lama is wise",
+        "Thank you Lama"
       ],
-      "prereq": "Level 4.1 completion",
-      "topicsIntroduced": [
-        "Religious titles: བླ་མ (Lama), དགེ་འདུན་པ (monks)",
-        "Sacred objects: སངས་རྒྱས་ཀྱི་སྐུ་འདྲ (Buddha statues), ཆོས་ཀྱི་འཁོར་ལོ (Dharma wheel)",
-        "Buddhist concepts: སྡུག་བསྔལ (suffering), ཐུགས་རྗེ (compassion), བསམ་གཏན (meditation)",
-        "Religious practices: མཆོད་པ (offerings), སྒོམ (meditate), ཕྱག་འཚལ (prostrate/bow)",
-        "Formal language: གུས་པ (respect), བཀའ་དྲིན (kindness/grace), གདམས་ངག (teachings/instructions)"
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "མཆོད་ཁང་ནང་ག་རེ་ཡོད།",
+      "options": [
+        "Where is temple?",
+        "When does temple open?",
+        "What is in temple?"
       ],
-      "culturalNotes": [
-        "Proper etiquette includes removing hats, speaking softly, and showing deep respect",
-        "Monks are addressed with honorific language and formal titles",
-        "Buddhist philosophical discussions require specific terminology",
-        "Monastery visits often include circumambulation and offering ceremonies",
-        "Questions about suffering, compassion, and liberation are central to Buddhist dialogue"
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "འདིར་སངས་རྒྱས་ཀྱི་སྐུ་འདྲ་ཡོད།",
+      "options": [
+        "Here we pray to Buddha",
+        "Here Buddha once lived",
+        "Here there are Buddha statues"
       ],
-      "monasteryEtiquette": [
-        "Always bow respectfully when meeting a Lama",
-        "Speak in hushed, reverent tones within temple halls",
-        "Ask permission before touching or photographing sacred objects",
-        "Offer gratitude for teachings and guidance received",
-        "Show genuine interest in spiritual learning, not mere curiosity"
-      ]
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ནང་པའི་ཆོས་ལ་དད་པ་ཡོད་པས།",
+      "options": [
+        "Do you understand Buddhism?",
+        "Do you practice Buddhism?",
+        "Do you have faith in Buddhism?"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་བསམ་གཏན་སྦྱོང་བ་སློབ་འདོད།",
+      "options": [
+        "I want to become a monk",
+        "I want to study Buddhist texts",
+        "I want to learn meditation practice"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "དགེ་འདུན་པ་ཚོས་ཉིན་རེའི་ཅི་བྱེད།",
+      "options": [
+        "What do the monks do daily?",
+        "How many monks are there?",
+        "Where do the monks live?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཚོས་སྔ་དྲོ་མཆོད་པ་ཕུལ་གྱི་ཡོད།",
+      "options": [
+        "We eat breakfast in the morning",
+        "We study texts in the morning",
+        "We make offerings in the morning"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཆོས་ཀྱི་འཁོར་ལོ་ག་རེ་རེད།",
+      "options": [
+        "Where is the Dharma wheel?",
+        "What is the Dharma wheel?",
+        "Who made the Dharma wheel?"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "སྡུག་བསྔལ་གྱི་རྒྱུ་ག་རེ་རེད།",
+      "options": [
+        "How do we end suffering?",
+        "What is the cause of suffering?",
+        "Why is there suffering?"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཐུགས་རྗེ་ཆེན་པོ་སྒོམ་དགོས།",
+      "options": [
+        "One must meditate on great compassion",
+        "Great compassion is very important",
+        "We should practice great compassion"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "དེབ་ཐེར་འདི་ནས་ཅི་ཤེས་ཐུབ།",
+      "options": [
+        "What can we learn from this scripture?",
+        "Where did this scripture come from?",
+        "Who wrote this scripture?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "བླ་མ་གདམས་ངག་གནང་།",
+      "options": [
+        "Please give teachings Lama",
+        "Thank you for teachings",
+        "Lama's teachings profound"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "སེམས་ཞི་བདེ་ཇི་ལྟར་ཐོབ་ཐུབ།",
+      "options": [
+        "What is mental peace like?",
+        "How can one achieve mental peace?",
+        "Why is mental peace important?"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "བཀའ་དྲིན་ཆེ་ལགས། ཕྱིར་འོང་གི་ཡིན།",
+      "options": [
+        "Thank you for your kindness. I will return",
+        "I am grateful for your wisdom",
+        "May I visit again sometime?"
+      ],
+      "correctAnswerIndex": 0
     }
+  ],
+  "metadata": {
+    "totalExercises": 15,
+    "exerciseTypes": [
+      "sentence_meaning"
+    ],
+    "contentMix": {
+      "respectful_greetings": 2,
+      "monastery_features": 3,
+      "buddhist_teachings": 5,
+      "monastic_life": 3,
+      "philosophical_questions": 2
+    },
+    "estimatedTime": "25-30 minutes",
+    "difficulty": "advanced",
+    "skillsLearned": [
+      "Respectful and honorific language for religious settings",
+      "Buddhist terminology and philosophical concepts",
+      "Proper etiquette when visiting monasteries",
+      "Asking meaningful questions about spiritual practice",
+      "Understanding monastic daily routines and practices"
+    ],
+    "prereq": "Level 4.1 completion",
+    "topicsIntroduced": [
+      "Religious titles: བླ་མ (Lama), དགེ་འདུན་པ (monks)",
+      "Sacred objects: སངས་རྒྱས་ཀྱི་སྐུ་འདྲ (Buddha statues), ཆོས་ཀྱི་འཁོར་ལོ (Dharma wheel)",
+      "Buddhist concepts: སྡུག་བསྔལ (suffering), ཐུགས་རྗེ (compassion), བསམ་གཏན (meditation)",
+      "Religious practices: མཆོད་པ (offerings), སྒོམ (meditate), ཕྱག་འཚལ (prostrate/bow)",
+      "Formal language: གུས་པ (respect), བཀའ་དྲིན (kindness/grace), གདམས་ངག (teachings/instructions)"
+    ],
+    "culturalNotes": [
+      "Proper etiquette includes removing hats, speaking softly, and showing deep respect",
+      "Monks are addressed with honorific language and formal titles",
+      "Buddhist philosophical discussions require specific terminology",
+      "Monastery visits often include circumambulation and offering ceremonies",
+      "Questions about suffering, compassion, and liberation are central to Buddhist dialogue"
+    ],
+    "monasteryEtiquette": [
+      "Always bow respectfully when meeting a Lama",
+      "Speak in hushed, reverent tones within temple halls",
+      "Ask permission before touching or photographing sacred objects",
+      "Offer gratitude for teachings and guidance received",
+      "Show genuine interest in spiritual learning, not mere curiosity"
+    ]
   }
+}
