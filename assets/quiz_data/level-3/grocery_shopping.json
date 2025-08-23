@@ -5,9 +5,9 @@
     "exercises": [
       {
         "type": "sentence_meaning",
-        "tibetanText": "ང་ལ་གཞི་ནས་ཁྱེར་ཚོད་དགོས",
+        "tibetanText": "ང་ལ་་ཚལ་དགོས",
         "options": [
-          "I need some vegetables",
+          "I need vegetables",
           "I need a receipt",
           "I need to go home"
         ],
@@ -15,7 +15,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "འབྲས་གང་དགོས།",
+        "tibetanText": "འབྲས་རིགས་གང་དགོས།",
         "options": [
           "Do you want rice?",
           "What kind of rice do you want?",
@@ -25,7 +25,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "ང་ལ་ཤ་གསོག་དགོས",
+        "tibetanText": "ང་ལ་ཤ་གསར་བ་དགོས",
         "options": [
           "I want to eat meat",
           "I need fresh meat",
@@ -35,10 +35,10 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "ཤ་གསོག་གཅིག་འདོན་རོགས།",
+        "tibetanText": "ཤ་ཀི་ལོ་གཅིག་སྤྲོད་རོགས",
         "options": [
           "Please weigh the meat",
-          "Please give me one pack of meat",
+          "Please give me one kilogram of meat",
           "Please cut the meat"
         ],
         "correctAnswerIndex": 1
@@ -55,7 +55,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "ང་ལ་ལེན་གྱི་ཡོད",
+        "tibetanText": "ངས་སྒོར་མོ་སྤྲོད་འདོད་ཡོད",
         "options": [
           "I already paid",
           "I want to pay",
@@ -65,21 +65,21 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "དེ་ལ་སྒོར་མོ་གཉིས་རེད།",
+        "tibetanText": "དེ་ལ་སྒོར་མོ་གཉིས་རེད",
         "options": [
-          "It is two rupees",
-          "That’s two bags",
+          "It is two dollars",
+          "That's two bags",
           "It weighs two kilograms"
         ],
         "correctAnswerIndex": 0
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "ཤོག་བཤེར་ཞུགས་ཨིན།",
+        "tibetanText": "ཤོག་བཤེར་ཡོད",
         "options": [
           "The receipt is included",
           "The receipt is missing",
-          "It’s a plastic bag"
+          "It's a plastic bag"
         ],
         "correctAnswerIndex": 0
       },
@@ -95,7 +95,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "འདི་ཁ་ལག་ཡིན་ན?",
+        "tibetanText": "འདི་ཁ་ལག་རེད་པས།",
         "options": [
           "Is this food?",
           "Is this yours?",
@@ -105,7 +105,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "དགའ་གནང་བ་ལགས།",
+        "tibetanText": "ཡང་བསྐྱར་ཡོང་རོགས",
         "options": [
           "Please come again",
           "Please come in",
@@ -125,7 +125,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "དེ་གཉིས་བཙོས་རོགས།",
+        "tibetanText": "དེ་གཉིས་ཐོབ་རོགས",
         "options": [
           "Pack two of those, please",
           "Give me a discount, please",
@@ -135,7 +135,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "དེ་གི་གཞི་ནས་མེད",
+        "tibetanText": "དེ་མེད",
         "options": [
           "There are no vegetables",
           "That one is not fresh",
@@ -145,10 +145,10 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "ངས་ཐུགས་རྗེ་ཆེ་ཞུ།",
+        "tibetanText": "ཐུགས་རྗེ་ཆེ",
         "options": [
           "Thank you very much",
-          "I’m sorry",
+          "I'm sorry",
           "You are welcome"
         ],
         "correctAnswerIndex": 0
@@ -175,9 +175,9 @@
       ],
       "prereq": "Level 3.2 completion",
       "topicsIntroduced": [
-        "Food items: འབྲས (rice), ཤ (meat), གཞི་ནས (vegetables), ཆུ (water)",
-        "Quantities: གཉིས (two), གཅིག (one), འདོན (pack)",
-        "Shopping actions: ཁྱེར (carry), བཙོས (pack), བསྒྲགས (announce)",
+        "Food items: འབྲས (rice), ཤ (meat), ཐོག་ཚལ (vegetables), ཆུ (water)",
+        "Quantities: གཉིས (two), གཅིག (one), ཐོབ (get/give)",
+        "Shopping actions: ཐོབ (get), ལེན (pay), ཡོང (come)",
         "Payments: སྒོར་མོ (money), ལེན (pay), ཕུར་ལེན (card)"
       ]
     }
