@@ -7,31 +7,31 @@
       "type": "sentence_meaning",
       "tibetanText": "ཁྱེད་རང་ག་འདྲ་འདུག་།",
       "options": [
-        "How are you feeling?",
         "Where are you going?",
+        "How are you feeling?",
         "What is your name?"
-      ],
-      "correctAnswerIndex": 0
-    },
-    {
-      "type": "sentence_meaning",
-      "tibetanText": "ང་ན་ཚ་ཡོད",
-      "options": [
-        "I am hungry",
-        "I am sick",
-        "I am tired"
       ],
       "correctAnswerIndex": 1
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ཁྱེད་རང་ག་ནས་ཕེབས་པ?",
+      "tibetanText": "ང་ན་ཚ་ཡོད",
       "options": [
-        "Where are you from?",
-        "Where does it hurt?",
-        "Where do you live?"
+        "I am sick",
+        "I am hungry",
+        "I am tired"
       ],
       "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ག་ནས་ཕེབས་པ?",
+      "options": [
+        "Where does it hurt?",
+        "Where are you from?",
+        "Where do you live?"
+      ],
+      "correctAnswerIndex": 1
     },
     {
       "type": "sentence_meaning",
@@ -47,11 +47,11 @@
       "type": "sentence_meaning",
       "tibetanText": "ཁྱེད་རང་ལ་ཚ་བ་འདུག་པས།",
       "options": [
-        "Do you have a fever?",
         "Do you have medicine?",
+        "Do you have a fever?",
         "Do you have a friend?"
       ],
-      "correctAnswerIndex": 0
+      "correctAnswerIndex": 1
     },
     {
       "type": "sentence_meaning",
@@ -67,11 +67,11 @@
       "type": "sentence_meaning",
       "tibetanText": "ནང་ལ་ཕེབས་རོགས",
       "options": [
+        "Please come in",
         "Please wait",
-        "Please sit",
-        "Please come in"
+        "Please sit"
       ],
-      "correctAnswerIndex": 2
+      "correctAnswerIndex": 0
     },
     {
       "type": "sentence_meaning",
@@ -87,11 +87,11 @@
       "type": "sentence_meaning",
       "tibetanText": "ངའི་མིང་...",
       "options": [
-        "My name is ...",
         "I am ... years old",
-        "I am from ..."
+        "I am from ...",
+        "My name is ..."
       ],
-      "correctAnswerIndex": 0
+      "correctAnswerIndex": 2
     },
     {
       "type": "sentence_meaning",
@@ -107,11 +107,11 @@
       "type": "sentence_meaning",
       "tibetanText": "ང་ལོ་...ཡིན",
       "options": [
-        "I am ... years old",
         "I am a student",
+        "I am ... years old",
         "I am a patient"
       ],
-      "correctAnswerIndex": 0
+      "correctAnswerIndex": 1
     },
     {
       "type": "sentence_meaning",
@@ -128,30 +128,30 @@
       "tibetanText": "ང་ལ་སྨན་མེད",
       "options": [
         "I have no money",
-        "I have no medicine",
-        "I have no pain"
+        "I have no pain",
+        "I have no medicine"
       ],
-      "correctAnswerIndex": 1
+      "correctAnswerIndex": 2
     },
     {
       "type": "sentence_meaning",
       "tibetanText": "ཁྱེད་རང་ལ་རྨས་སྐྱོན་ཡོད་པས།",
       "options": [
-        "Do you have an injury?",
         "Do you have a family?",
+        "Do you have an injury?",
         "Do you have a job?"
       ],
-      "correctAnswerIndex": 0
+      "correctAnswerIndex": 1
     },
     {
       "type": "sentence_meaning",
       "tibetanText": "ང་ལ་རྒྱུན་སྤྱོད་སྨན་དགོས",
       "options": [
-        "I need regular medicine",
         "I need a new doctor",
+        "I need regular medicine",
         "I need to rest"
       ],
-      "correctAnswerIndex": 0
+      "correctAnswerIndex": 1
     }
   ],
   "metadata": {
@@ -182,4 +182,4 @@
       "Instructions: དགའ་གནང་བ (please), བཞུགས (sit), ཕེབས (come in)"
     ]
   }
-} 
+}
