@@ -75,7 +75,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "ང་བོད་ཀྱི་ཁ་ལག་འདོད་འདུག་།",
+        "tibetanText": "ང་བོད་ཀྱི་ཁ་ལག་ཟ་འདོད་འདུག་།",
         "options": [
           "I want to eat Tibetan food",
           "I want to cook Tibetan food",
@@ -115,7 +115,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "ང་ནོར་བུ་གླིང་ཀར་འགྲོ་འདོད།",
+        "tibetanText": "ང་ནོར་བུ་གླིང་ཀར་འགྲོ་འདོད་འདུག་།",
         "options": [
           "I want to go to Norbulingka",
           "I want to see Norbulingka",
@@ -125,11 +125,11 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "མཆོག་ཀྱང་རི་ཁྲོད་ག་འདྲ་ཡོད།",
+        "tibetanText": "ག་འདྲ་ཡོད།",
         "options": [
-          "How is McLeod Ganj?",
-          "Where is McLeod Ganj?",
-          "What is McLeod Ganj?"
+          "How is Dharamsala?",
+          "Where is Dharamsala?",
+          "What is Dharamsala?"
         ],
         "correctAnswerIndex": 0
       },
