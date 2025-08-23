@@ -55,7 +55,7 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "ངས་སྒོར་མོ་སྤྲོད་འདོད་ཡོད",
+        "tibetanText": "ངས་དངུལ་སྤྲོད་འདོད་ཡོད",
         "options": [
           "I already paid",
           "I want to pay",
@@ -70,16 +70,6 @@
           "It is two dollars",
           "That's two bags",
           "It weighs two kilograms"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཤོག་བཤེར་ཡོད",
-        "options": [
-          "The receipt is included",
-          "The receipt is missing",
-          "It's a plastic bag"
         ],
         "correctAnswerIndex": 0
       },
@@ -115,23 +105,23 @@
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་ལ་ཕུར་ལེན་ཡོད་པས།",
+        "tibetanText": "ཁྱེད་དངུལ་རྐྱང་་ལེན་གྱི་ཡོད་པས།",
         "options": [
           "Do you accept card?",
-          "Do you have change?",
+          "Do you accept cash?",
           "Do you want to pay now?"
         ],
         "correctAnswerIndex": 0
       },
       {
         "type": "sentence_meaning",
-        "tibetanText": "དེ་གཉིས་ཐོབ་རོགས",
+        "tibetanText": "ང་ལ་ཆག་ཡང་གནང་རོགས།",
         "options": [
           "Pack two of those, please",
           "Give me a discount, please",
           "Weigh two of those, please"
         ],
-        "correctAnswerIndex": 0
+        "correctAnswerIndex": 1
       },
       {
         "type": "sentence_meaning",
