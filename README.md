@@ -4,7 +4,7 @@ A Tibetan Learning Flutter application.
 
 ## Getting Started
 
-This project is a Flutter application for learning Tibetan language who already knows english.
+This project is a Flutter application for learning Tibetan language who already knows english
 
 ### Prerequisites
 
