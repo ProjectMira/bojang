@@ -93,7 +93,7 @@ flutter emulators
 flutter emulators --launch apple_ios_simulator
 `
 ```bash
-sleep 5 && flutter devices
+sleep 5 && flutter devices --machine
 ```
 3. Run the app on the iOS simulator:
 ```bash
