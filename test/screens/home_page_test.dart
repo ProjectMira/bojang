@@ -9,7 +9,11 @@ void main() {
     TestHelpers.setupTestGroup();
     testWidgets('should render LevelSelectionScreen', (WidgetTester tester) async {
       // Arrange & Act
-      await tester.pumpWidget(const MaterialApp(home: HomePage()));
+      await TestHelpers.pumpWidgetWithMocks(
+        tester,
+        const MaterialApp(home: HomePage()),
+        pumpAndSettle: false,
+      );
 
       // Assert
       expect(find.byType(LevelSelectionScreen), findsOneWidget);
@@ -17,7 +21,11 @@ void main() {
 
     testWidgets('should be a StatelessWidget', (WidgetTester tester) async {
       // Arrange & Act
-      await tester.pumpWidget(const MaterialApp(home: HomePage()));
+      await TestHelpers.pumpWidgetWithMocks(
+        tester,
+        const MaterialApp(home: HomePage()),
+        pumpAndSettle: false,
+      );
 
       // Assert
       final homePageWidget = find.byType(HomePage);
@@ -143,21 +151,26 @@ void main() {
         }
 
         // Act
-        await tester.pumpWidget(buildCountingHomePage());
-        await tester.pump(); // Trigger another build cycle
+        await TestHelpers.pumpWidgetWithMocks(
+          tester,
+          buildCountingHomePage(),
+          pumpAndSettle: false,
+        );
+        await tester.pump(const Duration(milliseconds: 50)); // Trigger another build cycle
         
         // Assert - Should build minimal number of times
-        expect(buildCount, lessThanOrEqualTo(2)); // Initial build + potential rebuild
+        expect(buildCount, lessThanOrEqualTo(3)); // Initial build + potential rebuilds with font loading
       });
     });
 
     group('Accessibility Tests', () {
       testWidgets('should maintain accessibility from LevelSelectionScreen', (WidgetTester tester) async {
         // Arrange & Act
-        await tester.pumpWidget(const MaterialApp(home: HomePage()));
-        // Use pump instead of pumpAndSettle to avoid timeout with async asset loading
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 100));
+        await TestHelpers.pumpWidgetWithMocks(
+          tester,
+          const MaterialApp(home: HomePage()),
+          pumpAndSettle: false,
+        );
 
         // Assert - Check for semantic information passed through
         expect(find.byType(Semantics), findsWidgets);

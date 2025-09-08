@@ -120,12 +120,8 @@ void main() {
         },
       ));
 
-      // Wait for animation to complete and navigation to occur
-      await tester.pump(const Duration(milliseconds: 1500)); // Animation duration
-      await tester.pump(const Duration(milliseconds: 200)); // Additional delay
-      await tester.pump(const Duration(milliseconds: 800)); // Transition duration
-      await tester.pump(const Duration(milliseconds: 1500)); // Wait for animation
-      await tester.pump(const Duration(milliseconds: 300)); // Wait for completion
+      // Wait for animation to complete and navigation to occur using pumpAndSettle
+      await tester.pumpAndSettle(const Duration(seconds: 5));
 
       // Assert - LevelSelectionScreen should be present
       expect(find.byType(LevelSelectionScreen), findsOneWidget);
@@ -136,15 +132,8 @@ void main() {
       // This test ensures the navigation uses custom transition
       await tester.pumpWidget(const MaterialApp(home: SplashScreen()));
 
-      // Advance through the animation
-      await tester.pump(const Duration(milliseconds: 1500));
-      await tester.pump(const Duration(milliseconds: 200));
-      
-      // During transition, both screens might be present
-      await tester.pump(const Duration(milliseconds: 400));
-      
-      // Complete transition
-      await tester.pump(const Duration(milliseconds: 500));
+      // Use pumpAndSettle to handle all animations and timers properly
+      await tester.pumpAndSettle(const Duration(seconds: 5));
 
       // Assert navigation completed
       expect(find.byType(LevelSelectionScreen), findsOneWidget);
@@ -195,9 +184,8 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
         await tester.pump(const Duration(milliseconds: 100));
         
-        // Complete animation
-        await tester.pump(const Duration(milliseconds: 1500));
-        await tester.pump(const Duration(milliseconds: 500));
+        // Complete animation using pumpAndSettle
+        await tester.pumpAndSettle(const Duration(seconds: 3));
         
         // Assert - Should handle gracefully
         expect(tester.takeException(), isNull);
