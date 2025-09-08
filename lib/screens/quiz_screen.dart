@@ -424,6 +424,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               // Question Card
               Expanded(
                 child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(

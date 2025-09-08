@@ -20,6 +20,29 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
   late Animation<double> _scaleAnimation;
   final ScrollController _scrollController = ScrollController();
 
+  // Responsive design helpers
+  double _getResponsiveValue(BuildContext context, {
+    required double small,
+    required double medium, 
+    required double large,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth < 380) return small;      // iPhone SE, small screens
+    if (screenWidth < 414) return medium;    // iPhone 8, standard screens  
+    return large;                            // iPhone Plus, Pro Max, large screens
+  }
+
+  int _getResponsiveColumns(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth < 380) return 2;        // iPhone SE: 2 columns for more space
+    if (screenWidth < 500) return 3;        // Standard phones: 3 columns
+    return 4;                               // Large screens/tablets: 4 columns
+  }
+
+  double _getResponsivePadding(BuildContext context) {
+    return _getResponsiveValue(context, small: 16.0, medium: 20.0, large: 24.0);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -45,8 +68,13 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
     try {
       final String jsonString = await rootBundle.loadString('assets/quiz_data/levels.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
+      
+      final List<Level> loadedLevels = (jsonData['levels'] as List)
+          .map((level) => Level.fromJson(level))
+          .toList();
+      
       setState(() {
-        levels = (jsonData['levels'] as List).map((level) => Level.fromJson(level)).toList();
+        levels = loadedLevels;
         isLoading = false;
       });
     } catch (e) {
@@ -55,7 +83,10 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading levels: $e')),
+          SnackBar(
+            content: Text('Error loading levels: $e'),
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     }
@@ -75,39 +106,46 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
   }
 
   Widget _buildLevelPath() {
-    return ListView.builder(
+    final responsivePadding = _getResponsivePadding(context);
+    return SingleChildScrollView(
       controller: _scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
-      itemCount: levels.length,
-      itemBuilder: (context, levelIndex) {
-        final level = levels[levelIndex];
-        final color = _getLevelColor(level.level);
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: responsivePadding, vertical: responsivePadding),
+      child: Column(
+        children: levels.asMap().entries.map((entry) {
+          final levelIndex = entry.key;
+          final level = entry.value;
+          final color = _getLevelColor(level.level);
 
-        return Column(
-          children: [
-            if (levelIndex > 0)
-              Container(
-                height: 40,
-                width: 4,
-                color: Colors.grey[300],
+          return Column(
+            children: [
+              if (levelIndex > 0)
+                Container(
+                  height: _getResponsiveValue(context, small: 32, medium: 40, large: 48),
+                  width: 4,
+                  color: Colors.grey[300],
+                ),
+              ScaleTransition(
+                scale: _scaleAnimation,
+                child: _buildLevelNode(level, color),
               ),
-            ScaleTransition(
-              scale: _scaleAnimation,
-              child: _buildLevelNode(level, color),
-            ),
-          ],
-        );
-      },
+            ],
+          );
+        }).toList(),
+      ),
     );
   }
 
   Widget _buildLevelNode(Level level, Color color) {
+    final containerPadding = _getResponsiveValue(context, small: 12.0, medium: 16.0, large: 20.0);
+    final marginBottom = _getResponsiveValue(context, small: 12.0, medium: 16.0, large: 20.0);
+    
     return Container(
-      margin: const EdgeInsets.only(bottom: 16.0),
+      margin: EdgeInsets.only(bottom: marginBottom),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(containerPadding),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
@@ -125,7 +163,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(_getResponsiveValue(context, small: 10, medium: 12, large: 16)),
                       decoration: BoxDecoration(
                         color: color,
                         shape: BoxShape.circle,
@@ -133,18 +171,18 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                       child: Text(
                         '${level.level}',
                         style: GoogleFonts.kalam(
-                          fontSize: 24,
+                          fontSize: _getResponsiveValue(context, small: 20, medium: 24, large: 28),
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: _getResponsiveValue(context, small: 12, medium: 16, large: 20)),
                     Expanded(
                       child: Text(
                         level.title,
                         style: GoogleFonts.kalam(
-                          fontSize: 24,
+                          fontSize: _getResponsiveValue(context, small: 20, medium: 24, large: 28),
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
@@ -152,13 +190,13 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: _getResponsiveValue(context, small: 12, medium: 16, large: 20)),
                 level.sublevels.isEmpty
                     ? Center(
                         child: Text(
                           '🔒 Coming Soon!',
                           style: GoogleFonts.kalam(
-                            fontSize: 20,
+                            fontSize: _getResponsiveValue(context, small: 16, medium: 20, large: 24),
                             color: Colors.grey,
                             fontStyle: FontStyle.italic,
                           ),
@@ -174,14 +212,18 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
   }
 
   Widget _buildSublevels(Level level, Color color) {
+    final columns = _getResponsiveColumns(context);
+    final spacing = _getResponsiveValue(context, small: 6, medium: 8, large: 12);
+    final aspectRatio = _getResponsiveValue(context, small: 1.0, medium: 0.95, large: 0.9);
+    
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        crossAxisSpacing: spacing,
+        mainAxisSpacing: spacing,
+        childAspectRatio: aspectRatio,
       ),
       itemCount: level.sublevels.length,
       itemBuilder: (context, index) {
@@ -213,32 +255,35 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.play_circle_fill,
                       color: color,
-                      size: 32,
+                      size: _getResponsiveValue(context, small: 24, medium: 28, large: 32),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: _getResponsiveValue(context, small: 4, medium: 6, large: 8)),
                     Text(
                       sublevel.level.toString(),
                       style: GoogleFonts.kalam(
-                        fontSize: 18,
+                        fontSize: _getResponsiveValue(context, small: 14, medium: 16, large: 18),
                         fontWeight: FontWeight.bold,
                         color: color,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      sublevel.name,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.kalam(
-                        fontSize: 14,
-                        color: color,
-                        fontStyle: FontStyle.italic,
+                    SizedBox(height: _getResponsiveValue(context, small: 2, medium: 2, large: 4)),
+                    Flexible(
+                      child: Text(
+                        sublevel.name,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.kalam(
+                          fontSize: _getResponsiveValue(context, small: 10, medium: 12, large: 14),
+                          color: color,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -258,7 +303,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
         title: Text(
           'Learn Tibetan',
           style: GoogleFonts.kalam(
-            fontSize: 24,
+            fontSize: _getResponsiveValue(context, small: 20, medium: 24, large: 28),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -281,7 +326,38 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _buildLevelPath(),
+          : levels.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: _getResponsiveValue(context, small: 48, medium: 64, large: 80),
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: _getResponsiveValue(context, small: 12, medium: 16, large: 20)),
+                      Text(
+                        'No levels found',
+                        style: GoogleFonts.kalam(
+                          fontSize: _getResponsiveValue(context, small: 16, medium: 20, large: 24),
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          _loadLevels();
+                        },
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : _buildLevelPath(),
     );
   }
 }

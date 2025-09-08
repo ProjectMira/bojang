@@ -4,7 +4,14 @@ import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationService().init();
+  
+  // Initialize notification service but don't wait for it to prevent iOS loading issues
+  try {
+    NotificationService().init();
+  } catch (e) {
+    print('Notification service initialization failed: $e');
+  }
+  
   runApp(const MyApp());
 }
 
