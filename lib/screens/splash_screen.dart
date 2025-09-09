@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'level_selection_screen.dart';
 
@@ -73,8 +72,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Logo - clean without container
-              SvgPicture.asset(
-                'logos/Bojang/Square.svg',
+              Image.asset(
+                'logos/Bojang/logo.jpg',
                 width: 250,
                 height: 250,
                 fit: BoxFit.contain,

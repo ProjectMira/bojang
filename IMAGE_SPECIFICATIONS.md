@@ -156,3 +156,4 @@ bojang/
 4. **All other sizes** - Can be generated from the primary ones
 
 Once you provide these images, I'll integrate them into the app and ensure everything works perfectly!
+

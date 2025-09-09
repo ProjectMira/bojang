@@ -131,3 +131,4 @@ flutter build android
 ---
 
 **Next Steps**: Use an app icon generator tool with the provided logo.svg file to create all required icon sizes, then replace the existing files following this guide.
+
