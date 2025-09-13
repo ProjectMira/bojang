@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'level_selection_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -16,7 +17,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 3000),
       vsync: this,
     );
 
@@ -30,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // Navigate to LevelSelectionScreen after animation
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Future.delayed(const Duration(milliseconds: 200), () {
+        Future.delayed(const Duration(milliseconds: 100), () {
           Navigator.of(context).pushReplacement(
             PageRouteBuilder(
               pageBuilder: (context, animation, secondaryAnimation) => const LevelSelectionScreen(),
@@ -63,28 +64,59 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF2C97DD), // New blue background
       body: Center(
         child: FadeTransition(
           opacity: _animation,
-          child: Container(
-            width: 200,
-            height: 200,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.black,
-            ),
-            child: const Center(
-              child: Text(
-                'bojang',
-                style: TextStyle(
-                  fontSize: 32,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w300,
-                  letterSpacing: 1.5,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo - clean without container
+              Image.asset(
+                'logos/Bojang/logo.jpg',
+                width: 250,
+                height: 250,
+                fit: BoxFit.contain,
+              ),
+              
+              const SizedBox(height: 30),
+              
+              // App Name - "Bojang" in big and bold
+              Text(
+                'BOJANG',
+                style: GoogleFonts.fredoka(  // Balloon-style font alternative
+                  fontSize: 42,
+                  fontWeight: FontWeight.w800, // Extra bold
+                  color: const Color(0xFFAE6B45), // New brown color
+                  letterSpacing: 2.0,
                 ),
               ),
-            ),
+              
+              const SizedBox(height: 15),
+              
+              // Tagline
+              Text(
+                'Learn Tibetan Language',
+                style: GoogleFonts.fredoka(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800, // Extra bold
+                  color: const Color(0xFFAE6B45), // New brown color
+                  letterSpacing: 0.5,
+                ),
+              ),
+              
+              // Additional tagline
+              const SizedBox(height: 8),
+              Text(
+                'བོད་ཡིག་སློབ་པ།',
+                style: GoogleFonts.fredoka(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800, // Extra bold
+                  color: const Color(0xFFAE6B45), // New brown color
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'dart:typed_data';
 
 /// Helper class to set up common test mocks and utilities
 class TestHelpers {
@@ -70,7 +71,7 @@ class TestHelpers {
   }
   ''';
 
-  /// Sets up mock asset loading for tests
+  /// Comprehensive asset mocking that handles all asset types
   static void setupAssetMocks() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
@@ -83,226 +84,265 @@ class TestHelpers {
             return mockLevelsData;
           } else if (assetPath.startsWith('assets/quiz_data/level-')) {
             return mockQuizData;
-          } else if (assetPath == 'assets/audio/correct.mp3') {
-            return ''; // Mock audio file
-          } else if (assetPath == 'assets/audio/incorrect.mp3') {
-            return ''; // Mock audio file
+          } else if (assetPath == 'AssetManifest.json') {
+            return '''
+            {
+              "assets/quiz_data/levels.json": ["assets/quiz_data/levels.json"],
+              "packages/google_fonts/fonts/Kalam-Regular.ttf": ["packages/google_fonts/fonts/Kalam-Regular.ttf"],
+              "packages/google_fonts/fonts/Kalam-Bold.ttf": ["packages/google_fonts/fonts/Kalam-Bold.ttf"]
+            }
+            ''';
+          } else if (assetPath == 'AssetManifest.bin') {
+            return Uint8List(0);
+          } else if (assetPath == 'FontManifest.json') {
+            return '''
+            [
+              {
+                "family": "Kalam",
+                "fonts": [
+                  {"asset": "packages/google_fonts/fonts/Kalam-Regular.ttf"},
+                  {"asset": "packages/google_fonts/fonts/Kalam-Bold.ttf", "weight": 700}
+                ]
+              }
+            ]
+            ''';
+          } else if (assetPath.contains('google_fonts') || assetPath.contains('Kalam')) {
+            return ''; // Mock font content
           }
+        } else if (methodCall.method == 'load') {
+          // Handle binary asset loading (fonts, images)
+          return Uint8List.fromList([0, 0, 0, 0]); // Minimal data
         }
         return null;
       },
     );
   }
 
-  /// Cleans up asset mocks after tests
-  static void cleanupAssetMocks() {
+  /// Set up comprehensive platform mocking
+  static void setupPlatformMocks() {
+    // System Chrome and platform services
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(const MethodChannel('flutter/assets'), null);
+        .setMockMethodCallHandler(
+      const MethodChannel('flutter/platform'),
+      (MethodCall methodCall) async {
+        switch (methodCall.method) {
+          case 'SystemChrome.setApplicationSwitcherDescription':
+          case 'SystemChrome.setSystemUIOverlayStyle':
+          case 'SystemNavigator.pop':
+          case 'HapticFeedback.vibrate':
+          case 'Clipboard.setData':
+            return null;
+          case 'Clipboard.getData':
+            return <String, dynamic>{'text': ''};
+          default:
+            return null;
+        }
+      },
+    );
+
+    // Additional SystemChrome mocking with proper method channel
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('flutter/platform_views'),
+      (MethodCall methodCall) async => null,
+    );
+
+    // Connectivity
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/connectivity'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'check') return 'none';
+        return null;
+      },
+    );
+
+    // Path provider
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        switch (methodCall.method) {
+          case 'getApplicationDocumentsDirectory':
+            return '/mock/documents';
+          case 'getTemporaryDirectory':
+            return '/mock/temp';
+          default:
+            return null;
+        }
+      },
+    );
   }
 
-  /// Sets up mock method channel for notification service (both iOS and Android)
+  /// Set up Google Fonts mocking to prevent network requests and font loading issues
+  static void setupGoogleFontsMocks() {
+    // Mock the Google Fonts plugin channel
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/google_fonts'),
+      (MethodCall methodCall) async => null,
+    );
+
+    // Mock HTTP requests for fonts
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/http'),
+      (MethodCall methodCall) async => null,
+    );
+  }
+
+  /// Set up notification service mocks
   static void setupNotificationMocks() {
-    // Mock flutter_local_notifications (cross-platform)
+    // Flutter local notifications
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
       const MethodChannel('flutter_local_notifications'),
       (MethodCall methodCall) async {
-        if (methodCall.method == 'initialize') {
-          return true;
-        } else if (methodCall.method == 'zonedSchedule') {
-          return null;
-        } else if (methodCall.method == 'cancelAll') {
-          return null;
-        } else if (methodCall.method == 'requestPermissions') {
-          return true; // iOS specific
-        } else if (methodCall.method == 'getNotificationSettings') {
-          return <String, dynamic>{
-            'sound': true,
-            'alert': true,
-            'badge': true,
-          };
+        switch (methodCall.method) {
+          case 'initialize':
+            return true;
+          case 'zonedSchedule':
+          case 'cancelAll':
+            return null;
+          case 'requestPermissions':
+            return true;
+          case 'getNotificationSettings':
+            return <String, dynamic>{
+              'sound': true,
+              'alert': true,
+              'badge': true,
+            };
+          default:
+            return null;
         }
-        return null;
       },
     );
 
-    // Mock timezone initialization (cross-platform)
+    // Timezone
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
       const MethodChannel('plugins.flutter.io/timezone'),
       (MethodCall methodCall) async {
         if (methodCall.method == 'getTimeZoneName') {
-          return 'America/New_York'; // Default timezone
+          return 'America/New_York';
         }
         return null;
       },
     );
 
-    // Mock audio players (cross-platform)
+    // Audio players
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
       const MethodChannel('xyz.luan/audioplayers'),
       (MethodCall methodCall) async {
-        if (methodCall.method == 'play') {
-          return {'playerId': 'test_player'};
-        } else if (methodCall.method == 'stop') {
-          return null;
-        } else if (methodCall.method == 'pause') {
-          return null;
+        switch (methodCall.method) {
+          case 'play':
+            return {'playerId': 'test_player'};
+          case 'stop':
+          case 'pause':
+            return null;
+          default:
+            return null;
         }
-        return null;
       },
     );
   }
 
-  /// Cleans up notification mocks
-  static void cleanupNotificationMocks() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-            const MethodChannel('flutter_local_notifications'), null);
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-            const MethodChannel('plugins.flutter.io/timezone'), null);
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-            const MethodChannel('xyz.luan/audioplayers'), null);
-  }
-
-  /// Sets up all common mocks
+  /// Set up all mocks at once
   static void setupAllMocks() {
     setupAssetMocks();
+    setupPlatformMocks();
+    setupGoogleFontsMocks();
     setupNotificationMocks();
   }
 
-  /// Cleans up all mocks
+  /// Clean up all mocks
   static void cleanupAllMocks() {
-    cleanupAssetMocks();
-    cleanupNotificationMocks();
+    final channels = [
+      'flutter/assets',
+      'flutter/platform',
+      'flutter/platform_views',
+      'plugins.flutter.io/connectivity',
+      'plugins.flutter.io/path_provider',
+      'plugins.flutter.io/google_fonts',
+      'plugins.flutter.io/http',
+      'flutter_local_notifications',
+      'plugins.flutter.io/timezone',
+      'xyz.luan/audioplayers',
+    ];
+
+    for (final channel in channels) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(MethodChannel(channel), null);
+    }
   }
 
-  /// Waits for async operations with timeout
-  static Future<void> waitForAsyncOperation(WidgetTester tester, {
-    Duration timeout = const Duration(milliseconds: 500),
-  }) async {
-    await tester.pump();
-    await tester.pump(timeout);
-  }
-
-  /// Pumps widget with proper setup for async operations
+  /// Pump widget with proper setup and timeout handling
   static Future<void> pumpWidgetWithMocks(
     WidgetTester tester,
     Widget widget, {
     bool setupMocks = true,
+    Duration timeout = const Duration(seconds: 4), // Increased timeout for splash screen
   }) async {
     if (setupMocks) {
       setupAllMocks();
     }
     
     await tester.pumpWidget(widget);
-    await waitForAsyncOperation(tester);
+    
+    // Allow async operations to complete with proper timeout for animations
+    await tester.pump();
+    await tester.pump(timeout);
+    
+    // Additional pumps to ensure all async operations complete
+    await tester.pumpAndSettle(timeout);
   }
 
-  /// Test group setup with common mock setup
+  /// Wait for async operations with proper timeout
+  static Future<void> waitForAsync(WidgetTester tester, {
+    Duration timeout = const Duration(seconds: 4),
+  }) async {
+    await tester.pump();
+    await tester.pump(timeout);
+    await tester.pumpAndSettle(timeout);
+  }
+
+  /// Test group setup with mocks
   static void setupTestGroup() {
     setUp(() {
       setupAllMocks();
-      setupPlatformSpecificMocks();
     });
 
     tearDown(() {
       cleanupAllMocks();
-      cleanupPlatformSpecificMocks();
     });
   }
 
-  /// Sets up platform-specific mocks for iOS/Android compatibility
-  static void setupPlatformSpecificMocks() {
-    // Platform-specific system chrome settings
+  /// Mock asset loading with custom data
+  static void mockAssetString(String path, String content) {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('flutter/platform'),
+      const MethodChannel('flutter/assets'),
       (MethodCall methodCall) async {
-        if (methodCall.method == 'SystemChrome.setSystemUIOverlayStyle') {
-          return null;
-        } else if (methodCall.method == 'SystemNavigator.pop') {
-          return null;
-        } else if (methodCall.method == 'HapticFeedback.vibrate') {
-          return null;
+        if (methodCall.method == 'loadString' && methodCall.arguments == path) {
+          return content;
         }
         return null;
       },
     );
-
-    // Platform-specific path provider
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall methodCall) async {
-        if (methodCall.method == 'getApplicationDocumentsDirectory') {
-          return '/mock/documents';
-        } else if (methodCall.method == 'getTemporaryDirectory') {
-          return '/mock/temp';
-        }
-        return null;
-      },
-    );
-  }
-
-  /// Cleans up platform-specific mocks
-  static void cleanupPlatformSpecificMocks() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(const MethodChannel('flutter/platform'), null);
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-            const MethodChannel('plugins.flutter.io/path_provider'), null);
-  }
-
-  /// Cross-platform device sizes for testing
-  static const Map<String, List<Size>> platformScreenSizes = {
-    'small': [
-      Size(320, 568), // iPhone SE / Small Android
-      Size(360, 640), // Android Compact
-    ],
-    'medium': [
-      Size(375, 667), // iPhone 8
-      Size(411, 731), // Android Standard
-    ],
-    'large': [
-      Size(414, 896), // iPhone XR/11
-      Size(428, 926), // iPhone Plus / Large Android
-    ],
-    'tablet': [
-      Size(768, 1024), // iPad / Android Tablet
-      Size(800, 1280), // Large Android Tablet
-    ],
-  };
-
-  /// Test widget on multiple screen sizes (cross-platform)
-  static Future<void> testOnMultipleScreenSizes(
-    WidgetTester tester,
-    Widget widget,
-    Future<void> Function(Size screenSize, String category) testCallback,
-  ) async {
-    for (final category in platformScreenSizes.keys) {
-      for (final size in platformScreenSizes[category]!) {
-        await tester.binding.setSurfaceSize(size);
-        await pumpWidgetWithMocks(tester, widget);
-        await testCallback(size, category);
-        await tester.binding.setSurfaceSize(null);
-      }
-    }
   }
 }
 
 /// Extension to make testing more convenient
 extension WidgetTesterExtensions on WidgetTester {
-  /// Pumps and waits with timeout to avoid infinite waits
-  Future<void> pumpWithTimeout([Duration duration = const Duration(milliseconds: 100)]) async {
+  /// Pumps and waits with reasonable timeout
+  Future<void> pumpWithTimeout([Duration duration = const Duration(seconds: 4)]) async {
     await pump();
     await pump(duration);
+    await pumpAndSettle(duration);
   }
 
-  /// Finds text that may be in different widgets
+  /// Finds text anywhere in the widget tree
   Finder findTextAnywhere(String text) {
     return find.textContaining(text);
   }
