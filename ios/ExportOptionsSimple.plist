@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>method</key>
-    <string>development</string>
+    <string>app-store</string>
     <key>uploadBitcode</key>
     <false/>
     <key>uploadSymbols</key>
-    <false/>
+    <true/>
     <key>compileBitcode</key>
     <false/>
     <key>destination</key>
@@ -20,4 +20,5 @@
     <string>&lt;none&gt;</string>
 </dict>
 </plist>
+
 
