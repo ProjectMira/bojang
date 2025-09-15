@@ -1,0 +1,104 @@
+### Bojang Backend API Testing
+### Use with VS Code REST Client extension or similar tools
+
+@baseUrl = http://localhost:3000
+# @baseUrl = https://your-service.onrender.com
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Authentication - Register User
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "username": "testuser",
+    "password": "testpass123",
+    "displayName": "Test User"
+}
+
+### Authentication - Login
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "testpass123"
+}
+
+### Get Categories
+GET {{baseUrl}}/api/v1/content/categories
+
+### Get Levels
+GET {{baseUrl}}/api/v1/content/levels
+
+### Get Questions for a Level (replace level-id with actual ID)
+GET {{baseUrl}}/api/v1/content/levels/level-id/questions
+
+### Get User Progress (requires authentication)
+GET {{baseUrl}}/api/v1/progress/user
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Submit Quiz Session (requires authentication)
+POST {{baseUrl}}/api/v1/progress/quiz-session
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+    "levelId": "level-id",
+    "results": [
+        {
+            "questionId": "question-id",
+            "userAnswer": "answer",
+            "isCorrect": true,
+            "timeTaken": 5
+        }
+    ],
+    "totalScore": 100,
+    "accuracy": 1.0
+}
+
+### Get Achievements
+GET {{baseUrl}}/api/v1/achievements
+
+### Get User Achievements (requires authentication)
+GET {{baseUrl}}/api/v1/achievements/user
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Get Weekly Leaderboard
+GET {{baseUrl}}/api/v1/leaderboard/weekly
+
+### Get Monthly Leaderboard
+GET {{baseUrl}}/api/v1/leaderboard/monthly
+
+### Test Static File - Image
+GET {{baseUrl}}/media/images/animals/cat.jpg
+
+### Test Static File - Audio
+GET {{baseUrl}}/media/audio/animals/khyi_dog.wav
+
+### Sync Data (requires authentication)
+POST {{baseUrl}}/api/v1/sync/upload
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+    "quizSessions": [],
+    "gameScores": [],
+    "achievements": []
+}
+
+### Get User Profile (requires authentication)
+GET {{baseUrl}}/api/v1/user/profile
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### Update User Profile (requires authentication)
+PUT {{baseUrl}}/api/v1/user/profile
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+    "displayName": "Updated Name",
+    "preferredLanguage": "en"
+}
