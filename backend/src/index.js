@@ -6,6 +6,9 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 
+// Import Swagger configuration
+import { specs, swaggerUi } from './config/swagger.js';
+
 // Import routes
 import authRoutes from './routes/auth.js';
 import contentRoutes from './routes/content.js';
@@ -77,6 +80,13 @@ app.use((req, res, next) => {
 // =====================================================
 // ROUTES
 // =====================================================
+
+// Swagger Documentation
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Bojang API Documentation',
+  customfavIcon: '/favicon.ico'
+}));
 
 // Health check
 app.get('/health', (req, res) => {

@@ -7,6 +7,44 @@ const router = express.Router();
 // CATEGORIES
 // =====================================================
 
+/**
+ * @swagger
+ * /content/categories:
+ *   get:
+ *     tags:
+ *       - Content
+ *     summary: Get all categories
+ *     description: Retrieve all active categories with their levels
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Categories retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 categories:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Category'
+ *                 count:
+ *                   type: integer
+ *                   description: Number of categories
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Failed to fetch categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/categories', authenticateToken, async (req, res) => {
   try {
     const categories = await req.prisma.category.findMany({
@@ -37,6 +75,45 @@ router.get('/categories', authenticateToken, async (req, res) => {
 // LEVELS
 // =====================================================
 
+/**
+ * @swagger
+ * /content/categories/{categoryId}/levels:
+ *   get:
+ *     tags:
+ *       - Content
+ *     summary: Get levels for a category
+ *     description: Retrieve all levels for a specific category
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: categoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category ID
+ *     responses:
+ *       200:
+ *         description: Levels retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 levels:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Level'
+ *                 count:
+ *                   type: integer
+ *                   description: Number of levels
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Category not found
+ *       500:
+ *         description: Failed to fetch levels
+ */
 router.get('/categories/:categoryId/levels', authenticateToken, async (req, res) => {
   try {
     const { categoryId } = req.params;
