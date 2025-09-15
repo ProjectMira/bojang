@@ -24,16 +24,23 @@ class GoogleAuthService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    _googleSignIn = GoogleSignIn(
-      scopes: [
-        'email',
-        'profile',
-      ],
-    );
+    try {
+      _googleSignIn = GoogleSignIn(
+        scopes: [
+          'email',
+          'profile',
+        ],
+      );
 
-    // Load cached user data if available
-    await _loadCachedUser();
-    _isInitialized = true;
+      // Load cached user data if available
+      await _loadCachedUser();
+      _isInitialized = true;
+      print('Google Sign-In initialized successfully');
+    } catch (e) {
+      print('Google Sign-In initialization error: $e');
+      // Still mark as initialized to prevent repeated attempts
+      _isInitialized = true;
+    }
   }
 
   // Sign in with Google
@@ -44,6 +51,7 @@ class GoogleAuthService {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         // User canceled the sign-in
+        print('Google sign-in cancelled by user');
         return null;
       }
 
@@ -62,30 +70,43 @@ class GoogleAuthService {
         authProvider: AuthProvider.google,
       );
 
-      // Send to backend API for registration/login
-      final result = await _apiService.googleAuth(
-        googleId: googleUser.id,
-        email: googleUser.email,
-        displayName: googleUser.displayName ?? 'Google User',
-        profileImageUrl: googleUser.photoUrl,
-        idToken: googleAuth.idToken,
-        accessToken: googleAuth.accessToken,
-      );
+      // Try to send to backend API for registration/login
+      try {
+        final result = await _apiService.googleAuth(
+          googleId: googleUser.id,
+          email: googleUser.email,
+          displayName: googleUser.displayName ?? 'Google User',
+          profileImageUrl: googleUser.photoUrl,
+          idToken: googleAuth.idToken,
+          accessToken: googleAuth.accessToken,
+        );
 
-      if (result != null) {
-        // Update user with backend data if available
-        final backendUser = User.fromJson(result['user']);
-        _currentUser = backendUser;
-        await _cacheUser(backendUser);
-        return backendUser;
-      } else {
-        // Use Google data if backend is not available
-        _currentUser = user;
-        await _cacheUser(user);
-        return user;
+        if (result != null) {
+          // Update user with backend data if available
+          final backendUser = User.fromJson(result['user']);
+          _currentUser = backendUser;
+          await _cacheUser(backendUser);
+          return backendUser;
+        }
+      } catch (apiError) {
+        print('Backend API error during Google auth: $apiError');
+        // Continue with offline mode
       }
+
+      // Use Google data if backend is not available or failed
+      _currentUser = user;
+      await _cacheUser(user);
+      return user;
     } catch (error) {
       print('Google Sign-In error: $error');
+      // Provide more specific error information
+      if (error.toString().contains('sign_in_canceled')) {
+        print('User cancelled Google sign-in');
+      } else if (error.toString().contains('network_error')) {
+        print('Network error during Google sign-in');
+      } else if (error.toString().contains('sign_in_failed')) {
+        print('Google sign-in failed - check configuration');
+      }
       return null;
     }
   }

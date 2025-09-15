@@ -99,9 +99,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Transparent logo head
+              // Logo with blue background showing yak head in color
               Image.asset(
-                'logos/Bojang/without_background.jpg',
+                'logos/Bojang/logo.jpg',
                 width: 280,
                 height: 280,
                 fit: BoxFit.contain,
@@ -112,10 +112,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               // App Name - "Bojang" in big and bold
               Text(
                 'BOJANG',
-                style: GoogleFonts.comfortaa(
+                style: GoogleFonts.nunito(
                   fontSize: 48,
-                  fontWeight: FontWeight.w700, // Feather Bold equivalent
-                  color: Colors.white,
+                  fontWeight: FontWeight.w800, // Extra bold for feather-like effect
+                  color: const Color(0xFF8B4513), // Saddle brown color
                   letterSpacing: 3.0,
                   shadows: [
                     Shadow(
@@ -132,10 +132,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               // Tagline
               Text(
                 'Tibetan Learning App',
-                style: GoogleFonts.comfortaa(
+                style: GoogleFonts.nunito(
                   fontSize: 20,
-                  fontWeight: FontWeight.w400, // Feather regular equivalent
-                  color: Colors.white,
+                  fontWeight: FontWeight.w700, // Bold for consistency
+                  color: const Color(0xFF8B4513), // Saddle brown color
                   letterSpacing: 1.0,
                   shadows: [
                     Shadow(
@@ -151,10 +151,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               const SizedBox(height: 12),
               Text(
                 'བོད་ཡིག་སློབ་པ།',
-                style: GoogleFonts.comfortaa(
+                style: GoogleFonts.nunito(
                   fontSize: 18,
-                  fontWeight: FontWeight.w400, // Feather regular equivalent
-                  color: Colors.white.withOpacity(0.9),
+                  fontWeight: FontWeight.w600, // Semi-bold for consistency
+                  color: const Color(0xFF8B4513).withOpacity(0.9), // Brown with opacity
                   letterSpacing: 0.5,
                   shadows: [
                     Shadow(

@@ -75,12 +75,24 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     try {
       final user = await _googleAuthService.signInWithGoogle();
       if (user != null && mounted) {
+        _showSnackBar('Welcome ${user.displayName}!', isSuccess: true);
+        await Future.delayed(const Duration(milliseconds: 500)); // Brief delay to show success
         _navigateToMainScreen();
       } else {
-        _showSnackBar('Google sign-in was cancelled or failed');
+        if (mounted) {
+          _showSnackBar('Google sign-in was cancelled or failed. You can still use the app by clicking "Skip for now".');
+        }
       }
     } catch (e) {
-      _showSnackBar('Google sign-in failed: ${e.toString()}');
+      if (mounted) {
+        String errorMessage = 'Google sign-in failed';
+        if (e.toString().contains('sign_in_failed')) {
+          errorMessage = 'Google sign-in configuration issue. Please try again or skip for now.';
+        } else if (e.toString().contains('network_error')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        }
+        _showSnackBar('$errorMessage\n\nYou can still use the app by clicking "Skip for now".');
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -126,10 +138,16 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _showSnackBar(String message) {
+  void _showSnackBar(String message, {bool isSuccess = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isSuccess ? Colors.green : null,
+        duration: isSuccess 
+            ? const Duration(milliseconds: 1500) 
+            : const Duration(milliseconds: 4000),
+      ),
     );
   }
 
