@@ -1,0 +1,90 @@
+{
+  "level": 1.10,
+  "title": "Animal Sounds - Audio Recognition",
+  "description": "Listen to Tibetan pronunciation of animal names and identify the correct animal",
+  "exercises": [
+    {
+      "type": "audio_multiple_choice",
+      "questionType": "AUDIO_TO_TEXT",
+      "questionAudioUrl": "assets/audio/animals/khyi_dog.wav",
+      "questionText": "Listen to the Tibetan word. What animal is this?",
+      "options": [
+        { "optionText": "Dog", "optionTextTibetan": "ཁྱི" },
+        { "optionText": "Cat", "optionTextTibetan": "ཞི་མི" },
+        { "optionText": "Horse", "optionTextTibetan": "རྟ" },
+        { "optionText": "Bird", "optionTextTibetan": "བྱ" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "audio_multiple_choice",
+      "questionType": "AUDIO_TO_TEXT",
+      "questionAudioUrl": "assets/audio/animals/zhimi_cat.wav",
+      "questionText": "Listen to the Tibetan word. What animal is this?",
+      "options": [
+        { "optionText": "Dog", "optionTextTibetan": "ཁྱི" },
+        { "optionText": "Cat", "optionTextTibetan": "ཞི་མི" },
+        { "optionText": "Fox", "optionTextTibetan": "ཝ་མོ" },
+        { "optionText": "Wolf", "optionTextTibetan": "སྤྱང་ཀི" }
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "audio_multiple_choice",
+      "questionType": "AUDIO_TO_TEXT",
+      "questionAudioUrl": "assets/audio/animals/rta_horse.wav",
+      "questionText": "Listen to the Tibetan word. What animal is this?",
+      "options": [
+        { "optionText": "Yak", "optionTextTibetan": "གཡག" },
+        { "optionText": "Cow", "optionTextTibetan": "བ་ཕྱུགས" },
+        { "optionText": "Horse", "optionTextTibetan": "རྟ" },
+        { "optionText": "Donkey", "optionTextTibetan": "བོང་བུ" }
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "text_to_audio",
+      "questionType": "TEXT_TO_AUDIO",
+      "questionText": "How do you pronounce 'Tiger' in Tibetan?",
+      "questionTextTibetan": "སྟག",
+      "options": [
+        { "optionAudioUrl": "assets/audio/animals/stag_tiger.wav" },
+        { "optionAudioUrl": "assets/audio/animals/sengge_lion.wav" },
+        { "optionAudioUrl": "assets/audio/animals/dom_bear.wav" },
+        { "optionAudioUrl": "assets/audio/animals/spyang_wolf.wav" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "text_to_audio",
+      "questionType": "TEXT_TO_AUDIO",
+      "questionText": "How do you pronounce 'Elephant' in Tibetan?",
+      "questionTextTibetan": "གླང་ཆེན",
+      "options": [
+        { "optionAudioUrl": "assets/audio/animals/glag_yak.wav" },
+        { "optionAudioUrl": "assets/audio/animals/glag_yak.wav" },
+        { "optionAudioUrl": "assets/audio/animals/zhimi_cat.wav" },
+        { "optionAudioUrl": "assets/audio/animals/rta_horse.wav" }
+      ],
+      "correctAnswerIndex": 0
+    }
+  ],
+  "metadata": {
+    "totalExercises": 5,
+    "exerciseTypes": ["audio_multiple_choice", "text_to_audio"],
+    "estimatedTime": "8-12 minutes",
+    "difficulty": "beginner",
+    "skillsLearned": [
+      "Audio recognition of animal names",
+      "Tibetan pronunciation practice",
+      "Listening comprehension",
+      "Audio-text association"
+    ],
+    "prereq": "Level 1.9 completion",
+    "s3BucketInfo": {
+      "bucketName": "bojang-audio-bucket",
+      "region": "us-east-1",
+      "publicAccess": true
+    }
+  }
+}

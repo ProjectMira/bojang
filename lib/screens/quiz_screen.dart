@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import '../models/quiz_question.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:provider/provider.dart';
+import '../services/progress_service.dart';
 
 class QuizScreen extends StatefulWidget {
   final String topicFilePath;
@@ -124,6 +126,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       showFeedback = true;
       if (isCorrect) score++;
     });
+    
     if (isCorrect) {
       _showFeedbackDialog(true);
       Future.delayed(const Duration(seconds: 2), () {
@@ -158,6 +161,11 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
 
   void _showCompletionDialog(int totalQuestions) {
     final percentage = (score / totalQuestions) * 100;
+    final category = _getCategoryFromFilePath(widget.topicFilePath);
+    
+    // Update progress using ProgressService
+    final progressService = Provider.of<ProgressService>(context, listen: false);
+    progressService.updateQuizResults(category, score, totalQuestions, context: context);
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -395,14 +403,31 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               Container(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Score: $score',
+                      'Question ${currentQuestionIndex + 1} of ${questions.length}',
                       style: GoogleFonts.kalam(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue[700],
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.grey.shade400 
+                            : Colors.grey.shade600,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Score: $score',
+                        style: GoogleFonts.kalam(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
                       ),
                     ),
                   ],
@@ -411,14 +436,43 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               // Progress bar
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: currentQuestionIndex / questions.length,
-                    backgroundColor: Colors.grey.shade200,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-                    minHeight: 10,
-                  ),
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: (currentQuestionIndex + 1) / questions.length,
+                        backgroundColor: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.grey.shade700 
+                            : Colors.grey.shade200,
+                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                        minHeight: 8,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${((currentQuestionIndex + 1) / questions.length * 100).toInt()}% Complete',
+                          style: GoogleFonts.kalam(
+                            fontSize: 12,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.grey.shade400 
+                                : Colors.grey.shade600,
+                          ),
+                        ),
+                        Text(
+                          'Accuracy: ${score > 0 ? ((score / (currentQuestionIndex + 1)) * 100).toInt() : 0}%',
+                          style: GoogleFonts.kalam(
+                            fontSize: 12,
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
               // Question Card
@@ -565,5 +619,21 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     // Return the mapped display name or format the filename as a fallback
     return displayNames[filename] ?? 
            filename.replaceAll('_', ' ').replaceAll('-', ' ').toUpperCase();
+  }
+  
+  String _getCategoryFromFilePath(String filePath) {
+    // Extract category from file path for progress tracking
+    final filename = filePath.split('/').last.split('.').first;
+    
+    // Map quiz files to categories for progress tracking
+    if (filename.contains('alphabet') || filename.contains('vowels')) {
+      return 'alphabet';
+    } else if (filename.contains('numbers') || filename.contains('calender')) {
+      return 'numbers';
+    } else if (filename.contains('introduction') || filename.contains('greetings')) {
+      return 'greetings';
+    }
+    
+    return filename.toLowerCase().replaceAll('_', ' ');
   }
 } 
