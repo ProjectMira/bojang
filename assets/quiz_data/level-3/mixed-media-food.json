@@ -1,0 +1,132 @@
+{
+  "level": 3.8,
+  "title": "Food & Dining - Mixed Media",
+  "description": "Advanced food vocabulary using text, audio, and images",
+  "exercises": [
+    {
+      "type": "audio_multiple_choice",
+      "questionType": "AUDIO_TO_TEXT",
+      "questionAudioUrl": "assets/audio/food/momo.wav",
+      "questionText": "Listen to the Tibetan word. What food is this?",
+      "options": [
+        { "optionText": "Momo (Dumpling)", "optionTextTibetan": "མོག་མོག" },
+        { "optionText": "Thukpa (Noodle soup)", "optionTextTibetan": "ཐུག་པ" },
+        { "optionText": "Tsampa (Barley flour)", "optionTextTibetan": "རྩམ་པ" },
+        { "optionText": "Butter tea", "optionTextTibetan": "བོད་ཇ" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "image_multiple_choice",
+      "questionType": "IMAGE_TO_TEXT",
+      "questionImageUrl": "assets/images/food/butter-tea.jpg",
+      "questionText": "What traditional Tibetan drink is shown?",
+      "options": [
+        { "optionText": "Sweet tea", "optionTextTibetan": "ཇ་མངར་མོ" },
+        { "optionText": "Butter tea", "optionTextTibetan": "བོད་ཇ" },
+        { "optionText": "Milk tea", "optionTextTibetan": "འོ་མ་ཇ" },
+        { "optionText": "Green tea", "optionTextTibetan": "ཇ་སེར་པོ" }
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "text_to_image",
+      "questionType": "TEXT_TO_IMAGE",
+      "questionText": "Select the image that shows 'Tsampa' (roasted barley flour)",
+      "questionTextTibetan": "རྩམ་པ",
+      "options": [
+        { "optionImageUrl": "assets/images/food/tsampa.jpg" },
+        { "optionImageUrl": "assets/images/food/momo.jpg" },
+        { "optionImageUrl": "assets/images/food/thukpa.jpg" },
+        { "optionImageUrl": "assets/images/food/shapale.jpg" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "text_to_audio",
+      "questionType": "TEXT_TO_AUDIO",
+      "questionText": "How do you pronounce 'Thukpa' (noodle soup)?",
+      "questionTextTibetan": "ཐུག་པ",
+      "options": [
+        { "optionAudioUrl": "assets/audio/food/thukpa.wav" },
+        { "optionAudioUrl": "assets/audio/food/momo.wav" },
+        { "optionAudioUrl": "assets/audio/food/tsampa.wav" },
+        { "optionAudioUrl": "assets/audio/food/shapale.wav" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "image_multiple_choice",
+      "questionType": "IMAGE_TO_TEXT",
+      "questionImageUrl": "assets/images/food/yak-meat.jpg",
+      "questionText": "What type of meat is commonly eaten in Tibet?",
+      "options": [
+        { "optionText": "Beef", "optionTextTibetan": "གླང་ཤ" },
+        { "optionText": "Yak meat", "optionTextTibetan": "གཡག་ཤ" },
+        { "optionText": "Mutton", "optionTextTibetan": "ལུག་ཤ" },
+        { "optionText": "Pork", "optionTextTibetan": "ཕག་ཤ" }
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "audio_multiple_choice",
+      "questionType": "AUDIO_TO_TEXT",
+      "questionAudioUrl": "assets/audio/food/gundruk.wav",
+      "questionText": "Listen to the Tibetan word. What vegetable is this?",
+      "options": [
+        { "optionText": "Radish", "optionTextTibetan": "ལ་ཕུག" },
+        { "optionText": "Gundruk (fermented leafy greens)", "optionTextTibetan": "གུང་དྲུག" },
+        { "optionText": "Spinach", "optionTextTibetan": "སྤེན་ཚེ" },
+        { "optionText": "Cabbage", "optionTextTibetan": "སྤང་རྒྱན" }
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "text_to_image",
+      "questionType": "TEXT_TO_IMAGE",
+      "questionText": "Select the image that shows 'Shapale' (Tibetan meat pie)",
+      "questionTextTibetan": "ཤ་པ་ལེ",
+      "options": [
+        { "optionImageUrl": "assets/images/food/momo.jpg" },
+        { "optionImageUrl": "assets/images/food/shapale.jpg" },
+        { "optionImageUrl": "assets/images/food/butter-tea.jpg" },
+        { "optionImageUrl": "assets/images/food/thukpa.jpg" }
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "text_to_audio",
+      "questionType": "TEXT_TO_AUDIO",
+      "questionText": "How do you ask for 'butter tea' in Tibetan?",
+      "questionTextTibetan": "བོད་ཇ་གཅིག་གནང་རོགས",
+      "options": [
+        { "optionAudioUrl": "assets/audio/phrases/butter-tea-request.wav" },
+        { "optionAudioUrl": "assets/audio/phrases/sweet-tea-request.wav" },
+        { "optionAudioUrl": "assets/audio/phrases/water-request.wav" },
+        { "optionAudioUrl": "assets/audio/phrases/milk-request.wav" }
+      ],
+      "correctAnswerIndex": 0
+    }
+  ],
+  "metadata": {
+    "totalExercises": 8,
+    "exerciseTypes": ["audio_multiple_choice", "image_multiple_choice", "text_to_image", "text_to_audio"],
+    "estimatedTime": "15-20 minutes",
+    "difficulty": "advanced",
+    "skillsLearned": [
+      "Traditional Tibetan food vocabulary",
+      "Audio recognition of food terms",
+      "Visual identification of Tibetan dishes",
+      "Restaurant/dining phrases",
+      "Cultural food knowledge"
+    ],
+    "prereq": "Level 3.7 completion",
+    "culturalContext": "Traditional Tibetan cuisine and dining customs",
+    "s3BucketInfo": {
+      "audioBucket": "bojang-audio-bucket",
+      "imagesBucket": "bojang-images-bucket",
+      "region": "us-east-1",
+      "publicAccess": true
+    }
+  }
+}

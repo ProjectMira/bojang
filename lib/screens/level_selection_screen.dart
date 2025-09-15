@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../models/level_models.dart';
+import '../services/progress_service.dart';
 import 'quiz_screen.dart';
-import 'notification_settings_screen.dart';
+import 'settings_screen.dart';
 
 class LevelSelectionScreen extends StatefulWidget {
   const LevelSelectionScreen({super.key});
@@ -105,7 +107,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
     }
   }
 
-  Widget _buildLevelPath() {
+  Widget _buildLevelPath(ProgressService progressService) {
     final responsivePadding = _getResponsivePadding(context);
     return SingleChildScrollView(
       controller: _scrollController,
@@ -127,7 +129,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                 ),
               ScaleTransition(
                 scale: _scaleAnimation,
-                child: _buildLevelNode(level, color),
+                child: _buildLevelNode(level, color, progressService),
               ),
             ],
           );
@@ -136,9 +138,22 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
     );
   }
 
-  Widget _buildLevelNode(Level level, Color color) {
+  Widget _buildLevelNode(Level level, Color color, ProgressService progressService) {
     final containerPadding = _getResponsiveValue(context, small: 12.0, medium: 16.0, large: 20.0);
     final marginBottom = _getResponsiveValue(context, small: 12.0, medium: 16.0, large: 20.0);
+    
+    // Calculate level progress
+    double levelProgress = 0.0;
+    int completedSublevels = 0;
+    for (final sublevel in level.sublevels) {
+      final filename = sublevel.path.split('/').last.split('.').first;
+      final categoryProgress = progressService.categoryProgress[filename] ?? 0.0;
+      if (categoryProgress > 0.7) completedSublevels++;
+      levelProgress += categoryProgress;
+    }
+    if (level.sublevels.isNotEmpty) {
+      levelProgress = levelProgress / level.sublevels.length;
+    }
     
     return Container(
       margin: EdgeInsets.only(bottom: marginBottom),
@@ -179,13 +194,36 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                     ),
                     SizedBox(width: _getResponsiveValue(context, small: 12, medium: 16, large: 20)),
                     Expanded(
-                      child: Text(
-                        level.title,
-                        style: GoogleFonts.kalam(
-                          fontSize: _getResponsiveValue(context, small: 20, medium: 24, large: 28),
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            level.title,
+                            style: GoogleFonts.kalam(
+                              fontSize: _getResponsiveValue(context, small: 20, medium: 24, large: 28),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          if (levelProgress > 0) ...[
+                            const SizedBox(height: 8),
+                            LinearProgressIndicator(
+                              value: levelProgress,
+                              backgroundColor: Colors.grey.shade200,
+                              valueColor: AlwaysStoppedAnimation<Color>(color),
+                              minHeight: 4,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${(levelProgress * 100).toInt()}% Complete • $completedSublevels/${level.sublevels.length} lessons',
+                              style: GoogleFonts.kalam(
+                                fontSize: _getResponsiveValue(context, small: 12, medium: 14, large: 16),
+                                color: color,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ],
@@ -202,7 +240,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                           ),
                         ),
                       )
-                    : _buildSublevels(level, color),
+                    : _buildSublevels(level, color, progressService),
               ],
             ),
           ),
@@ -211,7 +249,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
     );
   }
 
-  Widget _buildSublevels(Level level, Color color) {
+  Widget _buildSublevels(Level level, Color color, ProgressService progressService) {
     final columns = _getResponsiveColumns(context);
     final spacing = _getResponsiveValue(context, small: 6, medium: 8, large: 12);
     final aspectRatio = _getResponsiveValue(context, small: 1.0, medium: 0.95, large: 0.9);
@@ -229,6 +267,11 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
       itemBuilder: (context, index) {
         final sublevel = level.sublevels[index];
         final isLocked = false;
+        
+        // Check completion status
+        final filename = sublevel.path.split('/').last.split('.').first;
+        final progress = progressService.categoryProgress[filename] ?? 0.0;
+        final isCompleted = progress > 0.7;
 
         return Hero(
           tag: 'sublevel_${sublevel.level}_${sublevel.name}',
@@ -257,10 +300,23 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.play_circle_fill,
-                      color: color,
-                      size: _getResponsiveValue(context, small: 24, medium: 28, large: 32),
+                    Stack(
+                      children: [
+                        Icon(
+                          isCompleted ? Icons.check_circle : Icons.play_circle_fill,
+                          color: isCompleted ? Colors.green : color,
+                          size: _getResponsiveValue(context, small: 24, medium: 28, large: 32),
+                        ),
+                        if (progress > 0 && !isCompleted)
+                          Positioned.fill(
+                            child: CircularProgressIndicator(
+                              value: progress,
+                              strokeWidth: 2,
+                              backgroundColor: Colors.transparent,
+                              valueColor: AlwaysStoppedAnimation<Color>(color),
+                            ),
+                          ),
+                      ],
                     ),
                     SizedBox(height: _getResponsiveValue(context, small: 4, medium: 6, large: 8)),
                     Text(
@@ -297,7 +353,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Consumer<ProgressService>(
+      builder: (context, progressService, child) {
+        return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
         title: Text(
@@ -317,7 +375,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const NotificationSettingsScreen(),
+                  builder: (context) => const SettingsScreen(),
                 ),
               );
             },
@@ -357,7 +415,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                     ],
                   ),
                 )
-              : _buildLevelPath(),
+              : _buildLevelPath(progressService),
+        );
+      },
     );
   }
 }
