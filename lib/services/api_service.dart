@@ -8,7 +8,7 @@ import '../models/question.dart';
 import '../models/category.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000/api'; // Change for production
+  static const String baseUrl = 'https://bojang.onrender.com/api'; // Production Render URL
   static const String apiVersion = 'v1';
   
   // Singleton pattern
@@ -50,7 +50,7 @@ class ApiService {
           'email': email,
           'username': username,
           'password': password,
-          'display_name': displayName,
+          'displayName': displayName,
           'device_id': deviceId,
         }),
       );
@@ -112,7 +112,7 @@ class ApiService {
         body: jsonEncode({
           'google_id': googleId,
           'email': email,
-          'display_name': displayName,
+          'displayName': displayName,
           'profile_image_url': profileImageUrl,
           'id_token': idToken,
           'access_token': accessToken,

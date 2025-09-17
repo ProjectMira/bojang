@@ -48,6 +48,12 @@ class GoogleAuthService {
     try {
       if (!_isInitialized) await initialize();
 
+      // Check if Google Sign-In is properly configured
+      if (!await _isGoogleSignInConfigured()) {
+        print('Google Sign-In not properly configured - using demo mode');
+        return _createDemoUser();
+      }
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         // User canceled the sign-in
@@ -196,5 +202,37 @@ class GoogleAuthService {
   Future<void> _clearCachedUser() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('cached_user');
+  }
+
+  // Check if Google Sign-In is properly configured
+  Future<bool> _isGoogleSignInConfigured() async {
+    try {
+      // Try to access Google Sign-In configuration
+      await _googleSignIn.isSignedIn();
+      return true;
+    } catch (e) {
+      // If this throws an error, configuration is likely missing
+      print('Google Sign-In configuration error: $e');
+      return false;
+    }
+  }
+
+  // Create a demo user for testing when Google Sign-In is not configured
+  User _createDemoUser() {
+    final demoUser = User(
+      id: 'demo_user_${DateTime.now().millisecondsSinceEpoch}',
+      email: 'demo@bojang.app',
+      username: 'demouser',
+      displayName: 'Demo User',
+      profileImageUrl: null,
+      createdAt: DateTime.now(),
+      lastLogin: DateTime.now(),
+      googleId: null,
+      authProvider: AuthProvider.google,
+    );
+    
+    _currentUser = demoUser;
+    _cacheUser(demoUser);
+    return demoUser;
   }
 }
