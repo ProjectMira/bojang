@@ -35,7 +35,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.example.bojang"
+    namespace "com.projectmira.bojang"
     compileSdkVersion 36
     ndkVersion "27.0.12077973"
 
