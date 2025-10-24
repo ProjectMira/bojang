@@ -1,0 +1,109 @@
+{
+  "level": 2.11,
+  "title": "Body Parts - Image Recognition",
+  "description": "Look at images and identify body parts in Tibetan",
+  "exercises": [
+    {
+      "type": "image_multiple_choice",
+      "questionType": "IMAGE_TO_TEXT",
+      "questionImageUrl": "assets/images/body-parts/eye.jpg",
+      "questionText": "What body part is shown in the image?",
+      "options": [
+        { "optionText": "Eye", "optionTextTibetan": "མིག" },
+        { "optionText": "Nose", "optionTextTibetan": "སྣ" },
+        { "optionText": "Ear", "optionTextTibetan": "རྣ་བ" },
+        { "optionText": "Mouth", "optionTextTibetan": "ཁ" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "image_multiple_choice",
+      "questionType": "IMAGE_TO_TEXT",
+      "questionImageUrl": "assets/images/body-parts/hand.jpg",
+      "questionText": "What body part is shown in the image?",
+      "options": [
+        { "optionText": "Foot", "optionTextTibetan": "རྐང་པ" },
+        { "optionText": "Hand", "optionTextTibetan": "ལག་པ" },
+        { "optionText": "Arm", "optionTextTibetan": "དཔུང་པ" },
+        { "optionText": "Leg", "optionTextTibetan": "བརླ་པ" }
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "image_multiple_choice",
+      "questionType": "IMAGE_TO_TEXT",
+      "questionImageUrl": "assets/images/body-parts/head.jpg",
+      "questionText": "What body part is shown in the image?",
+      "options": [
+        { "optionText": "Head", "optionTextTibetan": "མགོ" },
+        { "optionText": "Neck", "optionTextTibetan": "སྐེ" },
+        { "optionText": "Shoulder", "optionTextTibetan": "དཔུང་གྲུ" },
+        { "optionText": "Back", "optionTextTibetan": "རྒྱབ" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "text_to_image",
+      "questionType": "TEXT_TO_IMAGE",
+      "questionText": "Select the image that shows 'Nose'",
+      "questionTextTibetan": "སྣ",
+      "options": [
+        { "optionImageUrl": "assets/images/body-parts/nose.jpg" },
+        { "optionImageUrl": "assets/images/body-parts/mouth.jpg" },
+        { "optionImageUrl": "assets/images/body-parts/ear.jpg" },
+        { "optionImageUrl": "assets/images/body-parts/eye.jpg" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "text_to_image",
+      "questionType": "TEXT_TO_IMAGE",
+      "questionText": "Select the image that shows 'Foot'",
+      "questionTextTibetan": "རྐང་པ",
+      "options": [
+        { "optionImageUrl": "assets/images/body-parts/hand.jpg" },
+        { "optionImageUrl": "assets/images/body-parts/arm.jpg" },
+        { "optionImageUrl": "assets/images/body-parts/foot.jpg" },
+        { "optionImageUrl": "assets/images/body-parts/leg.jpg" }
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "image_multiple_choice",
+      "questionType": "IMAGE_TO_TEXT",
+      "questionImageUrl": "assets/images/body-parts/mouth.jpg",
+      "questionText": "What body part is shown in the image?",
+      "options": [
+        { "optionText": "Tongue", "optionTextTibetan": "ལྕེ" },
+        { "optionText": "Teeth", "optionTextTibetan": "སོ" },
+        { "optionText": "Mouth", "optionTextTibetan": "ཁ" },
+        { "optionText": "Lip", "optionTextTibetan": "མཆུ" }
+      ],
+      "correctAnswerIndex": 2
+    }
+  ],
+  "metadata": {
+    "totalExercises": 6,
+    "exerciseTypes": ["image_multiple_choice", "text_to_image"],
+    "estimatedTime": "10-15 minutes",
+    "difficulty": "intermediate",
+    "skillsLearned": [
+      "Visual recognition of body parts",
+      "Tibetan vocabulary for anatomy",
+      "Image-text association",
+      "Basic medical vocabulary"
+    ],
+    "prereq": "Level 2.10 completion",
+    "s3BucketInfo": {
+      "bucketName": "bojang-images-bucket",
+      "region": "us-east-1",
+      "publicAccess": true,
+      "imageSpecs": {
+        "format": "jpg",
+        "maxSize": "500KB",
+        "dimensions": "800x600",
+        "quality": "high"
+      }
+    }
+  }
+}

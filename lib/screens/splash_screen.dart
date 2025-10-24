@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'level_selection_screen.dart';
+import '../services/google_auth_service.dart';
+import '../services/api_service.dart';
+import 'main_navigation_screen.dart';
+import 'auth_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,6 +15,8 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
+  final ApiService _apiService = ApiService();
 
   @override
   void initState() {
@@ -28,31 +33,54 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    // Navigate to LevelSelectionScreen after animation
+    // Navigate to appropriate screen after animation
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Future.delayed(const Duration(milliseconds: 100), () {
-          Navigator.of(context).pushReplacement(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => const LevelSelectionScreen(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return FadeTransition(
-                  opacity: Tween<double>(
-                    begin: 0.0,
-                    end: 1.0,
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeInOut,
-                  )),
-                  child: child,
-                );
-              },
-              transitionDuration: const Duration(milliseconds: 800),
-            ),
-          );
-        });
+        _checkAuthenticationStatus();
       }
     });
+  }
+
+  Future<void> _checkAuthenticationStatus() async {
+    await _googleAuthService.initialize();
+    await _apiService.initialize();
+
+    // Try to sign in silently with Google
+    final user = await _googleAuthService.signInSilently();
+    
+    // Small delay for better UX
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (mounted) {
+      Widget nextScreen;
+      
+      if (user != null || _apiService.isAuthenticated) {
+        // User is authenticated, go to main screen
+        nextScreen = const MainNavigationScreen();
+      } else {
+        // User is not authenticated, show auth screen
+        nextScreen = const AuthScreen();
+      }
+
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: Tween<double>(
+                begin: 0.0,
+                end: 1.0,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              )),
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 800),
+        ),
+      );
+    }
   }
 
   @override
@@ -71,11 +99,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo - clean without container
+              // Logo with blue background showing yak head in color
               Image.asset(
                 'logos/Bojang/logo.jpg',
-                width: 250,
-                height: 250,
+                width: 280,
+                height: 280,
                 fit: BoxFit.contain,
               ),
               
@@ -84,36 +112,57 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               // App Name - "Bojang" in big and bold
               Text(
                 'BOJANG',
-                style: GoogleFonts.fredoka(  // Balloon-style font alternative
-                  fontSize: 42,
-                  fontWeight: FontWeight.w800, // Extra bold
-                  color: const Color(0xFFAE6B45), // New brown color
-                  letterSpacing: 2.0,
+                style: GoogleFonts.nunito(
+                  fontSize: 48,
+                  fontWeight: FontWeight.w800, // Extra bold for feather-like effect
+                  color: const Color(0xFF8B4513), // Saddle brown color
+                  letterSpacing: 3.0,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
+                      color: Colors.black.withOpacity(0.3),
+                    ),
+                  ],
                 ),
               ),
               
-              const SizedBox(height: 15),
+              const SizedBox(height: 20),
               
               // Tagline
               Text(
-                'Learn Tibetan Language',
-                style: GoogleFonts.fredoka(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800, // Extra bold
-                  color: const Color(0xFFAE6B45), // New brown color
-                  letterSpacing: 0.5,
+                'Tibetan Learning App',
+                style: GoogleFonts.nunito(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700, // Bold for consistency
+                  color: const Color(0xFF8B4513), // Saddle brown color
+                  letterSpacing: 1.0,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 1),
+                      blurRadius: 2,
+                      color: Colors.black.withOpacity(0.3),
+                    ),
+                  ],
                 ),
               ),
               
               // Additional tagline
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Text(
                 'བོད་ཡིག་སློབ་པ།',
-                style: GoogleFonts.fredoka(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800, // Extra bold
-                  color: const Color(0xFFAE6B45), // New brown color
-                  letterSpacing: 0.3,
+                style: GoogleFonts.nunito(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600, // Semi-bold for consistency
+                  color: const Color(0xFF8B4513).withOpacity(0.9), // Brown with opacity
+                  letterSpacing: 0.5,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 1),
+                      blurRadius: 2,
+                      color: Colors.black.withOpacity(0.3),
+                    ),
+                  ],
                 ),
               ),
             ],

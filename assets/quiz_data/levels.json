@@ -48,6 +48,18 @@
                     "level": "1.9",
                     "name": "House Items",
                     "path": "assets/quiz_data/level-1/household-items.json"
+                },
+                {
+                    "level": "1.10",
+                    "name": "Animal Sounds",
+                    "path": "assets/quiz_data/level-1/audio-animals.json",
+                    "type": "audio"
+                },
+                {
+                    "level": "1.11",
+                    "name": "Animal Pictures",
+                    "path": "assets/quiz_data/level-1/image-animals.json",
+                    "type": "image"
                 }
             ]
         },
@@ -104,6 +116,18 @@
                     "level": "2.10",
                     "name": "Time & Routine",
                     "path": "assets/quiz_data/level-2/time-and-daily-routine.json"
+                },
+                {
+                    "level": "2.11",
+                    "name": "Body Parts Images",
+                    "path": "assets/quiz_data/level-2/image-body-parts.json",
+                    "type": "image"
+                },
+                {
+                    "level": "2.12",
+                    "name": "Greeting Audio",
+                    "path": "assets/quiz_data/level-2/audio-greetings.json",
+                    "type": "audio"
                 }
             ]
         },
@@ -145,6 +169,12 @@
                     "level": "3.7",
                     "name": "Monastery",
                     "path": "assets/quiz_data/level-3/visiting_monastery.json"
+                },
+                {
+                    "level": "3.8",
+                    "name": "Food & Dining Mixed",
+                    "path": "assets/quiz_data/level-3/mixed-media-food.json",
+                    "type": "mixed"
                 }
             ]
         }

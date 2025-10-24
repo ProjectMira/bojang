@@ -1,0 +1,85 @@
+{
+  "level": 1.11,
+  "title": "Animal Pictures - Visual Recognition",
+  "description": "Look at animal pictures and learn their Tibetan names",
+  "exercises": [
+    {
+      "type": "image_multiple_choice",
+      "questionType": "IMAGE_TO_TEXT",
+      "questionImageUrl": "assets/images/animals/dog.jpg",
+      "questionText": "What animal is shown in the image?",
+      "options": [
+        { "optionText": "Dog", "optionTextTibetan": "ཁྱི" },
+        { "optionText": "Cat", "optionTextTibetan": "ཞི་མི" },
+        { "optionText": "Horse", "optionTextTibetan": "རྟ" },
+        { "optionText": "Bird", "optionTextTibetan": "བྱ" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "image_multiple_choice",
+      "questionType": "IMAGE_TO_TEXT",
+      "questionImageUrl": "assets/images/animals/cat.jpg",
+      "questionText": "What animal is shown in the image?",
+      "options": [
+        { "optionText": "Dog", "optionTextTibetan": "ཁྱི" },
+        { "optionText": "Cat", "optionTextTibetan": "ཞི་མི" },
+        { "optionText": "Tiger", "optionTextTibetan": "སྟག" },
+        { "optionText": "Lion", "optionTextTibetan": "སེང་གེ" }
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "image_multiple_choice",
+      "questionType": "IMAGE_TO_TEXT",
+      "questionImageUrl": "assets/images/animals/horse.jpg",
+      "questionText": "What animal is shown in the image?",
+      "options": [
+        { "optionText": "Yak", "optionTextTibetan": "གཡག" },
+        { "optionText": "Horse", "optionTextTibetan": "རྟ" },
+        { "optionText": "Tiger", "optionTextTibetan": "སྟག" },
+        { "optionText": "Bear", "optionTextTibetan": "དོམ" }
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "text_to_image",
+      "questionType": "TEXT_TO_IMAGE",
+      "questionText": "Select the image that shows a 'Tiger'",
+      "questionTextTibetan": "སྟག",
+      "options": [
+        { "optionImageUrl": "assets/images/animals/tiger.jpg" },
+        { "optionImageUrl": "assets/images/animals/lion.jpg" },
+        { "optionImageUrl": "assets/images/animals/bear.jpg" },
+        { "optionImageUrl": "assets/images/animals/wolf.jpg" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "text_to_image",
+      "questionType": "TEXT_TO_IMAGE",
+      "questionText": "Select the image that shows a 'Yak'",
+      "questionTextTibetan": "གཡག",
+      "options": [
+        { "optionImageUrl": "assets/images/animals/horse.jpg" },
+        { "optionImageUrl": "assets/images/animals/yak.jpg" },
+        { "optionImageUrl": "assets/images/animals/dog.jpg" },
+        { "optionImageUrl": "assets/images/animals/cat.jpg" }
+      ],
+      "correctAnswerIndex": 1
+    }
+  ],
+  "metadata": {
+    "totalExercises": 5,
+    "exerciseTypes": ["image_multiple_choice", "text_to_image"],
+    "estimatedTime": "8-12 minutes",
+    "difficulty": "beginner",
+    "skillsLearned": [
+      "Visual animal recognition",
+      "Basic animal vocabulary in Tibetan",
+      "Image-text association",
+      "Animal identification skills"
+    ],
+    "prereq": "Level 1.10 completion"
+  }
+}

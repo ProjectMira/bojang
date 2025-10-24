@@ -1,0 +1,72 @@
+{
+  "level": 2.12,
+  "title": "Greeting Pronunciations - Audio Practice",
+  "description": "Listen to common Tibetan greetings and practice pronunciation",
+  "exercises": [
+    {
+      "type": "audio_multiple_choice",
+      "questionType": "AUDIO_TO_TEXT",
+      "questionAudioUrl": "assets/audio/greetings/tashi-delek.wav",
+      "questionText": "Listen to the Tibetan greeting. What does it mean?",
+      "options": [
+        { "optionText": "Hello/Good luck", "optionTextTibetan": "བཀྲ་ཤིས་བདེ་ལེགས།" },
+        { "optionText": "Thank you", "optionTextTibetan": "ཐུགས་རྗེ་ཆེ།" },
+        { "optionText": "Goodbye", "optionTextTibetan": "ཕེབས་མཁན།" },
+        { "optionText": "How are you?", "optionTextTibetan": "སྐུ་ཁམས་བཟང་།" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "audio_multiple_choice",
+      "questionType": "AUDIO_TO_TEXT",
+      "questionAudioUrl": "assets/audio/greetings/thugs-che.wav",
+      "questionText": "Listen to the Tibetan phrase. What does it mean?",
+      "options": [
+        { "optionText": "Hello", "optionTextTibetan": "བཀྲ་ཤིས་བདེ་ལེགས།" },
+        { "optionText": "Thank you", "optionTextTibetan": "ཐུགས་རྗེ་ཆེ།" },
+        { "optionText": "Excuse me", "optionTextTibetan": "གོང་དུ།" },
+        { "optionText": "Please", "optionTextTibetan": "རོགས་གནང་།" }
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "text_to_audio",
+      "questionType": "TEXT_TO_AUDIO",
+      "questionText": "How do you pronounce 'Hello' in Tibetan?",
+      "questionTextTibetan": "བཀྲ་ཤིས་བདེ་ལེགས།",
+      "options": [
+        { "optionAudioUrl": "assets/audio/greetings/tashi-delek.wav" },
+        { "optionAudioUrl": "assets/audio/greetings/thugs-che.wav" },
+        { "optionAudioUrl": "assets/audio/greetings/goodbye.wav" },
+        { "optionAudioUrl": "assets/audio/animals/khyi_dog.wav" }
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "text_to_audio",
+      "questionType": "TEXT_TO_AUDIO",
+      "questionText": "How do you pronounce 'Thank you' in Tibetan?",
+      "questionTextTibetan": "ཐུགས་རྗེ་ཆེ།",
+      "options": [
+        { "optionAudioUrl": "assets/audio/greetings/goodbye.wav" },
+        { "optionAudioUrl": "assets/audio/greetings/thugs-che.wav" },
+        { "optionAudioUrl": "assets/audio/greetings/tashi-delek.wav" },
+        { "optionAudioUrl": "assets/audio/animals/zhimi_cat.wav" }
+      ],
+      "correctAnswerIndex": 1
+    }
+  ],
+  "metadata": {
+    "totalExercises": 4,
+    "exerciseTypes": ["audio_multiple_choice", "text_to_audio"],
+    "estimatedTime": "6-10 minutes",
+    "difficulty": "intermediate",
+    "skillsLearned": [
+      "Greeting pronunciation practice",
+      "Audio recognition of common phrases",
+      "Polite expression usage",
+      "Basic conversation skills"
+    ],
+    "prereq": "Level 2.11 completion"
+  }
+}
