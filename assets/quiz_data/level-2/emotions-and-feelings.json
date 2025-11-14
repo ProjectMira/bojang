@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "སྐྱིད་པོ",
+      "tibetanText": "སྐྱིད་པོ།",
       "options": [
         "Sad",
         "Angry",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སེམས་ཁྲལ",
+      "tibetanText": "སེམས་ཁྲལ།",
       "options": [
         "Excited",
         "Worry",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁོང་ཁྲོ",
+      "tibetanText": "ཁོང་ཁྲོ།",
       "options": [
         "Angry",
         "Surprised",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྐྱོ་བ",
+      "tibetanText": "སྐྱོ་བ།",
       "options": [
         "Happy",
         "Afraid",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཞེད་བ",
+      "tibetanText": "ཞེད་བ།",
       "options": [
         "Excited",
         "Afraid",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྤོབས་པ",
+      "tibetanText": "སྤོབས་པ།",
       "options": [
         "Proud",
         "Jealous",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁྱད་པར",
+      "tibetanText": "ཁྱད་པར།",
       "options": [
         "Special",
         "Excited",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སེམས་ཤུགས་སྤེལ་བ",
+      "tibetanText": "སེམས་ཤུགས་སྤེལ་བ།",
       "options": [
         "Encourage",
         "Embarrassed",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁྲེལ་བ",
+      "tibetanText": "ཁྲེལ་བ།",
       "options": [
         "Excited",
         "Calm",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དགའ་བ",
+      "tibetanText": "དགའ་བ།",
       "options": [
         "Dislike",
         "Like",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མི་དགའ",
+      "tibetanText": "མི་དགའ།",
       "options": [
         "Dislike",
         "Like",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འདོད་པ",
+      "tibetanText": "འདོད་པ།",
       "options": [
         "Fear",
         "Desire",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཞི་བ",
+      "tibetanText": "ཞི་བ།",
       "options": [
         "Angry",
         "Sad",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རེ་བ",
+      "tibetanText": "རེ་བ།",
       "options": [
         "Despair",
         "Confusion",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ངོ་ཚ་བ",
+      "tibetanText": "ངོ་ཚ་བ།",
       "options": [
         "Bold",
         "Shy",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བློ་ཕམ",
+      "tibetanText": "བློ་ཕམ།",
       "options": [
         "Excited",
         "Proud",
@@ -185,7 +185,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སེམས་པ",
+      "tibetanText": "སེམས་པ།",
       "options": [
         "Forget",
         "Sleep",
@@ -195,7 +195,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཡིད་ཆེས",
+      "tibetanText": "ཡིད་ཆེས།",
       "options": [
         "Trust",
         "Doubt",
@@ -223,22 +223,22 @@
     ],
     "prereq": "Level 1.10 completion",
     "vocabularyIntroduced": [
-      "དགའ་པོ (happy)",
-      "སེམས་ཁུར (worried)",
-      "ཁོང་ཁྲོ (angry)",
-      "སྐྱོ་བ (sad)",
-      "འཇིགས་པ (afraid)",
-      "བསུན་པ (jealous)",
-      "རྗེས་དགའ (proud)",
-      "ཁྱད་པར (lonely)",
-      "འདུག་སྐུལ (encouraged)",
-      "ཁྲེལ་བ (embarrassed)",
-      "དགའ་བ (like)",
-      "མི་དགའ (dislike)",
-      "འདོད་པ (desire)",
-      "དགའ་སྟོན (joyful)",
-      "འཁྲུགས་པ (disturbed)",
-      "ཞི་བ (calm)"
+      "དགའ་པོ།(happy)",
+      "སེམས་ཁུར།(worried)",
+      "ཁོང་ཁྲོ།(angry)",
+      "སྐྱོ་བ།(sad)",
+      "འཇིགས་པ།(afraid)",
+      "བསུན་པ།(jealous)",
+      "རྗེས་དགའ།(proud)",
+      "ཁྱད་པར།(lonely)",
+      "འདུག་སྐུལ།(encouraged)",
+      "ཁྲེལ་བ།(embarrassed)",
+      "དགའ་བ།(like)",
+      "མི་དགའ།(dislike)",
+      "འདོད་པ།(desire)",
+      "དགའ་སྟོན།(joyful)",
+      "འཁྲུགས་པ།(disturbed)",
+      "ཞི་བ།(calm)"
     ]
   }
 }

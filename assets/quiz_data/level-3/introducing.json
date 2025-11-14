@@ -1,230 +1,230 @@
 {
-    "level": 3.1,
-    "title": "Introductions & Basic Greetings",
-    "description": "Essential Tibetan phrases for introducing yourself and basic polite conversation",
-    "exercises": [
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "བཀྲ་ཤིས་བདེ་ལེགས།",
-        "options": [
-          "Hello/Greetings",
-          "Goodbye",
-          "Thank you"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ངའི་མིང་ལ་ཟེར།",
-        "options": [
-          "My name is...",
-          "I am from...",
-          "I live in..."
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་གི་མིང་ག་རེ་ཟེར།",
-        "options": [
-          "Where are you from?",
-          "What is your name?",
-          "How are you?"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་ག་ནས་ཡིན།",
-        "options": [
-          "What is your name?",
-          "Where are you from?",
-          "How are you?"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་བོད་པ་ཡིན།",
-        "options": [
-          "I am Chinese",
-          "I am Tibetan",
-          "I am Indian"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་བདེ་པོ་ཡིན་པས",
-        "options": [
-          "Are you well?",
-          "Are you tired?",
-          "Are you happy?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་བདེ་པོ་ཡིན",
-        "options": [
-          "I am tired",
-          "I am well",
-          "I am sick"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཐུགས་རྗེ་ཆེ།",
-        "options": [
-          "Excuse me",
-          "Sorry",
-          "Thank you"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཡལ་ཡལ།",
-        "options": [
-          "Goodbye",
-          "Good morning",
-          "Good night"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་རང་ངོ་སྤྲོད་ཞུ་གི་ཡིན།",
-        "options": [
-          "Let me introduce myself",
-          "Let me help you",
-          "Let me ask you"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་མཇལ་ནས་དགའ་པོ་བྱུང༌།",
-        "options": [
-          "Nice to meet you",
-          "Sorry to bother you",
-          "Happy to help you"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་བོད་མི་ཞིག་ཡིན།",
-        "options": [
-          "I am a Chinese person",
-          "I am a Tibetan person",
-          "I am an Indian person"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཚོ་བོད་ནས་ཡིན།",
-        "options": [
-          "We are from China",
-          "We are from Tibet",
-          "We are from India"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་དྷ་རམ་ས་ལ་ལ་སྡོད་ཀྱི་ཡོད།",
-        "options": [
-          "I live in Delhi",
-          "I live in Dharamshala",
-          "I live in Tibet"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ངའི་ལུང་པ་བོད་ཡིན།",
-        "options": [
-          "My country is China",
-          "My country is Tibet",
-          "My country is India"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཨ་རི་ནས་ཡིན།",
-        "options": [
-          "I am from America",
-          "I am from Europe",
-          "I am from here"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཚོ་རོགས་པ་ཡིན།",
-        "options": [
-          "We are strangers",
-          "We are friends",
-          "We are family"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཚོ་མི་རིགས་གཅིག་པ་ཡིན།",
-        "options": [
-          "We are the same age",
-          "We are the same family",
-          "We are the same people"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་བོད་སྐད་སློབ་ཀྱི་ཡོད།",
-        "options": [
-          "I am teaching Tibetan",
-          "I am learning Tibetan",
-          "I speak Tibetan well"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁྱེད་རང་ལ་སྐད་ཆ་ཤོད་པ་དགའ་པོ་བྱུང༌།",
-        "options": [
-          "Nice talking to you",
-          "Sorry to disturb you",
-          "Thank you for listening"
-        ],
-        "correctAnswerIndex": 0
-      }
-    ],
-    "metadata": {
-      "totalExercises": 20,
-      "exerciseTypes": [
-        "sentence_meaning"
+  "level": 3.1,
+  "title": "Introductions & Basic Greetings",
+  "description": "Essential Tibetan phrases for introducing yourself and basic polite conversation",
+  "exercises": [
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "བཀྲ་ཤིས་བདེ་ལེགས།",
+      "options": [
+        "Hello/Greetings",
+        "Goodbye",
+        "Thank you"
       ],
-      "contentFocus": "Introduction and basic greetings",
-      "estimatedTime": "15-20 minutes",
-      "difficulty": "beginner-intermediate",
-      "skillsLearned": [
-        "Essential greetings and polite expressions",
-        "Self-introduction phrases",
-        "Asking and answering basic personal questions",
-        "Nationality and origin expressions",
-        "Basic conversational courtesy"
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ངའི་མིང་ལ་ཟེར།",
+      "options": [
+        "My name is...",
+        "I am from...",
+        "I live in..."
       ],
-      "topicsIntroduced": [
-        "Greetings: བཀྲ་ཤིས་བདེ་ལེགས་ (hello), ཐུགས་རྗེ་ཆེ་ (thank you), ཡལ་ཡལ་ (goodbye)",
-        "Identity: ང་བོད་པ་ཡིན་ (I am Tibetan), ངའི་མིང་ལ་ཟེར་ (my name is)",
-        "Origin: ང་ག་ནས་ཡིན་ (I am from), ངའི་ལུང་པ་ (my country)",
-        "Health: ཀུ་ཤལ་ཡིན་པས་ (are you well?), ང་ཀུ་ཤལ་ཡིན་ (I am well)",
-        "Courtesy: བཟང་འཛོམས་བྱུང་ (nice to meet you), ངོ་སྤྲོད་ (introduction)"
-      ]
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་གི་མིང་ག་རེ་ཟེར།",
+      "options": [
+        "Where are you from?",
+        "What is your name?",
+        "How are you?"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ག་ནས་ཡིན།",
+      "options": [
+        "What is your name?",
+        "Where are you from?",
+        "How are you?"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་བོད་པ་ཡིན།",
+      "options": [
+        "I am Chinese",
+        "I am Tibetan",
+        "I am Indian"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་བདེ་པོ་ཡིན་པས།",
+      "options": [
+        "Are you well?",
+        "Are you tired?",
+        "Are you happy?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་བདེ་པོ་ཡིན།",
+      "options": [
+        "I am tired",
+        "I am well",
+        "I am sick"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཐུགས་རྗེ་ཆེ།",
+      "options": [
+        "Excuse me",
+        "Sorry",
+        "Thank you"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཡལ་ཡལ།",
+      "options": [
+        "Goodbye",
+        "Good morning",
+        "Good night"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་རང་ངོ་སྤྲོད་ཞུ་གི་ཡིན།",
+      "options": [
+        "Let me introduce myself",
+        "Let me help you",
+        "Let me ask you"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་མཇལ་ནས་དགའ་པོ་བྱུང༌།",
+      "options": [
+        "Nice to meet you",
+        "Sorry to bother you",
+        "Happy to help you"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་བོད་མི་ཞིག་ཡིན།",
+      "options": [
+        "I am a Chinese person",
+        "I am a Tibetan person",
+        "I am an Indian person"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཚོ་བོད་ནས་ཡིན།",
+      "options": [
+        "We are from China",
+        "We are from Tibet",
+        "We are from India"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་དྷ་རམ་ས་ལ་ལ་སྡོད་ཀྱི་ཡོད།",
+      "options": [
+        "I live in Delhi",
+        "I live in Dharamshala",
+        "I live in Tibet"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ངའི་ལུང་པ་བོད་ཡིན།",
+      "options": [
+        "My country is China",
+        "My country is Tibet",
+        "My country is India"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཨ་རི་ནས་ཡིན།",
+      "options": [
+        "I am from America",
+        "I am from Europe",
+        "I am from here"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཚོ་རོགས་པ་ཡིན།",
+      "options": [
+        "We are strangers",
+        "We are friends",
+        "We are family"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཚོ་མི་རིགས་གཅིག་པ་ཡིན།",
+      "options": [
+        "We are the same age",
+        "We are the same family",
+        "We are the same people"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་བོད་སྐད་སློབ་ཀྱི་ཡོད།",
+      "options": [
+        "I am teaching Tibetan",
+        "I am learning Tibetan",
+        "I speak Tibetan well"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁྱེད་རང་ལ་སྐད་ཆ་ཤོད་པ་དགའ་པོ་བྱུང༌།",
+      "options": [
+        "Nice talking to you",
+        "Sorry to disturb you",
+        "Thank you for listening"
+      ],
+      "correctAnswerIndex": 0
     }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": [
+      "sentence_meaning"
+    ],
+    "contentFocus": "Introduction and basic greetings",
+    "estimatedTime": "15-20 minutes",
+    "difficulty": "beginner-intermediate",
+    "skillsLearned": [
+      "Essential greetings and polite expressions",
+      "Self-introduction phrases",
+      "Asking and answering basic personal questions",
+      "Nationality and origin expressions",
+      "Basic conversational courtesy"
+    ],
+    "topicsIntroduced": [
+      "Greetings: བཀྲ་ཤིས་བདེ་ལེགས་ (hello), ཐུགས་རྗེ་ཆེ་ (thank you), ཡལ་ཡལ་ (goodbye)",
+      "Identity: ང་བོད་པ་ཡིན་ (I am Tibetan), ངའི་མིང་ལ་ཟེར་ (my name is)",
+      "Origin: ང་ག་ནས་ཡིན་ (I am from), ངའི་ལུང་པ་ (my country)",
+      "Health: ཀུ་ཤལ་ཡིན་པས་ (are you well?), ང་ཀུ་ཤལ་ཡིན་ (I am well)",
+      "Courtesy: བཟང་འཛོམས་བྱུང་ (nice to meet you), ངོ་སྤྲོད་ (introduction)"
+    ]
   }
+}

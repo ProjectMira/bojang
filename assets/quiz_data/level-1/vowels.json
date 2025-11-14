@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "syllable_recognition",
-      "tibetanText": "ཀི",
+      "tibetanText": "ཀི།",
       "options": [
         "ki",
         "ka",
@@ -15,7 +15,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ཀུ",
+      "tibetanText": "ཀུ།",
       "options": [
         "ka",
         "ku",
@@ -25,7 +25,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ཀེ",
+      "tibetanText": "ཀེ།",
       "options": [
         "ko",
         "ka",
@@ -35,7 +35,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ཀོ",
+      "tibetanText": "ཀོ།",
       "options": [
         "ko",
         "ku",
@@ -45,7 +45,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "བུ",
+      "tibetanText": "བུ།",
       "options": [
         "ba",
         "bu",
@@ -55,7 +55,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "མི",
+      "tibetanText": "མི།",
       "options": [
         "mu",
         "ma",
@@ -65,7 +65,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "རི",
+      "tibetanText": "རི།",
       "options": [
         "ri",
         "ra",
@@ -75,7 +75,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "པོ",
+      "tibetanText": "པོ།",
       "options": [
         "pu",
         "po",
@@ -85,7 +85,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ལེ",
+      "tibetanText": "ལེ།",
       "options": [
         "la",
         "lo",
@@ -95,7 +95,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "སུ",
+      "tibetanText": "སུ།",
       "options": [
         "su",
         "sa",
@@ -105,7 +105,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "དེ",
+      "tibetanText": "དེ།",
       "options": [
         "da",
         "de",
@@ -115,7 +115,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ཆུ",
+      "tibetanText": "ཆུ།",
       "options": [
         "cha",
         "che",
@@ -125,7 +125,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ཡེ",
+      "tibetanText": "ཡེ།",
       "options": [
         "ye",
         "ya",
@@ -135,7 +135,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ནོ",
+      "tibetanText": "ནོ།",
       "options": [
         "nu",
         "no",
@@ -145,7 +145,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "གུ",
+      "tibetanText": "གུ།",
       "options": [
         "ga",
         "go",
@@ -155,7 +155,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ཏི",
+      "tibetanText": "ཏི།",
       "options": [
         "ti",
         "ta",
@@ -165,7 +165,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "རེ",
+      "tibetanText": "རེ།",
       "options": [
         "ra",
         "re",
@@ -175,7 +175,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ལུ",
+      "tibetanText": "ལུ།",
       "options": [
         "la",
         "le",
@@ -185,7 +185,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ཟོ",
+      "tibetanText": "ཟོ།",
       "options": [
         "zo",
         "za",
@@ -195,7 +195,7 @@
     },
     {
       "type": "syllable_recognition",
-      "tibetanText": "ངེ",
+      "tibetanText": "ངེ།",
       "options": [
         "nga",
         "nge",
@@ -206,20 +206,42 @@
   ],
   "metadata": {
     "totalExercises": 20,
-    "vowelMarks": ["ི", "ུ", "ེ", "ོ"],
+    "vowelMarks": [
+      "ི",
+      "ུ",
+      "ེ",
+      "ོ"
+    ],
     "estimatedTime": "10-15 minutes",
     "difficulty": "beginner",
     "skillsLearned": [
       "Most common Tibetan vowel combinations",
-      "Essential syllable recognition", 
+      "Essential syllable recognition",
       "Consonant-vowel patterns",
       "Foundation for reading Tibetan words"
     ],
     "prereq": "Level 1.1 - Alphabet Recognition",
     "vocabularyIntroduced": [
-      "ཀི (ki)", "ཀུ (ku)", "ཀེ (ke)", "ཀོ (ko)", "བུ (bu)", "མི (mi)", "རི (ri)",
-      "པོ (po)", "ལེ (le)", "སུ (su)", "དེ (de)", "ཆུ (chu)", "ཡེ (ye)", "ནོ (no)",
-      "གུ (gu)", "ཏི (ti)", "རེ (re)", "ལུ (lu)", "ཟོ (zo)", "ངེ (nge)"
+      "ཀི།(ki)",
+      "ཀུ།(ku)",
+      "ཀེ།(ke)",
+      "ཀོ།(ko)",
+      "བུ།(bu)",
+      "མི།(mi)",
+      "རི།(ri)",
+      "པོ།(po)",
+      "ལེ།(le)",
+      "སུ།(su)",
+      "དེ།(de)",
+      "ཆུ།(chu)",
+      "ཡེ།(ye)",
+      "ནོ།(no)",
+      "གུ།(gu)",
+      "ཏི།(ti)",
+      "རེ།(re)",
+      "ལུ།(lu)",
+      "ཟོ།(zo)",
+      "ངེ།(nge)"
     ]
   }
 }
