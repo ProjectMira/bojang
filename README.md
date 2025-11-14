@@ -2,6 +2,21 @@
 
 A Tibetan Learning Flutter application.
 
+## Tibetan Word Ending Rules
+
+To ensure consistent and proper Tibetan orthography, all Tibetan words and phrases in the dataset follow these ending rules:
+
+- **Every Tibetan word or phrase must end with a shad (`།`).**
+- **Words ending in ང (nga)** must include a **tsek** before the shad:  
+  - Example: `…ང་།`
+- **Words ending in ཀ (ka) or ག (ga)** must **not** have a tsek at the end.  
+  They should end with **only a shad**:  
+  - Example: `…ཀ།`, `…ག།`
+- Remove any incorrect punctuation such as duplicate shads, trailing tseks, or Western symbols.
+
+These rules ensure that all Tibetan text in the dataset appears in correct written form.
+
+
 ## Getting Started
 
 This project is a Flutter application for learning Tibetan language who already knows english
