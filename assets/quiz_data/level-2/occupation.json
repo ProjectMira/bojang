@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "དགེ་རྒན",
+      "tibetanText": "དགེ་རྒན།",
       "options": [
         "Doctor",
         "Engineer",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྨན་པ",
+      "tibetanText": "སྨན་པ།",
       "options": [
         "Nurse",
         "Doctor",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྩིས་པ",
+      "tibetanText": "རྩིས་པ།",
       "options": [
         "Lawyer",
         "Cook",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རི་མོ་མཁན",
+      "tibetanText": "རི་མོ་མཁན།",
       "options": [
         "Artist",
         "Builder",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉེན་རྟོག་པ",
+      "tibetanText": "ཉེན་རྟོག་པ།",
       "options": [
         "Driver",
         "Pilot",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མ་བྱན་",
+      "tibetanText": "མ་བྱན།",
       "options": [
         "Teacher",
         "Doctor",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཞིང་པ",
+      "tibetanText": "ཞིང་པ།",
       "options": [
         "Cook",
         "Nurse",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གྲྭ་བ",
+      "tibetanText": "གྲྭ་བ།",
       "options": [
         "Nun",
         "Monk",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཨ་ནེ",
+      "tibetanText": "ཨ་ནེ།",
       "options": [
         "Monk",
         "Nun",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དཔེ་མཛོད་པ",
+      "tibetanText": "དཔེ་མཛོད་པ།",
       "options": [
         "Accountant",
         "Cook",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དམག་མི",
+      "tibetanText": "དམག་མི།",
       "options": [
         "Police",
         "Driver",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཚོང་པ",
+      "tibetanText": "ཚོང་པ།",
       "options": [
         "Farmer",
         "Merchant",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁྲིམས་དཔོན",
+      "tibetanText": "ཁྲིམས་དཔོན།",
       "options": [
         "Judge",
         "Lawyer",
@@ -135,7 +135,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཚན་རིག་པ",
+      "tibetanText": "ཚན་རིག་པ།",
       "options": [
         "Teacher",
         "Scientist",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁ་ལོ་པ",
+      "tibetanText": "ཁ་ལོ་པ།",
       "options": [
         "Driver",
         "Engineer",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉེན་སྲུང་པ",
+      "tibetanText": "ཉེན་སྲུང་པ།",
       "options": [
         "Nurse",
         "Designer",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལོ་ཙཱ་བ",
+      "tibetanText": "ལོ་ཙཱ་བ།",
       "options": [
         "Translator",
         "Photographer",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཞས་པ",
+      "tibetanText": "གཞས་པ།",
       "options": [
         "Mechanic",
         "Singer",
@@ -185,7 +185,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གནམ་གྲུའི་ཁ་ལོ་པ",
+      "tibetanText": "གནམ་གྲུའི་ཁ་ལོ་པ།",
       "options": [
         "Journalist",
         "Cleaner",
@@ -213,26 +213,26 @@
     ],
     "prereq": "Level 2.2 completion",
     "vocabularyIntroduced": [
-      "སློབ་དཔོན (teacher)",
-      "ནད་པོ (doctor)",
-      "བཟོ་བཅོས་པ (mechanic)",
-      "རྩིས་པ (accountant)",
-      "བཟོ་བ (artist)",
-      "འཁྲིད་པ (guide)",
-      "འཛིན་པ (leader)",
-      "སྲོལ་པ (farmer)",
-      "ཉི་མའི་སྤྱི་བོ (nurse)",
-      "མི་དམངས (civil servant)",
-      "དགེ་སློང (monk)",
-      "དགེ་བཤེས (geshe)",
-      "དགེ་སློང་མ (nun)",
-      "དཔེ་མཛོད (librarian)",
-      "མཁན་པོ (abbot)",
-      "དམག་པ (soldier)",
-      "ཚོང་པ (merchant)",
-      "ཁྲིམས་པ (judge)",
-      "ཁྲིམས་རྩོད་པ (lawyer)",
-      "མཁན་སྐྱོང (manager)"
+      "སློབ་དཔོན།(teacher)",
+      "ནད་པོ།(doctor)",
+      "བཟོ་བཅོས་པ།(mechanic)",
+      "རྩིས་པ།(accountant)",
+      "བཟོ་བ།(artist)",
+      "འཁྲིད་པ།(guide)",
+      "འཛིན་པ།(leader)",
+      "སྲོལ་པ།(farmer)",
+      "ཉི་མའི་སྤྱི་བོ།(nurse)",
+      "མི་དམངས།(civil servant)",
+      "དགེ་སློང་།(monk)",
+      "དགེ་བཤེས།(geshe)",
+      "དགེ་སློང་མ།(nun)",
+      "དཔེ་མཛོད།(librarian)",
+      "མཁན་པོ།(abbot)",
+      "དམག་པ།(soldier)",
+      "ཚོང་པ།(merchant)",
+      "ཁྲིམས་པ།(judge)",
+      "ཁྲིམས་རྩོད་པ།(lawyer)",
+      "མཁན་སྐྱོང་།(manager)"
     ]
   }
 }

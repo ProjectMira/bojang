@@ -3,32 +3,215 @@
   "title": "Clothing and Accessories",
   "description": "Learn Tibetan names for common clothing and accessories",
   "exercises": [
-    { "type": "word_meaning", "tibetanText": "གོས", "options": ["Clothes", "Shoes", "Bag"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སྟོད་ཐུང", "options": ["Shirt", "Pants", "Hat"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "གོས་ཐུང", "options": ["Pants", "Shirt", "Robe"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཞྭ་མོ", "options": ["Hat", "Bag", "Shoes"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ལྟོ་ཕད", "options": ["Robe", "Bag", "Cap"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "ལྷམ", "options": ["Clothes", "Shoes", "Bag"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "སྐ་རགས", "options": ["Cap", "Scarf", "Belt"], "correctAnswerIndex": 2 },
-    { "type": "word_meaning", "tibetanText": "རྐང་ཤུབས", "options": ["Shoes", "Socks", "Scarf"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "ནང་གྱོན", "options": ["Pants", "Stockings", "Underwear"], "correctAnswerIndex": 2 },
-    { "type": "word_meaning", "tibetanText": "ལག་ཤུབས", "options": ["Glove", "Watch", "Shirt"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཆུ་ཚོད", "options": ["Jacket", "Scarf", "Watch"], "correctAnswerIndex": 2 },
-    { "type": "word_meaning", "tibetanText": "མིག་ཤེལ", "options": ["Headband", "Sunglasses", "Belt"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "རྒྱན་ཆ", "options": ["jewelry", "Dress", "Perfume"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སྤོས", "options": ["Perfume", "Incense", "Makeup"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "སྐྲ་སྣུམ", "options": ["Hair Oil", "Makeup", "Oil"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཁ་བཏགས་", "options": ["Belt", "Tibetan white scarf", "Dress"], "correctAnswerIndex": 2 },
-    { "type": "word_meaning", "tibetanText": "སྦྱར་མ", "options": ["Jacket", "Skirt", "Apron"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "དྲི་ཞིམ", "options": ["Makeup", "Necklace", "Perfume"], "correctAnswerIndex": 2 },
-    { "type": "word_meaning", "tibetanText": "སྦ་ཁུག", "options": ["Phone", "Wallet", "Airphone"], "correctAnswerIndex": 2 },
-    { "type": "word_meaning", "tibetanText": "ཁ་པར", "options": ["Phone", "Airphone", "Slipper"], "correctAnswerIndex": 2 }
-    
+    {
+      "type": "word_meaning",
+      "tibetanText": "གོས།",
+      "options": [
+        "Clothes",
+        "Shoes",
+        "Bag"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྟོད་ཐུང་།",
+      "options": [
+        "Shirt",
+        "Pants",
+        "Hat"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གོས་ཐུང་།",
+      "options": [
+        "Pants",
+        "Shirt",
+        "Robe"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཞྭ་མོ།",
+      "options": [
+        "Hat",
+        "Bag",
+        "Shoes"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལྟོ་ཕད།",
+      "options": [
+        "Robe",
+        "Bag",
+        "Cap"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལྷམ།",
+      "options": [
+        "Clothes",
+        "Shoes",
+        "Bag"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྐ་རགས།",
+      "options": [
+        "Cap",
+        "Scarf",
+        "Belt"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྐང་ཤུབས།",
+      "options": [
+        "Shoes",
+        "Socks",
+        "Scarf"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ནང་གྱོན།",
+      "options": [
+        "Pants",
+        "Stockings",
+        "Underwear"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལག་ཤུབས།",
+      "options": [
+        "Glove",
+        "Watch",
+        "Shirt"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཆུ་ཚོད།",
+      "options": [
+        "Jacket",
+        "Scarf",
+        "Watch"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "མིག་ཤེལ།",
+      "options": [
+        "Headband",
+        "Sunglasses",
+        "Belt"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྒྱན་ཆ།",
+      "options": [
+        "jewelry",
+        "Dress",
+        "Perfume"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྤོས།",
+      "options": [
+        "Perfume",
+        "Incense",
+        "Makeup"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྐྲ་སྣུམ།",
+      "options": [
+        "Hair Oil",
+        "Makeup",
+        "Oil"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁ་བཏགས།",
+      "options": [
+        "Belt",
+        "Tibetan white scarf",
+        "Dress"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྦྱར་མ།",
+      "options": [
+        "Jacket",
+        "Skirt",
+        "Apron"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དྲི་ཞིམ།",
+      "options": [
+        "Makeup",
+        "Necklace",
+        "Perfume"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྦ་ཁུག",
+      "options": [
+        "Phone",
+        "Wallet",
+        "Airphone"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁ་པར།",
+      "options": [
+        "Phone",
+        "Airphone",
+        "Slipper"
+      ],
+      "correctAnswerIndex": 2
+    }
   ],
   "metadata": {
     "totalExercises": 20,
-    "exerciseTypes": ["word_meaning"],
-    "contentMix": {"meaningfulWords": 20},
+    "exerciseTypes": [
+      "word_meaning"
+    ],
+    "contentMix": {
+      "meaningfulWords": 20
+    },
     "estimatedTime": "10-15 minutes",
     "difficulty": "beginner-intermediate",
     "skillsLearned": [
@@ -40,8 +223,13 @@
     ],
     "prereq": "Level 2.3 completion",
     "vocabularyIntroduced": [
-      "གོས (clothes)", "གོས་ཕྲ (shirt)", "གོས་རགས (pants)", "ཞྭ་མོ (hat)", "ཞྭ་བུ (cap)",
-      "གོས་ཆེན (robe)", "བཞུགས་སྒམ (bag)"
+      "གོས།(clothes)",
+      "གོས་ཕྲ།(shirt)",
+      "གོས་རགས།(pants)",
+      "ཞྭ་མོ།(hat)",
+      "ཞྭ་བུ།(cap)",
+      "གོས་ཆེན།(robe)",
+      "བཞུགས་སྒམ།(bag)"
     ]
   }
-} 
+}

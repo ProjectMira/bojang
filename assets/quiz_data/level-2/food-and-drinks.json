@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "བག་ལེབ",
+      "tibetanText": "བག་ལེབ།",
       "options": [
         "Bread",
         "Rice",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འབྲས",
+      "tibetanText": "འབྲས།",
       "options": [
         "Rice",
         "Bread",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཇ",
+      "tibetanText": "ཇ།",
       "options": [
         "Tea",
         "Water",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཆུ",
+      "tibetanText": "ཆུ།",
       "options": [
         "Tea",
         "Water",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཤ",
+      "tibetanText": "ཤ།",
       "options": [
         "Fish",
         "Egg",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མར",
+      "tibetanText": "མར།",
       "options": [
         "Cheese",
         "Milk",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཞོ",
+      "tibetanText": "ཞོ།",
       "options": [
         "Butter",
         "Soup",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁུ་བ",
+      "tibetanText": "ཁུ་བ།",
       "options": [
         "Soup",
         "Noodles",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཐུག་པ",
+      "tibetanText": "ཐུག་པ།",
       "options": [
         "Soup",
         "Noodles",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འོ་མ",
+      "tibetanText": "འོ་མ།",
       "options": [
         "Milk",
         "Tea",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཚྭ",
+      "tibetanText": "ཚྭ།",
       "options": [
         "Salt",
         "Sugar",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བྱེ་མ་ཀ་ར",
+      "tibetanText": "བྱེ་མ་ཀ་ར།",
       "options": [
         "Sugar",
         "Salt",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སི་པན",
+      "tibetanText": "སི་པན།",
       "options": [
         "Rice",
         "Soup",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྩམ་པ",
+      "tibetanText": "རྩམ་པ།",
       "options": [
         "Tsampa",
         "Rice",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཆང",
+      "tibetanText": "ཆང་།",
       "options": [
         "Wine",
         "Beer",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྒུན་ཆང",
+      "tibetanText": "རྒུན་ཆང་།",
       "options": [
         "Beer",
         "Juice",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྒོ་ང",
+      "tibetanText": "སྒོ་ང་།",
       "options": [
         "Potato",
         "Egg",
@@ -185,7 +185,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཤིང་ཏོག་གི་ཁུ་བ",
+      "tibetanText": "ཤིང་ཏོག་གི་ཁུ་བ།",
       "options": [
         "Juice",
         "Chocolate",
@@ -195,7 +195,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བྱ་ཤ",
+      "tibetanText": "བྱ་ཤ།",
       "options": [
         "Chicken",
         "Fish",
@@ -223,27 +223,27 @@
     ],
     "prereq": "Level 2.6 completion",
     "vocabularyIntroduced": [
-      "བག་ལེབ (bread)",
-      "འབྲས (rice)",
-      "ཇ (tea)",
-      "ཆུ (water)",
-      "ཤ (meat)",
-      "མར (butter)",
-      "ཞོ (cheese)",
-      "བཤེར་ཁོག (soup)",
-      "ཐུག་པ (noodles)",
-      "འོག་ཇ (milk)",
-      "སོར་ཚོགས (salt)",
-      "ཟས་ཏོག (sugar)",
-      "སོགས་འབྲས (chili)",
-      "མོག་མོག (momo)",
-      "རྩམ་པ (tsampa)",
-      "འཐུང་ཆང (beer)",
-      "ཞོ་ཆང (wine)",
-      "སྐྱིད་ལེབ (apple)",
-      "སེར་ཕྲུག (orange)",
-      "ཞིབ་འབྲས (potato)",
-      "སྒོར་ཁུ (egg)"
+      "བག་ལེབ།(bread)",
+      "འབྲས།(rice)",
+      "ཇ།(tea)",
+      "ཆུ།(water)",
+      "ཤ།(meat)",
+      "མར།(butter)",
+      "ཞོ།(cheese)",
+      "བཤེར་ཁོག(soup)",
+      "ཐུག་པ།(noodles)",
+      "འོག་ཇ།(milk)",
+      "སོར་ཚོགས།(salt)",
+      "ཟས་ཏོག(sugar)",
+      "སོགས་འབྲས།(chili)",
+      "མོག་མོག(momo)",
+      "རྩམ་པ།(tsampa)",
+      "འཐུང་ཆང་།(beer)",
+      "ཞོ་ཆང་།(wine)",
+      "སྐྱིད་ལེབ།(apple)",
+      "སེར་ཕྲུག(orange)",
+      "ཞིབ་འབྲས།(potato)",
+      "སྒོར་ཁུ།(egg)"
     ]
   }
 }

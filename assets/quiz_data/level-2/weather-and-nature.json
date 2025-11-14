@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "ཆར་པ",
+      "tibetanText": "ཆར་པ།",
       "options": [
         "Snow",
         "Rain",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉི་མ",
+      "tibetanText": "ཉི་མ།",
       "options": [
         "Moon",
         "Sun",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གངས",
+      "tibetanText": "གངས།",
       "options": [
         "Rain",
         "Snow",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཤིང་སྡོང",
+      "tibetanText": "ཤིང་སྡོང་།",
       "options": [
         "Mountain",
         "Tree",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རི",
+      "tibetanText": "རི།",
       "options": [
         "Mountain",
         "Valley",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཙང་ཆུ",
+      "tibetanText": "གཙང་ཆུ།",
       "options": [
         "Rain",
         "River",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྤྲིན་པ",
+      "tibetanText": "སྤྲིན་པ།",
       "options": [
         "White",
         "Cloud",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རླུང",
+      "tibetanText": "རླུང་།",
       "options": [
         "Rain",
         "Sun",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མཚོ",
+      "tibetanText": "མཚོ།",
       "options": [
         "River",
         "Lake",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འཛམ་གླིང",
+      "tibetanText": "འཛམ་གླིང་།",
       "options": [
         "Sky",
         "Fire",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ནམ་མཁའ",
+      "tibetanText": "ནམ་མཁའ།",
       "options": [
         "Earth",
         "Sky",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འཁྱགས་པ",
+      "tibetanText": "འཁྱགས་པ།",
       "options": [
         "Ice",
         "Snow",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མེ",
+      "tibetanText": "མེ།",
       "options": [
         "Sun",
         "Wind",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དཀར་མོ",
+      "tibetanText": "དཀར་མོ།",
       "options": [
         "Dew",
         "Fog",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྒྱ་མཚོ",
+      "tibetanText": "རྒྱ་མཚོ།",
       "options": [
         "Lake",
         "Ocean",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཟླ་བ",
+      "tibetanText": "ཟླ་བ།",
       "options": [
         "Sun",
         "Star",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྐར་མ",
+      "tibetanText": "སྐར་མ།",
       "options": [
         "Moon",
         "Star",
@@ -185,7 +185,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྩྭ",
+      "tibetanText": "རྩྭ།",
       "options": [
         "Tree",
         "Grass",
@@ -223,26 +223,26 @@
     ],
     "prereq": "Level 2.4 completion",
     "vocabularyIntroduced": [
-      "ཆར་པ (rain)",
-      "ཉི་མ (sun)",
-      "གངས (snow)",
-      "ཤིང (tree)",
-      "རི (mountain)",
-      "ཆུ (river)",
-      "དཀར་པོ (cloud)",
-      "རླུང (wind)",
-      "མཚོ (lake)",
-      "ས (earth)",
-      "མཁས་པ (sky)",
-      "འཁྱགས (ice)",
-      "མེ (fire)",
-      "དཔལ (flower)",
-      "རི་བོ (mountain)",
-      "དཀར་མོ (fog)",
-      "གཡུ (jade)",
-      "རྒྱ་ཆེན་པོ (ocean)",
-      "རྒྱ་མཚོ (sea)",
-      "གཡུ་མཚོ (turquoise lake)"
+      "ཆར་པ།(rain)",
+      "ཉི་མ།(sun)",
+      "གངས།(snow)",
+      "ཤིང་།(tree)",
+      "རི།(mountain)",
+      "ཆུ།(river)",
+      "དཀར་པོ།(cloud)",
+      "རླུང་།(wind)",
+      "མཚོ།(lake)",
+      "ས།(earth)",
+      "མཁས་པ།(sky)",
+      "འཁྱགས།(ice)",
+      "མེ།(fire)",
+      "དཔལ།(flower)",
+      "རི་བོ།(mountain)",
+      "དཀར་མོ།(fog)",
+      "གཡུ།(jade)",
+      "རྒྱ་ཆེན་པོ།(ocean)",
+      "རྒྱ་མཚོ།(sea)",
+      "གཡུ་མཚོ།(turquoise lake)"
     ]
   }
 }
