@@ -3,31 +3,215 @@
   "title": "Animals",
   "description": "Learn Tibetan names for common animals",
   "exercises": [
-    { "type": "word_meaning", "tibetanText": "ཁྱི", "options": ["Dog", "Wolf", "Fox"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ཞི་མི", "options": ["Tiger", "Cat", "Leopard"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "རྟ", "options": ["Horse", "Donkey", "Mule"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "བ་ཕྱུགས", "options": ["Yak", "Cow", "Horse"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "གླང་ཆེན", "options": ["Elephant", "Ox", "Crocodile"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "སྟག", "options": ["Tiger", "Leopard", "Lion"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "སེང་གེ", "options": ["Leopard", "Lion", "Tiger"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "སྤྲེའུ", "options": ["Dog", "Fox", "Monkey"], "correctAnswerIndex": 2 },
-    { "type": "word_meaning", "tibetanText": "ནེ་ཙོ", "options": ["Bird", "Parrot", "Crow"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "ཉ", "options": ["Bird", "Fish", "Dog"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "བྱི་བ", "options": ["Mouse", "Rat", "Squirrel"], "correctAnswerIndex": 0 },    
-    { "type": "word_meaning", "tibetanText": "སྦྲང་བུ", "options": ["Butterfly","Bee",  "Ant"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "རྨ་བྱ", "options": ["Peacock", "Pigeon", "Parrot"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "བོང་བུ", "options": ["Donkey", "Mule", "Goat"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "རི་བོང", "options": ["Duck", "Goose", "Rabbit"], "correctAnswerIndex": 0 },
-    { "type": "word_meaning", "tibetanText": "ལུག", "options": ["Cow", "Sheep", "Goat"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "ར", "options": ["Donkey", "Mule", "Goat"], "correctAnswerIndex": 2 },
-    { "type": "word_meaning", "tibetanText": "གྲོག་མ", "options": ["Bee", "Butterfly", "Ant"], "correctAnswerIndex": 2 },
-    { "type": "word_meaning", "tibetanText": "དོམ", "options": ["Dolphin", "Bear", "Seal"], "correctAnswerIndex": 1 },
-    { "type": "word_meaning", "tibetanText": "ཕོ་རོག", "options": ["Crow", "Pigeon", "Parrot"], "correctAnswerIndex": 0 }
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཁྱི།",
+      "options": [
+        "Dog",
+        "Wolf",
+        "Fox"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཞི་མི།",
+      "options": [
+        "Tiger",
+        "Cat",
+        "Leopard"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྟ།",
+      "options": [
+        "Horse",
+        "Donkey",
+        "Mule"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བ་ཕྱུགས།",
+      "options": [
+        "Yak",
+        "Cow",
+        "Horse"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གླང་ཆེན།",
+      "options": [
+        "Elephant",
+        "Ox",
+        "Crocodile"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྟག",
+      "options": [
+        "Tiger",
+        "Leopard",
+        "Lion"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སེང་གེ།",
+      "options": [
+        "Leopard",
+        "Lion",
+        "Tiger"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྤྲེའུ།",
+      "options": [
+        "Dog",
+        "Fox",
+        "Monkey"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ནེ་ཙོ།",
+      "options": [
+        "Bird",
+        "Parrot",
+        "Crow"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཉ།",
+      "options": [
+        "Bird",
+        "Fish",
+        "Dog"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བྱི་བ།",
+      "options": [
+        "Mouse",
+        "Rat",
+        "Squirrel"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "སྦྲང་བུ།",
+      "options": [
+        "Butterfly",
+        "Bee",
+        "Ant"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རྨ་བྱ།",
+      "options": [
+        "Peacock",
+        "Pigeon",
+        "Parrot"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "བོང་བུ།",
+      "options": [
+        "Donkey",
+        "Mule",
+        "Goat"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "རི་བོང་།",
+      "options": [
+        "Duck",
+        "Goose",
+        "Rabbit"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ལུག",
+      "options": [
+        "Cow",
+        "Sheep",
+        "Goat"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ར།",
+      "options": [
+        "Donkey",
+        "Mule",
+        "Goat"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "གྲོག་མ།",
+      "options": [
+        "Bee",
+        "Butterfly",
+        "Ant"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "དོམ།",
+      "options": [
+        "Dolphin",
+        "Bear",
+        "Seal"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "word_meaning",
+      "tibetanText": "ཕོ་རོག",
+      "options": [
+        "Crow",
+        "Pigeon",
+        "Parrot"
+      ],
+      "correctAnswerIndex": 0
+    }
   ],
   "metadata": {
     "totalExercises": 20,
-    "exerciseTypes": ["word_meaning"],
-    "contentMix": {"meaningfulWords": 20},
+    "exerciseTypes": [
+      "word_meaning"
+    ],
+    "contentMix": {
+      "meaningfulWords": 20
+    },
     "estimatedTime": "10-15 minutes",
     "difficulty": "beginner-intermediate",
     "skillsLearned": [
@@ -39,10 +223,22 @@
     ],
     "prereq": "Level 2.1 completion",
     "vocabularyIntroduced": [
-      "གཟིགས (lion)", "གླང་པོ (yak)", "རྒྱུད་སྤྱི (dog)", "བྱ (bird)", "རྟ (horse)",
-      "གླང་མོ (cow)", "བོང་བ (donkey)", "ཁྱི (dog)", "ཤིང་བྱ (woodpecker)", "བྱ་རུང (bee)",
-      "རྒྱ་མཚོའི་འབྲིང (whale)", "བྱི (mouse)", "རྒྱལ་བྱ (peacock)", "བྱ་བ (duck)", "རྒྱ་མཚོའི་སྤུས (seal)",
-      "བྱ་མོ (hen)"
+      "གཟིགས།(lion)",
+      "གླང་པོ།(yak)",
+      "རྒྱུད་སྤྱི།(dog)",
+      "བྱ།(bird)",
+      "རྟ།(horse)",
+      "གླང་མོ།(cow)",
+      "བོང་བ།(donkey)",
+      "ཁྱི།(dog)",
+      "ཤིང་བྱ།(woodpecker)",
+      "བྱ་རུང་།(bee)",
+      "རྒྱ་མཚོའི་འབྲིང་།(whale)",
+      "བྱི།(mouse)",
+      "རྒྱལ་བྱ།(peacock)",
+      "བྱ་བ།(duck)",
+      "རྒྱ་མཚོའི་སྤུས།(seal)",
+      "བྱ་མོ།(hen)"
     ]
   }
-} 
+}

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -94,21 +93,6 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     }
   }
 
-  Future<void> _testNotification() async {
-    await _notificationService.scheduleTestNotification();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            Platform.isAndroid 
-              ? 'Test notification sent immediately (Android)' 
-              : 'Test notification scheduled for 5 seconds from now (iOS)'
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,36 +135,6 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 minimumSize: const Size(double.infinity, 50),
               ),
             ),
-            // Only show test notifications section in debug mode
-            if (kDebugMode) ...[
-              const SizedBox(height: 24),
-              const Divider(),
-              const SizedBox(height: 16),
-              const Text(
-                'Test Notifications',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Send a test notification to verify the feature is working (Debug only)',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _testNotification,
-                icon: const Icon(Icons.notifications_active),
-                label: const Text('Send Test Notification'),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-              ),
-            ],
           ],
         ),
       ),

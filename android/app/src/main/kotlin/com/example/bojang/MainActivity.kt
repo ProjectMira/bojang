@@ -1,4 +1,4 @@
-package com.example.bojang
+package com.projectmira.bojang
 
 import io.flutter.embedding.android.FlutterActivity
 

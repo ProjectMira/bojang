@@ -25,7 +25,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ང",
+      "tibetanText": "ང་།",
       "options": [
         "nya",
         "na",
@@ -35,7 +35,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ཅ",
+      "tibetanText": "ཅ།",
       "options": [
         "ca",
         "ja",
@@ -45,7 +45,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ཆ",
+      "tibetanText": "ཆ།",
       "options": [
         "tsha",
         "cha",
@@ -55,7 +55,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ཇ",
+      "tibetanText": "ཇ།",
       "options": [
         "dza",
         "ca",
@@ -65,7 +65,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ཉ",
+      "tibetanText": "ཉ།",
       "options": [
         "nya",
         "nga",
@@ -75,7 +75,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ཏ",
+      "tibetanText": "ཏ།",
       "options": [
         "tha",
         "ta",
@@ -85,7 +85,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ད",
+      "tibetanText": "ད།",
       "options": [
         "ta",
         "ba",
@@ -95,7 +95,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ན",
+      "tibetanText": "ན།",
       "options": [
         "na",
         "ma",
@@ -105,7 +105,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "པ",
+      "tibetanText": "པ།",
       "options": [
         "pha",
         "pa",
@@ -115,7 +115,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "བ",
+      "tibetanText": "བ།",
       "options": [
         "pa",
         "ma",
@@ -125,7 +125,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "མ",
+      "tibetanText": "མ།",
       "options": [
         "ma",
         "wa",
@@ -135,7 +135,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ཙ",
+      "tibetanText": "ཙ།",
       "options": [
         "za",
         "tsa",
@@ -145,7 +145,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ཞ",
+      "tibetanText": "ཞ།",
       "options": [
         "sha",
         "za",
@@ -155,7 +155,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ཟ",
+      "tibetanText": "ཟ།",
       "options": [
         "za",
         "zha",
@@ -165,7 +165,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ཡ",
+      "tibetanText": "ཡ།",
       "options": [
         "ra",
         "ya",
@@ -175,7 +175,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ར",
+      "tibetanText": "ར།",
       "options": [
         "ya",
         "la",
@@ -185,7 +185,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ལ",
+      "tibetanText": "ལ།",
       "options": [
         "la",
         "ra",
@@ -195,7 +195,7 @@
     },
     {
       "type": "character_recognition",
-      "tibetanText": "ས",
+      "tibetanText": "ས།",
       "options": [
         "sha",
         "sa",
@@ -215,9 +215,26 @@
     ],
     "alphabetSelection": "20 most frequently used consonants in Tibetan texts",
     "vocabularyIntroduced": [
-      "ཀ (ka)", "ག (ga)", "ང (nga)", "ཅ (ca)", "ཆ (cha)", "ཇ (ja)", "ཉ (nya)",
-      "ཏ (ta)", "ད (da)", "ན (na)", "པ (pa)", "བ (ba)", "མ (ma)", "ཙ (tsa)",
-      "ཞ (zha)", "ཟ (za)", "ཡ (ya)", "ར (ra)", "ལ (la)", "ས (sa)"
+      "ཀ(ka)",
+      "ག(ga)",
+      "ང་།(nga)",
+      "ཅ།(ca)",
+      "ཆ།(cha)",
+      "ཇ།(ja)",
+      "ཉ།(nya)",
+      "ཏ།(ta)",
+      "ད།(da)",
+      "ན།(na)",
+      "པ།(pa)",
+      "བ།(ba)",
+      "མ།(ma)",
+      "ཙ།(tsa)",
+      "ཞ།(zha)",
+      "ཟ།(za)",
+      "ཡ།(ya)",
+      "ར།(ra)",
+      "ལ།(la)",
+      "ས།(sa)"
     ]
   }
 }

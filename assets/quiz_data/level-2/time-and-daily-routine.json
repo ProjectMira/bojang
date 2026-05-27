@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "ཞོགས་པ",
+      "tibetanText": "ཞོགས་པ།",
       "options": [
         "Evening",
         "Night",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉིན་དགུང",
+      "tibetanText": "ཉིན་དགུང་།",
       "options": [
         "Morning",
         "Night",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དགོང་དྲོ",
+      "tibetanText": "དགོང་དྲོ།",
       "options": [
         "Morning",
         "Afternoon",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མཚན",
+      "tibetanText": "མཚན།",
       "options": [
         "Morning",
         "Evening",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དེ་རིང",
+      "tibetanText": "དེ་རིང་།",
       "options": [
         "Today",
         "Tomorrow",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སང་ཉིན",
+      "tibetanText": "སང་ཉིན།",
       "options": [
         "Today",
         "Yesterday",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁ་སང",
+      "tibetanText": "ཁ་སང་།",
       "options": [
         "Yesterday",
         "Today",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཆུ་ཚོད",
+      "tibetanText": "ཆུ་ཚོད།",
       "options": [
         "Hour",
         "Minute",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྐར་མ",
+      "tibetanText": "སྐར་མ།",
       "options": [
         "Minute",
         "Hour",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྐར་ཆ",
+      "tibetanText": "སྐར་ཆ།",
       "options": [
         "Minute",
         "Second",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཟླ",
+      "tibetanText": "ཟླ།",
       "options": [
         "Month",
         "Week",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལོ",
+      "tibetanText": "ལོ།",
       "options": [
         "Year",
         "Month",
@@ -135,7 +135,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྟག་པར",
+      "tibetanText": "རྟག་པར།",
       "options": [
         "Sometimes",
         "Never",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྐབས་རེ",
+      "tibetanText": "སྐབས་རེ།",
       "options": [
         "Sometimes",
         "Always",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཡང་ན",
+      "tibetanText": "ཡང་ན།",
       "options": [
         "And",
         "But",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གང་རུང",
+      "tibetanText": "གང་རུང་།",
       "options": [
         "All",
         "None",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ད་ལྟ",
+      "tibetanText": "ད་ལྟ།",
       "options": [
         "Soon",
         "Later",
@@ -195,7 +195,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཟའ",
+      "tibetanText": "གཟའ།",
       "options": [
         "Night",
         "Week",
@@ -223,26 +223,26 @@
     ],
     "prereq": "Level 2.9 completion",
     "vocabularyIntroduced": [
-      "ཞོགས་ཀས (morning)",
-      "ཉིན་གུང (afternoon)",
-      "དགོང་དག (evening)",
-      "མཚན (night)",
-      "དེ་རིང (today)",
-      "སང་ཉིན (tomorrow)",
-      "ཁ་སང (yesterday)",
-      "ཆུ་ཚོད (hour)",
-      "སྐར་མ (minute)",
-      "སྐར་ཆ (second)",
-      "བདུན་ཕྲག (week)",
-      "ཟླ (month)",
-      "ལོ (year)",
-      "དུས་རབས (always)",
-      "འཛིན་སྐབས (sometimes)",
-      "ཡང་ན (or)",
-      "གང་རུང (any)",
-      "ད་ལྟ (now)",
-      "མར་མེད (never)",
-      "གཟའ (day)"
+      "ཞོགས་ཀས།(morning)",
+      "ཉིན་གུང་།(afternoon)",
+      "དགོང་དག(evening)",
+      "མཚན།(night)",
+      "དེ་རིང་།(today)",
+      "སང་ཉིན།(tomorrow)",
+      "ཁ་སང་།(yesterday)",
+      "ཆུ་ཚོད།(hour)",
+      "སྐར་མ།(minute)",
+      "སྐར་ཆ།(second)",
+      "བདུན་ཕྲག(week)",
+      "ཟླ།(month)",
+      "ལོ།(year)",
+      "དུས་རབས།(always)",
+      "འཛིན་སྐབས།(sometimes)",
+      "ཡང་ན།(or)",
+      "གང་རུང་།(any)",
+      "ད་ལྟ།(now)",
+      "མར་མེད།(never)",
+      "གཟའ།(day)"
     ]
   }
 }

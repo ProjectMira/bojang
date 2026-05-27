@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "ཀླད་ཀོར",
+      "tibetanText": "ཀླད་ཀོར།",
       "options": [
         "chik (One)",
         "lekor (Zero)",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཉིས",
+      "tibetanText": "གཉིས།",
       "options": [
         "chik (One)",
         "sum (Three)",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བཞི",
+      "tibetanText": "བཞི།",
       "options": [
         "sum (Three)",
         "nga (Five)",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གསུམ",
+      "tibetanText": "གསུམ།",
       "options": [
         "zhi (Four)",
         "sum (Three)",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལྔ",
+      "tibetanText": "ལྔ།",
       "options": [
         "nga (Five)",
         "zhi (Four)",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བདུན",
+      "tibetanText": "བདུན།",
       "options": [
         "druk (Six)",
         "dun (Seven)",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བཅོ་ལྔ",
+      "tibetanText": "བཅོ་ལྔ།",
       "options": [
         "chu zhi (Fourteen)",
         "chu druk (Sixteen)",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བརྒྱད",
+      "tibetanText": "བརྒྱད།",
       "options": [
         "gu (Nine)",
         "dun (Seven)",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དགུ",
+      "tibetanText": "དགུ།",
       "options": [
         "gye (Eight)",
         "gu (Nine)",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བཅུ",
+      "tibetanText": "བཅུ།",
       "options": [
         "gu (Nine)",
         "chu chik (Eleven)",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉི་ཤུ",
+      "tibetanText": "ཉི་ཤུ།",
       "options": [
         "nyi shu (Twenty)",
         "cho nga (Fifteen)",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལྔ་བཅུ",
+      "tibetanText": "ལྔ་བཅུ།",
       "options": [
         "nga chu (Fifty)",
         "zhi chu (Forty)",
@@ -135,7 +135,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སུམ་ཅུ",
+      "tibetanText": "སུམ་ཅུ།",
       "options": [
         "nyi shu (Twenty)",
         "sum chu (Thirty)",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྟོང",
+      "tibetanText": "སྟོང་།",
       "options": [
         "tong (Thousand)",
         "gya (Hundred)",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བརྒྱ",
+      "tibetanText": "བརྒྱ།",
       "options": [
         "gya (Hundred)",
         "gu chu (Ninety)",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མང་པོ",
+      "tibetanText": "མང་པོ།",
       "options": [
         "nyung ngu (Few)",
         "mang po (Many)",
@@ -195,7 +195,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དང་པོ",
+      "tibetanText": "དང་པོ།",
       "options": [
         "dang po (First)",
         "gnyis pa (Second)",
@@ -223,10 +223,26 @@
     ],
     "prereq": "Level 1.3 completion",
     "vocabularyIntroduced": [
-      "ཀླད (zero)", "གཅིག (one)", "གཉིས (two)", "གསུམ (three)", "བཞི (four)", "ལྔ (five)",
-      "དྲུག (six)", "བདུན (seven)", "བརྒྱད (eight)", "དགུ (nine)", "བཅུ (ten)",
-      "བཅོ་ལྔ (fifteen)", "ཉི་ཤུ (twenty)", "སུམ་ཅུ (thirty)", "ལྔ་བཅུ (fifty)",
-      "བརྒྱ (hundred)", "སྟོང (thousand)", "མང་པོ (many)", "ཕྱེད་ཀ (half)", "དང་པོ (first)"
+      "ཀླད།(zero)",
+      "གཅིག(one)",
+      "གཉིས།(two)",
+      "གསུམ།(three)",
+      "བཞི།(four)",
+      "ལྔ།(five)",
+      "དྲུག(six)",
+      "བདུན།(seven)",
+      "བརྒྱད།(eight)",
+      "དགུ།(nine)",
+      "བཅུ།(ten)",
+      "བཅོ་ལྔ།(fifteen)",
+      "ཉི་ཤུ།(twenty)",
+      "སུམ་ཅུ།(thirty)",
+      "ལྔ་བཅུ།(fifty)",
+      "བརྒྱ།(hundred)",
+      "སྟོང་།(thousand)",
+      "མང་པོ།(many)",
+      "ཕྱེད་ཀ(half)",
+      "དང་པོ།(first)"
     ]
   }
 }

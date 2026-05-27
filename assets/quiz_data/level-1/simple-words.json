@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "ས",
+      "tibetanText": "ས།",
       "options": [
         "Earth",
         "Sky",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མི",
+      "tibetanText": "མི།",
       "options": [
         "Water",
         "Person",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བུ",
+      "tibetanText": "བུ།",
       "options": [
         "Daughter",
         "Mother",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མོ",
+      "tibetanText": "མོ།",
       "options": [
         "Woman",
         "Man",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རི",
+      "tibetanText": "རི།",
       "options": [
         "Valley",
         "Mountain",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལོ",
+      "tibetanText": "ལོ།",
       "options": [
         "Day",
         "Month",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁ",
+      "tibetanText": "ཁ།",
       "options": [
         "Mouth",
         "Eye",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉི",
+      "tibetanText": "ཉི།",
       "options": [
         "Moon",
         "Sun",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཟླ",
+      "tibetanText": "ཟླ།",
       "options": [
         "Sun",
         "Cloud",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མེ",
+      "tibetanText": "མེ།",
       "options": [
         "Fire",
         "Earth",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཆུ",
+      "tibetanText": "ཆུ།",
       "options": [
         "Fire",
         "Water",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁྱི",
+      "tibetanText": "ཁྱི།",
       "options": [
         "Cat",
         "Bird",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྟ",
+      "tibetanText": "རྟ།",
       "options": [
         "Horse",
         "Cow",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉ",
+      "tibetanText": "ཉ།",
       "options": [
         "Bird",
         "Fish",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བྱ",
+      "tibetanText": "བྱ།",
       "options": [
         "Fish",
         "Insect",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཤ",
+      "tibetanText": "ཤ།",
       "options": [
         "Meat",
         "Bone",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁྱིམ",
+      "tibetanText": "ཁྱིམ།",
       "options": [
         "Village",
         "House",
@@ -185,7 +185,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཞིང",
+      "tibetanText": "ཞིང་།",
       "options": [
         "Garden",
         "Forest",
@@ -195,7 +195,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཡོང",
+      "tibetanText": "ཡོང་།",
       "options": [
         "Come",
         "Go",
@@ -224,10 +224,26 @@
     ],
     "prereq": "Level 1.1 and 1.2 completion",
     "vocabularyIntroduced": [
-      "ས (earth)", "མི (person)", "བུ (son)", "མོ (woman)", "རི (mountain)", "ལོ (year)",
-      "ཁ (mouth)", "ཉི (sun)", "ཟླ (moon)", "མེ (fire)", "ཆུ (water)", "ཁྱི (dog)",
-      "རྟ (horse)", "ལུག (sheep)", "ཉ (fish)", "བྱ (bird)", "ཟ (eat)", "འགྲོ (go)",
-      "ཉལ (sleep)", "ཡོང (come)"
+      "ས།(earth)",
+      "མི།(person)",
+      "བུ།(son)",
+      "མོ།(woman)",
+      "རི།(mountain)",
+      "ལོ།(year)",
+      "ཁ།(mouth)",
+      "ཉི།(sun)",
+      "ཟླ།(moon)",
+      "མེ།(fire)",
+      "ཆུ།(water)",
+      "ཁྱི།(dog)",
+      "རྟ།(horse)",
+      "ལུག(sheep)",
+      "ཉ།(fish)",
+      "བྱ།(bird)",
+      "ཟ།(eat)",
+      "འགྲོ།(go)",
+      "ཉལ།(sleep)",
+      "ཡོང་།(come)"
     ]
   }
 }

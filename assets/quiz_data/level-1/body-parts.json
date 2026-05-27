@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "ལུས",
+      "tibetanText": "ལུས།",
       "options": [
         "Body",
         "Head",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མགོ",
+      "tibetanText": "མགོ།",
       "options": [
         "Neck",
         "Head",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གདོང",
+      "tibetanText": "གདོང་།",
       "options": [
         "Head",
         "Face",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྣ",
+      "tibetanText": "སྣ།",
       "options": [
         "Nose",
         "Mouth",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁ",
+      "tibetanText": "ཁ།",
       "options": [
         "Nose",
         "Mouth",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྣ",
+      "tibetanText": "རྣ།",
       "options": [
         "Eye",
         "Ear",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལག་པ",
+      "tibetanText": "ལག་པ།",
       "options": [
         "Shoulder",
         "Hand",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྐང་པ",
+      "tibetanText": "རྐང་པ།",
       "options": [
         "Leg",
         "Foot",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལྕེ",
+      "tibetanText": "ལྕེ།",
       "options": [
         "Lip",
         "Tongue",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སོ",
+      "tibetanText": "སོ།",
       "options": [
         "Tongue",
         "Tooth",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྐྲ",
+      "tibetanText": "སྐྲ།",
       "options": [
         "Hair",
         "Beard",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྙིང",
+      "tibetanText": "སྙིང་།",
       "options": [
         "Lung",
         "Heart",
@@ -135,7 +135,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གློ",
+      "tibetanText": "གློ།",
       "options": [
         "Heart",
         "Lung",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མཆིན་པ",
+      "tibetanText": "མཆིན་པ།",
       "options": [
         "Kidney",
         "Liver",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རུས་པ",
+      "tibetanText": "རུས་པ།",
       "options": [
         "Muscle",
         "Bone",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "པགས་པ",
+      "tibetanText": "པགས་པ།",
       "options": [
         "Fat",
         "Skin",
@@ -185,7 +185,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མཛུབ་མོ",
+      "tibetanText": "མཛུབ་མོ།",
       "options": [
         "Finger",
         "Thumb",
@@ -195,7 +195,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སེན་མོ",
+      "tibetanText": "སེན་མོ།",
       "options": [
         "Knuckle",
         "Nail",
@@ -224,10 +224,26 @@
     ],
     "prereq": "Level 2 completion",
     "vocabularyIntroduced": [
-      "ལུས (body)", "མགོ (head)", "ཞལ (face)", "མིག (eye)", "རྣ (ear)",
-      "སྣ (nose)", "ཁ (mouth)", "ལྕེ (tongue)", "སོ (tooth)", "སྐྲ (hair)",
-      "ལག (hand)", "རྐང་པ (foot)", "སྙིང (heart)", "གློ (lung)", "མཆིན་པ (liver)",
-      "རུས་པ (bone)", "པགས་པ (skin)", "ཁྲག (blood)", "མཐོང (see)", "ཐོས (hear)"
+      "ལུས།(body)",
+      "མགོ།(head)",
+      "ཞལ།(face)",
+      "མིག(eye)",
+      "རྣ།(ear)",
+      "སྣ།(nose)",
+      "ཁ།(mouth)",
+      "ལྕེ།(tongue)",
+      "སོ།(tooth)",
+      "སྐྲ།(hair)",
+      "ལག(hand)",
+      "རྐང་པ།(foot)",
+      "སྙིང་།(heart)",
+      "གློ།(lung)",
+      "མཆིན་པ།(liver)",
+      "རུས་པ།(bone)",
+      "པགས་པ།(skin)",
+      "ཁྲག(blood)",
+      "མཐོང་།(see)",
+      "ཐོས།(hear)"
     ]
   }
 }

@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "sentence_meaning",
-      "tibetanText": "ཁྱེད་རང་ག་འདྲ་འདུག་།",
+      "tibetanText": "ཁྱེད་རང་ག་འདྲ་འདུག",
       "options": [
         "Where are you going?",
         "How are you feeling?",
@@ -15,7 +15,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ང་ན་ཚ་ཡོད",
+      "tibetanText": "ང་ན་ཚ་ཡོད།",
       "options": [
         "I am sick",
         "I am hungry",
@@ -25,7 +25,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ཁྱེད་རང་ག་ནས་ཕེབས་པ?",
+      "tibetanText": "ཁྱེད་རང་ག་ནས་ཕེབས་པ?།",
       "options": [
         "Where does it hurt?",
         "Where are you from?",
@@ -35,7 +35,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ང་མགོ་ན་གི་འདུག་།",
+      "tibetanText": "ང་མགོ་ན་གི་འདུག",
       "options": [
         "I have a headache",
         "I have a stomach ache",
@@ -55,7 +55,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ང་ལ་སྨན་དགོས",
+      "tibetanText": "ང་ལ་སྨན་དགོས།",
       "options": [
         "I need water",
         "I need medicine",
@@ -65,7 +65,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ནང་ལ་ཕེབས་རོགས",
+      "tibetanText": "ནང་ལ་ཕེབས་རོགས།",
       "options": [
         "Please come in",
         "Please wait",
@@ -85,7 +85,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ངའི་མིང་...",
+      "tibetanText": "ངའི་མིང་།",
       "options": [
         "I am ... years old",
         "I am from ...",
@@ -105,7 +105,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ང་ལོ་...ཡིན",
+      "tibetanText": "ང་ལོ་ཡིན།",
       "options": [
         "I am a student",
         "I am ... years old",
@@ -125,7 +125,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ང་ལ་སྨན་མེད",
+      "tibetanText": "ང་ལ་སྨན་མེད།",
       "options": [
         "I have no money",
         "I have no pain",
@@ -145,7 +145,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ང་ལ་རྒྱུན་སྤྱོད་སྨན་དགོས",
+      "tibetanText": "ང་ལ་རྒྱུན་སྤྱོད་སྨན་དགོས།",
       "options": [
         "I need a new doctor",
         "I need regular medicine",

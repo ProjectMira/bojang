@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "sentence_meaning",
-      "tibetanText": "དྷ་རམ་ས་ལ་ག་པར་ཡོད་རེད་།",
+      "tibetanText": "དྷ་རམ་ས་ལ་ག་པར་ཡོད་རེད།",
       "options": [
         "Where is Dharamsala?",
         "What is in Dharamsala?",
@@ -15,7 +15,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ཏཱ་ལའི་བླ་མ་ག་པར་བཞུགས་ཡོད་རེད་།",
+      "tibetanText": "ཏཱ་ལའི་བླ་མ་ག་པར་བཞུགས་ཡོད་རེད།",
       "options": [
         "When does the Dalai Lama speak?",
         "What does the Dalai Lama teach?",
@@ -25,7 +25,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ང་དགོན་པ་ལ་འགྲོ་འདོད་འདུག་།",
+      "tibetanText": "ང་དགོན་པ་ལ་འགྲོ་འདོད་འདུག",
       "options": [
         "I want to see the temple",
         "I want to meet the monks",
@@ -35,7 +35,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "མཆོད་ཁང་ག་དུས་ཕྱེ་གི་རེད་།",
+      "tibetanText": "མཆོད་ཁང་ག་དུས་ཕྱེ་གི་རེད།",
       "options": [
         "Where is the temple?",
         "Who built the temple?",
@@ -65,7 +65,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ཏཱ་ལའི་བླ་མའི་ཕོ་བྲང་ག་པར་ཡོད་རེད་།",
+      "tibetanText": "ཏཱ་ལའི་བླ་མའི་ཕོ་བྲང་ག་པར་ཡོད་རེད།",
       "options": [
         "What is the Dalai Lama's palace like?",
         "When was the palace built?",
@@ -75,7 +75,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ང་བོད་ཀྱི་ཁ་ལག་ཟ་འདོད་འདུག་།",
+      "tibetanText": "ང་བོད་ཀྱི་ཁ་ལག་ཟ་འདོད་འདུག",
       "options": [
         "I want to cook Tibetan food",
         "I want to buy Tibetan food",
@@ -115,7 +115,7 @@
     },
     {
       "type": "sentence_meaning",
-      "tibetanText": "ང་ནོར་བུ་གླིང་ཀར་འགྲོ་འདོད་འདུག་།",
+      "tibetanText": "ང་ནོར་བུ་གླིང་ཀར་འགྲོ་འདོད་འདུག",
       "options": [
         "I want to go to Norbulingka",
         "I want to see Norbulingka",

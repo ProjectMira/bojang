@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "ཟ",
+      "tibetanText": "ཟ།",
       "options": [
         "Drink",
         "Eat",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འཐུང",
+      "tibetanText": "འཐུང་།",
       "options": [
         "Eat",
         "Drink",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འགྲོ",
+      "tibetanText": "འགྲོ།",
       "options": [
         "Come",
         "Go",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཡོང",
+      "tibetanText": "ཡོང་།",
       "options": [
         "Go",
         "Sit",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མཐོང",
+      "tibetanText": "མཐོང་།",
       "options": [
         "See",
         "Hear",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉན",
+      "tibetanText": "ཉན།",
       "options": [
         "Hear",
         "See",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཤོད",
+      "tibetanText": "ཤོད།",
       "options": [
         "Read",
         "Write",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འབྲི",
+      "tibetanText": "འབྲི།",
       "options": [
         "Read",
         "Speak",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉལ",
+      "tibetanText": "ཉལ།",
       "options": [
         "Sleep",
         "Sit",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བཞུགས",
+      "tibetanText": "བཞུགས།",
       "options": [
         "Stand",
         "Sit",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལང་",
+      "tibetanText": "ལང་།",
       "options": [
         "Sit",
         "Run",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འཛུལ",
+      "tibetanText": "འཛུལ།",
       "options": [
         "Exit",
         "Enter",
@@ -135,7 +135,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཕྱིར་ཐོན",
+      "tibetanText": "ཕྱིར་ཐོན།",
       "options": [
         "Enter",
         "Close",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁ་ཕྱེ",
+      "tibetanText": "ཁ་ཕྱེ།",
       "options": [
         "Close",
         "Open",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉོ",
+      "tibetanText": "ཉོ།",
       "options": [
         "Sell",
         "Buy",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འཚོང",
+      "tibetanText": "འཚོང་།",
       "options": [
         "Buy",
         "Sell",
@@ -185,7 +185,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྤྲོད་པ",
+      "tibetanText": "སྤྲོད་པ།",
       "options": [
         "Give",
         "Take",
@@ -195,7 +195,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལེན",
+      "tibetanText": "ལེན།",
       "options": [
         "Take",
         "Give",
@@ -223,26 +223,26 @@
     ],
     "prereq": "Level 2.5 completion",
     "vocabularyIntroduced": [
-      "ཟ (eat)",
-      "འཐུང (drink)",
-      "འགྲོ (go)",
-      "ཡོང (come)",
-      "མཐོང (see)",
-      "ཉན (hear)",
-      "ཤོད (speak)",
-      "འབྲི (write)",
-      "ཀློག (read)",
-      "ཉལ (sleep)",
-      "བཞུགས (sit)",
-      "ལུས་བཀོལ (stand)",
-      "འཛུལ (enter)",
-      "ཕྱིར་འཐོན (exit)",
-      "ཁ་ཕྱེ (open)",
-      "ཁ་རྒྱག (close)",
-      "ཉོ (buy)",
-      "བཙོང (sell)",
-      "གཏོང (give)",
-      "ལེན (take)"
+      "ཟ།(eat)",
+      "འཐུང་།(drink)",
+      "འགྲོ།(go)",
+      "ཡོང་།(come)",
+      "མཐོང་།(see)",
+      "ཉན།(hear)",
+      "ཤོད།(speak)",
+      "འབྲི།(write)",
+      "ཀློག(read)",
+      "ཉལ།(sleep)",
+      "བཞུགས།(sit)",
+      "ལུས་བཀོལ།(stand)",
+      "འཛུལ།(enter)",
+      "ཕྱིར་འཐོན།(exit)",
+      "ཁ་ཕྱེ།(open)",
+      "ཁ་རྒྱག(close)",
+      "ཉོ།(buy)",
+      "བཙོང་།(sell)",
+      "གཏོང་།(give)",
+      "ལེན།(take)"
     ]
   }
 }

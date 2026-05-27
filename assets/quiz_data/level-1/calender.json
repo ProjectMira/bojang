@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "ཟླ",
+      "tibetanText": "ཟླ།",
       "options": [
         "Month",
         "Day",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལོ",
+      "tibetanText": "ལོ།",
       "options": [
         "Week",
         "Year",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དུས་ཚོད",
+      "tibetanText": "དུས་ཚོད།",
       "options": [
         "Week",
         "Day",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཟའ་ཉི་མ",
+      "tibetanText": "གཟའ་ཉི་མ།",
       "options": [
         "Sunday",
         "Monday",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཟའ་ཕུར་བུ",
+      "tibetanText": "གཟའ་ཕུར་བུ།",
       "options": [
         "Thursday",
         "Saturday",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཟའ་ཟླ་བ",
+      "tibetanText": "གཟའ་ཟླ་བ།",
       "options": [
         "Wednesday",
         "Sunday",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཟའ་ལྷག་པ",
+      "tibetanText": "གཟའ་ལྷག་པ།",
       "options": [
         "Friday",
         "Tuesday",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཟའ་མིག་དམར",
+      "tibetanText": "གཟའ་མིག་དམར།",
       "options": [
         "Monday",
         "Tuesday",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཟའ་པ་སངས",
+      "tibetanText": "གཟའ་པ་སངས།",
       "options": [
         "Sunday",
         "Thursday",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཟའ་སྤེན་པ",
+      "tibetanText": "གཟའ་སྤེན་པ།",
       "options": [
         "Friday",
         "Saturday",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉི་མ",
+      "tibetanText": "ཉི་མ།",
       "options": [
         "Star",
         "Moon",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཟླ་བ",
+      "tibetanText": "ཟླ་བ།",
       "options": [
         "Moon",
         "Sun",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མིག་དམར",
+      "tibetanText": "མིག་དམར།",
       "options": [
         "Jupiter",
         "Mars",
@@ -135,7 +135,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཕུར་བུ",
+      "tibetanText": "ཕུར་བུ།",
       "options": [
         "Jupiter",
         "Venus",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལོ་གསར",
+      "tibetanText": "ལོ་གསར།",
       "options": [
         "New Year",
         "Buddha Day",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བྱི་བ",
+      "tibetanText": "བྱི་བ།",
       "options": [
         "Rat",
         "Ox",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གླང",
+      "tibetanText": "གླང་།",
       "options": [
         "Rabbit",
         "Ox",
@@ -223,11 +223,26 @@
     ],
     "prereq": "Level 2.2 completion",
     "vocabularyIntroduced": [
-      "གཟའ་ཉི་མ (Sunday)", "གཟའ་ཟླ་བ (Monday)", "གཟའ་མིག་དམར (Tuesday)", "གཟའ་ལྷག་པ (Wednesday)",
-      "གཟའ་ཕུར་བུ (Thursday)", "གཟའ་པ་སངས (Friday)", "གཟའ་སྤེན་པ (Saturday)",
-      "ཉི་མ (sun)", "ཟླ་བ (moon)", "མིག་དམར (Mars)", "ཕུར་བུ (Jupiter)",
-      "བྱི་བ (rat)", "གླང (ox)", "སྟག (tiger)", "འབྲུག (dragon)",
-      "ལོ་གསར (New Year)", "ས་ག (Buddha Day)", "ཟླ (month)", "ལོ (year)", "དུས་ཚོད (week)"
+      "གཟའ་ཉི་མ།(Sunday)",
+      "གཟའ་ཟླ་བ།(Monday)",
+      "གཟའ་མིག་དམར།(Tuesday)",
+      "གཟའ་ལྷག་པ།(Wednesday)",
+      "གཟའ་ཕུར་བུ།(Thursday)",
+      "གཟའ་པ་སངས།(Friday)",
+      "གཟའ་སྤེན་པ།(Saturday)",
+      "ཉི་མ།(sun)",
+      "ཟླ་བ།(moon)",
+      "མིག་དམར།(Mars)",
+      "ཕུར་བུ།(Jupiter)",
+      "བྱི་བ།(rat)",
+      "གླང་།(ox)",
+      "སྟག(tiger)",
+      "འབྲུག(dragon)",
+      "ལོ་གསར།(New Year)",
+      "ས་ག(Buddha Day)",
+      "ཟླ།(month)",
+      "ལོ།(year)",
+      "དུས་ཚོད།(week)"
     ]
   }
 }

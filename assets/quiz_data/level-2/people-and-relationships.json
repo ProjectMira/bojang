@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "ཕ",
+      "tibetanText": "ཕ།",
       "options": [
         "Mother",
         "Father",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མ",
+      "tibetanText": "མ།",
       "options": [
         "Mother",
         "Father",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཅེན་པོ",
+      "tibetanText": "གཅེན་པོ།",
       "options": [
         "Singer",
         "Friend",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཅེན་མོ",
+      "tibetanText": "གཅེན་མོ།",
       "options": [
         "Brother",
         "Sister",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གྲོགས་པོ",
+      "tibetanText": "གྲོགས་པོ།",
       "options": [
         "Neighbor",
         "Cousin",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དགེ་རྒན",
+      "tibetanText": "དགེ་རྒན།",
       "options": [
         "Student",
         "Parent",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བུ",
+      "tibetanText": "བུ།",
       "options": [
         "Son",
         "Daughter",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བུ་མོ",
+      "tibetanText": "བུ་མོ།",
       "options": [
         "Son",
         "Daughter",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཕ་མ",
+      "tibetanText": "ཕ་མ།",
       "options": [
         "Children",
         "Parents",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ནང་མི",
+      "tibetanText": "ནང་མི།",
       "options": [
         "Neighbor",
         "Friend",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མི་",
+      "tibetanText": "མི།",
       "options": [
         "Family",
         "Neighbor",
@@ -135,7 +135,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "བཟའ་མོ",
+      "tibetanText": "བཟའ་མོ།",
       "options": [
         "Daughter",
         "Sister",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁྱིམ་མཚེས",
+      "tibetanText": "ཁྱིམ་མཚེས།",
       "options": [
         "Neighbor",
         "Friend",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "པོ་པོ",
+      "tibetanText": "པོ་པོ།",
       "options": [
         "Grandfather",
         "Grandmother",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྨོ་མོ",
+      "tibetanText": "རྨོ་མོ།",
       "options": [
         "Grandmother",
         "Grandfather",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཨ་ཞང",
+      "tibetanText": "ཨ་ཞང་།",
       "options": [
         "Aunt",
         "Cousin",
@@ -185,7 +185,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཨ་ནེ",
+      "tibetanText": "ཨ་ནེ།",
       "options": [
         "Aunt",
         "Uncle",
@@ -195,7 +195,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དཔོན་པོ",
+      "tibetanText": "དཔོན་པོ།",
       "options": [
         "Colleague",
         "Relative",
@@ -223,26 +223,26 @@
     ],
     "prereq": "Level 2.7 completion",
     "vocabularyIntroduced": [
-      "ཕ (father)",
-      "མ (mother)",
-      "ཨ་ཅག (older brother)",
-      "ཨ་ཅག་མོ (older sister)",
-      "གྲོགས་པོ (friend)",
-      "སློབ་དཔོན (teacher)",
-      "སློབ་ཕྲུག (student)",
-      "བུ (son)",
-      "སྲས (daughter)",
-      "ཕ་མ (parents)",
-      "ནུས་པ (family)",
-      "མི་མང (people)",
-      "མཆོག (husband)",
-      "བུ་མོ (girl)",
-      "ཁྱིམ་ཚང (family)",
-      "གྲོང་ཚོ (neighbor)",
-      "ཡུན་ངུ (grandfather)",
-      "རྨོ (grandmother)",
-      "ཨ་ཞང (uncle)",
-      "ཨ་ནེ (aunt)"
+      "ཕ།(father)",
+      "མ།(mother)",
+      "ཨ་ཅག(older brother)",
+      "ཨ་ཅག་མོ།(older sister)",
+      "གྲོགས་པོ།(friend)",
+      "སློབ་དཔོན།(teacher)",
+      "སློབ་ཕྲུག(student)",
+      "བུ།(son)",
+      "སྲས།(daughter)",
+      "ཕ་མ།(parents)",
+      "ནུས་པ།(family)",
+      "མི་མང་།(people)",
+      "མཆོག(husband)",
+      "བུ་མོ།(girl)",
+      "ཁྱིམ་ཚང་།(family)",
+      "གྲོང་ཚོ།(neighbor)",
+      "ཡུན་ངུ།(grandfather)",
+      "རྨོ།(grandmother)",
+      "ཨ་ཞང་།(uncle)",
+      "ཨ་ནེ།(aunt)"
     ]
   }
 }

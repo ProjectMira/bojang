@@ -1,238 +1,238 @@
 {
-    "level": 3.2,
-    "title": "Restaurant & Food Ordering - Core Questions",
-    "description": "Top 20 Tibetan sentences focused specifically on ordering food and restaurant interactions",
-    "exercises": [
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཟ་ཁང་ག་པར་ཡོད་རེད་",
-        "options": [
-          "Where is the bathroom?",
-          "Where is the restaurant?",
-          "Where is the kitchen?"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ལ་མོ་མོ་དགོས",
-        "options": [
-          "I want noodles",
-          "I want dumplings",
-          "I want rice"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ལ་ཇ་གཅིག་དགོས",
-        "options": [
-          "I want a coffee",
-          "I want a tea",
-          "I want a milk"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "གོང་ཚད་ག་ཚོད་རེད",
-        "options": [
-          "How much does it cost?",
-          "How long does it take?",
-          "How many people?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁ་ལག་འདི་ཚ་པོ་འདུག་",
-        "options": [
-          "This food is cold",
-          "This food is hot",
-          "This food is salty"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཤ་ཟ་གི་མེད་",
-        "options": [
-          "I don't eat vegetables",
-          "I don't eat meat",
-          "I don't eat rice"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཆུ་དགོས",
-        "options": [
-          "I need tea",
-          "I need water",
-          "I need milk"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཤ་ག་རེ་ཡོད",
-        "options": [
-          "What meat is there?",
-          "What fish is there?",
-          "What chicken is there?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ཚོ་འདིར་བསྡད་ཆོག་གི་རེད་པས",
-        "options": [
-          "Can we sit here?",
-          "Can we order here?",
-          "Can we pay here?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ལ་ཕོར་པ་དང་ཐུར་མ་དགོས",
-        "options": [
-          "I need a cup and chopsticks",
-          "I need a bowl and spoon",
-          "I need a plate and fork"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "འོ་མ་ཚ་པོ་དགོས",
-        "options": [
-          "I want cold milk",
-          "I want hot milk",
-          "I want fresh milk"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "དེ་རིང་ཁ་ལག་དམིགས་བསལ་ག་རེ་རེད",
-        "options": [
-          "What's today's special dish?",
-          "What's today's soup?",
-          "What's today's drink?"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ངས་དངུལ་སྤྲོད་དགོས",
-        "options": [
-          "I will order",
-          "I will pay",
-          "I will leave"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཁ་ལག་འདི་རང་དགོས",
-        "options": [
-          "I want the same food as this",
-          "I want different food from this",
-          "I want more food like this"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ཐུག་པ་ཞིམ་པོ་འདུག",
-        "options": [
-          "The soup is hot",
-          "The soup is cold",
-          "The soup is delicious"
-        ],
-        "correctAnswerIndex": 2
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "རྟག་པར་ག་རེ་ཟ་གི་ཡོད",
-        "options": [
-          "What do you usually drink?",
-          "What do you usually eat?",
-          "What do you usually cook?"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ལ་ཚལ་མང་པོ་མི་དགོས",
-        "options": [
-          "I don't need much rice",
-          "I don't need much vegetables",
-          "I don't need much meat"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "འདི་བོད་ཀྱི་ཁ་ལག་རེད་པས",
-        "options": [
-          "Is this Chinese food?",
-          "Is this Tibetan food?",
-          "Is this Indian food?"
-        ],
-        "correctAnswerIndex": 1
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་ལ་གང་ཡང་མི་དགོས",
-        "options": [
-          "I don't need anything",
-          "I don't want anything",
-          "I don't have anything"
-        ],
-        "correctAnswerIndex": 0
-      },
-      {
-        "type": "sentence_meaning",
-        "tibetanText": "ང་རྩམ་པ་དགའ་པོ་ཡོད་",
-        "options": [
-          "I like barley/tsampa",
-          "I like rice",
-          "I like bread"
-        ],
-        "correctAnswerIndex": 0
-      }
-    ],
-    "metadata": {
-      "totalExercises": 20,
-      "exerciseTypes": [
-        "sentence_meaning"
+  "level": 3.2,
+  "title": "Restaurant & Food Ordering - Core Questions",
+  "description": "Top 20 Tibetan sentences focused specifically on ordering food and restaurant interactions",
+  "exercises": [
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཟ་ཁང་ག་པར་ཡོད་རེད།",
+      "options": [
+        "Where is the bathroom?",
+        "Where is the restaurant?",
+        "Where is the kitchen?"
       ],
-      "contentFocus": {
-        "ordering_food": 12,
-        "menu_items": 4,
-        "restaurant_basics": 2,
-        "payment": 2
-      },
-      "estimatedTime": "15-20 minutes",
-      "difficulty": "intermediate",
-      "skillsLearned": [
-        "Essential food ordering phrases",
-        "Menu item vocabulary",
-        "Dietary preferences expression",
-        "Restaurant etiquette basics",
-        "Payment interactions"
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལ་མོ་མོ་དགོས།",
+      "options": [
+        "I want noodles",
+        "I want dumplings",
+        "I want rice"
       ],
-      "keyVocabulary": [
-        "ཁ་ལག (food)",
-        "དགོས (want/need)",
-        "མོ་མོ (dumplings)",
-        "གསོལ་ཇ (tea)",
-        "ཆུ (water)",
-        "འབྲས་ཆང (beer)",
-        "གོང་ཚད (price)",
-        "ཐོ་ཡིག (menu)"
-      ]
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལ་ཇ་གཅིག་དགོས།",
+      "options": [
+        "I want a coffee",
+        "I want a tea",
+        "I want a milk"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "གོང་ཚད་ག་ཚོད་རེད།",
+      "options": [
+        "How much does it cost?",
+        "How long does it take?",
+        "How many people?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁ་ལག་འདི་ཚ་པོ་འདུག",
+      "options": [
+        "This food is cold",
+        "This food is hot",
+        "This food is salty"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཤ་ཟ་གི་མེད།",
+      "options": [
+        "I don't eat vegetables",
+        "I don't eat meat",
+        "I don't eat rice"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཆུ་དགོས།",
+      "options": [
+        "I need tea",
+        "I need water",
+        "I need milk"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཤ་ག་རེ་ཡོད།",
+      "options": [
+        "What meat is there?",
+        "What fish is there?",
+        "What chicken is there?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ཚོ་འདིར་བསྡད་ཆོག་གི་རེད་པས།",
+      "options": [
+        "Can we sit here?",
+        "Can we order here?",
+        "Can we pay here?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལ་ཕོར་པ་དང་ཐུར་མ་དགོས།",
+      "options": [
+        "I need a cup and chopsticks",
+        "I need a bowl and spoon",
+        "I need a plate and fork"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "འོ་མ་ཚ་པོ་དགོས།",
+      "options": [
+        "I want cold milk",
+        "I want hot milk",
+        "I want fresh milk"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "དེ་རིང་ཁ་ལག་དམིགས་བསལ་ག་རེ་རེད།",
+      "options": [
+        "What's today's special dish?",
+        "What's today's soup?",
+        "What's today's drink?"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ངས་དངུལ་སྤྲོད་དགོས།",
+      "options": [
+        "I will order",
+        "I will pay",
+        "I will leave"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཁ་ལག་འདི་རང་དགོས།",
+      "options": [
+        "I want the same food as this",
+        "I want different food from this",
+        "I want more food like this"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ཐུག་པ་ཞིམ་པོ་འདུག",
+      "options": [
+        "The soup is hot",
+        "The soup is cold",
+        "The soup is delicious"
+      ],
+      "correctAnswerIndex": 2
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "རྟག་པར་ག་རེ་ཟ་གི་ཡོད།",
+      "options": [
+        "What do you usually drink?",
+        "What do you usually eat?",
+        "What do you usually cook?"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལ་ཚལ་མང་པོ་མི་དགོས།",
+      "options": [
+        "I don't need much rice",
+        "I don't need much vegetables",
+        "I don't need much meat"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "འདི་བོད་ཀྱི་ཁ་ལག་རེད་པས།",
+      "options": [
+        "Is this Chinese food?",
+        "Is this Tibetan food?",
+        "Is this Indian food?"
+      ],
+      "correctAnswerIndex": 1
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་ལ་གང་ཡང་མི་དགོས།",
+      "options": [
+        "I don't need anything",
+        "I don't want anything",
+        "I don't have anything"
+      ],
+      "correctAnswerIndex": 0
+    },
+    {
+      "type": "sentence_meaning",
+      "tibetanText": "ང་རྩམ་པ་དགའ་པོ་ཡོད།",
+      "options": [
+        "I like barley/tsampa",
+        "I like rice",
+        "I like bread"
+      ],
+      "correctAnswerIndex": 0
     }
+  ],
+  "metadata": {
+    "totalExercises": 20,
+    "exerciseTypes": [
+      "sentence_meaning"
+    ],
+    "contentFocus": {
+      "ordering_food": 12,
+      "menu_items": 4,
+      "restaurant_basics": 2,
+      "payment": 2
+    },
+    "estimatedTime": "15-20 minutes",
+    "difficulty": "intermediate",
+    "skillsLearned": [
+      "Essential food ordering phrases",
+      "Menu item vocabulary",
+      "Dietary preferences expression",
+      "Restaurant etiquette basics",
+      "Payment interactions"
+    ],
+    "keyVocabulary": [
+      "ཁ་ལག (food)",
+      "དགོས (want/need)",
+      "མོ་མོ (dumplings)",
+      "གསོལ་ཇ (tea)",
+      "ཆུ (water)",
+      "འབྲས་ཆང (beer)",
+      "གོང་ཚད (price)",
+      "ཐོ་ཡིག (menu)"
+    ]
   }
+}

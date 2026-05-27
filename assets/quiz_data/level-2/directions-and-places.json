@@ -5,7 +5,7 @@
   "exercises": [
     {
       "type": "word_meaning",
-      "tibetanText": "གཡས",
+      "tibetanText": "གཡས།",
       "options": [
         "Left",
         "Right",
@@ -15,7 +15,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "གཡོན",
+      "tibetanText": "གཡོན།",
       "options": [
         "Left",
         "Right",
@@ -25,7 +25,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མདུན",
+      "tibetanText": "མདུན།",
       "options": [
         "Back",
         "Front",
@@ -35,7 +35,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "རྒྱབ",
+      "tibetanText": "རྒྱབ།",
       "options": [
         "Front",
         "Back",
@@ -45,7 +45,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཡར",
+      "tibetanText": "ཡར།",
       "options": [
         "Down",
         "Inside",
@@ -55,7 +55,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "མར",
+      "tibetanText": "མར།",
       "options": [
         "Up",
         "Outside",
@@ -65,7 +65,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ནང",
+      "tibetanText": "ནང་།",
       "options": [
         "Outside",
         "Near",
@@ -75,7 +75,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཕྱི",
+      "tibetanText": "ཕྱི།",
       "options": [
         "Inside",
         "Far",
@@ -85,7 +85,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཉེ",
+      "tibetanText": "ཉེ།",
       "options": [
         "Far",
         "Here",
@@ -95,7 +95,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཐག་རིང",
+      "tibetanText": "ཐག་རིང་།",
       "options": [
         "Near",
         "Far",
@@ -105,7 +105,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "འདི",
+      "tibetanText": "འདི།",
       "options": [
         "There",
         "Here",
@@ -115,7 +115,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དེ",
+      "tibetanText": "དེ།",
       "options": [
         "Here",
         "There",
@@ -125,7 +125,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སློབ་གྲྭ",
+      "tibetanText": "སློབ་གྲྭ།",
       "options": [
         "Home",
         "Market",
@@ -135,7 +135,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཁྱིམ",
+      "tibetanText": "ཁྱིམ།",
       "options": [
         "Home",
         "School",
@@ -145,7 +145,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཚོང་ཁང",
+      "tibetanText": "ཚོང་ཁང་།",
       "options": [
         "Market",
         "Shop",
@@ -155,7 +155,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "དགོན་པ",
+      "tibetanText": "དགོན་པ།",
       "options": [
         "Hospital",
         "Shop",
@@ -165,7 +165,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "སྨན་ཁང",
+      "tibetanText": "སྨན་ཁང་།",
       "options": [
         "Monastery",
         "Park",
@@ -175,7 +175,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལམ",
+      "tibetanText": "ལམ།",
       "options": [
         "Bridge",
         "Park",
@@ -185,7 +185,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ཟུར",
+      "tibetanText": "ཟུར།",
       "options": [
         "Bridge",
         "Corner",
@@ -195,7 +195,7 @@
     },
     {
       "type": "word_meaning",
-      "tibetanText": "ལྡུམ་ར",
+      "tibetanText": "ལྡུམ་ར།",
       "options": [
         "Bridge",
         "Park",
@@ -223,26 +223,26 @@
     ],
     "prereq": "Level 2.8 completion",
     "vocabularyIntroduced": [
-      "གཡས (right)",
-      "གཡོན (left)",
-      "མདུན (front)",
-      "རྒྱབ (back)",
-      "ཡར (up)",
-      "མར (down)",
-      "ནང (inside)",
-      "ཕྱི (outside)",
-      "ཉེ (near)",
-      "ཐག་རིང (far)",
-      "འདི (here)",
-      "དེ (there)",
-      "སློབ་གྲྭ (school)",
-      "ཁྱིམ (home)",
-      "ཚོང་ཁང (shop)",
-      "དགོན་པ (monastery)",
-      "སྲོང་ཁང (hospital)",
-      "ལམ (road)",
-      "ཟུར (corner)",
-      "སྐད་འཕྲིན (park)"
+      "གཡས།(right)",
+      "གཡོན།(left)",
+      "མདུན།(front)",
+      "རྒྱབ།(back)",
+      "ཡར།(up)",
+      "མར།(down)",
+      "ནང་།(inside)",
+      "ཕྱི།(outside)",
+      "ཉེ།(near)",
+      "ཐག་རིང་།(far)",
+      "འདི།(here)",
+      "དེ།(there)",
+      "སློབ་གྲྭ།(school)",
+      "ཁྱིམ།(home)",
+      "ཚོང་ཁང་།(shop)",
+      "དགོན་པ།(monastery)",
+      "སྲོང་ཁང་།(hospital)",
+      "ལམ།(road)",
+      "ཟུར།(corner)",
+      "སྐད་འཕྲིན།(park)"
     ]
   }
 }
