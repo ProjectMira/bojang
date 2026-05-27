@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/level_models.dart';
+import '../services/api_service.dart';
 import '../services/progress_service.dart';
 import 'quiz_screen.dart';
 import 'settings_screen.dart';
@@ -15,7 +16,8 @@ class LevelSelectionScreen extends StatefulWidget {
   State<LevelSelectionScreen> createState() => _LevelSelectionScreenState();
 }
 
-class _LevelSelectionScreenState extends State<LevelSelectionScreen> with SingleTickerProviderStateMixin {
+class _LevelSelectionScreenState extends State<LevelSelectionScreen>
+    with SingleTickerProviderStateMixin {
   List<Level> levels = [];
   bool isLoading = true;
   late AnimationController _controller;
@@ -23,22 +25,23 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
   final ScrollController _scrollController = ScrollController();
 
   // Responsive design helpers
-  double _getResponsiveValue(BuildContext context, {
+  double _getResponsiveValue(
+    BuildContext context, {
     required double small,
-    required double medium, 
+    required double medium,
     required double large,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth < 380) return small;      // iPhone SE, small screens
-    if (screenWidth < 414) return medium;    // iPhone 8, standard screens  
-    return large;                            // iPhone Plus, Pro Max, large screens
+    if (screenWidth < 380) return small; // iPhone SE, small screens
+    if (screenWidth < 414) return medium; // iPhone 8, standard screens
+    return large; // iPhone Plus, Pro Max, large screens
   }
 
   int _getResponsiveColumns(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth < 380) return 2;        // iPhone SE: 2 columns for more space
-    if (screenWidth < 500) return 3;        // Standard phones: 3 columns
-    return 4;                               // Large screens/tablets: 4 columns
+    if (screenWidth < 380) return 2; // iPhone SE: 2 columns for more space
+    if (screenWidth < 500) return 3; // Standard phones: 3 columns
+    return 4; // Large screens/tablets: 4 columns
   }
 
   double _getResponsivePadding(BuildContext context) {
@@ -52,9 +55,10 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
     _loadLevels();
     _controller.forward();
   }
@@ -68,13 +72,25 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
 
   Future<void> _loadLevels() async {
     try {
-      final String jsonString = await rootBundle.loadString('assets/quiz_data/levels.json');
+      final remoteLevels = await ApiService().getLearningLevels();
+      if (remoteLevels != null && remoteLevels.isNotEmpty) {
+        setState(() {
+          levels = Level.fromApiLevels(remoteLevels);
+          isLoading = false;
+        });
+        return;
+      }
+
+      final String jsonString = await rootBundle.loadString(
+        'assets/quiz_data/levels.json',
+      );
       final Map<String, dynamic> jsonData = json.decode(jsonString);
-      
-      final List<Level> loadedLevels = (jsonData['levels'] as List)
-          .map((level) => Level.fromJson(level))
-          .toList();
-      
+
+      final List<Level> loadedLevels =
+          (jsonData['levels'] as List)
+              .map((level) => Level.fromJson(level))
+              .toList();
+
       setState(() {
         levels = loadedLevels;
         isLoading = false;
@@ -112,49 +128,73 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
     return SingleChildScrollView(
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.symmetric(horizontal: responsivePadding, vertical: responsivePadding),
+      padding: EdgeInsets.symmetric(
+        horizontal: responsivePadding,
+        vertical: responsivePadding,
+      ),
       child: Column(
-        children: levels.asMap().entries.map((entry) {
-          final levelIndex = entry.key;
-          final level = entry.value;
-          final color = _getLevelColor(level.level);
+        children:
+            levels.asMap().entries.map((entry) {
+              final levelIndex = entry.key;
+              final level = entry.value;
+              final color = _getLevelColor(level.level);
 
-          return Column(
-            children: [
-              if (levelIndex > 0)
-                Container(
-                  height: _getResponsiveValue(context, small: 32, medium: 40, large: 48),
-                  width: 4,
-                  color: Colors.grey[300],
-                ),
-              ScaleTransition(
-                scale: _scaleAnimation,
-                child: _buildLevelNode(level, color, progressService),
-              ),
-            ],
-          );
-        }).toList(),
+              return Column(
+                children: [
+                  if (levelIndex > 0)
+                    Container(
+                      height: _getResponsiveValue(
+                        context,
+                        small: 32,
+                        medium: 40,
+                        large: 48,
+                      ),
+                      width: 4,
+                      color: Colors.grey[300],
+                    ),
+                  ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: _buildLevelNode(level, color, progressService),
+                  ),
+                ],
+              );
+            }).toList(),
       ),
     );
   }
 
-  Widget _buildLevelNode(Level level, Color color, ProgressService progressService) {
-    final containerPadding = _getResponsiveValue(context, small: 12.0, medium: 16.0, large: 20.0);
-    final marginBottom = _getResponsiveValue(context, small: 12.0, medium: 16.0, large: 20.0);
-    
+  Widget _buildLevelNode(
+    Level level,
+    Color color,
+    ProgressService progressService,
+  ) {
+    final containerPadding = _getResponsiveValue(
+      context,
+      small: 12.0,
+      medium: 16.0,
+      large: 20.0,
+    );
+    final marginBottom = _getResponsiveValue(
+      context,
+      small: 12.0,
+      medium: 16.0,
+      large: 20.0,
+    );
+
     // Calculate level progress
     double levelProgress = 0.0;
     int completedSublevels = 0;
     for (final sublevel in level.sublevels) {
       final filename = sublevel.path.split('/').last.split('.').first;
-      final categoryProgress = progressService.categoryProgress[filename] ?? 0.0;
+      final categoryProgress =
+          progressService.categoryProgress[filename] ?? 0.0;
       if (categoryProgress > 0.7) completedSublevels++;
       levelProgress += categoryProgress;
     }
     if (level.sublevels.isNotEmpty) {
       levelProgress = levelProgress / level.sublevels.length;
     }
-    
+
     return Container(
       margin: EdgeInsets.only(bottom: marginBottom),
       child: Column(
@@ -178,7 +218,14 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                 Row(
                   children: [
                     Container(
-                      padding: EdgeInsets.all(_getResponsiveValue(context, small: 10, medium: 12, large: 16)),
+                      padding: EdgeInsets.all(
+                        _getResponsiveValue(
+                          context,
+                          small: 10,
+                          medium: 12,
+                          large: 16,
+                        ),
+                      ),
                       decoration: BoxDecoration(
                         color: color,
                         shape: BoxShape.circle,
@@ -186,13 +233,25 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                       child: Text(
                         '${level.level}',
                         style: GoogleFonts.kalam(
-                          fontSize: _getResponsiveValue(context, small: 20, medium: 24, large: 28),
+                          fontSize: _getResponsiveValue(
+                            context,
+                            small: 20,
+                            medium: 24,
+                            large: 28,
+                          ),
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
                     ),
-                    SizedBox(width: _getResponsiveValue(context, small: 12, medium: 16, large: 20)),
+                    SizedBox(
+                      width: _getResponsiveValue(
+                        context,
+                        small: 12,
+                        medium: 16,
+                        large: 20,
+                      ),
+                    ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,7 +259,12 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                           Text(
                             level.title,
                             style: GoogleFonts.kalam(
-                              fontSize: _getResponsiveValue(context, small: 20, medium: 24, large: 28),
+                              fontSize: _getResponsiveValue(
+                                context,
+                                small: 20,
+                                medium: 24,
+                                large: 28,
+                              ),
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
@@ -217,7 +281,12 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                             Text(
                               '${(levelProgress * 100).toInt()}% Complete • $completedSublevels/${level.sublevels.length} lessons',
                               style: GoogleFonts.kalam(
-                                fontSize: _getResponsiveValue(context, small: 12, medium: 14, large: 16),
+                                fontSize: _getResponsiveValue(
+                                  context,
+                                  small: 12,
+                                  medium: 14,
+                                  large: 16,
+                                ),
                                 color: color,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -228,18 +297,30 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                     ),
                   ],
                 ),
-                SizedBox(height: _getResponsiveValue(context, small: 12, medium: 16, large: 20)),
+                SizedBox(
+                  height: _getResponsiveValue(
+                    context,
+                    small: 12,
+                    medium: 16,
+                    large: 20,
+                  ),
+                ),
                 level.sublevels.isEmpty
                     ? Center(
-                        child: Text(
-                          '🔒 Coming Soon!',
-                          style: GoogleFonts.kalam(
-                            fontSize: _getResponsiveValue(context, small: 16, medium: 20, large: 24),
-                            color: Colors.grey,
-                            fontStyle: FontStyle.italic,
+                      child: Text(
+                        '🔒 Coming Soon!',
+                        style: GoogleFonts.kalam(
+                          fontSize: _getResponsiveValue(
+                            context,
+                            small: 16,
+                            medium: 20,
+                            large: 24,
                           ),
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
                         ),
-                      )
+                      ),
+                    )
                     : _buildSublevels(level, color, progressService),
               ],
             ),
@@ -249,11 +330,25 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
     );
   }
 
-  Widget _buildSublevels(Level level, Color color, ProgressService progressService) {
+  Widget _buildSublevels(
+    Level level,
+    Color color,
+    ProgressService progressService,
+  ) {
     final columns = _getResponsiveColumns(context);
-    final spacing = _getResponsiveValue(context, small: 6, medium: 8, large: 12);
-    final aspectRatio = _getResponsiveValue(context, small: 1.0, medium: 0.95, large: 0.9);
-    
+    final spacing = _getResponsiveValue(
+      context,
+      small: 6,
+      medium: 8,
+      large: 12,
+    );
+    final aspectRatio = _getResponsiveValue(
+      context,
+      small: 1.0,
+      medium: 0.95,
+      large: 0.9,
+    );
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -266,8 +361,8 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
       itemCount: level.sublevels.length,
       itemBuilder: (context, index) {
         final sublevel = level.sublevels[index];
-        final isLocked = false;
-        
+        final isLocked = sublevel.isLocked;
+
         // Check completion status
         final filename = sublevel.path.split('/').last.split('.').first;
         final progress = progressService.categoryProgress[filename] ?? 0.0;
@@ -279,10 +374,21 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
             color: Colors.transparent,
             child: InkWell(
               onTap: () {
+                if (isLocked) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Earn ${sublevel.requiredXp} XP to unlock ${sublevel.name}.',
+                      ),
+                    ),
+                  );
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QuizScreen(topicFilePath: sublevel.path),
+                    builder:
+                        (context) => QuizScreen(topicFilePath: sublevel.path),
                   ),
                 );
               },
@@ -291,10 +397,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: color,
-                    width: 2,
-                  ),
+                  border: Border.all(color: color, width: 2),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -303,9 +406,21 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                     Stack(
                       children: [
                         Icon(
-                          isCompleted ? Icons.check_circle : Icons.play_circle_fill,
-                          color: isCompleted ? Colors.green : color,
-                          size: _getResponsiveValue(context, small: 24, medium: 28, large: 32),
+                          isLocked
+                              ? Icons.lock
+                              : isCompleted
+                              ? Icons.check_circle
+                              : Icons.play_circle_fill,
+                          color:
+                              isLocked
+                                  ? Colors.grey
+                                  : (isCompleted ? Colors.green : color),
+                          size: _getResponsiveValue(
+                            context,
+                            small: 24,
+                            medium: 28,
+                            large: 32,
+                          ),
                         ),
                         if (progress > 0 && !isCompleted)
                           Positioned.fill(
@@ -318,23 +433,47 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
                           ),
                       ],
                     ),
-                    SizedBox(height: _getResponsiveValue(context, small: 4, medium: 6, large: 8)),
+                    SizedBox(
+                      height: _getResponsiveValue(
+                        context,
+                        small: 4,
+                        medium: 6,
+                        large: 8,
+                      ),
+                    ),
                     Text(
                       sublevel.level.toString(),
                       style: GoogleFonts.kalam(
-                        fontSize: _getResponsiveValue(context, small: 14, medium: 16, large: 18),
+                        fontSize: _getResponsiveValue(
+                          context,
+                          small: 14,
+                          medium: 16,
+                          large: 18,
+                        ),
                         fontWeight: FontWeight.bold,
-                        color: color,
+                        color: isLocked ? Colors.grey : color,
                       ),
                     ),
-                    SizedBox(height: _getResponsiveValue(context, small: 2, medium: 2, large: 4)),
+                    SizedBox(
+                      height: _getResponsiveValue(
+                        context,
+                        small: 2,
+                        medium: 2,
+                        large: 4,
+                      ),
+                    ),
                     Flexible(
                       child: Text(
                         sublevel.name,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.kalam(
-                          fontSize: _getResponsiveValue(context, small: 10, medium: 12, large: 14),
-                          color: color,
+                          fontSize: _getResponsiveValue(
+                            context,
+                            small: 10,
+                            medium: 12,
+                            large: 14,
+                          ),
+                          color: isLocked ? Colors.grey : color,
                           fontStyle: FontStyle.italic,
                         ),
                         maxLines: 2,
@@ -356,66 +495,89 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> with Single
     return Consumer<ProgressService>(
       builder: (context, progressService, child) {
         return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
-      appBar: AppBar(
-        title: Text(
-          'Learn Tibetan',
-          style: GoogleFonts.kalam(
-            fontSize: _getResponsiveValue(context, small: 20, medium: 24, large: 28),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(),
+          backgroundColor: const Color(0xFFF7F7F7),
+          appBar: AppBar(
+            title: Text(
+              'Learn Tibetan',
+              style: GoogleFonts.kalam(
+                fontSize: _getResponsiveValue(
+                  context,
+                  small: 20,
+                  medium: 24,
+                  large: 28,
                 ),
-              );
-            },
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            centerTitle: true,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : levels.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: _getResponsiveValue(context, small: 48, medium: 64, large: 80),
-                        color: Colors.grey,
-                      ),
-                      SizedBox(height: _getResponsiveValue(context, small: 12, medium: 16, large: 20)),
-                      Text(
-                        'No levels found',
-                        style: GoogleFonts.kalam(
-                          fontSize: _getResponsiveValue(context, small: 16, medium: 20, large: 24),
-                          color: Colors.grey[700],
+          body:
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : levels.isEmpty
+                  ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: _getResponsiveValue(
+                            context,
+                            small: 48,
+                            medium: 64,
+                            large: 80,
+                          ),
+                          color: Colors.grey,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          _loadLevels();
-                        },
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                )
-              : _buildLevelPath(progressService),
+                        SizedBox(
+                          height: _getResponsiveValue(
+                            context,
+                            small: 12,
+                            medium: 16,
+                            large: 20,
+                          ),
+                        ),
+                        Text(
+                          'No levels found',
+                          style: GoogleFonts.kalam(
+                            fontSize: _getResponsiveValue(
+                              context,
+                              small: 16,
+                              medium: 20,
+                              large: 24,
+                            ),
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            _loadLevels();
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                  : _buildLevelPath(progressService),
         );
       },
     );

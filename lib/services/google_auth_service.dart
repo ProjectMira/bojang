@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
@@ -9,9 +11,9 @@ class GoogleAuthService {
   factory GoogleAuthService() => _instance;
   GoogleAuthService._internal();
 
-  late GoogleSignIn _googleSignIn;
+  GoogleSignIn? _googleSignIn;
   final ApiService _apiService = ApiService();
-  
+
   User? _currentUser;
   bool _isInitialized = false;
 
@@ -25,12 +27,16 @@ class GoogleAuthService {
     if (_isInitialized) return;
 
     try {
-      _googleSignIn = GoogleSignIn(
-        scopes: [
-          'email',
-          'profile',
-        ],
-      );
+      if (kIsWeb) {
+        await _loadCachedUser();
+        _isInitialized = true;
+        print(
+          'Google Sign-In skipped on web until a web client ID is configured',
+        );
+        return;
+      }
+
+      _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
 
       // Load cached user data if available
       await _loadCachedUser();
@@ -47,16 +53,22 @@ class GoogleAuthService {
   Future<User?> signInWithGoogle() async {
     try {
       if (!_isInitialized) await initialize();
+      if (_googleSignIn == null) {
+        print('Google Sign-In is not configured for this platform');
+        return null;
+      }
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn!.signIn();
       if (googleUser == null) {
         // User canceled the sign-in
         print('Google sign-in cancelled by user');
         return null;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final backendToken = await _firebaseIdTokenFromGoogle(googleAuth);
+
       // Create user object from Google data
       final user = User(
         id: googleUser.id,
@@ -77,7 +89,7 @@ class GoogleAuthService {
           email: googleUser.email,
           displayName: googleUser.displayName ?? 'Google User',
           profileImageUrl: googleUser.photoUrl,
-          idToken: googleAuth.idToken,
+          idToken: backendToken ?? googleAuth.idToken,
           accessToken: googleAuth.accessToken,
         );
 
@@ -115,8 +127,11 @@ class GoogleAuthService {
   Future<void> signOut() async {
     try {
       if (_isInitialized) {
-        await _googleSignIn.signOut();
+        await _googleSignIn?.signOut();
       }
+      try {
+        await firebase_auth.FirebaseAuth.instance.signOut();
+      } catch (_) {}
       await _apiService.logout();
       _currentUser = null;
       await _clearCachedUser();
@@ -129,21 +144,25 @@ class GoogleAuthService {
   Future<User?> signInSilently() async {
     try {
       if (!_isInitialized) await initialize();
+      if (_googleSignIn == null) return _currentUser;
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signInSilently();
+      final GoogleSignInAccount? googleUser =
+          await _googleSignIn!.signInSilently();
       if (googleUser == null) {
         return _currentUser; // Return cached user if available
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final backendToken = await _firebaseIdTokenFromGoogle(googleAuth);
+
       // Verify with backend if possible
       final result = await _apiService.googleAuth(
         googleId: googleUser.id,
         email: googleUser.email,
         displayName: googleUser.displayName ?? 'Google User',
         profileImageUrl: googleUser.photoUrl,
-        idToken: googleAuth.idToken,
+        idToken: backendToken ?? googleAuth.idToken,
         accessToken: googleAuth.accessToken,
       );
 
@@ -164,11 +183,11 @@ class GoogleAuthService {
   // Check if user is currently signed in to Google
   Future<bool> isSignedInToGoogle() async {
     if (!_isInitialized) await initialize();
-    return await _googleSignIn.isSignedIn();
+    return await _googleSignIn?.isSignedIn() ?? false;
   }
 
   // Get current Google account
-  GoogleSignInAccount? get currentGoogleAccount => _googleSignIn.currentUser;
+  GoogleSignInAccount? get currentGoogleAccount => _googleSignIn?.currentUser;
 
   // Private helper methods
   String _generateUsername(String email) {
@@ -196,5 +215,22 @@ class GoogleAuthService {
   Future<void> _clearCachedUser() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('cached_user');
+  }
+
+  Future<String?> _firebaseIdTokenFromGoogle(
+    GoogleSignInAuthentication googleAuth,
+  ) async {
+    try {
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final result = await firebase_auth.FirebaseAuth.instance
+          .signInWithCredential(credential);
+      return result.user?.getIdToken();
+    } catch (e) {
+      print('Firebase token exchange skipped: $e');
+      return null;
+    }
   }
 }

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/progress_service.dart';
 import '../services/theme_service.dart';
+import '../services/api_service.dart';
 import '../widgets/cultural_tip_card.dart';
 import 'level_selection_screen.dart';
 import 'settings_screen.dart';
@@ -25,16 +26,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    ));
-    
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
     _animationController.forward();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _refreshServerProgress(),
+    );
+  }
+
+  Future<void> _refreshServerProgress() async {
+    if (!ApiService().isAuthenticated || !mounted) return;
+    final stats = await ApiService().getUserProgress();
+    if (stats != null && mounted) {
+      await Provider.of<ProgressService>(
+        context,
+        listen: false,
+      ).updateFromServer(stats);
+    }
   }
 
   @override
@@ -65,22 +76,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Welcome back!',
+                              'Welcome back',
                               style: GoogleFonts.kalam(
                                 fontSize: 16,
-                                color: Theme.of(context).brightness == Brightness.dark 
-                                    ? Colors.grey.shade400 
-                                    : Colors.grey.shade600,
+                                color:
+                                    Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.grey.shade400
+                                        : Colors.grey.shade600,
                               ),
                             ),
                             Text(
-                              'Ready to learn?',
+                              'Ready for Tibetan?',
                               style: GoogleFonts.kalam(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).brightness == Brightness.dark 
-                                    ? Colors.white 
-                                    : const Color(0xFF2C3E50),
+                                color:
+                                    Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : const Color(0xFF2C3E50),
                               ),
                             ),
                           ],
@@ -96,48 +111,50 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           },
                           icon: Icon(
                             Icons.settings,
-                            color: Theme.of(context).brightness == Brightness.dark 
-                                ? Colors.grey.shade400 
-                                : Colors.grey.shade600,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade600,
                             size: 28,
                           ),
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Streak Card
                     _buildStreakCard(progressService),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Quick Stats
                     _buildQuickStats(progressService),
-                    
+
                     const SizedBox(height: 32),
-                    
+
                     // Continue Learning Button
                     _buildContinueLearningButton(),
-                    
+
                     const SizedBox(height: 32),
-                    
+
                     // Cultural Tip of the Day
                     Text(
                       'Cultural Tip',
                       style: GoogleFonts.kalam(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).brightness == Brightness.dark 
-                            ? Colors.white 
-                            : const Color(0xFF2C3E50),
+                        color:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : const Color(0xFF2C3E50),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     _buildCulturalTip(),
-                    
+
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -148,7 +165,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       },
     );
   }
-  
+
   Widget _buildStreakCard(ProgressService progressService) {
     return Container(
       width: double.infinity,
@@ -176,10 +193,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               children: [
                 Row(
                   children: [
-                    const Text(
-                      '🔥',
-                      style: TextStyle(fontSize: 28),
-                    ),
+                    const Text('🔥', style: TextStyle(fontSize: 28)),
                     const SizedBox(width: 8),
                     Text(
                       '${progressService.currentStreak}',
@@ -192,19 +206,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ],
                 ),
                 Text(
-                  progressService.currentStreak == 1 ? 'Day Streak' : 'Days Streak',
-                  style: GoogleFonts.kalam(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
+                  progressService.currentStreak == 1
+                      ? 'Day Streak'
+                      : 'Days Streak',
+                  style: GoogleFonts.kalam(fontSize: 16, color: Colors.white70),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   _getStreakMessage(progressService.currentStreak),
-                  style: GoogleFonts.kalam(
-                    fontSize: 14,
-                    color: Colors.white70,
-                  ),
+                  style: GoogleFonts.kalam(fontSize: 14, color: Colors.white70),
                 ),
               ],
             ),
@@ -216,8 +226,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              progressService.currentStreak > 0 
-                  ? Icons.local_fire_department 
+              progressService.currentStreak > 0
+                  ? Icons.local_fire_department
                   : Icons.play_arrow,
               color: Colors.white,
               size: 32,
@@ -227,32 +237,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
     );
   }
-  
+
   Widget _buildQuickStats(ProgressService progressService) {
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
-            'Accuracy',
-            '${progressService.accuracy.toStringAsFixed(0)}%',
-            Icons.track_changes,
+            progressService.xp > 0 ? 'XP' : 'Accuracy',
+            progressService.xp > 0
+                ? '${progressService.xp}'
+                : '${progressService.accuracy.toStringAsFixed(0)}%',
+            progressService.xp > 0 ? Icons.bolt : Icons.track_changes,
             Colors.green,
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildStatCard(
-            'Quizzes',
-            '${progressService.totalQuizzesTaken}',
-            Icons.quiz,
+            'Streak',
+            '${progressService.currentStreak}',
+            Icons.local_fire_department,
             Colors.orange,
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildStatCard(
-            'Level',
-            '${progressService.currentLevel}',
+            progressService.completedLevelsCount > 0 ? 'Lessons' : 'Level',
+            progressService.completedLevelsCount > 0
+                ? '${progressService.completedLevelsCount}'
+                : '${progressService.currentLevel}',
             Icons.trending_up,
             Colors.purple,
           ),
@@ -260,8 +274,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ],
     );
   }
-  
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -284,25 +303,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             style: GoogleFonts.kalam(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).brightness == Brightness.dark 
-                  ? Colors.white 
-                  : const Color(0xFF2C3E50),
+              color:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : const Color(0xFF2C3E50),
             ),
           ),
           Text(
             title,
             style: GoogleFonts.kalam(
               fontSize: 12,
-              color: Theme.of(context).brightness == Brightness.dark 
-                  ? Colors.grey.shade400 
-                  : Colors.grey.shade600,
+              color:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.shade400
+                      : Colors.grey.shade600,
             ),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildContinueLearningButton() {
     return Container(
       width: double.infinity,
@@ -347,23 +368,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Continue Learning',
+                        'Start a Lesson',
                         style: GoogleFonts.kalam(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).brightness == Brightness.dark 
-                              ? Colors.white 
-                              : const Color(0xFF2C3E50),
+                          color:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : const Color(0xFF2C3E50),
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Pick up where you left off',
+                        'Practice vocabulary, phrases, and verbs',
                         style: GoogleFonts.kalam(
                           fontSize: 14,
-                          color: Theme.of(context).brightness == Brightness.dark 
-                              ? Colors.grey.shade400 
-                              : Colors.grey.shade600,
+                          color:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
                         ),
                       ),
                     ],
@@ -371,9 +394,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: Theme.of(context).brightness == Brightness.dark 
-                      ? Colors.grey.shade400 
-                      : Colors.grey.shade600,
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
                 ),
               ],
             ),
@@ -382,7 +406,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
     );
   }
-  
+
   Widget _buildCulturalTip() {
     final tipData = CulturalTipsData.getRandomTip();
     return CulturalTipCard(
@@ -393,13 +417,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       color: tipData['color'],
     );
   }
-  
+
   String _getStreakMessage(int streak) {
-    if (streak == 0) return 'Start your learning journey!';
+    if (streak == 0) return 'Start with one short lesson today';
     if (streak < 3) return 'Great start! Keep it up!';
     if (streak < 7) return 'Building a habit! 🎯';
     if (streak < 14) return 'You\'re on fire! 🔥';
     if (streak < 30) return 'Amazing dedication! 🌟';
     return 'Learning master! 👑';
   }
-} 
+}

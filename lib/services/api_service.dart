@@ -2,39 +2,38 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/user.dart';
-import '../models/quiz_session.dart';
-import '../models/question.dart';
-import '../models/category.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000/api'; // Change for production
-  static const String apiVersion = 'v1';
-  
+  static const String baseUrl = String.fromEnvironment(
+    'BOJANG_API_BASE_URL',
+    defaultValue: 'https://bojang-backend-lbziapssxq-uc.a.run.app',
+  );
+
   // Singleton pattern
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
   ApiService._internal();
-  
+
+  final http.Client _client = http.Client();
   String? _authToken;
-  
+
   // Headers for API requests
   Map<String, String> get _headers => {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     if (_authToken != null) 'Authorization': 'Bearer $_authToken',
   };
-  
+
   // Initialize service with stored auth token
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     _authToken = prefs.getString('auth_token');
   }
-  
+
   // =====================================================
   // AUTHENTICATION METHODS
   // =====================================================
-  
+
   Future<Map<String, dynamic>?> register({
     required String email,
     required String username,
@@ -42,61 +41,21 @@ class ApiService {
     required String displayName,
     String? deviceId,
   }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/$apiVersion/auth/register'),
-        headers: _headers,
-        body: jsonEncode({
-          'email': email,
-          'username': username,
-          'password': password,
-          'display_name': displayName,
-          'device_id': deviceId,
-        }),
-      );
-      
-      if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        _authToken = data['token'];
-        await _storeAuthToken(_authToken!);
-        return data;
-      }
-      return null;
-    } catch (e) {
-      print('Registration error: $e');
-      return null;
-    }
+    // The production API uses Firebase authentication plus /auth/sync.
+    // Email/password registration is intentionally not exposed by the backend.
+    return null;
   }
-  
+
   Future<Map<String, dynamic>?> login({
     required String email,
     required String password,
     String? deviceId,
   }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/$apiVersion/auth/login'),
-        headers: _headers,
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-          'device_id': deviceId,
-        }),
-      );
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        _authToken = data['token'];
-        await _storeAuthToken(_authToken!);
-        return data;
-      }
-      return null;
-    } catch (e) {
-      print('Login error: $e');
-      return null;
-    }
+    // The production API uses Firebase authentication plus /auth/sync.
+    // Email/password login is intentionally not exposed by the backend.
+    return null;
   }
-  
+
   Future<Map<String, dynamic>?> googleAuth({
     required String googleId,
     required String email,
@@ -105,328 +64,294 @@ class ApiService {
     String? idToken,
     String? accessToken,
   }) async {
+    final token = idToken ?? accessToken;
+    if (token == null || token.isEmpty) return null;
+
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/$apiVersion/auth/google'),
-        headers: _headers,
-        body: jsonEncode({
-          'google_id': googleId,
-          'email': email,
-          'display_name': displayName,
-          'profile_image_url': profileImageUrl,
-          'id_token': idToken,
-          'access_token': accessToken,
-        }),
+      _authToken = token;
+      await _storeAuthToken(token);
+
+      final profile = await syncUser(
+        email: email,
+        nativeLang: 'en',
+        targetLang: 'bo',
       );
-      
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        _authToken = data['token'];
-        await _storeAuthToken(_authToken!);
-        return data;
-      }
-      return null;
+      if (profile == null) return null;
+
+      final uid = (profile['uid'] ?? googleId).toString();
+      final user = {
+        'id': uid,
+        'uid': uid,
+        'email': email,
+        'username': email.split('@').first,
+        'display_name': profile['display_name'] ?? displayName,
+        'profile_image_url': profileImageUrl,
+        'created_at': DateTime.now().toIso8601String(),
+        'google_id': googleId,
+        'auth_provider': 'google',
+        'xp': profile['xp'] ?? 0,
+        'streak': profile['streak'] ?? 0,
+        'league': profile['league'] ?? 'Bronze',
+      };
+      return {'token': token, 'user': user, 'profile': profile};
     } catch (e) {
-      print('Google auth error: $e');
+      print('Google auth sync error: $e');
       return null;
     }
   }
 
   Future<void> logout() async {
-    try {
-      await http.post(
-        Uri.parse('$baseUrl/$apiVersion/auth/logout'),
-        headers: _headers,
-      );
-    } finally {
-      _authToken = null;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('auth_token');
-    }
+    _authToken = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
   }
-  
+
   // =====================================================
   // USER METHODS
   // =====================================================
-  
+
   Future<Map<String, dynamic>?> getUserProfile() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$apiVersion/user/profile'),
-        headers: _headers,
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      }
-      return null;
-    } catch (e) {
-      print('Get user profile error: $e');
-      return null;
-    }
+    return _get('auth/me');
   }
-  
+
   Future<Map<String, dynamic>?> getUserProgress() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$apiVersion/user/progress'),
-        headers: _headers,
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      }
-      return null;
-    } catch (e) {
-      print('Get user progress error: $e');
-      return null;
-    }
+    return _get('progress/stats');
   }
-  
+
+  Future<Map<String, dynamic>?> syncUser({
+    required String email,
+    String nativeLang = 'en',
+    String targetLang = 'bo',
+  }) async {
+    return _post('auth/sync', {
+      'email': email,
+      'native_lang': nativeLang,
+      'target_lang': targetLang,
+    });
+  }
+
+  Future<Map<String, dynamic>?> updateUserProfile({
+    String? displayName,
+    String? nativeLang,
+    String? targetLang,
+  }) async {
+    final body = <String, dynamic>{
+      if (displayName != null) 'display_name': displayName,
+      if (nativeLang != null) 'native_lang': nativeLang,
+      if (targetLang != null) 'target_lang': targetLang,
+    };
+    return _patch('auth/me', body);
+  }
+
+  Future<Map<String, dynamic>?> getUserStats() async {
+    return _get('auth/me/stats');
+  }
+
+  Future<Map<String, dynamic>?> exportUserData() async {
+    return _get('auth/me/data-export');
+  }
+
+  Future<bool> deleteAccount() async {
+    final response = await _delete('auth/me');
+    return response != null;
+  }
+
   // =====================================================
   // CONTENT METHODS
   // =====================================================
-  
+
   Future<List<Map<String, dynamic>>?> getCategories() async {
+    return getCategoriesByType();
+  }
+
+  Future<List<Map<String, dynamic>>?> getCategoriesByType({
+    String? type,
+  }) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$apiVersion/content/categories'),
-        headers: _headers,
+      final data = await _get(
+        'content/categories',
+        queryParameters: {if (type != null) 'type': type},
       );
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['categories']);
-      }
-      return null;
+      if (data == null) return null;
+      return List<Map<String, dynamic>>.from(data['categories'] ?? []);
     } catch (e) {
       print('Get categories error: $e');
       return null;
     }
   }
-  
+
   Future<List<Map<String, dynamic>>?> getLevels(String categoryId) async {
+    return getLearningLevels();
+  }
+
+  Future<List<Map<String, dynamic>>?> getLearningLevels() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$apiVersion/content/categories/$categoryId/levels'),
-        headers: _headers,
-      );
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['levels']);
-      }
-      return null;
+      final data = await _getList('learn/levels');
+      return data;
     } catch (e) {
       print('Get levels error: $e');
       return null;
     }
   }
-  
+
   Future<List<Map<String, dynamic>>?> getQuestions(String levelId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$apiVersion/content/levels/$levelId/questions'),
-        headers: _headers,
-      );
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['questions']);
-      }
-      return null;
+      final session = await getLearningSession(levelId: levelId);
+      if (session == null) return null;
+      return List<Map<String, dynamic>>.from(session['exercises'] ?? []);
     } catch (e) {
       print('Get questions error: $e');
       return null;
     }
   }
-  
-  Future<List<Map<String, dynamic>>?> getGames(String levelId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$apiVersion/content/levels/$levelId/games'),
-        headers: _headers,
-      );
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['games']);
-      }
-      return null;
-    } catch (e) {
-      print('Get games error: $e');
-      return null;
-    }
+
+  Future<Map<String, dynamic>?> getLearningSession({
+    required String levelId,
+    int numQuestions = 10,
+    List<String>? exerciseTypes,
+  }) async {
+    return _get(
+      'learn/session/$levelId',
+      queryParameters: {
+        'num_questions': numQuestions.toString(),
+        if (exerciseTypes != null && exerciseTypes.isNotEmpty)
+          'exercise_types': exerciseTypes.join(','),
+      },
+    );
   }
-  
+
+  Future<List<Map<String, dynamic>>?> getGames(String levelId) async {
+    return null;
+  }
+
   // =====================================================
   // PROGRESS METHODS
   // =====================================================
-  
+
   Future<bool> submitQuizSession(Map<String, dynamic> sessionData) async {
+    return submitProgressCompletion(sessionData);
+  }
+
+  Future<bool> submitProgressCompletion(Map<String, dynamic> submission) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/$apiVersion/progress/quiz-session'),
-        headers: _headers,
-        body: jsonEncode(sessionData),
-      );
-      
-      return response.statusCode == 201;
+      final response = await _post('progress/complete', submission);
+      return response != null && response['success'] == true;
     } catch (e) {
-      print('Submit quiz session error: $e');
+      print('Submit progress error: $e');
       return false;
     }
   }
-  
+
   Future<bool> submitGameScore(Map<String, dynamic> scoreData) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/$apiVersion/progress/game-score'),
-        headers: _headers,
-        body: jsonEncode(scoreData),
-      );
-      
-      return response.statusCode == 201;
+      return false;
     } catch (e) {
       print('Submit game score error: $e');
       return false;
     }
   }
-  
+
   Future<bool> updateStreak(Map<String, dynamic> streakData) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/$apiVersion/progress/streak'),
-        headers: _headers,
-        body: jsonEncode(streakData),
-      );
-      
-      return response.statusCode == 200;
+      return false;
     } catch (e) {
       print('Update streak error: $e');
       return false;
     }
   }
-  
+
   // =====================================================
   // ACHIEVEMENTS METHODS
   // =====================================================
-  
+
   Future<List<Map<String, dynamic>>?> getAchievements() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$apiVersion/achievements'),
-        headers: _headers,
-      );
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['achievements']);
-      }
-      return null;
-    } catch (e) {
-      print('Get achievements error: $e');
-      return null;
-    }
+    return null;
   }
-  
+
   Future<List<Map<String, dynamic>>?> getUserAchievements() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$apiVersion/user/achievements'),
-        headers: _headers,
-      );
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['user_achievements']);
-      }
-      return null;
-    } catch (e) {
-      print('Get user achievements error: $e');
-      return null;
-    }
+    return null;
   }
-  
+
   // =====================================================
   // LEADERBOARD METHODS
   // =====================================================
-  
+
   Future<List<Map<String, dynamic>>?> getLeaderboard({
     required String type,
     String? period,
     int limit = 50,
   }) async {
     try {
-      final queryParams = {
-        'type': type,
-        'limit': limit.toString(),
-        if (period != null) 'period': period,
-      };
-      
-      final uri = Uri.parse('$baseUrl/$apiVersion/leaderboard')
-          .replace(queryParameters: queryParams);
-      
-      final response = await http.get(uri, headers: _headers);
-      
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return List<Map<String, dynamic>>.from(data['leaderboard']);
-      }
-      return null;
+      final league =
+          ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'].contains(type)
+              ? type
+              : null;
+      final data = await _get(
+        'progress/leaderboard',
+        queryParameters: {if (league != null) 'league': league},
+      );
+      if (data == null) return null;
+      return List<Map<String, dynamic>>.from(data['entries'] ?? []);
     } catch (e) {
       print('Get leaderboard error: $e');
       return null;
     }
   }
-  
+
   // =====================================================
   // SYNC METHODS
   // =====================================================
-  
+
   Future<bool> syncOfflineData(List<Map<String, dynamic>> syncData) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/$apiVersion/sync/offline-data'),
-        headers: _headers,
-        body: jsonEncode({'sync_data': syncData}),
-      );
-      
-      return response.statusCode == 200;
+      var allSynced = true;
+      for (final item in syncData) {
+        if (item.containsKey('session_id') && item.containsKey('level_id')) {
+          allSynced = await submitProgressCompletion(item) && allSynced;
+        }
+      }
+      return allSynced;
     } catch (e) {
       print('Sync offline data error: $e');
       return false;
     }
   }
-  
+
   Future<Map<String, dynamic>?> getContentVersion() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$apiVersion/content/version'),
-        headers: _headers,
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      }
-      return null;
-    } catch (e) {
-      print('Get content version error: $e');
-      return null;
-    }
+    final config = await getAppConfig();
+    if (config == null) return null;
+    final latest =
+        (config['latest_ios_version'] ??
+                config['latest_android_version'] ??
+                '1.0.0')
+            .toString();
+    final versionNumber = latest
+        .split('.')
+        .map((part) => int.tryParse(part) ?? 0)
+        .fold<int>(0, (value, part) => value * 100 + part);
+    return {'version': versionNumber, 'config': config};
   }
-  
+
+  Future<Map<String, dynamic>?> getAppConfig() async {
+    return _get('subscriptions/config');
+  }
+
   // =====================================================
   // UTILITY METHODS
   // =====================================================
-  
+
   Future<void> _storeAuthToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('auth_token', token);
   }
-  
+
   bool get isAuthenticated => _authToken != null;
-  
+
+  Future<void> setAuthToken(String token) async {
+    _authToken = token;
+    await _storeAuthToken(token);
+  }
+
   // Check if device is online
   Future<bool> isOnline() async {
     try {
@@ -436,15 +361,18 @@ class ApiService {
       return false;
     }
   }
-  
+
   // Generic GET request with error handling
-  Future<Map<String, dynamic>?> _get(String endpoint) async {
+  Future<Map<String, dynamic>?> _get(
+    String endpoint, {
+    Map<String, String>? queryParameters,
+  }) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/$apiVersion/$endpoint'),
+      final response = await _client.get(
+        _uri(endpoint, queryParameters),
         headers: _headers,
       );
-      
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
@@ -454,16 +382,38 @@ class ApiService {
       return null;
     }
   }
-  
-  // Generic POST request with error handling
-  Future<Map<String, dynamic>?> _post(String endpoint, Map<String, dynamic> data) async {
+
+  Future<List<Map<String, dynamic>>?> _getList(
+    String endpoint, {
+    Map<String, String>? queryParameters,
+  }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/$apiVersion/$endpoint'),
+      final response = await _client.get(
+        _uri(endpoint, queryParameters),
+        headers: _headers,
+      );
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      }
+      return null;
+    } catch (e) {
+      print('GET $endpoint error: $e');
+      return null;
+    }
+  }
+
+  // Generic POST request with error handling
+  Future<Map<String, dynamic>?> _post(
+    String endpoint,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final response = await _client.post(
+        _uri(endpoint),
         headers: _headers,
         body: jsonEncode(data),
       );
-      
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return jsonDecode(response.body);
       }
@@ -472,5 +422,51 @@ class ApiService {
       print('POST $endpoint error: $e');
       return null;
     }
+  }
+
+  Future<Map<String, dynamic>?> _patch(
+    String endpoint,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final response = await _client.patch(
+        _uri(endpoint),
+        headers: _headers,
+        body: jsonEncode(data),
+      );
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('PATCH $endpoint error: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _delete(String endpoint) async {
+    try {
+      final response = await _client.delete(_uri(endpoint), headers: _headers);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('DELETE $endpoint error: $e');
+      return null;
+    }
+  }
+
+  Uri _uri(String endpoint, [Map<String, String>? queryParameters]) {
+    final cleanBase =
+        baseUrl.endsWith('/')
+            ? baseUrl.substring(0, baseUrl.length - 1)
+            : baseUrl;
+    final cleanEndpoint =
+        endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+    return Uri.parse('$cleanBase/$cleanEndpoint').replace(
+      queryParameters:
+          queryParameters?.isEmpty == true ? null : queryParameters,
+    );
   }
 }

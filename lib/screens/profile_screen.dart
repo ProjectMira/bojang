@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/progress_service.dart';
 import '../services/google_auth_service.dart';
+import '../services/api_service.dart';
 import '../models/user.dart';
 import 'settings_screen.dart';
 import 'auth_screen.dart';
@@ -25,42 +26,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final googleAuthService = Provider.of<GoogleAuthService>(context, listen: false);
+    final googleAuthService = Provider.of<GoogleAuthService>(
+      context,
+      listen: false,
+    );
     setState(() {
       currentUser = googleAuthService.currentUser;
       playerName = currentUser?.displayName ?? 'Tibetan Learner';
     });
+    final stats = await ApiService().getUserProgress();
+    if (stats != null && mounted) {
+      await Provider.of<ProgressService>(
+        context,
+        listen: false,
+      ).updateFromServer(stats);
+    }
   }
 
   Future<void> _handleLogout() async {
     final shouldLogout = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Sign Out', style: GoogleFonts.kalam(fontWeight: FontWeight.bold)),
-        content: Text('Are you sure you want to sign out?', style: GoogleFonts.kalam()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: GoogleFonts.kalam()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
+      builder:
+          (context) => AlertDialog(
+            title: Text(
               'Sign Out',
-              style: GoogleFonts.kalam(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
+              style: GoogleFonts.kalam(fontWeight: FontWeight.bold),
             ),
+            content: Text(
+              'Are you sure you want to sign out?',
+              style: GoogleFonts.kalam(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('Cancel', style: GoogleFonts.kalam()),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(
+                  'Sign Out',
+                  style: GoogleFonts.kalam(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (shouldLogout == true) {
-      final googleAuthService = Provider.of<GoogleAuthService>(context, listen: false);
+      final googleAuthService = Provider.of<GoogleAuthService>(
+        context,
+        listen: false,
+      );
       await googleAuthService.signOut();
-      
+
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const AuthScreen()),
@@ -74,43 +95,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final controller = TextEditingController(text: playerName);
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).cardColor,
-        title: Text(
-          'Edit Name',
-          style: GoogleFonts.kalam(fontWeight: FontWeight.bold),
-        ),
-        content: TextField(
-          controller: controller,
-          style: GoogleFonts.kalam(),
-          decoration: InputDecoration(
-            labelText: 'Your Name',
-            labelStyle: GoogleFonts.kalam(),
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: GoogleFonts.kalam()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: Text(
-              'Save',
-              style: GoogleFonts.kalam(
-                color: Theme.of(context).primaryColor,
-                fontWeight: FontWeight.bold,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Theme.of(context).cardColor,
+            title: Text(
+              'Edit Name',
+              style: GoogleFonts.kalam(fontWeight: FontWeight.bold),
+            ),
+            content: TextField(
+              controller: controller,
+              style: GoogleFonts.kalam(),
+              decoration: InputDecoration(
+                labelText: 'Your Name',
+                labelStyle: GoogleFonts.kalam(),
+                border: const OutlineInputBorder(),
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel', style: GoogleFonts.kalam()),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, controller.text),
+                child: Text(
+                  'Save',
+                  style: GoogleFonts.kalam(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (result != null && result.isNotEmpty) {
+      await ApiService().updateUserProfile(displayName: result.trim());
       setState(() {
-        playerName = result;
+        playerName = result.trim();
       });
     }
   }
@@ -155,197 +178,209 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
             ],
           ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Profile Header
-            Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF2C97DD), Color(0xFFF5F7FA)],
-                ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.white,
-                    backgroundImage: currentUser?.profileImageUrl != null 
-                        ? NetworkImage(currentUser!.profileImageUrl!) 
-                        : null,
-                    child: currentUser?.profileImageUrl == null
-                        ? Text(
-                            playerName.isNotEmpty ? playerName[0].toUpperCase() : 'T',
-                            style: const TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2C97DD),
-                            ),
-                          )
-                        : null,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    playerName,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Profile Header
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xFF2C97DD), Color(0xFFF5F7FA)],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  if (currentUser?.email != null)
-                    Text(
-                      currentUser!.email,
-                      style: GoogleFonts.kalam(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.white,
+                        backgroundImage:
+                            currentUser?.profileImageUrl != null
+                                ? NetworkImage(currentUser!.profileImageUrl!)
+                                : null,
+                        child:
+                            currentUser?.profileImageUrl == null
+                                ? Text(
+                                  playerName.isNotEmpty
+                                      ? playerName[0].toUpperCase()
+                                      : 'T',
+                                  style: const TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2C97DD),
+                                  ),
+                                )
+                                : null,
                       ),
-                    ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Level ${progressService.currentLevel} Learner',
-                    style: GoogleFonts.kalam(
-                      fontSize: 16,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  if (currentUser?.authProvider == AuthProvider.google)
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Google Account',
-                        style: GoogleFonts.kalam(
-                          fontSize: 12,
-                          color: Colors.blue.shade800,
-                          fontWeight: FontWeight.w600,
+                      const SizedBox(height: 16),
+                      Text(
+                        playerName,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2C3E50),
                         ),
                       ),
-                    ),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-            
-            // Stats Section
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Your Progress',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Stats Grid
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.2,
-                    children: [
-                      _buildStatCard(
-                        'Quizzes Taken',
-                        '${progressService.totalQuizzesTaken}',
-                        Icons.quiz,
-                        Colors.blue,
+                      const SizedBox(height: 8),
+                      if (currentUser?.email != null)
+                        Text(
+                          currentUser!.email,
+                          style: GoogleFonts.kalam(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${progressService.league} League • ${progressService.xp} XP',
+                        style: GoogleFonts.kalam(
+                          fontSize: 16,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
-                      _buildStatCard(
-                        'Accuracy',
-                        '${progressService.accuracy.toStringAsFixed(1)}%',
-                        Icons.track_changes,
-                        Colors.green,
-                      ),
-                      _buildStatCard(
-                        'Correct Answers',
-                        '${progressService.totalCorrectAnswers}',
-                        Icons.check_circle,
-                        Colors.orange,
-                      ),
-                      _buildStatCard(
-                        'Achievements',
-                        '${progressService.unlockedAchievements.length}',
-                        Icons.emoji_events,
-                        Colors.purple,
-                      ),
+                      if (currentUser?.authProvider == AuthProvider.google)
+                        Container(
+                          margin: const EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Google Account',
+                            style: GoogleFonts.kalam(
+                              fontSize: 12,
+                              color: Colors.blue.shade800,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 32),
                     ],
                   ),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Settings Section
-                  const Text(
-                    'Settings',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  _buildSettingsCard(
-                    'Settings',
-                    'Manage app preferences and notifications',
-                    Icons.settings,
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SettingsScreen(),
+                ),
+
+                // Stats Section
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Your Progress',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2C3E50),
                         ),
-                      );
-                    },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Stats Grid
+                      GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 1.2,
+                        children: [
+                          _buildStatCard(
+                            'XP',
+                            '${progressService.xp}',
+                            Icons.bolt,
+                            Colors.blue,
+                          ),
+                          _buildStatCard(
+                            'Streak',
+                            '${progressService.currentStreak}',
+                            Icons.local_fire_department,
+                            Colors.green,
+                          ),
+                          _buildStatCard(
+                            'Completed Lessons',
+                            '${progressService.completedLevelsCount}',
+                            Icons.check_circle,
+                            Colors.orange,
+                          ),
+                          _buildStatCard(
+                            'League',
+                            progressService.league,
+                            Icons.emoji_events,
+                            Colors.purple,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Settings Section
+                      const Text(
+                        'Settings',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2C3E50),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      _buildSettingsCard(
+                        'Settings',
+                        'Manage app preferences and notifications',
+                        Icons.settings,
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SettingsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      _buildSettingsCard(
+                        'Reset Progress',
+                        'Clear local streaks, scores, and cached progress',
+                        Icons.refresh,
+                        () => _showResetDialog(progressService),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      _buildSettingsCard(
+                        'About App',
+                        'Learn more about Bojang',
+                        Icons.info,
+                        _showAboutDialog,
+                      ),
+
+                      const SizedBox(height: 32),
+                    ],
                   ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  _buildSettingsCard(
-                    'Reset Progress',
-                    'Start your learning journey fresh',
-                    Icons.refresh,
-                    () => _showResetDialog(progressService),
-                  ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  _buildSettingsCard(
-                    'About App',
-                    'Learn more about Bojang',
-                    Icons.info,
-                    _showAboutDialog,
-                  ),
-                  
-                  const SizedBox(height: 32),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
         );
       },
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -375,10 +410,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
             textAlign: TextAlign.center,
           ),
         ],
@@ -386,7 +418,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSettingsCard(String title, String subtitle, IconData icon, VoidCallback onTap) {
+  Widget _buildSettingsCard(
+    String title,
+    String subtitle,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -417,12 +454,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         subtitle: Text(
           subtitle,
-          style: const TextStyle(
-            color: Colors.grey,
-            fontSize: 12,
-          ),
+          style: const TextStyle(color: Colors.grey, fontSize: 12),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: Colors.grey,
+        ),
         onTap: onTap,
       ),
     );
@@ -431,73 +469,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showResetDialog(ProgressService progressService) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).cardColor,
-        title: Text(
-          'Reset Progress',
-          style: GoogleFonts.kalam(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'Are you sure you want to reset all your progress? This action cannot be undone.',
-          style: GoogleFonts.kalam(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: GoogleFonts.kalam()),
-          ),
-          TextButton(
-            onPressed: () async {
-              // TODO: Implement reset functionality in ProgressService
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Reset functionality coming soon!',
-                    style: GoogleFonts.kalam(),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Theme.of(context).cardColor,
+            title: Text(
+              'Reset Progress',
+              style: GoogleFonts.kalam(fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              'Are you sure you want to reset all your progress? This action cannot be undone.',
+              style: GoogleFonts.kalam(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel', style: GoogleFonts.kalam()),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await progressService.resetProgress();
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Progress reset on this device.',
+                        style: GoogleFonts.kalam(),
+                      ),
+                    ),
+                  );
+                },
+                child: Text(
+                  'Reset',
+                  style: GoogleFonts.kalam(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              );
-            },
-            child: Text(
-              'Reset',
-              style: GoogleFonts.kalam(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
               ),
-            ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showAboutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('About Bojang'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Bojang - Tibetan Learning App'),
-            SizedBox(height: 8),
-            Text('Version 2.0.0'),
-            SizedBox(height: 16),
-            Text(
-              'Learn Tibetan language through interactive quizzes and games. Build your vocabulary and improve your understanding of this beautiful language.',
+      builder:
+          (context) => AlertDialog(
+            title: const Text('About Bojang'),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Bojang - Tibetan Learning App'),
+                SizedBox(height: 8),
+                Text('Version 2.0.0'),
+                SizedBox(height: 16),
+                Text(
+                  'Bojang teaches Tibetan with short lessons, generated practice sessions, XP, streaks, and league progress. Start with vocabulary and phrases, then build toward verbs and sentence practice.',
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
-

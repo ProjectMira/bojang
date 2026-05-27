@@ -5,6 +5,7 @@ import '../models/quiz_question.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
+import '../services/api_service.dart';
 import '../services/progress_service.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -16,15 +17,17 @@ class QuizScreen extends StatefulWidget {
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateMixin {
+class _QuizScreenState extends State<QuizScreen>
+    with SingleTickerProviderStateMixin {
   late Future<List<QuizQuestion>> questionsFuture;
   int currentQuestionIndex = 0;
   int? selectedAnswerIndex;
   bool showFeedback = false;
   int score = 0;
   late AnimationController _animationController;
-  late Animation<double> _animation;
   final AudioPlayer _audioPlayer = AudioPlayer();
+  String? _remoteSessionId;
+  String? _remoteLevelId;
 
   @override
   void initState() {
@@ -34,16 +37,34 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _animation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    );
   }
 
   Future<List<QuizQuestion>> _loadQuestions() async {
     try {
       print('Loading quiz from: ${widget.topicFilePath}');
-      
+
+      if (widget.topicFilePath.startsWith('api://level/')) {
+        final levelId = widget.topicFilePath.replaceFirst('api://level/', '');
+        _remoteLevelId = levelId;
+        final session = await ApiService().getLearningSession(
+          levelId: levelId,
+          numQuestions: 10,
+        );
+        if (session == null) {
+          throw FormatException(
+            'Could not start this lesson. Please try again.',
+          );
+        }
+        _remoteSessionId = session['session_id'] as String?;
+        final exercises = List<Map<String, dynamic>>.from(
+          session['exercises'] as List<dynamic>? ?? [],
+        );
+        if (exercises.isEmpty) {
+          throw FormatException('No exercises found for this lesson yet.');
+        }
+        return exercises.map(QuizQuestion.fromApiExercise).toList();
+      }
+
       // Try to load the JSON file
       String jsonString;
       try {
@@ -62,7 +83,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       } catch (e) {
         throw FormatException('Invalid JSON format: ${e.toString()}');
       }
-      
+
       // Validate the JSON structure
       if (!jsonMap.containsKey('exercises')) {
         throw FormatException('Missing required key: "exercises"');
@@ -79,20 +100,23 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       }
 
       // Convert JSON to QuizQuestion objects with validation
-      final questions = exercisesJson.map((exerciseJson) {
-        if (exerciseJson is! Map<String, dynamic>) {
-          throw FormatException('Invalid exercise format: must be an object');
-        }
+      final questions =
+          exercisesJson.map((exerciseJson) {
+            if (exerciseJson is! Map<String, dynamic>) {
+              throw FormatException(
+                'Invalid exercise format: must be an object',
+              );
+            }
 
-        try {
-          return QuizQuestion.fromJson(exerciseJson);
-        } catch (e) {
-          throw FormatException('Invalid exercise data: ${e.toString()}');
-        }
-      }).toList();
+            try {
+              return QuizQuestion.fromJson(exerciseJson);
+            } catch (e) {
+              throw FormatException('Invalid exercise data: ${e.toString()}');
+            }
+          }).toList();
 
       print('Successfully loaded ${questions.length} questions');
-      
+
       // Shuffle the questions for variety
       // questions.shuffle();
       return questions;
@@ -110,7 +134,8 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   }
 
   void _handleAnswer(int answerIndex, List<QuizQuestion> questions) async {
-    final isCorrect = answerIndex == questions[currentQuestionIndex].correctAnswerIndex;
+    final isCorrect =
+        answerIndex == questions[currentQuestionIndex].correctAnswerIndex;
     final audioPath = isCorrect ? 'audio/correct.mp3' : 'audio/incorrect.mp3';
 
     try {
@@ -126,7 +151,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       showFeedback = true;
       if (isCorrect) score++;
     });
-    
+
     if (isCorrect) {
       _showFeedbackDialog(true);
       Future.delayed(const Duration(seconds: 2), () {
@@ -162,17 +187,28 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   void _showCompletionDialog(int totalQuestions) {
     final percentage = (score / totalQuestions) * 100;
     final category = _getCategoryFromFilePath(widget.topicFilePath);
-    
+
     // Update progress using ProgressService
-    final progressService = Provider.of<ProgressService>(context, listen: false);
-    progressService.updateQuizResults(category, score, totalQuestions, context: context);
+    final progressService = Provider.of<ProgressService>(
+      context,
+      listen: false,
+    );
+    progressService.updateQuizResults(
+      category,
+      score,
+      totalQuestions,
+      context: context,
+    );
+    _submitRemoteProgress(totalQuestions);
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: const Text('Quiz Completed!', textAlign: TextAlign.center),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -184,7 +220,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
               ),
               const SizedBox(height: 16),
               Text(
-                'Your Score: $score/totalQuestions',
+                'Your Score: $score/$totalQuestions',
                 style: GoogleFonts.kalam(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -196,14 +232,13 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                 style: GoogleFonts.kalam(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: percentage >= 70 ? Colors.green[700] : Colors.blue[700],
+                  color:
+                      percentage >= 70 ? Colors.green[700] : Colors.blue[700],
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                percentage >= 70 
-                    ? 'ལེགས་སོ། Excellent!'
-                    : 'Keep practicing!',
+                percentage >= 70 ? 'ལེགས་སོ། Excellent!' : 'Keep practicing!',
                 style: TextStyle(
                   fontSize: 20,
                   color: percentage >= 70 ? Colors.green : Colors.blue,
@@ -226,14 +261,43 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     );
   }
 
+  Future<void> _submitRemoteProgress(int totalQuestions) async {
+    if (_remoteSessionId == null ||
+        _remoteLevelId == null ||
+        !ApiService().isAuthenticated) {
+      return;
+    }
+    final xpEarned = score * 10;
+    final success = await ApiService().submitProgressCompletion({
+      'session_id': _remoteSessionId,
+      'level_id': _remoteLevelId,
+      'xp_earned': xpEarned,
+      'correct_answers': score,
+      'total_questions': totalQuestions,
+      'time_taken_seconds': 0,
+    });
+    if (!success) return;
+
+    final stats = await ApiService().getUserProgress();
+    if (stats != null && mounted) {
+      await Provider.of<ProgressService>(
+        context,
+        listen: false,
+      ).updateFromServer(stats);
+    }
+  }
+
   void _showFeedbackDialog(bool isCorrect) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: isCorrect ? Colors.green.shade50 : Colors.red.shade50,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor:
+              isCorrect ? Colors.green.shade50 : Colors.red.shade50,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -307,11 +371,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: Colors.red[400],
-                      size: 64,
-                    ),
+                    Icon(Icons.error_outline, color: Colors.red[400], size: 64),
                     const SizedBox(height: 16),
                     Text(
                       'Error loading questions',
@@ -324,10 +384,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                     const SizedBox(height: 8),
                     Text(
                       snapshot.error.toString(),
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[700],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -340,7 +397,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                       icon: const Icon(Icons.refresh),
                       label: const Text('Try Again'),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ],
@@ -374,10 +434,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                     const SizedBox(height: 8),
                     Text(
                       'This quiz section is currently empty. Please try another section.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -386,7 +443,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                       icon: const Icon(Icons.arrow_back),
                       label: const Text('Go Back'),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ],
@@ -410,13 +470,17 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                       style: GoogleFonts.kalam(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Theme.of(context).brightness == Brightness.dark 
-                            ? Colors.grey.shade400 
-                            : Colors.grey.shade600,
+                        color:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).primaryColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -442,10 +506,13 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                       borderRadius: BorderRadius.circular(10),
                       child: LinearProgressIndicator(
                         value: (currentQuestionIndex + 1) / questions.length,
-                        backgroundColor: Theme.of(context).brightness == Brightness.dark 
-                            ? Colors.grey.shade700 
-                            : Colors.grey.shade200,
-                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                        backgroundColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade700
+                                : Colors.grey.shade200,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).primaryColor,
+                        ),
                         minHeight: 8,
                       ),
                     ),
@@ -457,9 +524,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                           '${((currentQuestionIndex + 1) / questions.length * 100).toInt()}% Complete',
                           style: GoogleFonts.kalam(
                             fontSize: 12,
-                            color: Theme.of(context).brightness == Brightness.dark 
-                                ? Colors.grey.shade400 
-                                : Colors.grey.shade600,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade600,
                           ),
                         ),
                         Text(
@@ -522,24 +590,34 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                           itemCount: question.options.length,
                           itemBuilder: (context, index) {
                             final isSelected = selectedAnswerIndex == index;
-                            final isCorrect = index == question.correctAnswerIndex;
-                            
+                            final isCorrect =
+                                index == question.correctAnswerIndex;
+
                             Color? buttonColor;
                             if (showFeedback) {
                               if (isSelected) {
-                                buttonColor = isCorrect ? Colors.green.shade100 : Colors.red.shade100;
+                                buttonColor =
+                                    isCorrect
+                                        ? Colors.green.shade100
+                                        : Colors.red.shade100;
                               }
                             }
 
                             return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8.0,
+                              ),
                               child: Card(
                                 elevation: 4,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 child: InkWell(
-                                  onTap: showFeedback ? null : () => _handleAnswer(index, questions),
+                                  onTap:
+                                      showFeedback
+                                          ? null
+                                          : () =>
+                                              _handleAnswer(index, questions),
                                   borderRadius: BorderRadius.circular(15),
                                   child: Container(
                                     decoration: BoxDecoration(
@@ -554,9 +632,16 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                                           height: 40,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: showFeedback
-                                                ? (isSelected ? (isCorrect ? Colors.green : Colors.red) : Colors.grey)
-                                                : Colors.blue.withOpacity(0.1),
+                                            color:
+                                                showFeedback
+                                                    ? (isSelected
+                                                        ? (isCorrect
+                                                            ? Colors.green
+                                                            : Colors.red)
+                                                        : Colors.grey)
+                                                    : Colors.blue.withOpacity(
+                                                      0.1,
+                                                    ),
                                           ),
                                           child: Center(
                                             child: Text(
@@ -564,9 +649,12 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                                               style: TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
-                                                color: showFeedback
-                                                    ? (isSelected ? Colors.white : Colors.grey)
-                                                    : Colors.blue,
+                                                color:
+                                                    showFeedback
+                                                        ? (isSelected
+                                                            ? Colors.white
+                                                            : Colors.grey)
+                                                        : Colors.blue,
                                               ),
                                             ),
                                           ),
@@ -575,7 +663,9 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                                         Expanded(
                                           child: Text(
                                             question.options[index],
-                                            style: const TextStyle(fontSize: 18),
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -600,8 +690,15 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
 
   String _getDisplayNameFromFilePath(String filePath) {
     // Extract the filename without extension
+    if (filePath.startsWith('api://level/')) {
+      return filePath
+          .replaceFirst('api://level/', '')
+          .replaceAll('_', ' ')
+          .replaceAll('-', ' ')
+          .toUpperCase();
+    }
     final filename = filePath.split('/').last.split('.').first;
-    
+
     // Map of known quiz types to their display names
     const displayNames = {
       'alphabet': 'Alphabet',
@@ -613,27 +710,31 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       'numbers': 'Numbers',
       'calender': 'Calendar',
       'introduction': 'Introduction',
-      'resturants': 'Restaurants'
+      'resturants': 'Restaurants',
     };
 
     // Return the mapped display name or format the filename as a fallback
-    return displayNames[filename] ?? 
-           filename.replaceAll('_', ' ').replaceAll('-', ' ').toUpperCase();
+    return displayNames[filename] ??
+        filename.replaceAll('_', ' ').replaceAll('-', ' ').toUpperCase();
   }
-  
+
   String _getCategoryFromFilePath(String filePath) {
     // Extract category from file path for progress tracking
+    if (filePath.startsWith('api://level/')) {
+      return filePath.replaceFirst('api://level/', '');
+    }
     final filename = filePath.split('/').last.split('.').first;
-    
+
     // Map quiz files to categories for progress tracking
     if (filename.contains('alphabet') || filename.contains('vowels')) {
       return 'alphabet';
     } else if (filename.contains('numbers') || filename.contains('calender')) {
       return 'numbers';
-    } else if (filename.contains('introduction') || filename.contains('greetings')) {
+    } else if (filename.contains('introduction') ||
+        filename.contains('greetings')) {
       return 'greetings';
     }
-    
+
     return filename.toLowerCase().replaceAll('_', ' ');
   }
-} 
+}

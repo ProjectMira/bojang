@@ -32,26 +32,37 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    final uid = (json['id'] ?? json['uid'] ?? '').toString();
+    final email = (json['email'] ?? '').toString();
+    final fallbackName =
+        email.contains('@') ? email.split('@').first : 'Tibetan Learner';
+
     return User(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      username: json['username'] as String,
-      displayName: json['display_name'] as String,
+      id: uid,
+      email: email,
+      username: (json['username'] ?? fallbackName).toString(),
+      displayName: (json['display_name'] ?? fallbackName).toString(),
       profileImageUrl: json['profile_image_url'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      lastLogin: json['last_login'] != null 
-          ? DateTime.parse(json['last_login'] as String) 
-          : null,
+      createdAt:
+          json['created_at'] != null
+              ? DateTime.parse(json['created_at'] as String)
+              : DateTime.now(),
+      lastLogin:
+          json['last_login'] != null
+              ? DateTime.parse(json['last_login'] as String)
+              : null,
       isActive: json['is_active'] as bool? ?? true,
       timezone: json['timezone'] as String? ?? 'UTC',
       preferredLanguage: json['preferred_language'] as String? ?? 'en',
       deviceId: json['device_id'] as String?,
-      lastSync: json['last_sync'] != null 
-          ? DateTime.parse(json['last_sync'] as String) 
-          : null,
+      lastSync:
+          json['last_sync'] != null
+              ? DateTime.parse(json['last_sync'] as String)
+              : null,
       googleId: json['google_id'] as String?,
       authProvider: AuthProvider.values.firstWhere(
-        (e) => e.toString() == 'AuthProvider.${json['auth_provider'] ?? 'email'}',
+        (e) =>
+            e.toString() == 'AuthProvider.${json['auth_provider'] ?? 'email'}',
         orElse: () => AuthProvider.email,
       ),
     );
@@ -111,7 +122,4 @@ class User {
   }
 }
 
-enum AuthProvider {
-  email,
-  google,
-}
+enum AuthProvider { email, google }
