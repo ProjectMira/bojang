@@ -1,6 +1,11 @@
 name: Mobile Release
 
 "on":
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - pubspec.yaml
   workflow_dispatch:
     inputs:
       version_bump:
@@ -65,6 +70,7 @@ env:
 jobs:
   prepare:
     name: Prepare version
+    if: ${{ github.event_name != 'push' || vars.AUTO_MOBILE_RELEASE_ENABLED == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
@@ -73,30 +79,75 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
       source_sha: ${{ steps.version.outputs.source_sha }}
+      release_android: ${{ steps.config.outputs.release_android }}
+      release_ios: ${{ steps.config.outputs.release_ios }}
+      android_track: ${{ steps.config.outputs.android_track }}
+      enable_ios_firebase: ${{ steps.config.outputs.enable_ios_firebase }}
+      enable_ios_google_sign_in: ${{ steps.config.outputs.enable_ios_google_sign_in }}
     steps:
       - name: Check out repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - name: Validate release request
+      - name: Resolve release settings
+        id: config
+        env:
+          INPUT_VERSION_BUMP: ${{ inputs.version_bump }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_BUILD_NUMBER: ${{ inputs.build_number }}
+          INPUT_RELEASE_ANDROID: ${{ inputs.release_android }}
+          INPUT_RELEASE_IOS: ${{ inputs.release_ios }}
+          INPUT_ANDROID_TRACK: ${{ inputs.android_track }}
+          INPUT_ENABLE_IOS_FIREBASE: ${{ inputs.enable_ios_firebase }}
+          INPUT_ENABLE_IOS_GOOGLE_SIGN_IN: ${{ inputs.enable_ios_google_sign_in }}
         run: |
           set -euo pipefail
           if [ "${{ github.ref }}" != "refs/heads/main" ]; then
             echo "::error::Mobile releases must be started from main."
             exit 1
           fi
-          if [ "${{ inputs.release_android }}" != "true" ] && [ "${{ inputs.release_ios }}" != "true" ]; then
+
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            version_bump="build-only"
+            requested_version=""
+            requested_build=""
+            release_android="true"
+            release_ios="true"
+            android_track="internal"
+            enable_ios_firebase="false"
+            enable_ios_google_sign_in="false"
+          else
+            version_bump="$INPUT_VERSION_BUMP"
+            requested_version="$INPUT_VERSION"
+            requested_build="$INPUT_BUILD_NUMBER"
+            release_android="$INPUT_RELEASE_ANDROID"
+            release_ios="$INPUT_RELEASE_IOS"
+            android_track="$INPUT_ANDROID_TRACK"
+            enable_ios_firebase="$INPUT_ENABLE_IOS_FIREBASE"
+            enable_ios_google_sign_in="$INPUT_ENABLE_IOS_GOOGLE_SIGN_IN"
+          fi
+
+          if [ "$release_android" != "true" ] && [ "$release_ios" != "true" ]; then
             echo "::error::Select at least one release platform."
             exit 1
           fi
 
+          echo "version_bump=$version_bump" >> "$GITHUB_OUTPUT"
+          echo "requested_version=$requested_version" >> "$GITHUB_OUTPUT"
+          echo "requested_build=$requested_build" >> "$GITHUB_OUTPUT"
+          echo "release_android=$release_android" >> "$GITHUB_OUTPUT"
+          echo "release_ios=$release_ios" >> "$GITHUB_OUTPUT"
+          echo "android_track=$android_track" >> "$GITHUB_OUTPUT"
+          echo "enable_ios_firebase=$enable_ios_firebase" >> "$GITHUB_OUTPUT"
+          echo "enable_ios_google_sign_in=$enable_ios_google_sign_in" >> "$GITHUB_OUTPUT"
+
       - name: Calculate release version
         id: version
         env:
-          REQUESTED_VERSION: ${{ inputs.version }}
-          REQUESTED_BUILD: ${{ inputs.build_number }}
-          VERSION_BUMP: ${{ inputs.version_bump }}
+          REQUESTED_VERSION: ${{ steps.config.outputs.requested_version }}
+          REQUESTED_BUILD: ${{ steps.config.outputs.requested_build }}
+          VERSION_BUMP: ${{ steps.config.outputs.version_bump }}
         run: |
           set -euo pipefail
 
@@ -165,8 +216,9 @@ jobs:
             echo "### Mobile release"
             echo "- Version: \`$next_version\`"
             echo "- Tag: \`$tag\`"
-            echo "- Android: \`${{ inputs.release_android }}\`"
-            echo "- iOS: \`${{ inputs.release_ios }}\`"
+            echo "- Trigger: \`$GITHUB_EVENT_NAME\`"
+            echo "- Android: \`${{ steps.config.outputs.release_android }}\`"
+            echo "- iOS: \`${{ steps.config.outputs.release_ios }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
   quality:
@@ -196,7 +248,7 @@ jobs:
 
   android:
     name: Android / Google Play
-    if: ${{ inputs.release_android }}
+    if: ${{ needs.prepare.outputs.release_android == 'true' }}
     needs:
       - prepare
       - quality
@@ -280,7 +332,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: ${{ env.ANDROID_PACKAGE_NAME }}
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: ${{ inputs.android_track }}
+          track: ${{ needs.prepare.outputs.android_track }}
           status: completed
 
       - name: Upload Android artifact
@@ -294,7 +346,7 @@ jobs:
 
   ios:
     name: iOS / TestFlight
-    if: ${{ inputs.release_ios }}
+    if: ${{ needs.prepare.outputs.release_ios == 'true' }}
     needs:
       - prepare
       - quality
@@ -326,7 +378,7 @@ jobs:
             echo "::error::IOS_BUNDLE_ID must match Xcode bundle identifier com.bojang.app"
             missing=1
           fi
-          if { [ "${{ inputs.enable_ios_firebase }}" = "true" ] || [ "${{ inputs.enable_ios_google_sign_in }}" = "true" ]; } && [ -z "$GOOGLE_SERVICE_INFO_PLIST" ]; then
+          if { [ "${{ needs.prepare.outputs.enable_ios_firebase }}" = "true" ] || [ "${{ needs.prepare.outputs.enable_ios_google_sign_in }}" = "true" ]; } && [ -z "$GOOGLE_SERVICE_INFO_PLIST" ]; then
             echo "::error::GOOGLE_SERVICE_INFO_PLIST is required when iOS Firebase or Google Sign-In is enabled"
             missing=1
           fi
@@ -435,8 +487,8 @@ jobs:
             --no-codesign \
             --build-name "${{ needs.prepare.outputs.marketing }}" \
             --build-number "${{ needs.prepare.outputs.build }}" \
-            --dart-define "ENABLE_IOS_FIREBASE=${{ inputs.enable_ios_firebase }}" \
-            --dart-define "ENABLE_IOS_GOOGLE_SIGN_IN=${{ inputs.enable_ios_google_sign_in }}"
+            --dart-define "ENABLE_IOS_FIREBASE=${{ needs.prepare.outputs.enable_ios_firebase }}" \
+            --dart-define "ENABLE_IOS_GOOGLE_SIGN_IN=${{ needs.prepare.outputs.enable_ios_google_sign_in }}"
 
       - name: Archive signed iOS app
         run: |
@@ -540,8 +592,8 @@ jobs:
       ${{
         always() &&
         needs.quality.result == 'success' &&
-        (inputs.release_android != true || needs.android.result == 'success') &&
-        (inputs.release_ios != true || needs.ios.result == 'success')
+        (needs.prepare.outputs.release_android != 'true' || needs.android.result == 'success') &&
+        (needs.prepare.outputs.release_ios != 'true' || needs.ios.result == 'success')
       }}
     needs:
       - prepare
