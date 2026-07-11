@@ -63,8 +63,9 @@ Create these environment secrets:
 
 The ProjectMira organization currently forces the standard workflow token to be
 read-only. The `mobile-production` environment therefore contains a release token
-for the final version commit and tag, and the environment requires approval from
-`ta4tsering`. Replace the current token with a fine-grained token limited to the
+for the final version commit and tag. The environment is restricted to `main` and
+does not require recurring manual approval, so push releases are fully automatic.
+Replace the current token with a fine-grained token limited to the
 `ProjectMira/bojang` repository and Contents read/write when convenient.
 
 ## Android setup
