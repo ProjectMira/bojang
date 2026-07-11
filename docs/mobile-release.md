@@ -98,11 +98,16 @@ history.
 3. Complete the required store, policy, content, and data-safety setup.
 4. If this is the first release and the Publishing API rejects it, upload the
    first signed AAB manually to Internal testing.
-5. Create a Google Cloud project and enable the Google Play Android Developer API.
-6. Create a dedicated service account.
-7. Invite its email under **Play Console > Users and permissions**.
-8. Give it app-level permission to manage releases for Bojang.
-9. Store its JSON key:
+5. Invite `github-play-publisher@bojang-backend.iam.gserviceaccount.com` under
+   **Play Console > Users and permissions**.
+6. Give it app-level permission to manage testing-track releases for Bojang.
+
+The Google Play Android Developer API is already enabled in the
+`bojang-backend` Google Cloud project. The service-account JSON is backed up at
+`~/Documents/keys/bojang/google-play-service-account.json` and stored in the
+GitHub `mobile-production` environment.
+
+If the key is rotated later, update GitHub with:
 
 ```sh
 gh secret set GOOGLE_PLAY_SERVICE_ACCOUNT_JSON \
