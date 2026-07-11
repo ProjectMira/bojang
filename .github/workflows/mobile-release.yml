@@ -513,7 +513,8 @@ jobs:
             CODE_SIGN_STYLE=Automatic \
             PRODUCT_BUNDLE_IDENTIFIER="$IOS_BUNDLE_ID" \
             FLUTTER_BUILD_NAME="${{ needs.prepare.outputs.marketing }}" \
-            FLUTTER_BUILD_NUMBER="${{ needs.prepare.outputs.build }}"
+            FLUTTER_BUILD_NUMBER="${{ needs.prepare.outputs.build }}" \
+            2>&1 | tee build/ios/xcodebuild-archive.log
 
       - name: Export IPA
         id: export
@@ -551,7 +552,8 @@ jobs:
             -allowProvisioningUpdates \
             -authenticationKeyPath "${{ steps.asc-key.outputs.path }}" \
             -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            2>&1 | tee build/ios/xcodebuild-export.log
 
           ipa_path="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
           test -n "$ipa_path"
@@ -592,6 +594,15 @@ jobs:
           path: build/ios/ipa/*.ipa
           if-no-files-found: ignore
           retention-days: 14
+
+      - name: Upload iOS build logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bojang-ios-logs-${{ needs.prepare.outputs.version }}
+          path: build/ios/*.log
+          if-no-files-found: ignore
+          retention-days: 7
 
   finalize:
     name: Commit version and tag
