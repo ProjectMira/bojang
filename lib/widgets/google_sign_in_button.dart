@@ -143,12 +143,6 @@ class GoogleLogoPainter extends CustomPainter {
 
     // Draw the "G" shape
     paint.color = const Color(0xFF4285F4);
-    final rect = Rect.fromCenter(
-      center: center,
-      width: size.width * 0.6,
-      height: size.height * 0.6,
-    );
-    
     final path = Path();
     path.addRect(Rect.fromLTWH(
       center.dx, 
