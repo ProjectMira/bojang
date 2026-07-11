@@ -11,9 +11,10 @@ The normal release path is:
 4. After every selected upload succeeds, commit the version to `pubspec.yaml`
    and create an annotated `v<version>-build.<number>` tag.
 
-When `AUTO_MOBILE_RELEASE_ENABLED` is `true`, every push to `main` creates a
-build-only version increment, uploads Android to the Play Internal track and iOS
-to TestFlight, then commits the shared version and creates an annotated tag.
+Unless `AUTO_MOBILE_RELEASE_ENABLED` is set to `false`, every push to `main`
+creates a build-only version increment, uploads Android to the Play Internal
+track and iOS to TestFlight, then commits the shared version and creates an
+annotated tag.
 Manual dispatch remains available for version overrides and partial-release
 recovery. The release jobs use the `mobile-production` GitHub Environment.
 
@@ -41,9 +42,9 @@ Create these environment variables:
 | `APP_STORE_CONNECT_API_KEY_ID` | App Store Connect team API key ID |
 | `APP_STORE_CONNECT_API_ISSUER_ID` | App Store Connect API issuer ID |
 
-Create the repository-level variable `AUTO_MOBILE_RELEASE_ENABLED`. Keep it
-`false` until the first Play app/release and service-account invitation are
-complete, then set it to `true` to enable automatic releases on pushes to `main`.
+Automatic releases on pushes to `main` are enabled by default. To pause them,
+create the repository-level variable `AUTO_MOBILE_RELEASE_ENABLED` and set it to
+`false`; remove it or set any other value to re-enable.
 
 The IDs may be stored as secrets instead for compatibility, but the private key,
 keystore, passwords, and service-account JSON must always be secrets.
@@ -207,8 +208,8 @@ Example:
 
 ### Automatic releases
 
-After the repository variable `AUTO_MOBILE_RELEASE_ENABLED` is set to `true`, a
-normal push to `main` is sufficient. Push releases keep the current marketing
+A normal push to `main` is sufficient unless the repository variable
+`AUTO_MOBILE_RELEASE_ENABLED` is set to `false`. Push releases keep the current marketing
 version, increment the build number, publish both test builds, and create a tag
 such as `v1.0.1-build.7`. The bot's follow-up commit only changes `pubspec.yaml`
 and is excluded from the push trigger, preventing a release loop.
