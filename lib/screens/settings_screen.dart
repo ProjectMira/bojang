@@ -23,7 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           appBar: AppBar(
             title: Text(
               'Settings',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -190,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: GoogleFonts.kalam(
+      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color:
@@ -238,7 +238,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         title: Text(
           title,
-          style: GoogleFonts.kalam(
+          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
             fontWeight: FontWeight.w600,
             color:
                 isDestructive
@@ -315,54 +315,151 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showAudioSettings() {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Audio Settings'),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Audio settings will be available in a future update.'),
-                SizedBox(height: 16),
-                Text('Features coming soon:'),
-                Text('• Sound effects volume'),
-                Text('• Pronunciation playback speed'),
-                Text('• Audio quality settings'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+      builder: (context) {
+        return Consumer<ThemeService>(
+          builder: (context, themeService, child) {
+            return AlertDialog(
+              title: const Text('Audio Settings'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Sound Effects'),
+                    subtitle: const Text('Play correct/incorrect answers sound'),
+                    value: themeService.soundEffectsEnabled,
+                    onChanged: (val) => themeService.setSoundEffectsEnabled(val),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Sound Effects Volume'),
+                  Row(
+                    children: [
+                      const Icon(Icons.volume_down),
+                      Expanded(
+                        child: Slider(
+                          value: themeService.soundEffectsVolume,
+                          onChanged: themeService.soundEffectsEnabled
+                              ? (val) => themeService.setSoundEffectsVolume(val)
+                              : null,
+                        ),
+                      ),
+                      const Icon(Icons.volume_up),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Pronunciation Volume'),
+                  Row(
+                    children: [
+                      const Icon(Icons.volume_down),
+                      Expanded(
+                        child: Slider(
+                          value: themeService.pronunciationVolume,
+                          onChanged: (val) => themeService.setPronunciationVolume(val),
+                        ),
+                      ),
+                      const Icon(Icons.volume_up),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Audio Quality'),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: themeService.audioQuality,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'Standard', child: Text('Standard (Recommended)')),
+                      DropdownMenuItem(value: 'High', child: Text('High Quality')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        themeService.setAudioQuality(val);
+                      }
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Done'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
   void _showGoalsDialog() {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Learning Goals'),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Goal setting will be available in a future update.'),
-                SizedBox(height: 16),
-                Text('Features coming soon:'),
-                Text('• Daily quiz targets'),
-                Text('• Weekly learning goals'),
-                Text('• Custom reminders'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+      builder: (context) {
+        return Consumer<ThemeService>(
+          builder: (context, themeService, child) {
+            return AlertDialog(
+              title: const Text('Learning Goals'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Daily Quiz Target'),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: themeService.dailyQuizTarget,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 1, child: Text('1 Quiz / Day')),
+                      DropdownMenuItem(value: 2, child: Text('2 Quizzes / Day')),
+                      DropdownMenuItem(value: 3, child: Text('3 Quizzes / Day')),
+                      DropdownMenuItem(value: 5, child: Text('5 Quizzes / Day')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        themeService.setDailyQuizTarget(val);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Weekly Learning Goal'),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: themeService.weeklyGoal,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 3, child: Text('3 Quizzes / Week')),
+                      DropdownMenuItem(value: 5, child: Text('5 Quizzes / Week')),
+                      DropdownMenuItem(value: 7, child: Text('7 Quizzes / Week')),
+                      DropdownMenuItem(value: 10, child: Text('10 Quizzes / Week')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        themeService.setWeeklyGoal(val);
+                      }
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Done'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 

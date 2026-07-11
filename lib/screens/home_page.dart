@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           children: [
                             Text(
                               'Welcome back',
-                              style: GoogleFonts.kalam(
+                              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                                 fontSize: 16,
                                 color:
                                     Theme.of(context).brightness ==
@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             ),
                             Text(
                               'Ready for Tibetan?',
-                              style: GoogleFonts.kalam(
+                              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
                                 color:
@@ -141,7 +141,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     // Cultural Tip of the Day
                     Text(
                       'Cultural Tip',
-                      style: GoogleFonts.kalam(
+                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color:
@@ -197,7 +197,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     const SizedBox(width: 8),
                     Text(
                       '${progressService.currentStreak}',
-                      style: GoogleFonts.kalam(
+                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -209,12 +209,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   progressService.currentStreak == 1
                       ? 'Day Streak'
                       : 'Days Streak',
-                  style: GoogleFonts.kalam(fontSize: 16, color: Colors.white70),
+                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontSize: 16, color: Colors.white70),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   _getStreakMessage(progressService.currentStreak),
-                  style: GoogleFonts.kalam(fontSize: 14, color: Colors.white70),
+                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontSize: 14, color: Colors.white70),
                 ),
               ],
             ),
@@ -300,7 +300,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           const SizedBox(height: 8),
           Text(
             value,
-            style: GoogleFonts.kalam(
+            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color:
@@ -311,7 +311,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           Text(
             title,
-            style: GoogleFonts.kalam(
+            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
               fontSize: 12,
               color:
                   Theme.of(context).brightness == Brightness.dark
@@ -369,7 +369,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     children: [
                       Text(
                         'Start a Lesson',
-                        style: GoogleFonts.kalam(
+                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color:
@@ -381,7 +381,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       const SizedBox(height: 4),
                       Text(
                         'Practice vocabulary, phrases, and verbs',
-                        style: GoogleFonts.kalam(
+                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                           fontSize: 14,
                           color:
                               Theme.of(context).brightness == Brightness.dark

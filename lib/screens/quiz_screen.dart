@@ -7,6 +7,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../services/progress_service.dart';
+import '../services/theme_service.dart';
 
 class QuizScreen extends StatefulWidget {
   final String topicFilePath;
@@ -41,7 +42,7 @@ class _QuizScreenState extends State<QuizScreen>
 
   Future<List<QuizQuestion>> _loadQuestions() async {
     try {
-      print('Loading quiz from: ${widget.topicFilePath}');
+      debugPrint('Loading quiz from: ${widget.topicFilePath}');
 
       if (widget.topicFilePath.startsWith('api://level/')) {
         final levelId = widget.topicFilePath.replaceFirst('api://level/', '');
@@ -49,6 +50,7 @@ class _QuizScreenState extends State<QuizScreen>
         final session = await ApiService().getLearningSession(
           levelId: levelId,
           numQuestions: 10,
+          exerciseTypes: const ['multiple_choice'],
         );
         if (session == null) {
           throw FormatException(
@@ -56,13 +58,32 @@ class _QuizScreenState extends State<QuizScreen>
           );
         }
         _remoteSessionId = session['session_id'] as String?;
-        final exercises = List<Map<String, dynamic>>.from(
+        final allExercises = List<Map<String, dynamic>>.from(
           session['exercises'] as List<dynamic>? ?? [],
         );
-        if (exercises.isEmpty) {
+        // Only multiple_choice exercises are supported in the quiz screen.
+        // memory_match and translation_match use different data shapes.
+        final exercises =
+            allExercises
+                .where(
+                  (e) =>
+                      e['type'] == 'multiple_choice' ||
+                      e['exercise_type'] == 'multiple_choice',
+                )
+                .toList();
+        final questions = <QuizQuestion>[];
+        for (final exercise in exercises) {
+          try {
+            questions.add(QuizQuestion.fromApiExercise(exercise));
+          } catch (e) {
+            debugPrint('Skipping invalid remote exercise: $e');
+          }
+        }
+
+        if (questions.isEmpty) {
           throw FormatException('No exercises found for this lesson yet.');
         }
-        return exercises.map(QuizQuestion.fromApiExercise).toList();
+        return questions;
       }
 
       // Try to load the JSON file
@@ -115,13 +136,13 @@ class _QuizScreenState extends State<QuizScreen>
             }
           }).toList();
 
-      print('Successfully loaded ${questions.length} questions');
+      debugPrint('Successfully loaded ${questions.length} questions');
 
       // Shuffle the questions for variety
       // questions.shuffle();
       return questions;
     } catch (e) {
-      print('Error loading questions from ${widget.topicFilePath}: $e');
+      debugPrint('Error loading questions from ${widget.topicFilePath}: $e');
       rethrow;
     }
   }
@@ -138,12 +159,16 @@ class _QuizScreenState extends State<QuizScreen>
         answerIndex == questions[currentQuestionIndex].correctAnswerIndex;
     final audioPath = isCorrect ? 'audio/correct.mp3' : 'audio/incorrect.mp3';
 
-    try {
-      print('Attempting to play audio: $audioPath');
-      await _audioPlayer.play(AssetSource(audioPath));
-      print('Audio played successfully.');
-    } catch (e) {
-      print('Error playing audio: $e');
+    final themeService = Provider.of<ThemeService>(context, listen: false);
+    if (themeService.soundEffectsEnabled) {
+      try {
+        debugPrint('Attempting to play audio: $audioPath');
+        await _audioPlayer.setVolume(themeService.soundEffectsVolume);
+        await _audioPlayer.play(AssetSource(audioPath));
+        debugPrint('Audio played successfully.');
+      } catch (e) {
+        debugPrint('Error playing audio: $e');
+      }
     }
 
     setState(() {
@@ -221,7 +246,7 @@ class _QuizScreenState extends State<QuizScreen>
               const SizedBox(height: 16),
               Text(
                 'Your Score: $score/$totalQuestions',
-                style: GoogleFonts.kalam(
+                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue[700],
@@ -229,7 +254,7 @@ class _QuizScreenState extends State<QuizScreen>
               ),
               Text(
                 '${percentage.toStringAsFixed(0)}%',
-                style: GoogleFonts.kalam(
+                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color:
@@ -330,7 +355,7 @@ class _QuizScreenState extends State<QuizScreen>
       appBar: AppBar(
         title: Text(
           _getDisplayNameFromFilePath(widget.topicFilePath),
-          style: GoogleFonts.kalam(
+          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
@@ -354,7 +379,7 @@ class _QuizScreenState extends State<QuizScreen>
                   const SizedBox(height: 16),
                   Text(
                     'Loading questions...',
-                    style: GoogleFonts.kalam(
+                    style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                       fontSize: 18,
                       color: Colors.grey[600],
                     ),
@@ -375,7 +400,7 @@ class _QuizScreenState extends State<QuizScreen>
                     const SizedBox(height: 16),
                     Text(
                       'Error loading questions',
-                      style: GoogleFonts.kalam(
+                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.red[700],
@@ -425,7 +450,7 @@ class _QuizScreenState extends State<QuizScreen>
                     const SizedBox(height: 16),
                     Text(
                       'No Questions Available',
-                      style: GoogleFonts.kalam(
+                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey[700],
@@ -467,7 +492,7 @@ class _QuizScreenState extends State<QuizScreen>
                   children: [
                     Text(
                       'Question ${currentQuestionIndex + 1} of ${questions.length}',
-                      style: GoogleFonts.kalam(
+                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color:
@@ -482,12 +507,14 @@ class _QuizScreenState extends State<QuizScreen>
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         'Score: $score',
-                        style: GoogleFonts.kalam(
+                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).primaryColor,
@@ -522,7 +549,7 @@ class _QuizScreenState extends State<QuizScreen>
                       children: [
                         Text(
                           '${((currentQuestionIndex + 1) / questions.length * 100).toInt()}% Complete',
-                          style: GoogleFonts.kalam(
+                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                             fontSize: 12,
                             color:
                                 Theme.of(context).brightness == Brightness.dark
@@ -532,7 +559,7 @@ class _QuizScreenState extends State<QuizScreen>
                         ),
                         Text(
                           'Accuracy: ${score > 0 ? ((score / (currentQuestionIndex + 1)) * 100).toInt() : 0}%',
-                          style: GoogleFonts.kalam(
+                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                             fontSize: 12,
                             color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.w600,
@@ -639,8 +666,8 @@ class _QuizScreenState extends State<QuizScreen>
                                                             ? Colors.green
                                                             : Colors.red)
                                                         : Colors.grey)
-                                                    : Colors.blue.withOpacity(
-                                                      0.1,
+                                                    : Colors.blue.withValues(
+                                                      alpha: 0.1,
                                                     ),
                                           ),
                                           child: Center(

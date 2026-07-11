@@ -29,6 +29,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     setState(() {
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? false;
       final hour = prefs.getInt('notification_hour') ?? 11;

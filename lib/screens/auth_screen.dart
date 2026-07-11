@@ -173,7 +173,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         const SizedBox(height: 24),
         Text(
           'Bojang',
-          style: GoogleFonts.kalam(
+          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
             fontSize: 36,
             fontWeight: FontWeight.bold,
             color:
@@ -185,7 +185,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         const SizedBox(height: 8),
         Text(
           'Practice Tibetan every day',
-          style: GoogleFonts.kalam(
+          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
             fontSize: 16,
             color:
                 Theme.of(context).brightness == Brightness.dark
@@ -208,7 +208,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           children: [
             Text(
               'Save your progress',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color:
@@ -221,7 +221,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             const SizedBox(height: 12),
             Text(
               'Sign in to sync XP, streaks, completed lessons, and league progress across devices.',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 fontSize: 16,
                 color:
                     Theme.of(context).brightness == Brightness.dark
@@ -233,7 +233,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             const SizedBox(height: 16),
             Text(
               'You can also continue without an account and practice with lessons on this device.',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 fontSize: 14,
                 color:
                     Theme.of(context).brightness == Brightness.dark
@@ -248,7 +248,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               icon: const Icon(Icons.mail_outline),
               label: Text(
                 'Email sign-in coming soon',
-                style: GoogleFonts.kalam(fontWeight: FontWeight.w600),
+                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -263,7 +263,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       icon: const Icon(Icons.g_mobiledata, size: 24),
       label: Text(
         'Continue with Google',
-        style: GoogleFonts.kalam(fontSize: 16, fontWeight: FontWeight.w600),
+        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontSize: 16, fontWeight: FontWeight.w600),
       ),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -278,7 +278,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       onPressed: _navigateToMainScreen,
       child: Text(
         'Continue without account',
-        style: GoogleFonts.kalam(
+        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
           fontSize: 16,
           color: Colors.grey.shade500,
           decoration: TextDecoration.underline,

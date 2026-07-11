@@ -12,7 +12,7 @@ class ExtraGamesScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Extra Games',
-          style: GoogleFonts.kalam(
+          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -28,7 +28,7 @@ class ExtraGamesScreen extends StatelessWidget {
           children: [
             Text(
               'More Ways to Learn',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).brightness == Brightness.dark 
@@ -39,7 +39,7 @@ class ExtraGamesScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Explore additional games and activities to enhance your Tibetan learning experience.',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 fontSize: 16,
                 color: Theme.of(context).brightness == Brightness.dark 
                     ? Colors.grey.shade400 
@@ -136,7 +136,7 @@ class ExtraGamesScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'More Games Coming Soon!',
-                    style: GoogleFonts.kalam(
+                    style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.indigo.shade800,
@@ -146,7 +146,7 @@ class ExtraGamesScreen extends StatelessWidget {
                   Text(
                     'We\'re working on exciting new games and features to make your Tibetan learning journey even more engaging.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.kalam(
+                    style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                       fontSize: 14,
                       color: Colors.indigo.shade600,
                     ),
@@ -233,7 +233,7 @@ class ExtraGamesScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   title,
-                  style: GoogleFonts.kalam(
+                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: isAvailable 
@@ -247,7 +247,7 @@ class ExtraGamesScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   description,
-                  style: GoogleFonts.kalam(
+                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                     fontSize: 12,
                     color: isAvailable 
                         ? (Theme.of(context).brightness == Brightness.dark 
@@ -269,7 +269,7 @@ class ExtraGamesScreen extends StatelessWidget {
                     ),
                     child: Text(
                       'Coming Soon',
-                      style: GoogleFonts.kalam(
+                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                         color: Colors.orange.shade700,

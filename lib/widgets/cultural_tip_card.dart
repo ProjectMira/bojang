@@ -55,10 +55,11 @@ class CulturalTipCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.kalam(
+                  style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: color,
+                    fontFamilyFallback: const ['Jomolhari'],
                   ),
                 ),
               ),
@@ -81,6 +82,7 @@ class CulturalTipCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
+                    fontFamilyFallback: ['Jomolhari'],
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -92,12 +94,13 @@ class CulturalTipCard extends StatelessWidget {
           // Tip Content
           Text(
             tip,
-            style: GoogleFonts.kalam(
+            style: GoogleFonts.poppins(
               fontSize: 16,
               height: 1.5,
               color: Theme.of(context).brightness == Brightness.dark 
                   ? Colors.grey.shade300 
                   : Colors.grey.shade700,
+              fontFamilyFallback: const ['Jomolhari'],
             ),
           ),
         ],

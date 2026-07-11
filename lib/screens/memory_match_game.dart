@@ -155,7 +155,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Congratulations!',
-          style: GoogleFonts.kalam(
+          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
             fontWeight: FontWeight.bold,
             color: Theme.of(context).primaryColor,
           ),
@@ -172,13 +172,13 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             const SizedBox(height: 16),
             Text(
               'You completed the memory game!',
-              style: GoogleFonts.kalam(fontSize: 18),
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontSize: 18),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'Moves: $_moves',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 fontSize: 16,
                 color: Theme.of(context).primaryColor,
                 fontWeight: FontWeight.bold,
@@ -192,7 +192,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
               Navigator.pop(context);
               _initializeGame();
             },
-            child: Text('Play Again', style: GoogleFonts.kalam()),
+            child: Text('Play Again', style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], )),
           ),
           TextButton(
             onPressed: () {
@@ -201,7 +201,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             },
             child: Text(
               'Done',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 color: Theme.of(context).primaryColor,
                 fontWeight: FontWeight.bold,
               ),
@@ -219,7 +219,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
       appBar: AppBar(
         title: Text(
           'Memory Match',
-          style: GoogleFonts.kalam(
+          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -271,7 +271,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             padding: const EdgeInsets.all(16),
             child: Text(
               'Match Tibetan letters with their English pronunciations',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 fontSize: 16,
                 color: Theme.of(context).brightness == Brightness.dark 
                     ? Colors.grey.shade400 
@@ -309,7 +309,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             children: [
               Text(
                 value,
-                style: GoogleFonts.kalam(
+                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: color,
@@ -317,7 +317,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
               ),
               Text(
                 title,
-                style: GoogleFonts.kalam(
+                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                   fontSize: 12,
                   color: Theme.of(context).brightness == Brightness.dark 
                       ? Colors.grey.shade400 
@@ -366,7 +366,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
                         children: [
                           Text(
                             card.text,
-                            style: GoogleFonts.kalam(
+                            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                               fontSize: card.type == CardType.tibetan ? 24 : 16,
                               fontWeight: FontWeight.bold,
                               color: card.isMatched 
@@ -386,7 +386,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
                               ),
                               child: Text(
                                 'EN',
-                                style: GoogleFonts.kalam(
+                                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                                   fontSize: 10,
                                   color: Colors.blue,
                                   fontWeight: FontWeight.bold,

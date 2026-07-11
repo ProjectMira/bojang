@@ -51,12 +51,13 @@ class GoogleSignInButton extends StatelessWidget {
                 ],
                 Text(
                   isLoading ? 'Signing in...' : text,
-                  style: GoogleFonts.kalam(
+                  style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white
                         : const Color(0xFF2C3E50),
+                    fontFamilyFallback: const ['Jomolhari'],
                   ),
                 ),
               ],

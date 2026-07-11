@@ -50,22 +50,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           (context) => AlertDialog(
             title: Text(
               'Sign Out',
-              style: GoogleFonts.kalam(fontWeight: FontWeight.bold),
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontWeight: FontWeight.bold),
             ),
             content: Text(
               'Are you sure you want to sign out?',
-              style: GoogleFonts.kalam(),
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text('Cancel', style: GoogleFonts.kalam()),
+                child: Text('Cancel', style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], )),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(
                   'Sign Out',
-                  style: GoogleFonts.kalam(
+                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
                   ),
@@ -100,27 +100,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Theme.of(context).cardColor,
             title: Text(
               'Edit Name',
-              style: GoogleFonts.kalam(fontWeight: FontWeight.bold),
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontWeight: FontWeight.bold),
             ),
             content: TextField(
               controller: controller,
-              style: GoogleFonts.kalam(),
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], ),
               decoration: InputDecoration(
                 labelText: 'Your Name',
-                labelStyle: GoogleFonts.kalam(),
+                labelStyle: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], ),
                 border: const OutlineInputBorder(),
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: GoogleFonts.kalam()),
+                child: Text('Cancel', style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], )),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, controller.text),
                 child: Text(
                   'Save',
-                  style: GoogleFonts.kalam(
+                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                     color: Theme.of(context).primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
@@ -147,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           appBar: AppBar(
             title: Text(
               'Profile',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -228,7 +228,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (currentUser?.email != null)
                         Text(
                           currentUser!.email,
-                          style: GoogleFonts.kalam(
+                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                             fontSize: 14,
                             color: Colors.grey.shade600,
                           ),
@@ -236,7 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 4),
                       Text(
                         '${progressService.league} League • ${progressService.xp} XP',
-                        style: GoogleFonts.kalam(
+                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                           fontSize: 16,
                           color: Colors.grey.shade600,
                         ),
@@ -254,7 +254,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           child: Text(
                             'Google Account',
-                            style: GoogleFonts.kalam(
+                            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                               fontSize: 12,
                               color: Colors.blue.shade800,
                               fontWeight: FontWeight.w600,
@@ -474,16 +474,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Theme.of(context).cardColor,
             title: Text(
               'Reset Progress',
-              style: GoogleFonts.kalam(fontWeight: FontWeight.bold),
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontWeight: FontWeight.bold),
             ),
             content: Text(
               'Are you sure you want to reset all your progress? This action cannot be undone.',
-              style: GoogleFonts.kalam(),
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: GoogleFonts.kalam()),
+                child: Text('Cancel', style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], )),
               ),
               TextButton(
                 onPressed: () async {
@@ -493,14 +493,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     SnackBar(
                       content: Text(
                         'Progress reset on this device.',
-                        style: GoogleFonts.kalam(),
+                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], ),
                       ),
                     ),
                   );
                 },
                 child: Text(
                   'Reset',
-                  style: GoogleFonts.kalam(
+                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
                   ),

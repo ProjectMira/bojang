@@ -21,7 +21,7 @@ class _StreakViewScreenState extends State<StreakViewScreen> {
           appBar: AppBar(
             title: Text(
               'Your Streak',
-              style: GoogleFonts.kalam(
+              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -64,7 +64,7 @@ class _StreakViewScreenState extends State<StreakViewScreen> {
                   const SizedBox(height: 12),
                   Text(
                     '${progressService.currentStreak}',
-                    style: GoogleFonts.kalam(
+                    style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -72,7 +72,7 @@ class _StreakViewScreenState extends State<StreakViewScreen> {
                   ),
                   Text(
                     progressService.currentStreak == 1 ? 'Day Streak' : 'Days Streak',
-                    style: GoogleFonts.kalam(
+                    style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                       fontSize: 18,
                       color: Colors.white70,
                     ),

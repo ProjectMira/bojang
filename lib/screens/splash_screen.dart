@@ -110,13 +110,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               const SizedBox(height: 30),
               
               // App Name - "Bojang" in big and bold
-              Text(
+               Text(
                 'BOJANG',
-                style: GoogleFonts.nunito(
+                style: GoogleFonts.poppins(
                   fontSize: 48,
                   fontWeight: FontWeight.w800, // Extra bold for feather-like effect
                   color: const Color(0xFF8B4513), // Saddle brown color
                   letterSpacing: 3.0,
+                  fontFamilyFallback: const ['Jomolhari'],
                   shadows: [
                     Shadow(
                       offset: const Offset(0, 2),
@@ -132,11 +133,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               // Tagline
               Text(
                 'Tibetan Learning App',
-                style: GoogleFonts.nunito(
+                style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.w700, // Bold for consistency
                   color: const Color(0xFF8B4513), // Saddle brown color
                   letterSpacing: 1.0,
+                  fontFamilyFallback: const ['Jomolhari'],
                   shadows: [
                     Shadow(
                       offset: const Offset(0, 1),
@@ -151,11 +153,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               const SizedBox(height: 12),
               Text(
                 'བོད་ཡིག་སློབ་པ།',
-                style: GoogleFonts.nunito(
+                style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w600, // Semi-bold for consistency
                   color: const Color(0xFF8B4513).withOpacity(0.9), // Brown with opacity
                   letterSpacing: 0.5,
+                  fontFamilyFallback: const ['Jomolhari'],
                   shadows: [
                     Shadow(
                       offset: const Offset(0, 1),

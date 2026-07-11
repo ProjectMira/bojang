@@ -138,7 +138,7 @@ class _AchievementDialogState extends State<AchievementDialog>
                         // Achievement Title
                         Text(
                           'Achievement Unlocked!',
-                          style: GoogleFonts.kalam(
+                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                             fontSize: 16,
                             color: Theme.of(context).brightness == Brightness.dark 
                                 ? Colors.grey.shade400 
@@ -150,7 +150,7 @@ class _AchievementDialogState extends State<AchievementDialog>
                         
                         Text(
                           widget.title,
-                          style: GoogleFonts.kalam(
+                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: widget.color,
@@ -162,7 +162,7 @@ class _AchievementDialogState extends State<AchievementDialog>
                         
                         Text(
                           widget.description,
-                          style: GoogleFonts.kalam(
+                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                             fontSize: 16,
                             color: Theme.of(context).brightness == Brightness.dark 
                                 ? Colors.grey.shade300 
@@ -189,7 +189,7 @@ class _AchievementDialogState extends State<AchievementDialog>
                           ),
                           child: Text(
                             'Awesome!',
-                            style: GoogleFonts.kalam(
+                            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
