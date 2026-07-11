@@ -23,10 +23,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           appBar: AppBar(
             title: Text(
               'Settings',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+              style: GoogleFonts.poppins( 
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              ),
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,
@@ -190,14 +190,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+      style: GoogleFonts.poppins( 
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color:
             Theme.of(context).brightness == Brightness.dark
                 ? Colors.white
                 : const Color(0xFF2C3E50),
-      ),
+      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
     );
   }
 
@@ -238,7 +238,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         title: Text(
           title,
-          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+          style: GoogleFonts.poppins( 
             fontWeight: FontWeight.w600,
             color:
                 isDestructive
@@ -246,7 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     : (Theme.of(context).brightness == Brightness.dark
                         ? Colors.white
                         : const Color(0xFF2C3E50)),
-          ),
+          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
         ),
         subtitle: Text(
           subtitle,

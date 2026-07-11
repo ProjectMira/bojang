@@ -246,20 +246,20 @@ class _QuizScreenState extends State<QuizScreen>
               const SizedBox(height: 16),
               Text(
                 'Your Score: $score/$totalQuestions',
-                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                style: GoogleFonts.poppins( 
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue[700],
-                ),
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               ),
               Text(
                 '${percentage.toStringAsFixed(0)}%',
-                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                style: GoogleFonts.poppins( 
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color:
                       percentage >= 70 ? Colors.green[700] : Colors.blue[700],
-                ),
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               ),
               const SizedBox(height: 16),
               Text(
@@ -355,11 +355,11 @@ class _QuizScreenState extends State<QuizScreen>
       appBar: AppBar(
         title: Text(
           _getDisplayNameFromFilePath(widget.topicFilePath),
-          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+          style: GoogleFonts.poppins( 
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
-          ),
+          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
         ),
         centerTitle: true,
         leading: IconButton(
@@ -379,10 +379,10 @@ class _QuizScreenState extends State<QuizScreen>
                   const SizedBox(height: 16),
                   Text(
                     'Loading questions...',
-                    style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                    style: GoogleFonts.poppins( 
                       fontSize: 18,
                       color: Colors.grey[600],
-                    ),
+                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                   ),
                 ],
               ),
@@ -400,11 +400,11 @@ class _QuizScreenState extends State<QuizScreen>
                     const SizedBox(height: 16),
                     Text(
                       'Error loading questions',
-                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                      style: GoogleFonts.poppins( 
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.red[700],
-                      ),
+                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -450,11 +450,11 @@ class _QuizScreenState extends State<QuizScreen>
                     const SizedBox(height: 16),
                     Text(
                       'No Questions Available',
-                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                      style: GoogleFonts.poppins( 
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey[700],
-                      ),
+                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -492,14 +492,14 @@ class _QuizScreenState extends State<QuizScreen>
                   children: [
                     Text(
                       'Question ${currentQuestionIndex + 1} of ${questions.length}',
-                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                      style: GoogleFonts.poppins( 
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color:
                             Theme.of(context).brightness == Brightness.dark
                                 ? Colors.grey.shade400
                                 : Colors.grey.shade600,
-                      ),
+                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -514,11 +514,11 @@ class _QuizScreenState extends State<QuizScreen>
                       ),
                       child: Text(
                         'Score: $score',
-                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                        style: GoogleFonts.poppins( 
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).primaryColor,
-                        ),
+                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                       ),
                     ),
                   ],
@@ -549,21 +549,21 @@ class _QuizScreenState extends State<QuizScreen>
                       children: [
                         Text(
                           '${((currentQuestionIndex + 1) / questions.length * 100).toInt()}% Complete',
-                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                          style: GoogleFonts.poppins( 
                             fontSize: 12,
                             color:
                                 Theme.of(context).brightness == Brightness.dark
                                     ? Colors.grey.shade400
                                     : Colors.grey.shade600,
-                          ),
+                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                         ),
                         Text(
                           'Accuracy: ${score > 0 ? ((score / (currentQuestionIndex + 1)) * 100).toInt() : 0}%',
-                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                          style: GoogleFonts.poppins( 
                             fontSize: 12,
                             color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.w600,
-                          ),
+                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                         ),
                       ],
                     ),

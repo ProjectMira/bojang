@@ -117,7 +117,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   fontWeight: FontWeight.w800, // Extra bold for feather-like effect
                   color: const Color(0xFF8B4513), // Saddle brown color
                   letterSpacing: 3.0,
-                  fontFamilyFallback: const ['Jomolhari'],
                   shadows: [
                     Shadow(
                       offset: const Offset(0, 2),
@@ -125,7 +124,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       color: Colors.black.withOpacity(0.3),
                     ),
                   ],
-                ),
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               ),
               
               const SizedBox(height: 20),
@@ -138,7 +137,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   fontWeight: FontWeight.w700, // Bold for consistency
                   color: const Color(0xFF8B4513), // Saddle brown color
                   letterSpacing: 1.0,
-                  fontFamilyFallback: const ['Jomolhari'],
                   shadows: [
                     Shadow(
                       offset: const Offset(0, 1),
@@ -146,7 +144,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       color: Colors.black.withOpacity(0.3),
                     ),
                   ],
-                ),
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               ),
               
               // Additional tagline
@@ -158,7 +156,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   fontWeight: FontWeight.w600, // Semi-bold for consistency
                   color: const Color(0xFF8B4513).withOpacity(0.9), // Brown with opacity
                   letterSpacing: 0.5,
-                  fontFamilyFallback: const ['Jomolhari'],
                   shadows: [
                     Shadow(
                       offset: const Offset(0, 1),
@@ -166,7 +163,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       color: Colors.black.withOpacity(0.3),
                     ),
                   ],
-                ),
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               ),
             ],
           ),

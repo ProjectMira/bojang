@@ -138,23 +138,23 @@ class _AchievementDialogState extends State<AchievementDialog>
                         // Achievement Title
                         Text(
                           'Achievement Unlocked!',
-                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                          style: GoogleFonts.poppins( 
                             fontSize: 16,
                             color: Theme.of(context).brightness == Brightness.dark 
                                 ? Colors.grey.shade400 
                                 : Colors.grey.shade600,
-                          ),
+                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                         ),
                         
                         const SizedBox(height: 8),
                         
                         Text(
                           widget.title,
-                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                          style: GoogleFonts.poppins( 
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: widget.color,
-                          ),
+                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                           textAlign: TextAlign.center,
                         ),
                         
@@ -162,12 +162,12 @@ class _AchievementDialogState extends State<AchievementDialog>
                         
                         Text(
                           widget.description,
-                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                          style: GoogleFonts.poppins( 
                             fontSize: 16,
                             color: Theme.of(context).brightness == Brightness.dark 
                                 ? Colors.grey.shade300 
                                 : Colors.grey.shade700,
-                          ),
+                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                           textAlign: TextAlign.center,
                         ),
                         
@@ -189,10 +189,10 @@ class _AchievementDialogState extends State<AchievementDialog>
                           ),
                           child: Text(
                             'Awesome!',
-                            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                            style: GoogleFonts.poppins( 
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                            ),
+                            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                           ),
                         ),
                       ],

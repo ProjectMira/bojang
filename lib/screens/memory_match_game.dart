@@ -155,10 +155,10 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Congratulations!',
-          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+          style: GoogleFonts.poppins( 
             fontWeight: FontWeight.bold,
             color: Theme.of(context).primaryColor,
-          ),
+          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
           textAlign: TextAlign.center,
         ),
         content: Column(
@@ -172,17 +172,17 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             const SizedBox(height: 16),
             Text(
               'You completed the memory game!',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontSize: 18),
+              style: GoogleFonts.poppins( fontSize: 18).copyWith(fontFamilyFallback: const ['Jomolhari']),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'Moves: $_moves',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+              style: GoogleFonts.poppins( 
                 fontSize: 16,
                 color: Theme.of(context).primaryColor,
                 fontWeight: FontWeight.bold,
-              ),
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
           ],
         ),
@@ -192,7 +192,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
               Navigator.pop(context);
               _initializeGame();
             },
-            child: Text('Play Again', style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], )),
+            child: Text('Play Again', style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari'])),
           ),
           TextButton(
             onPressed: () {
@@ -201,10 +201,10 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             },
             child: Text(
               'Done',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+              style: GoogleFonts.poppins( 
                 color: Theme.of(context).primaryColor,
                 fontWeight: FontWeight.bold,
-              ),
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
           ),
         ],
@@ -219,10 +219,10 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
       appBar: AppBar(
         title: Text(
           'Memory Match',
-          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+          style: GoogleFonts.poppins( 
             fontSize: 24,
             fontWeight: FontWeight.bold,
-          ),
+          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
         ),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
@@ -271,12 +271,12 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             padding: const EdgeInsets.all(16),
             child: Text(
               'Match Tibetan letters with their English pronunciations',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+              style: GoogleFonts.poppins( 
                 fontSize: 16,
                 color: Theme.of(context).brightness == Brightness.dark 
                     ? Colors.grey.shade400 
                     : Colors.grey.shade600,
-              ),
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               textAlign: TextAlign.center,
             ),
           ),
@@ -309,20 +309,20 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             children: [
               Text(
                 value,
-                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                style: GoogleFonts.poppins( 
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: color,
-                ),
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               ),
               Text(
                 title,
-                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                style: GoogleFonts.poppins( 
                   fontSize: 12,
                   color: Theme.of(context).brightness == Brightness.dark 
                       ? Colors.grey.shade400 
                       : Colors.grey.shade600,
-                ),
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               ),
             ],
           ),
@@ -366,7 +366,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
                         children: [
                           Text(
                             card.text,
-                            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                            style: GoogleFonts.poppins( 
                               fontSize: card.type == CardType.tibetan ? 24 : 16,
                               fontWeight: FontWeight.bold,
                               color: card.isMatched 
@@ -374,7 +374,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
                                   : Theme.of(context).brightness == Brightness.dark 
                                       ? Colors.white 
                                       : const Color(0xFF2C3E50),
-                            ),
+                            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                           ),
                           if (card.type == CardType.english)
                             Container(
@@ -386,11 +386,11 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
                               ),
                               child: Text(
                                 'EN',
-                                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                                style: GoogleFonts.poppins( 
                                   fontSize: 10,
                                   color: Colors.blue,
                                   fontWeight: FontWeight.bold,
-                                ),
+                                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                               ),
                             ),
                         ],

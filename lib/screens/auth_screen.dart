@@ -173,25 +173,25 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         const SizedBox(height: 24),
         Text(
           'Bojang',
-          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+          style: GoogleFonts.poppins( 
             fontSize: 36,
             fontWeight: FontWeight.bold,
             color:
                 Theme.of(context).brightness == Brightness.dark
                     ? Colors.white
                     : const Color(0xFF2C3E50),
-          ),
+          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
         ),
         const SizedBox(height: 8),
         Text(
           'Practice Tibetan every day',
-          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+          style: GoogleFonts.poppins( 
             fontSize: 16,
             color:
                 Theme.of(context).brightness == Brightness.dark
                     ? Colors.grey.shade400
                     : Colors.grey.shade600,
-          ),
+          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
         ),
       ],
     );
@@ -208,38 +208,38 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           children: [
             Text(
               'Save your progress',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+              style: GoogleFonts.poppins( 
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color:
                     Theme.of(context).brightness == Brightness.dark
                         ? Colors.white
                         : const Color(0xFF2C3E50),
-              ),
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'Sign in to sync XP, streaks, completed lessons, and league progress across devices.',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+              style: GoogleFonts.poppins( 
                 fontSize: 16,
                 color:
                     Theme.of(context).brightness == Brightness.dark
                         ? Colors.grey.shade300
                         : Colors.grey.shade700,
-              ),
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Text(
               'You can also continue without an account and practice with lessons on this device.',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+              style: GoogleFonts.poppins( 
                 fontSize: 14,
                 color:
                     Theme.of(context).brightness == Brightness.dark
                         ? Colors.grey.shade400
                         : Colors.grey.shade600,
-              ),
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -248,7 +248,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               icon: const Icon(Icons.mail_outline),
               label: Text(
                 'Email sign-in coming soon',
-                style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontWeight: FontWeight.w600),
+                style: GoogleFonts.poppins( fontWeight: FontWeight.w600).copyWith(fontFamilyFallback: const ['Jomolhari']),
               ),
             ),
           ],
@@ -263,7 +263,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       icon: const Icon(Icons.g_mobiledata, size: 24),
       label: Text(
         'Continue with Google',
-        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontSize: 16, fontWeight: FontWeight.w600),
+        style: GoogleFonts.poppins( fontSize: 16, fontWeight: FontWeight.w600).copyWith(fontFamilyFallback: const ['Jomolhari']),
       ),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -278,11 +278,11 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       onPressed: _navigateToMainScreen,
       child: Text(
         'Continue without account',
-        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+        style: GoogleFonts.poppins( 
           fontSize: 16,
           color: Colors.grey.shade500,
           decoration: TextDecoration.underline,
-        ),
+        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
       ),
     );
   }

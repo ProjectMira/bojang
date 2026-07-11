@@ -21,10 +21,10 @@ class _StreakViewScreenState extends State<StreakViewScreen> {
           appBar: AppBar(
             title: Text(
               'Your Streak',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+              style: GoogleFonts.poppins( 
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              ),
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,
@@ -64,18 +64,18 @@ class _StreakViewScreenState extends State<StreakViewScreen> {
                   const SizedBox(height: 12),
                   Text(
                     '${progressService.currentStreak}',
-                    style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                    style: GoogleFonts.poppins( 
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                    ),
+                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                   ),
                   Text(
                     progressService.currentStreak == 1 ? 'Day Streak' : 'Days Streak',
-                    style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                    style: GoogleFonts.poppins( 
                       fontSize: 18,
                       color: Colors.white70,
-                    ),
+                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                   ),
                 ],
               ),

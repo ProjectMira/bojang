@@ -59,8 +59,7 @@ class CulturalTipCard extends StatelessWidget {
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: color,
-                    fontFamilyFallback: const ['Jomolhari'],
-                  ),
+                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                 ),
               ),
             ],
@@ -100,8 +99,7 @@ class CulturalTipCard extends StatelessWidget {
               color: Theme.of(context).brightness == Brightness.dark 
                   ? Colors.grey.shade300 
                   : Colors.grey.shade700,
-              fontFamilyFallback: const ['Jomolhari'],
-            ),
+            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
           ),
         ],
       ),

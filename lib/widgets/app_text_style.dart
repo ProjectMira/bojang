@@ -19,7 +19,6 @@ class AppTextStyles {
       shadows: shadows,
       fontStyle: fontStyle,
       height: height,
-      fontFamilyFallback: const ['Jomolhari'],
-    );
+    ).copyWith(fontFamilyFallback: const ['Jomolhari']);
   }
 }

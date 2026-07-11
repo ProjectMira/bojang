@@ -77,18 +77,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           children: [
                             Text(
                               'Welcome back',
-                              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                              style: GoogleFonts.poppins( 
                                 fontSize: 16,
                                 color:
                                     Theme.of(context).brightness ==
                                             Brightness.dark
                                         ? Colors.grey.shade400
                                         : Colors.grey.shade600,
-                              ),
+                              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                             ),
                             Text(
                               'Ready for Tibetan?',
-                              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                              style: GoogleFonts.poppins( 
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
                                 color:
@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             Brightness.dark
                                         ? Colors.white
                                         : const Color(0xFF2C3E50),
-                              ),
+                              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                             ),
                           ],
                         ),
@@ -141,14 +141,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     // Cultural Tip of the Day
                     Text(
                       'Cultural Tip',
-                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                      style: GoogleFonts.poppins( 
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color:
                             Theme.of(context).brightness == Brightness.dark
                                 ? Colors.white
                                 : const Color(0xFF2C3E50),
-                      ),
+                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                     ),
 
                     const SizedBox(height: 16),
@@ -197,11 +197,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     const SizedBox(width: 8),
                     Text(
                       '${progressService.currentStreak}',
-                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                      style: GoogleFonts.poppins( 
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                      ),
+                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                     ),
                   ],
                 ),
@@ -209,12 +209,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   progressService.currentStreak == 1
                       ? 'Day Streak'
                       : 'Days Streak',
-                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontSize: 16, color: Colors.white70),
+                  style: GoogleFonts.poppins( fontSize: 16, color: Colors.white70).copyWith(fontFamilyFallback: const ['Jomolhari']),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   _getStreakMessage(progressService.currentStreak),
-                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontSize: 14, color: Colors.white70),
+                  style: GoogleFonts.poppins( fontSize: 14, color: Colors.white70).copyWith(fontFamilyFallback: const ['Jomolhari']),
                 ),
               ],
             ),
@@ -300,24 +300,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           const SizedBox(height: 8),
           Text(
             value,
-            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+            style: GoogleFonts.poppins( 
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color:
                   Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
                       : const Color(0xFF2C3E50),
-            ),
+            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
           ),
           Text(
             title,
-            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+            style: GoogleFonts.poppins( 
               fontSize: 12,
               color:
                   Theme.of(context).brightness == Brightness.dark
                       ? Colors.grey.shade400
                       : Colors.grey.shade600,
-            ),
+            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
           ),
         ],
       ),
@@ -369,25 +369,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     children: [
                       Text(
                         'Start a Lesson',
-                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                        style: GoogleFonts.poppins( 
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color:
                               Theme.of(context).brightness == Brightness.dark
                                   ? Colors.white
                                   : const Color(0xFF2C3E50),
-                        ),
+                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Practice vocabulary, phrases, and verbs',
-                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                        style: GoogleFonts.poppins( 
                           fontSize: 14,
                           color:
                               Theme.of(context).brightness == Brightness.dark
                                   ? Colors.grey.shade400
                                   : Colors.grey.shade600,
-                        ),
+                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                       ),
                     ],
                   ),

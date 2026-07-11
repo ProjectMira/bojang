@@ -57,8 +57,7 @@ class GoogleSignInButton extends StatelessWidget {
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white
                         : const Color(0xFF2C3E50),
-                    fontFamilyFallback: const ['Jomolhari'],
-                  ),
+                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                 ),
               ],
             ),

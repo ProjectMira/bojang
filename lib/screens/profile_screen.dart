@@ -50,25 +50,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
           (context) => AlertDialog(
             title: Text(
               'Sign Out',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontWeight: FontWeight.bold),
+              style: GoogleFonts.poppins( fontWeight: FontWeight.bold).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             content: Text(
               'Are you sure you want to sign out?',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], ),
+              style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text('Cancel', style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], )),
+                child: Text('Cancel', style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari'])),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(
                   'Sign Out',
-                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                  style: GoogleFonts.poppins( 
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
-                  ),
+                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                 ),
               ),
             ],
@@ -100,30 +100,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Theme.of(context).cardColor,
             title: Text(
               'Edit Name',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontWeight: FontWeight.bold),
+              style: GoogleFonts.poppins( fontWeight: FontWeight.bold).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             content: TextField(
               controller: controller,
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], ),
+              style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               decoration: InputDecoration(
                 labelText: 'Your Name',
-                labelStyle: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], ),
+                labelStyle: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                 border: const OutlineInputBorder(),
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], )),
+                child: Text('Cancel', style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari'])),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, controller.text),
                 child: Text(
                   'Save',
-                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                  style: GoogleFonts.poppins( 
                     color: Theme.of(context).primaryColor,
                     fontWeight: FontWeight.bold,
-                  ),
+                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                 ),
               ),
             ],
@@ -147,10 +147,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           appBar: AppBar(
             title: Text(
               'Profile',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+              style: GoogleFonts.poppins( 
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              ),
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,
@@ -228,18 +228,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (currentUser?.email != null)
                         Text(
                           currentUser!.email,
-                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                          style: GoogleFonts.poppins( 
                             fontSize: 14,
                             color: Colors.grey.shade600,
-                          ),
+                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                         ),
                       const SizedBox(height: 4),
                       Text(
                         '${progressService.league} League • ${progressService.xp} XP',
-                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                        style: GoogleFonts.poppins( 
                           fontSize: 16,
                           color: Colors.grey.shade600,
-                        ),
+                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                       ),
                       if (currentUser?.authProvider == AuthProvider.google)
                         Container(
@@ -254,11 +254,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           child: Text(
                             'Google Account',
-                            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                            style: GoogleFonts.poppins( 
                               fontSize: 12,
                               color: Colors.blue.shade800,
                               fontWeight: FontWeight.w600,
-                            ),
+                            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                           ),
                         ),
                       const SizedBox(height: 32),
@@ -474,16 +474,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Theme.of(context).cardColor,
             title: Text(
               'Reset Progress',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], fontWeight: FontWeight.bold),
+              style: GoogleFonts.poppins( fontWeight: FontWeight.bold).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             content: Text(
               'Are you sure you want to reset all your progress? This action cannot be undone.',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], ),
+              style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], )),
+                child: Text('Cancel', style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari'])),
               ),
               TextButton(
                 onPressed: () async {
@@ -493,17 +493,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     SnackBar(
                       content: Text(
                         'Progress reset on this device.',
-                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], ),
+                        style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                       ),
                     ),
                   );
                 },
                 child: Text(
                   'Reset',
-                  style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                  style: GoogleFonts.poppins( 
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
-                  ),
+                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                 ),
               ),
             ],

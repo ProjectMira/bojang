@@ -232,7 +232,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                       ),
                       child: Text(
                         '${level.level}',
-                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                        style: GoogleFonts.poppins( 
                           fontSize: _getResponsiveValue(
                             context,
                             small: 20,
@@ -241,7 +241,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                           ),
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
-                        ),
+                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                       ),
                     ),
                     SizedBox(
@@ -258,7 +258,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                         children: [
                           Text(
                             level.title,
-                            style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                            style: GoogleFonts.poppins( 
                               fontSize: _getResponsiveValue(
                                 context,
                                 small: 20,
@@ -267,7 +267,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                               ),
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
-                            ),
+                            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                           ),
                           if (levelProgress > 0) ...[
                             const SizedBox(height: 8),
@@ -280,7 +280,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                             const SizedBox(height: 4),
                             Text(
                               '${(levelProgress * 100).toInt()}% Complete • $completedSublevels/${level.sublevels.length} lessons',
-                              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                              style: GoogleFonts.poppins( 
                                 fontSize: _getResponsiveValue(
                                   context,
                                   small: 12,
@@ -289,7 +289,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                                 ),
                                 color: color,
                                 fontWeight: FontWeight.w600,
-                              ),
+                              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                             ),
                           ],
                         ],
@@ -309,7 +309,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                     ? Center(
                       child: Text(
                         '🔒 Coming Soon!',
-                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                        style: GoogleFonts.poppins( 
                           fontSize: _getResponsiveValue(
                             context,
                             small: 16,
@@ -318,7 +318,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                           ),
                           color: Colors.grey,
                           fontStyle: FontStyle.italic,
-                        ),
+                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                       ),
                     )
                     : _buildSublevels(level, color, progressService),
@@ -443,7 +443,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                     ),
                     Text(
                       sublevel.level.toString(),
-                      style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                      style: GoogleFonts.poppins( 
                         fontSize: _getResponsiveValue(
                           context,
                           small: 14,
@@ -452,7 +452,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                         ),
                         fontWeight: FontWeight.bold,
                         color: isLocked ? Colors.grey : color,
-                      ),
+                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                     ),
                     SizedBox(
                       height: _getResponsiveValue(
@@ -466,7 +466,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                       child: Text(
                         sublevel.name,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                        style: GoogleFonts.poppins( 
                           fontSize: _getResponsiveValue(
                             context,
                             small: 10,
@@ -475,7 +475,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                           ),
                           color: isLocked ? Colors.grey : color,
                           fontStyle: FontStyle.italic,
-                        ),
+                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -499,7 +499,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
           appBar: AppBar(
             title: Text(
               'Learn Tibetan',
-              style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+              style: GoogleFonts.poppins( 
                 fontSize: _getResponsiveValue(
                   context,
                   small: 20,
@@ -507,7 +507,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                   large: 28,
                 ),
                 fontWeight: FontWeight.bold,
-              ),
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             centerTitle: true,
             elevation: 0,
@@ -554,7 +554,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                         ),
                         Text(
                           'No levels found',
-                          style: GoogleFonts.poppins(fontFamilyFallback: const ['Jomolhari'], 
+                          style: GoogleFonts.poppins( 
                             fontSize: _getResponsiveValue(
                               context,
                               small: 16,
@@ -562,7 +562,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
                               large: 24,
                             ),
                             color: Colors.grey[700],
-                          ),
+                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                         ),
                         const SizedBox(height: 8),
                         ElevatedButton(
