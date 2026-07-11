@@ -2,6 +2,10 @@
 
 A Tibetan Learning Flutter application.
 
+Mobile builds and store releases are automated through GitHub Actions. See the
+[mobile release runbook](docs/mobile-release.md) for versioning, credentials,
+TestFlight, and Google Play setup.
+
 ## Tibetan Word Ending Rules
 
 To ensure consistent and proper Tibetan orthography, all Tibetan words and phrases in the dataset follow these ending rules:

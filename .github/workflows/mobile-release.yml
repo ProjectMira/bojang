@@ -1,0 +1,588 @@
+name: Mobile Release
+
+"on":
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: Marketing version part to bump
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - build-only
+      version:
+        description: Optional exact marketing version, for example 1.2.3
+        required: false
+        type: string
+      build_number:
+        description: Optional exact build number; must exceed every committed build number
+        required: false
+        type: string
+      release_android:
+        description: Build and upload Android
+        required: true
+        default: true
+        type: boolean
+      release_ios:
+        description: Build and upload iOS
+        required: true
+        default: true
+        type: boolean
+      android_track:
+        description: Google Play track
+        required: true
+        default: internal
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+      enable_ios_firebase:
+        description: Enable Firebase on iOS; requires GOOGLE_SERVICE_INFO_PLIST
+        required: true
+        default: false
+        type: boolean
+      enable_ios_google_sign_in:
+        description: Enable Google Sign-In on iOS; requires GOOGLE_SERVICE_INFO_PLIST
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: 3.44.0
+
+jobs:
+  prepare:
+    name: Prepare version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      marketing: ${{ steps.version.outputs.marketing }}
+      build: ${{ steps.version.outputs.build }}
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      source_sha: ${{ steps.version.outputs.source_sha }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate release request
+        run: |
+          set -euo pipefail
+          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            echo "::error::Mobile releases must be started from main."
+            exit 1
+          fi
+          if [ "${{ inputs.release_android }}" != "true" ] && [ "${{ inputs.release_ios }}" != "true" ]; then
+            echo "::error::Select at least one release platform."
+            exit 1
+          fi
+
+      - name: Calculate release version
+        id: version
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+          REQUESTED_BUILD: ${{ inputs.build_number }}
+          VERSION_BUMP: ${{ inputs.version_bump }}
+        run: |
+          set -euo pipefail
+
+          current_line="$(grep -E '^version: [0-9]+\.[0-9]+\.[0-9]+\+[0-9]+$' pubspec.yaml)"
+          if [ -z "$current_line" ]; then
+            echo "::error::pubspec.yaml must contain version: MAJOR.MINOR.PATCH+BUILD"
+            exit 1
+          fi
+
+          current="${current_line#version: }"
+          marketing="${current%%+*}"
+          current_build="${current##*+}"
+          IFS='.' read -r major minor patch <<< "$marketing"
+
+          history_max="$({
+            printf '%s\n' "$current_build"
+            git log -p --format= -- pubspec.yaml \
+              | sed -nE 's/^[+-]version: [0-9]+\.[0-9]+\.[0-9]+\+([0-9]+)$/\1/p'
+          } | sort -n | tail -1)"
+
+          if [ -n "$REQUESTED_VERSION" ]; then
+            next_marketing="$REQUESTED_VERSION"
+          else
+            case "$VERSION_BUMP" in
+              major) next_marketing="$((major + 1)).0.0" ;;
+              minor) next_marketing="$major.$((minor + 1)).0" ;;
+              patch) next_marketing="$major.$minor.$((patch + 1))" ;;
+              build-only) next_marketing="$marketing" ;;
+              *)
+                echo "::error::Unsupported version bump: $VERSION_BUMP"
+                exit 1
+                ;;
+            esac
+          fi
+
+          if [ -n "$REQUESTED_BUILD" ]; then
+            next_build="$REQUESTED_BUILD"
+          else
+            next_build="$((history_max + 1))"
+          fi
+
+          if ! [[ "$next_marketing" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version must use MAJOR.MINOR.PATCH; got $next_marketing"
+            exit 1
+          fi
+          if ! [[ "$next_build" =~ ^[0-9]+$ ]] || [ "$next_build" -le "$history_max" ]; then
+            echo "::error::Build number must be an integer greater than committed maximum $history_max; got $next_build"
+            exit 1
+          fi
+
+          next_version="$next_marketing+$next_build"
+          tag="v$next_marketing-build.$next_build"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "::error::Release tag already exists: $tag"
+            exit 1
+          fi
+
+          echo "marketing=$next_marketing" >> "$GITHUB_OUTPUT"
+          echo "build=$next_build" >> "$GITHUB_OUTPUT"
+          echo "version=$next_version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "source_sha=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Mobile release"
+            echo "- Version: \`$next_version\`"
+            echo "- Tag: \`$tag\`"
+            echo "- Android: \`${{ inputs.release_android }}\`"
+            echo "- iOS: \`${{ inputs.release_ios }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  quality:
+    name: Analyze app and run model tests
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze lib --no-fatal-infos --no-fatal-warnings
+
+      - name: Run stable model tests
+        run: flutter test test/models
+
+  android:
+    name: Android / Google Play
+    if: ${{ inputs.release_android }}
+    needs:
+      - prepare
+      - quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    environment: mobile-production
+    env:
+      ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME || 'com.projectmira.bojang' }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Validate Android configuration
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD GOOGLE_PLAY_SERVICE_ACCOUNT_JSON; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing mobile-production secret: $name"
+              missing=1
+            fi
+          done
+          if [ "$ANDROID_PACKAGE_NAME" != "com.projectmira.bojang" ]; then
+            echo "::error::ANDROID_PACKAGE_NAME must match Gradle applicationId com.projectmira.bojang"
+            missing=1
+          fi
+          exit "$missing"
+
+      - name: Set up Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore Android upload key
+        run: |
+          set -euo pipefail
+          keystore="$GITHUB_WORKSPACE/android/app/upload-keystore.jks"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          chmod 600 "$keystore"
+          cat > android/key.properties << PROPERTIES
+          storeFile=upload-keystore.jks
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          keyPassword=$ANDROID_KEY_PASSWORD
+          PROPERTIES
+          keytool -list -keystore "$keystore" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null
+
+      - name: Build signed Android App Bundle
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter build appbundle \
+            --release \
+            --build-name "${{ needs.prepare.outputs.marketing }}" \
+            --build-number "${{ needs.prepare.outputs.build }}"
+
+      - name: Verify Android bundle signature
+        run: |
+          set -euo pipefail
+          bundle="build/app/outputs/bundle/release/app-release.aab"
+          test -s "$bundle"
+          jarsigner -verify -strict "$bundle"
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.ANDROID_PACKAGE_NAME }}
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: ${{ inputs.android_track }}
+          status: completed
+
+      - name: Upload Android artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bojang-android-${{ needs.prepare.outputs.version }}
+          path: build/app/outputs/bundle/release/*.aab
+          if-no-files-found: ignore
+          retention-days: 14
+
+  ios:
+    name: iOS / TestFlight
+    if: ${{ inputs.release_ios }}
+    needs:
+      - prepare
+      - quality
+    runs-on: macos-26
+    timeout-minutes: 60
+    environment: mobile-production
+    env:
+      IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID || 'com.bojang.app' }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID || secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ vars.APP_STORE_CONNECT_API_KEY_ID || secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      ASC_ISSUER_ID: ${{ vars.APP_STORE_CONNECT_API_ISSUER_ID || secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+      ASC_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
+      GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Validate iOS configuration
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing mobile-production variable or secret: $name"
+              missing=1
+            fi
+          done
+          if [ "$IOS_BUNDLE_ID" != "com.bojang.app" ]; then
+            echo "::error::IOS_BUNDLE_ID must match Xcode bundle identifier com.bojang.app"
+            missing=1
+          fi
+          if { [ "${{ inputs.enable_ios_firebase }}" = "true" ] || [ "${{ inputs.enable_ios_google_sign_in }}" = "true" ]; } && [ -z "$GOOGLE_SERVICE_INFO_PLIST" ]; then
+            echo "::error::GOOGLE_SERVICE_INFO_PLIST is required when iOS Firebase or Google Sign-In is enabled"
+            missing=1
+          fi
+          exit "$missing"
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Restore and validate App Store Connect key
+        id: asc-key
+        run: |
+          set -euo pipefail
+          key_dir="$HOME/.appstoreconnect/private_keys"
+          key_path="$key_dir/AuthKey_${ASC_KEY_ID}.p8"
+          mkdir -p "$key_dir"
+
+          raw="$(printf '%s' "$ASC_PRIVATE_KEY" | sed -e 's/\\r//g' -e 's/\\n//g' | tr -d '\r')"
+          if ! printf '%s' "$raw" | grep -q 'BEGIN PRIVATE KEY'; then
+            raw="$(printf '%s' "$raw" | tr -d '[:space:]' | openssl base64 -d -A 2>/dev/null || true)"
+          fi
+          body="$(printf '%s' "$raw" \
+            | sed -e 's/-----BEGIN PRIVATE KEY-----//' -e 's/-----END PRIVATE KEY-----//' \
+            | tr -d '[:space:]')"
+          {
+            echo '-----BEGIN PRIVATE KEY-----'
+            printf '%s\n' "$body" | fold -w 64
+            echo '-----END PRIVATE KEY-----'
+          } > "$key_path"
+          chmod 600 "$key_path"
+
+          if ! openssl pkey -in "$key_path" -noout >/dev/null 2>&1; then
+            echo "::error::APP_STORE_CONNECT_API_PRIVATE_KEY is not a valid .p8 private key"
+            exit 1
+          fi
+          echo "path=$key_path" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Firebase iOS configuration
+        if: ${{ env.GOOGLE_SERVICE_INFO_PLIST != '' }}
+        run: |
+          set -euo pipefail
+          plist="$GOOGLE_SERVICE_INFO_PLIST"
+          if ! printf '%s' "$plist" | grep -q '<plist'; then
+            decoded="$(printf '%s' "$plist" | tr -d '[:space:]' | openssl base64 -d -A 2>/dev/null || true)"
+            if printf '%s' "$decoded" | grep -q '<plist'; then
+              plist="$decoded"
+            fi
+          fi
+          printf '%s' "$plist" | sed -e 's/\\r//g' -e 's/\\n//g' | tr -d '\r' > ios/Runner/GoogleService-Info.plist
+          plutil -lint ios/Runner/GoogleService-Info.plist
+          configured_bundle="$(/usr/libexec/PlistBuddy -c 'Print :BUNDLE_ID' ios/Runner/GoogleService-Info.plist)"
+          if [ "$configured_bundle" != "$IOS_BUNDLE_ID" ]; then
+            echo "::error::Firebase plist bundle ID $configured_bundle does not match $IOS_BUNDLE_ID"
+            exit 1
+          fi
+
+      - name: Verify App Store Connect credentials
+        env:
+          ASC_KEY_PATH: ${{ steps.asc-key.outputs.path }}
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/asc_jwt.rb" <<'RUBY'
+          require 'openssl'
+          require 'base64'
+          require 'json'
+
+          key_id, issuer, key_path = ARGV
+          key = OpenSSL::PKey.read(File.read(key_path))
+          encode = ->(value) { Base64.urlsafe_encode64(value).delete('=') }
+          header = encode.call({ alg: 'ES256', kid: key_id, typ: 'JWT' }.to_json)
+          now = Time.now.to_i
+          payload = encode.call({ iss: issuer, iat: now, exp: now + 600, aud: 'appstoreconnect-v1' }.to_json)
+          input = "#{header}.#{payload}"
+          signature = OpenSSL::ASN1.decode(key.sign(OpenSSL::Digest::SHA256.new, input))
+          r, s = signature.value.map { |value| value.value.to_s(2).rjust(32, "\x00") }
+          puts "#{input}.#{encode.call(r + s)}"
+          RUBY
+
+          token="$(ruby "$RUNNER_TEMP/asc_jwt.rb" "$ASC_KEY_ID" "$ASC_ISSUER_ID" "$ASC_KEY_PATH")"
+          status="$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $token" \
+            'https://api.appstoreconnect.apple.com/v1/apps?limit=1')"
+          if [ "$status" != "200" ]; then
+            echo "::error::App Store Connect rejected the key ID, issuer ID, or private key (HTTP $status)"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          flutter pub get
+          cd ios
+          pod install
+
+      - name: Prepare unsigned Flutter iOS build
+        run: |
+          set -euo pipefail
+          flutter build ios \
+            --release \
+            --no-codesign \
+            --build-name "${{ needs.prepare.outputs.marketing }}" \
+            --build-number "${{ needs.prepare.outputs.build }}" \
+            --dart-define "ENABLE_IOS_FIREBASE=${{ inputs.enable_ios_firebase }}" \
+            --dart-define "ENABLE_IOS_GOOGLE_SIGN_IN=${{ inputs.enable_ios_google_sign_in }}"
+
+      - name: Archive signed iOS app
+        run: |
+          set -euo pipefail
+          mkdir -p build/ios/archive
+          xcodebuild archive \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "${{ steps.asc-key.outputs.path }}" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            PRODUCT_BUNDLE_IDENTIFIER="$IOS_BUNDLE_ID" \
+            FLUTTER_BUILD_NAME="${{ needs.prepare.outputs.marketing }}" \
+            FLUTTER_BUILD_NUMBER="${{ needs.prepare.outputs.build }}"
+
+      - name: Export IPA
+        id: export
+        run: |
+          set -euo pipefail
+          export_options="build/ios/ExportOptionsCI.plist"
+          cat > "$export_options" << PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>destination</key>
+            <string>export</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>teamID</key>
+            <string>$APPLE_TEAM_ID</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          PLIST
+
+          mkdir -p build/ios/ipa
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist "$export_options" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "${{ steps.asc-key.outputs.path }}" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+          ipa_path="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          test -n "$ipa_path"
+          echo "ipa=$ipa_path" >> "$GITHUB_OUTPUT"
+
+      - name: Verify IPA metadata and signature
+        run: |
+          set -euo pipefail
+          verify_dir="$RUNNER_TEMP/verify-ipa"
+          rm -rf "$verify_dir"
+          mkdir -p "$verify_dir"
+          unzip -q "${{ steps.export.outputs.ipa }}" -d "$verify_dir"
+          app_path="$(find "$verify_dir/Payload" -maxdepth 1 -name '*.app' -print -quit)"
+          test -n "$app_path"
+          actual_bundle="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_path/Info.plist")"
+          actual_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Info.plist")"
+          actual_build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_path/Info.plist")"
+          test "$actual_bundle" = "$IOS_BUNDLE_ID"
+          test "$actual_version" = "${{ needs.prepare.outputs.marketing }}"
+          test "$actual_build" = "${{ needs.prepare.outputs.build }}"
+          codesign --verify --deep --strict "$app_path"
+
+      - name: Upload to TestFlight
+        run: |
+          set -euo pipefail
+          xcrun altool \
+            --upload-app \
+            --type ios \
+            --file "${{ steps.export.outputs.ipa }}" \
+            --apiKey "$ASC_KEY_ID" \
+            --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Upload iOS artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bojang-ios-${{ needs.prepare.outputs.version }}
+          path: build/ios/ipa/*.ipa
+          if-no-files-found: ignore
+          retention-days: 14
+
+  finalize:
+    name: Commit version and tag
+    if: >-
+      ${{
+        always() &&
+        needs.quality.result == 'success' &&
+        (inputs.release_android != true || needs.android.result == 'success') &&
+        (inputs.release_ios != true || needs.ios.result == 'success')
+      }}
+    needs:
+      - prepare
+      - quality
+      - android
+      - ios
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: mobile-production
+    permissions:
+      contents: write
+    steps:
+      - name: Check out release source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.prepare.outputs.source_sha }}
+          token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+
+      - name: Commit version and push tag atomically
+        env:
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          SOURCE_SHA: ${{ needs.prepare.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin main --tags
+          remote_main="$(git rev-parse origin/main)"
+          if [ "$remote_main" != "$SOURCE_SHA" ]; then
+            echo "::error::main moved from $SOURCE_SHA to $remote_main during the release; stores were updated but the version commit was not pushed. Follow the partial-release recovery instructions."
+            exit 1
+          fi
+          if git rev-parse "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "::error::Tag already exists locally or remotely: $RELEASE_TAG"
+            exit 1
+          fi
+
+          perl -0pi -e "s/^version: [0-9]+\.[0-9]+\.[0-9]+\+[0-9]+\$/version: $RELEASE_VERSION/m" pubspec.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          git commit -m "chore(release): $RELEASE_TAG"
+          git tag -a "$RELEASE_TAG" -m "Mobile release $RELEASE_VERSION"
+          git push --atomic origin HEAD:refs/heads/main "refs/tags/$RELEASE_TAG"

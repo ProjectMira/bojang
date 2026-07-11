@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
+import 'services/app_config.dart';
 import 'services/notification_service.dart';
 import 'services/theme_service.dart';
 import 'services/progress_service.dart';
@@ -13,20 +14,24 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize services
-  try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    print('Firebase initialization skipped: $e');
+  if (AppConfig.firebaseEnabled) {
+    try {
+      await Firebase.initializeApp();
+    } catch (e) {
+      debugPrint('Firebase initialization skipped: $e');
+    }
+  } else {
+    debugPrint('Firebase initialization skipped: iOS config disabled');
   }
 
   try {
     if (!kIsWeb) {
-      NotificationService().init();
+      await NotificationService().init();
     }
     await GoogleAuthService().initialize();
     await ApiService().initialize();
   } catch (e) {
-    print('Service initialization failed: $e');
+    debugPrint('Service initialization failed: $e');
   }
 
   runApp(const MyApp());

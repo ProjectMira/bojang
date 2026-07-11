@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
+import 'app_config.dart';
 import 'api_service.dart';
 
 class GoogleAuthService {
@@ -33,6 +34,13 @@ class GoogleAuthService {
         print(
           'Google Sign-In skipped on web until a web client ID is configured',
         );
+        return;
+      }
+
+      if (!AppConfig.googleSignInEnabled) {
+        await _loadCachedUser();
+        _isInitialized = true;
+        debugPrint('Google Sign-In skipped: iOS config disabled');
         return;
       }
 
@@ -129,9 +137,11 @@ class GoogleAuthService {
       if (_isInitialized) {
         await _googleSignIn?.signOut();
       }
-      try {
-        await firebase_auth.FirebaseAuth.instance.signOut();
-      } catch (_) {}
+      if (AppConfig.firebaseEnabled) {
+        try {
+          await firebase_auth.FirebaseAuth.instance.signOut();
+        } catch (_) {}
+      }
       await _apiService.logout();
       _currentUser = null;
       await _clearCachedUser();
@@ -220,6 +230,8 @@ class GoogleAuthService {
   Future<String?> _firebaseIdTokenFromGoogle(
     GoogleSignInAuthentication googleAuth,
   ) async {
+    if (!AppConfig.firebaseEnabled) return null;
+
     try {
       final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
