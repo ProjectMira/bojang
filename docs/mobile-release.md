@@ -11,7 +11,7 @@ The normal release path is:
 4. After every selected upload succeeds, commit the version to `pubspec.yaml`
    and create an annotated `v<version>-build.<number>` tag.
 
-Unless `AUTO_MOBILE_RELEASE_ENABLED` is set to `false`, every push to `main`
+Unless `AUTO_MOBILE_RELEASE_PAUSED` is set to `true`, every push to `main`
 creates a build-only version increment, uploads Android to the Play Internal
 track and iOS to TestFlight, then commits the shared version and creates an
 annotated tag.
@@ -43,8 +43,9 @@ Create these environment variables:
 | `APP_STORE_CONNECT_API_ISSUER_ID` | App Store Connect API issuer ID |
 
 Automatic releases on pushes to `main` are enabled by default. To pause them,
-create the repository-level variable `AUTO_MOBILE_RELEASE_ENABLED` and set it to
-`false`; remove it or set any other value to re-enable.
+create the repository-level variable `AUTO_MOBILE_RELEASE_PAUSED` and set it to
+`true`; remove it or set any other value to re-enable. The legacy
+`AUTO_MOBILE_RELEASE_ENABLED` variable is no longer read and can be deleted.
 
 The IDs may be stored as secrets instead for compatibility, but the private key,
 keystore, passwords, and service-account JSON must always be secrets.
@@ -209,7 +210,7 @@ Example:
 ### Automatic releases
 
 A normal push to `main` is sufficient unless the repository variable
-`AUTO_MOBILE_RELEASE_ENABLED` is set to `false`. Push releases keep the current marketing
+`AUTO_MOBILE_RELEASE_PAUSED` is set to `true`. Push releases keep the current marketing
 version, increment the build number, publish both test builds, and create a tag
 such as `v1.0.1-build.7`. The bot's follow-up commit only changes `pubspec.yaml`
 and is excluded from the push trigger, preventing a release loop.

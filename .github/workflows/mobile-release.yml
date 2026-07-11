@@ -72,7 +72,7 @@ env:
 jobs:
   prepare:
     name: Prepare version
-    if: ${{ github.event_name != 'push' || vars.AUTO_MOBILE_RELEASE_ENABLED != 'false' }}
+    if: ${{ github.event_name != 'push' || vars.AUTO_MOBILE_RELEASE_PAUSED != 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
