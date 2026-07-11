@@ -259,6 +259,7 @@ jobs:
     environment: mobile-production
     env:
       ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME || 'com.projectmira.bojang' }}
+      ANDROID_UPLOAD_CERT_SHA1: ${{ vars.ANDROID_UPLOAD_CERT_SHA1 }}
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -311,6 +312,23 @@ jobs:
           keyPassword=$ANDROID_KEY_PASSWORD
           PROPERTIES
           keytool -list -keystore "$keystore" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null
+
+      - name: Verify keystore matches the Google Play upload key
+        if: ${{ env.ANDROID_UPLOAD_CERT_SHA1 != '' }}
+        run: |
+          set -euo pipefail
+          keystore="$GITHUB_WORKSPACE/android/app/upload-keystore.jks"
+          actual="$(keytool -exportcert -rfc \
+              -keystore "$keystore" \
+              -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+              -alias "$ANDROID_KEY_ALIAS" \
+            | openssl x509 -noout -fingerprint -sha1 \
+            | sed 's/^.*=//')"
+          normalize() { printf '%s' "$1" | tr -d ': ' | tr '[:lower:]' '[:upper:]'; }
+          if [ "$(normalize "$actual")" != "$(normalize "$ANDROID_UPLOAD_CERT_SHA1")" ]; then
+            echo "::error::Keystore certificate SHA-1 $actual does not match Google Play's registered upload certificate $ANDROID_UPLOAD_CERT_SHA1. Google Play will reject the bundle. Either point ANDROID_KEYSTORE_BASE64 at the registered upload keystore, or complete a Play Console upload-key reset and update the ANDROID_UPLOAD_CERT_SHA1 repository variable. See docs/mobile-release.md."
+            exit 1
+          fi
 
       - name: Build signed Android App Bundle
         run: |

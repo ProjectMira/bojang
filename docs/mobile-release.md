@@ -37,6 +37,7 @@ Create these environment variables:
 | Variable | Value |
 | --- | --- |
 | `ANDROID_PACKAGE_NAME` | `com.projectmira.bojang` |
+| `ANDROID_UPLOAD_CERT_SHA1` | SHA-1 of the upload certificate Google Play expects; the workflow fails fast when the keystore secret does not match. Update it after any upload-key reset. |
 | `IOS_BUNDLE_ID` | `com.bojang.app` |
 | `APPLE_TEAM_ID` | Apple Developer team ID |
 | `APP_STORE_CONNECT_API_KEY_ID` | App Store Connect team API key ID |
@@ -100,6 +101,52 @@ gh secret set ANDROID_KEY_PASSWORD --env mobile-production
 
 The last three commands prompt for their values without putting them in shell
 history.
+
+### Upload key mismatch recovery
+
+Google Play permanently associates the app with the upload certificate of the
+first uploaded bundle and rejects bundles signed with any other key:
+
+```
+The Android App Bundle was signed with the wrong key.
+Found: SHA1: <certificate of the keystore in ANDROID_KEYSTORE_BASE64>
+expected: SHA1: <upload certificate registered with Google Play>
+```
+
+Bojang hit this on 2026-07-11. Play builds 1–6 (including the live production
+release 1.0.0) were uploaded with an upload key whose certificate SHA-1 is
+`C1:16:42:7E:15:40:DF:9F:CF:A6:80:F9:7C:01:96:E4:C8:D9:50:F6`. That keystore is
+not on this machine and was never committed. The keystore generated during CI
+setup on 2026-07-11 (backed up at `~/Documents/keys/bojang/upload-keystore.jks`,
+certificate SHA-1 `86:93:40:C6:88:1E:5A:E4:31:21:6B:9D:36:70:C5:FB:52:F5:3A:AC`)
+is a different key, so Play rejects every CI upload.
+
+Two ways out:
+
+1. **Recover the original keystore.** Check the machine and backups used to
+   upload Play builds 1–6 (before 2026-07-11). If found, re-encode it into
+   `ANDROID_KEYSTORE_BASE64` with its alias and passwords, and delete the
+   unused 2026-07-11 keystore to avoid future confusion.
+2. **Reset the upload key.** In Play Console open
+   **Test and release > Setup > App signing** (App integrity), choose
+   **Request upload key reset**, select a reason (key lost), and upload
+   `~/Documents/keys/bojang/upload-certificate.pem`. Google reviews the
+   request and shows the date the new key becomes usable (typically about
+   48 hours). After the reset takes effect, update the repository variable
+   `ANDROID_UPLOAD_CERT_SHA1` to
+   `86:93:40:C6:88:1E:5A:E4:31:21:6B:9D:36:70:C5:FB:52:F5:3A:AC`. The GitHub
+   secrets already contain the new keystore, so no secret changes are needed.
+
+An upload-key reset only changes the key used to sign uploads; Play App
+Signing re-signs bundles for devices, so installed users are unaffected.
+
+While this stayed unresolved, automatic releases were paused with the
+repository variable `AUTO_MOBILE_RELEASE_PAUSED=true`. Workflow run 15 already
+uploaded iOS `1.0.1` build `8` to TestFlight without a version commit. Once
+Play accepts the upload key again, follow the partial-release recovery: run
+`Mobile Release` manually with version `1.0.1`, build number `8`, Android only.
+After it finalizes, delete `AUTO_MOBILE_RELEASE_PAUSED` to resume automatic
+releases.
 
 ### 2. Configure Google Play
 
