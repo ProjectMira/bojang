@@ -65,7 +65,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FLUTTER_VERSION: 3.44.0
+  # Keep this aligned with the project's dependency lockfile. google_fonts 6.x
+  # does not compile with Flutter 3.44's non-primitive FontWeight equality.
+  FLUTTER_VERSION: 3.35.1
 
 jobs:
   prepare:
