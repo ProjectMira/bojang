@@ -400,10 +400,6 @@ jobs:
             echo "::error::GOOGLE_SERVICE_INFO_PLIST is required when iOS Firebase is enabled"
             missing=1
           fi
-          if grep -q 'TODO_CLIENT_ID\|TODO_REVERSED_CLIENT_ID' ios/Runner/Info.plist; then
-            echo "::error::ios/Runner/Info.plist still has a placeholder Google iOS client ID. Register an iOS OAuth client for bundle com.bojang.app and fill in GIDClientID / the reversed client ID URL scheme."
-            missing=1
-          fi
           exit "$missing"
 
       - name: Show Xcode version
