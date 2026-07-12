@@ -7,7 +7,6 @@ import '../theme/app_tokens.dart';
 import '../utils/topic_visuals.dart';
 import '../widgets/app_text_style.dart';
 import 'quiz_screen.dart';
-import 'settings_screen.dart';
 
 const List<IconData> _kSectionIcons = [
   Icons.menu_book_rounded,
@@ -90,19 +89,6 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
             elevation: 0,
             backgroundColor: Colors.transparent,
             foregroundColor: AppTokens.ink(context),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
           ),
           body:
               isLoading

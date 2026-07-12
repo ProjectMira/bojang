@@ -15,7 +15,6 @@ import '../widgets/stat_strip.dart';
 import 'level_selection_screen.dart';
 import 'memory_match_game.dart';
 import 'quiz_screen.dart';
-import 'settings_screen.dart';
 
 class HomePage extends StatefulWidget {
   /// Switches the bottom nav to the Streak tab. Provided by
@@ -171,39 +170,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Welcome back', style: AppTextStyles.caption(context)),
-            const SizedBox(height: 2),
-            Text('Ready for Tibetan?', style: AppTextStyles.display(context)),
-          ],
-        ),
-        Material(
-          color: AppTokens.tint(AppTokens.inkSoft(context), context),
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
-            child: SizedBox(
-              width: 40,
-              height: 40,
-              child: Icon(
-                Icons.settings,
-                color: AppTokens.inkSoft(context),
-                size: 22,
-              ),
-            ),
-          ),
-        ),
+        Text('Welcome back', style: AppTextStyles.caption(context)),
+        const SizedBox(height: 2),
+        Text('Ready for Tibetan?', style: AppTextStyles.display(context)),
       ],
     );
   }
