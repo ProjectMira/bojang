@@ -463,6 +463,29 @@ jobs:
             exit 1
           fi
 
+      - name: Configure Google Sign-In iOS client ID
+        run: |
+          set -euo pipefail
+          gs_plist=ios/Runner/GoogleService-Info.plist
+          info_plist=ios/Runner/Info.plist
+          client_id="$(/usr/libexec/PlistBuddy -c 'Print :CLIENT_ID' "$gs_plist" 2>/dev/null || true)"
+          reversed_id="$(/usr/libexec/PlistBuddy -c 'Print :REVERSED_CLIENT_ID' "$gs_plist" 2>/dev/null || true)"
+          case "$client_id" in
+            *.apps.googleusercontent.com)
+              sed -i '' "s|TODO_CLIENT_ID\.apps\.googleusercontent\.com|$client_id|" "$info_plist"
+              ;;
+          esac
+          case "$reversed_id" in
+            com.googleusercontent.apps.*)
+              sed -i '' "s|com\.googleusercontent\.apps\.TODO_REVERSED_CLIENT_ID|$reversed_id|" "$info_plist"
+              ;;
+          esac
+          if grep -q 'TODO_CLIENT_ID\|TODO_REVERSED_CLIENT_ID' "$info_plist"; then
+            echo "::error::Google Sign-In client ID is still a placeholder. Register an iOS OAuth client for com.bojang.app (Firebase console -> iOS app), update the GOOGLE_SERVICE_INFO_PLIST secret with its GoogleService-Info.plist, and CI will fill ios/Runner/Info.plist from it. Alternatively commit the real GIDClientID and reversed-client-ID URL scheme directly in Info.plist."
+            exit 1
+          fi
+          plutil -lint "$info_plist"
+
       - name: Verify App Store Connect credentials
         env:
           ASC_KEY_PATH: ${{ steps.asc-key.outputs.path }}
