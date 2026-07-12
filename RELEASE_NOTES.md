@@ -1,6 +1,24 @@
 # Release Notes for Bojang
 ## Version History and Update Information
 
+### Version 2.0.0 - Complete Design Refresh
+**Release Date:** July 2026
+
+**🎨 A brand-new look for Bojang!**
+
+• **Redesigned Home** — your streak, XP, and lessons at a glance in one
+  tap-able strip, quick shortcut cards into your top categories and the
+  Memory Match game, and a share button for bojang.in
+• **Beautiful Categories page** — colorful, centered topic cards with
+  progress bars, clearer section headers, and livelier proportions
+• **Celebration screen** — finish a lesson to confetti, an animated
+  score ring, and your XP/accuracy/streak at a glance
+• **Smoother quizzes** — answer feedback now slides up as a banner
+  instead of interrupting with popups
+• **Polished profile** — refreshed stats cards, live app version in the
+  footer, and full dark-mode support
+• **Dark mode fixes** throughout the app
+
 ### Version 1.0.0 - Initial Release
 **Release Date:** [Insert Date]
 
