@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/google_auth_service.dart';
+import '../widgets/google_sign_in_button.dart';
 import 'main_navigation_screen.dart';
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key});
+  const AuthScreen({super.key, this.authService});
+
+  final GoogleAuthService? authService;
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -17,7 +20,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  final GoogleAuthService _googleAuthService = GoogleAuthService();
+  late final GoogleAuthService _googleAuthService =
+      widget.authService ?? GoogleAuthService();
 
   @override
   void initState() {
@@ -91,15 +95,12 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _handleEmailAuth() async {
-    _showSnackBar(
-      'Email sign-in is moving to Firebase. Use Google to sync XP and streaks, or continue without an account.',
-    );
-  }
-
   void _navigateToMainScreen() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/main'),
+        builder: (context) => const MainNavigationScreen(),
+      ),
     );
   }
 
@@ -137,9 +138,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                   const SizedBox(height: 60),
                   _buildLogo(),
                   const SizedBox(height: 48),
-                  _buildAuthForm(),
-                  const SizedBox(height: 24),
-                  _buildGoogleSignInButton(),
+                  _buildAuthCard(),
                   const SizedBox(height: 32),
                   _buildSkipButton(),
                 ],
@@ -154,26 +153,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   Widget _buildLogo() {
     return Column(
       children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(60),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withOpacity(0.8),
-              ],
-            ),
-          ),
-          child: const Icon(Icons.school, size: 60, color: Colors.white),
-        ),
-        const SizedBox(height: 24),
         Text(
           'Bojang',
-          style: GoogleFonts.poppins( 
+          style: GoogleFonts.poppins(
             fontSize: 36,
             fontWeight: FontWeight.bold,
             color:
@@ -185,7 +167,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         const SizedBox(height: 8),
         Text(
           'Practice Tibetan every day',
-          style: GoogleFonts.poppins( 
+          style: GoogleFonts.poppins(
             fontSize: 16,
             color:
                 Theme.of(context).brightness == Brightness.dark
@@ -197,7 +179,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildAuthForm() {
+  Widget _buildAuthCard() {
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -208,7 +190,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           children: [
             Text(
               'Save your progress',
-              style: GoogleFonts.poppins( 
+              style: GoogleFonts.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color:
@@ -220,8 +202,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 12),
             Text(
-              'Sign in to sync XP, streaks, completed lessons, and league progress across devices.',
-              style: GoogleFonts.poppins( 
+              'Sign in with Google to sync XP, streaks, and league progress across devices.',
+              style: GoogleFonts.poppins(
                 fontSize: 16,
                 color:
                     Theme.of(context).brightness == Brightness.dark
@@ -230,45 +212,13 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            Text(
-              'You can also continue without an account and practice with lessons on this device.',
-              style: GoogleFonts.poppins( 
-                fontSize: 14,
-                color:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey.shade400
-                        : Colors.grey.shade600,
-              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _handleEmailAuth,
-              icon: const Icon(Icons.mail_outline),
-              label: Text(
-                'Email sign-in coming soon',
-                style: GoogleFonts.poppins( fontWeight: FontWeight.w600).copyWith(fontFamilyFallback: const ['Jomolhari']),
-              ),
+            const SizedBox(height: 24),
+            GoogleSignInButton(
+              onPressed: _handleGoogleSignIn,
+              isLoading: _isLoading,
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildGoogleSignInButton() {
-    return OutlinedButton.icon(
-      onPressed: _isLoading ? null : _handleGoogleSignIn,
-      icon: const Icon(Icons.g_mobiledata, size: 24),
-      label: Text(
-        'Continue with Google',
-        style: GoogleFonts.poppins( fontSize: 16, fontWeight: FontWeight.w600).copyWith(fontFamilyFallback: const ['Jomolhari']),
-      ),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        side: BorderSide(color: Colors.grey.shade300),
       ),
     );
   }
@@ -278,7 +228,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       onPressed: _navigateToMainScreen,
       child: Text(
         'Continue without account',
-        style: GoogleFonts.poppins( 
+        style: GoogleFonts.poppins(
           fontSize: 16,
           color: Colors.grey.shade500,
           decoration: TextDecoration.underline,

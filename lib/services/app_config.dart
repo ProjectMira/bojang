@@ -6,7 +6,4 @@ class AppConfig {
 
   static bool get firebaseEnabled =>
       !isIOS || const bool.fromEnvironment('ENABLE_IOS_FIREBASE');
-
-  static bool get googleSignInEnabled =>
-      !isIOS || const bool.fromEnvironment('ENABLE_IOS_GOOGLE_SIGN_IN');
 }

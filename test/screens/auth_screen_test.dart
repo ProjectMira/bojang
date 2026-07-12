@@ -1,153 +1,105 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bojang/screens/auth_screen.dart';
+import 'package:bojang/screens/main_navigation_screen.dart';
 import 'package:bojang/services/google_auth_service.dart';
-import 'package:bojang/services/api_service.dart';
+import 'package:bojang/services/progress_service.dart';
+import 'package:bojang/services/theme_service.dart';
 import 'package:bojang/models/user.dart';
 
 // Generate mocks
-@GenerateMocks([GoogleAuthService, ApiService])
+@GenerateMocks([GoogleAuthService])
 import 'auth_screen_test.mocks.dart';
+
+/// Records route replacements without letting the destination route build,
+/// so tests can confirm navigation was triggered without dragging in
+/// MainNavigationScreen's Provider dependencies.
+class _RecordingNavigatorObserver extends NavigatorObserver {
+  Route<dynamic>? lastReplacedWith;
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    lastReplacedWith = newRoute;
+  }
+}
 
 void main() {
   group('AuthScreen Widget Tests', () {
     late MockGoogleAuthService mockGoogleAuthService;
-    late MockApiService mockApiService;
 
     setUp(() {
+      SharedPreferences.setMockInitialValues({});
       mockGoogleAuthService = MockGoogleAuthService();
-      mockApiService = MockApiService();
-      
+
       // Set up default mock behaviors
       when(mockGoogleAuthService.initialize()).thenAnswer((_) async => {});
       when(mockGoogleAuthService.isInitialized).thenReturn(true);
-      when(mockGoogleAuthService.currentUser).thenReturn(null);
     });
 
-    Widget createTestWidget() {
-      return MultiProvider(
-        providers: [
-          Provider<GoogleAuthService>.value(value: mockGoogleAuthService),
-          Provider<ApiService>.value(value: mockApiService),
-        ],
-        child: const MaterialApp(
-          home: AuthScreen(),
-        ),
+    Widget createTestWidget({List<NavigatorObserver> observers = const []}) {
+      return MaterialApp(
+        navigatorObservers: observers,
+        home: AuthScreen(authService: mockGoogleAuthService),
       );
     }
 
-    testWidgets('should display app logo and title', (WidgetTester tester) async {
+    testWidgets('should display app wordmark and tagline', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
       expect(find.text('Bojang'), findsOneWidget);
-      expect(find.text('Learn Tibetan Language'), findsOneWidget);
-      expect(find.byIcon(Icons.school), findsOneWidget);
+      expect(find.text('Practice Tibetan every day'), findsOneWidget);
+      expect(find.byIcon(Icons.school), findsNothing);
     });
 
-    testWidgets('should display login form by default', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Welcome Back!'), findsOneWidget);
-      expect(find.text('Sign In'), findsOneWidget);
-      expect(find.byType(TextFormField), findsNWidgets(2)); // Email and password
-    });
-
-    testWidgets('should toggle to signup form', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Tap on "Sign Up" link
-      await tester.tap(find.text('Sign Up'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Create Account'), findsOneWidget);
-      expect(find.text('Sign Up'), findsOneWidget);
-      expect(find.byType(TextFormField), findsNWidgets(4)); // Display name, username, email, password
-    });
-
-    testWidgets('should display Google sign-in button', (WidgetTester tester) async {
+    testWidgets('should only offer Google sign-in, no email form', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
       expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.text('Email sign-in coming soon'), findsNothing);
+      expect(find.byIcon(Icons.mail_outline), findsNothing);
+      expect(find.byType(TextFormField), findsNothing);
+      expect(find.byType(TextField), findsNothing);
     });
 
-    testWidgets('should display skip button', (WidgetTester tester) async {
+    testWidgets('should display continue without account button', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      expect(find.text('Skip for now'), findsOneWidget);
+      expect(find.text('Continue without account'), findsOneWidget);
     });
 
-    testWidgets('should validate email field', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
+    testWidgets('should navigate to main screen when skip button tapped', (
+      WidgetTester tester,
+    ) async {
+      final observer = _RecordingNavigatorObserver();
+      await tester.pumpWidget(createTestWidget(observers: [observer]));
       await tester.pumpAndSettle();
 
-      // Find email field and enter invalid email
-      final emailField = find.byType(TextFormField).first;
-      await tester.enterText(emailField, 'invalid-email');
+      // Tapping runs the synchronous onPressed handler (and thus
+      // Navigator.pushReplacement) without needing a further pump, so the
+      // destination route is never actually built here.
+      await tester.tap(find.text('Continue without account'));
 
-      // Try to submit form
-      await tester.tap(find.text('Sign In'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Please enter a valid email'), findsOneWidget);
+      expect(observer.lastReplacedWith?.settings.name, '/main');
     });
 
-    testWidgets('should validate required fields', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Try to submit form without filling fields
-      await tester.tap(find.text('Sign In'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Email is required'), findsOneWidget);
-      expect(find.text('Password is required'), findsOneWidget);
-    });
-
-    testWidgets('should validate password length in signup mode', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Switch to signup mode
-      await tester.tap(find.text('Sign Up'));
-      await tester.pumpAndSettle();
-
-      // Fill required fields with short password
-      await tester.enterText(find.byType(TextFormField).at(0), 'Test User'); // Display name
-      await tester.enterText(find.byType(TextFormField).at(1), 'testuser'); // Username
-      await tester.enterText(find.byType(TextFormField).at(2), 'test@example.com'); // Email
-      await tester.enterText(find.byType(TextFormField).at(3), '123'); // Short password
-
-      await tester.tap(find.text('Sign Up'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Password must be at least 6 characters'), findsOneWidget);
-    });
-
-    testWidgets('should toggle password visibility', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Find password visibility toggle button
-      final visibilityButton = find.byIcon(Icons.visibility);
-      expect(visibilityButton, findsOneWidget);
-
-      // Tap to show password
-      await tester.tap(visibilityButton);
-      await tester.pumpAndSettle();
-
-      // Should now show visibility_off icon
-      expect(find.byIcon(Icons.visibility_off), findsOneWidget);
-    });
-
-    testWidgets('should call Google sign-in when button is tapped', (WidgetTester tester) async {
+    testWidgets('should call Google sign-in when button is tapped', (
+      WidgetTester tester,
+    ) async {
       final testUser = User(
         id: 'test-id',
         email: 'test@gmail.com',
@@ -157,172 +109,106 @@ void main() {
         authProvider: AuthProvider.google,
       );
 
-      when(mockGoogleAuthService.signInWithGoogle())
-          .thenAnswer((_) async => testUser);
+      when(
+        mockGoogleAuthService.signInWithGoogle(),
+      ).thenAnswer((_) async => testUser);
+      when(mockGoogleAuthService.currentUser).thenReturn(testUser);
 
-      await tester.pumpWidget(createTestWidget());
+      // The success path awaits a 500ms delay before navigating to
+      // MainNavigationScreen, whose tabs pull ProgressService, ThemeService,
+      // and GoogleAuthService from Provider. That timer must fire before the
+      // test ends (flutter_test fails on pending timers), so the full
+      // provider tree the destination screen needs is supplied here.
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => ThemeService()),
+            ChangeNotifierProvider(create: (_) => ProgressService()),
+            Provider<GoogleAuthService>.value(value: mockGoogleAuthService),
+          ],
+          child: MaterialApp(
+            home: AuthScreen(authService: mockGoogleAuthService),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      // Tap Google sign-in button
       await tester.tap(find.text('Continue with Google'));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       verify(mockGoogleAuthService.signInWithGoogle()).called(1);
+      expect(find.text('Welcome Test User!'), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AuthScreen), findsNothing);
+      expect(find.byType(MainNavigationScreen), findsOneWidget);
     });
 
-    testWidgets('should handle Google sign-in cancellation', (WidgetTester tester) async {
-      when(mockGoogleAuthService.signInWithGoogle())
-          .thenAnswer((_) async => null);
+    testWidgets('should handle Google sign-in cancellation', (
+      WidgetTester tester,
+    ) async {
+      when(
+        mockGoogleAuthService.signInWithGoogle(),
+      ).thenAnswer((_) async => null);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // Tap Google sign-in button
       await tester.tap(find.text('Continue with Google'));
       await tester.pumpAndSettle();
 
-      // Should show snackbar with cancellation message
-      expect(find.text('Google sign-in was cancelled or failed'), findsOneWidget);
+      expect(find.textContaining('cancelled or failed'), findsOneWidget);
+      expect(find.byType(AuthScreen), findsOneWidget);
     });
 
-    testWidgets('should call API service for email login', (WidgetTester tester) async {
-      final mockResponse = {
-        'token': 'auth-token',
-        'user': {
-          'id': 'user-id',
-          'email': 'test@example.com',
-          'username': 'testuser',
-          'display_name': 'Test User',
-          'created_at': '2023-01-01T00:00:00.000Z',
-          'auth_provider': 'email',
-        }
-      };
-
-      when(mockApiService.login(
-        email: anyNamed('email'),
-        password: anyNamed('password'),
-      )).thenAnswer((_) async => mockResponse);
+    testWidgets('should handle Google sign-in error without crashing', (
+      WidgetTester tester,
+    ) async {
+      when(
+        mockGoogleAuthService.signInWithGoogle(),
+      ).thenThrow(Exception('sign_in_failed: developer error'));
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // Fill login form
-      await tester.enterText(find.byType(TextFormField).at(0), 'test@example.com');
-      await tester.enterText(find.byType(TextFormField).at(1), 'password123');
-
-      // Submit form
-      await tester.tap(find.text('Sign In'));
+      await tester.tap(find.text('Continue with Google'));
       await tester.pumpAndSettle();
 
-      verify(mockApiService.login(
-        email: 'test@example.com',
-        password: 'password123',
-      )).called(1);
+      expect(find.textContaining('configuration issue'), findsOneWidget);
+
+      // Loading state cleared, button back to its normal (usable) label.
+      expect(find.text('Signing in...'), findsNothing);
+      expect(find.text('Continue with Google'), findsOneWidget);
     });
 
-    testWidgets('should call API service for email registration', (WidgetTester tester) async {
-      final mockResponse = {
-        'token': 'auth-token',
-        'user': {
-          'id': 'user-id',
-          'email': 'test@example.com',
-          'username': 'testuser',
-          'display_name': 'Test User',
-          'created_at': '2023-01-01T00:00:00.000Z',
-          'auth_provider': 'email',
-        }
-      };
+    testWidgets(
+      'should show loading state and ignore a second tap while pending',
+      (WidgetTester tester) async {
+        final completer = Completer<User?>();
+        when(
+          mockGoogleAuthService.signInWithGoogle(),
+        ).thenAnswer((_) => completer.future);
 
-      when(mockApiService.register(
-        email: anyNamed('email'),
-        username: anyNamed('username'),
-        password: anyNamed('password'),
-        displayName: anyNamed('displayName'),
-      )).thenAnswer((_) async => mockResponse);
+        await tester.pumpWidget(createTestWidget());
+        await tester.pumpAndSettle();
 
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Continue with Google'));
+        await tester.pump();
 
-      // Switch to signup mode
-      await tester.tap(find.text('Sign Up'));
-      await tester.pumpAndSettle();
+        expect(find.text('Signing in...'), findsOneWidget);
 
-      // Fill registration form
-      await tester.enterText(find.byType(TextFormField).at(0), 'Test User');
-      await tester.enterText(find.byType(TextFormField).at(1), 'testuser');
-      await tester.enterText(find.byType(TextFormField).at(2), 'test@example.com');
-      await tester.enterText(find.byType(TextFormField).at(3), 'password123');
+        // Tapping again while pending must not trigger a second call: the
+        // button's onTap is null while isLoading is true.
+        await tester.tap(find.text('Signing in...'), warnIfMissed: false);
+        await tester.pump();
 
-      // Submit form
-      await tester.tap(find.text('Sign Up'));
-      await tester.pumpAndSettle();
+        completer.complete(null);
+        await tester.pumpAndSettle();
 
-      verify(mockApiService.register(
-        email: 'test@example.com',
-        username: 'testuser',
-        password: 'password123',
-        displayName: 'Test User',
-      )).called(1);
-    });
-
-    testWidgets('should handle login failure', (WidgetTester tester) async {
-      when(mockApiService.login(
-        email: anyNamed('email'),
-        password: anyNamed('password'),
-      )).thenAnswer((_) async => null);
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Fill login form
-      await tester.enterText(find.byType(TextFormField).at(0), 'test@example.com');
-      await tester.enterText(find.byType(TextFormField).at(1), 'wrongpassword');
-
-      // Submit form
-      await tester.tap(find.text('Sign In'));
-      await tester.pumpAndSettle();
-
-      // Should show error message
-      expect(find.text('Login failed'), findsOneWidget);
-    });
-
-    testWidgets('should show loading state during authentication', (WidgetTester tester) async {
-      // Make the authentication call take some time
-      when(mockApiService.login(
-        email: anyNamed('email'),
-        password: anyNamed('password'),
-      )).thenAnswer((_) async {
-        await Future.delayed(const Duration(milliseconds: 100));
-        return {
-          'token': 'auth-token',
-          'user': {'id': 'user-id', 'email': 'test@example.com'}
-        };
-      });
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Fill and submit form
-      await tester.enterText(find.byType(TextFormField).at(0), 'test@example.com');
-      await tester.enterText(find.byType(TextFormField).at(1), 'password123');
-      await tester.tap(find.text('Sign In'));
-
-      // Should show loading indicator
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
-
-    testWidgets('should navigate on skip button tap', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Tap skip button
-      await tester.tap(find.text('Skip for now'));
-      await tester.pumpAndSettle();
-
-      // This test would need navigation observer to fully verify navigation
-      // For now, we just verify the button exists and is tappable
-      expect(find.text('Skip for now'), findsOneWidget);
-    });
+        verify(mockGoogleAuthService.signInWithGoogle()).called(1);
+      },
+    );
   });
 }

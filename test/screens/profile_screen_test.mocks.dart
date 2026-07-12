@@ -9,9 +9,9 @@ import 'dart:ui' as _i8;
 import 'package:bojang/models/user.dart' as _i4;
 import 'package:bojang/services/google_auth_service.dart' as _i2;
 import 'package:bojang/services/progress_service.dart' as _i5;
-import 'package:flutter/material.dart' as _i6;
+import 'package:flutter/material.dart' as _i7;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i7;
+import 'package:mockito/src/dummies.dart' as _i6;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -162,16 +162,48 @@ class MockProgressService extends _i1.Mock implements _i5.ProgressService {
           as double);
 
   @override
+  int get xp =>
+      (super.noSuchMethod(Invocation.getter(#xp), returnValue: 0) as int);
+
+  @override
+  String get league =>
+      (super.noSuchMethod(
+            Invocation.getter(#league),
+            returnValue: _i6.dummyValue<String>(
+              this,
+              Invocation.getter(#league),
+            ),
+          )
+          as String);
+
+  @override
+  int get completedLevelsCount =>
+      (super.noSuchMethod(
+            Invocation.getter(#completedLevelsCount),
+            returnValue: 0,
+          )
+          as int);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
+
+  @override
+  _i3.Future<void> updateFromServer(Map<String, dynamic>? data) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateFromServer, [data]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 
   @override
   _i3.Future<void> updateQuizResults(
     String? category,
     int? score,
     int? totalQuestions, {
-    _i6.BuildContext? context,
+    _i7.BuildContext? context,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -185,10 +217,19 @@ class MockProgressService extends _i1.Mock implements _i5.ProgressService {
           as _i3.Future<void>);
 
   @override
+  _i3.Future<void> resetProgress() =>
+      (super.noSuchMethod(
+            Invocation.method(#resetProgress, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
   String getAchievementTitle(String? achievementId) =>
       (super.noSuchMethod(
             Invocation.method(#getAchievementTitle, [achievementId]),
-            returnValue: _i7.dummyValue<String>(
+            returnValue: _i6.dummyValue<String>(
               this,
               Invocation.method(#getAchievementTitle, [achievementId]),
             ),
@@ -199,7 +240,7 @@ class MockProgressService extends _i1.Mock implements _i5.ProgressService {
   String getAchievementDescription(String? achievementId) =>
       (super.noSuchMethod(
             Invocation.method(#getAchievementDescription, [achievementId]),
-            returnValue: _i7.dummyValue<String>(
+            returnValue: _i6.dummyValue<String>(
               this,
               Invocation.method(#getAchievementDescription, [achievementId]),
             ),

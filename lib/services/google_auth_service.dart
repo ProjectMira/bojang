@@ -37,13 +37,6 @@ class GoogleAuthService {
         return;
       }
 
-      if (!AppConfig.googleSignInEnabled) {
-        await _loadCachedUser();
-        _isInitialized = true;
-        debugPrint('Google Sign-In skipped: iOS config disabled');
-        return;
-      }
-
       _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
 
       // Load cached user data if available

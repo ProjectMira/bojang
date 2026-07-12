@@ -131,9 +131,73 @@ class MockApiService extends _i1.Mock implements _i2.ApiService {
           as _i3.Future<Map<String, dynamic>?>);
 
   @override
+  _i3.Future<Map<String, dynamic>?> syncUser({
+    required String? email,
+    String? nativeLang = 'en',
+    String? targetLang = 'bo',
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#syncUser, [], {
+              #email: email,
+              #nativeLang: nativeLang,
+              #targetLang: targetLang,
+            }),
+            returnValue: _i3.Future<Map<String, dynamic>?>.value(),
+          )
+          as _i3.Future<Map<String, dynamic>?>);
+
+  @override
+  _i3.Future<Map<String, dynamic>?> updateUserProfile({
+    String? displayName,
+    String? nativeLang,
+    String? targetLang,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateUserProfile, [], {
+              #displayName: displayName,
+              #nativeLang: nativeLang,
+              #targetLang: targetLang,
+            }),
+            returnValue: _i3.Future<Map<String, dynamic>?>.value(),
+          )
+          as _i3.Future<Map<String, dynamic>?>);
+
+  @override
+  _i3.Future<Map<String, dynamic>?> getUserStats() =>
+      (super.noSuchMethod(
+            Invocation.method(#getUserStats, []),
+            returnValue: _i3.Future<Map<String, dynamic>?>.value(),
+          )
+          as _i3.Future<Map<String, dynamic>?>);
+
+  @override
+  _i3.Future<Map<String, dynamic>?> exportUserData() =>
+      (super.noSuchMethod(
+            Invocation.method(#exportUserData, []),
+            returnValue: _i3.Future<Map<String, dynamic>?>.value(),
+          )
+          as _i3.Future<Map<String, dynamic>?>);
+
+  @override
+  _i3.Future<bool> deleteAccount() =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteAccount, []),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
   _i3.Future<List<Map<String, dynamic>>?> getCategories() =>
       (super.noSuchMethod(
             Invocation.method(#getCategories, []),
+            returnValue: _i3.Future<List<Map<String, dynamic>>?>.value(),
+          )
+          as _i3.Future<List<Map<String, dynamic>>?>);
+
+  @override
+  _i3.Future<List<Map<String, dynamic>>?> getCategoriesByType({String? type}) =>
+      (super.noSuchMethod(
+            Invocation.method(#getCategoriesByType, [], {#type: type}),
             returnValue: _i3.Future<List<Map<String, dynamic>>?>.value(),
           )
           as _i3.Future<List<Map<String, dynamic>>?>);
@@ -147,12 +211,36 @@ class MockApiService extends _i1.Mock implements _i2.ApiService {
           as _i3.Future<List<Map<String, dynamic>>?>);
 
   @override
+  _i3.Future<List<Map<String, dynamic>>?> getLearningLevels() =>
+      (super.noSuchMethod(
+            Invocation.method(#getLearningLevels, []),
+            returnValue: _i3.Future<List<Map<String, dynamic>>?>.value(),
+          )
+          as _i3.Future<List<Map<String, dynamic>>?>);
+
+  @override
   _i3.Future<List<Map<String, dynamic>>?> getQuestions(String? levelId) =>
       (super.noSuchMethod(
             Invocation.method(#getQuestions, [levelId]),
             returnValue: _i3.Future<List<Map<String, dynamic>>?>.value(),
           )
           as _i3.Future<List<Map<String, dynamic>>?>);
+
+  @override
+  _i3.Future<Map<String, dynamic>?> getLearningSession({
+    required String? levelId,
+    int? numQuestions = 10,
+    List<String>? exerciseTypes,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#getLearningSession, [], {
+              #levelId: levelId,
+              #numQuestions: numQuestions,
+              #exerciseTypes: exerciseTypes,
+            }),
+            returnValue: _i3.Future<Map<String, dynamic>?>.value(),
+          )
+          as _i3.Future<Map<String, dynamic>?>);
 
   @override
   _i3.Future<List<Map<String, dynamic>>?> getGames(String? levelId) =>
@@ -166,6 +254,14 @@ class MockApiService extends _i1.Mock implements _i2.ApiService {
   _i3.Future<bool> submitQuizSession(Map<String, dynamic>? sessionData) =>
       (super.noSuchMethod(
             Invocation.method(#submitQuizSession, [sessionData]),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<bool> submitProgressCompletion(Map<String, dynamic>? submission) =>
+      (super.noSuchMethod(
+            Invocation.method(#submitProgressCompletion, [submission]),
             returnValue: _i3.Future<bool>.value(false),
           )
           as _i3.Future<bool>);
@@ -233,6 +329,23 @@ class MockApiService extends _i1.Mock implements _i2.ApiService {
             returnValue: _i3.Future<Map<String, dynamic>?>.value(),
           )
           as _i3.Future<Map<String, dynamic>?>);
+
+  @override
+  _i3.Future<Map<String, dynamic>?> getAppConfig() =>
+      (super.noSuchMethod(
+            Invocation.method(#getAppConfig, []),
+            returnValue: _i3.Future<Map<String, dynamic>?>.value(),
+          )
+          as _i3.Future<Map<String, dynamic>?>);
+
+  @override
+  _i3.Future<void> setAuthToken(String? token) =>
+      (super.noSuchMethod(
+            Invocation.method(#setAuthToken, [token]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 
   @override
   _i3.Future<bool> isOnline() =>
