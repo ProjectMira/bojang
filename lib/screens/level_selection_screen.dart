@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/level_models.dart';
 import '../services/api_service.dart';
 import '../services/progress_service.dart';
+import '../utils/topic_visuals.dart';
 import 'quiz_screen.dart';
 import 'settings_screen.dart';
 
@@ -16,58 +17,27 @@ class LevelSelectionScreen extends StatefulWidget {
   State<LevelSelectionScreen> createState() => _LevelSelectionScreenState();
 }
 
-class _LevelSelectionScreenState extends State<LevelSelectionScreen>
-    with SingleTickerProviderStateMixin {
+class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   List<Level> levels = [];
   bool isLoading = true;
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  final ScrollController _scrollController = ScrollController();
 
-  // Responsive design helpers
-  double _getResponsiveValue(
-    BuildContext context, {
-    required double small,
-    required double medium,
-    required double large,
-  }) {
+  static const List<Color> _sectionColors = [
+    Color(0xFF2C97DD), // Blue
+    Color(0xFF58CC02), // Green
+    Color(0xFFCE82FF), // Purple
+    Color(0xFFFF9600), // Orange
+  ];
+
+  int _getColumns(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth < 380) return small; // iPhone SE, small screens
-    if (screenWidth < 414) return medium; // iPhone 8, standard screens
-    return large; // iPhone Plus, Pro Max, large screens
-  }
-
-  int _getResponsiveColumns(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth < 380) return 2; // iPhone SE: 2 columns for more space
-    if (screenWidth < 500) return 3; // Standard phones: 3 columns
-    return 4; // Large screens/tablets: 4 columns
-  }
-
-  double _getResponsivePadding(BuildContext context) {
-    return _getResponsiveValue(context, small: 16.0, medium: 20.0, large: 24.0);
+    if (screenWidth >= 600) return 3;
+    return 2;
   }
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
     _loadLevels();
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _scrollController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadLevels() async {
@@ -102,7 +72,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading levels: $e'),
+            content: Text('Error loading topics: $e'),
             duration: const Duration(seconds: 5),
           ),
         );
@@ -110,408 +80,36 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
     }
   }
 
-  Color _getLevelColor(int level) {
-    switch (level) {
-      case 1:
-        return const Color(0xFF58CC02); // Green
-      case 2:
-        return const Color(0xFF1CB0F6); // Blue
-      case 3:
-        return const Color(0xFFCE82FF); // Purple
-      default:
-        return Colors.grey;
-    }
+  Color _sectionColor(int index) {
+    return _sectionColors[index % _sectionColors.length];
   }
 
-  Widget _buildLevelPath(ProgressService progressService) {
-    final responsivePadding = _getResponsivePadding(context);
-    return SingleChildScrollView(
-      controller: _scrollController,
-      physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.symmetric(
-        horizontal: responsivePadding,
-        vertical: responsivePadding,
-      ),
-      child: Column(
-        children:
-            levels.asMap().entries.map((entry) {
-              final levelIndex = entry.key;
-              final level = entry.value;
-              final color = _getLevelColor(level.level);
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
-              return Column(
-                children: [
-                  if (levelIndex > 0)
-                    Container(
-                      height: _getResponsiveValue(
-                        context,
-                        small: 32,
-                        medium: 40,
-                        large: 48,
-                      ),
-                      width: 4,
-                      color: Colors.grey[300],
-                    ),
-                  ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: _buildLevelNode(level, color, progressService),
-                  ),
-                ],
-              );
-            }).toList(),
-      ),
-    );
-  }
+  Color get _titleColor => _isDark ? Colors.white : const Color(0xFF2C3E50);
 
-  Widget _buildLevelNode(
-    Level level,
-    Color color,
-    ProgressService progressService,
-  ) {
-    final containerPadding = _getResponsiveValue(
-      context,
-      small: 12.0,
-      medium: 16.0,
-      large: 20.0,
-    );
-    final marginBottom = _getResponsiveValue(
-      context,
-      small: 12.0,
-      medium: 16.0,
-      large: 20.0,
-    );
-
-    // Calculate level progress
-    double levelProgress = 0.0;
-    int completedSublevels = 0;
-    for (final sublevel in level.sublevels) {
-      final filename = sublevel.path.split('/').last.split('.').first;
-      final categoryProgress =
-          progressService.categoryProgress[filename] ?? 0.0;
-      if (categoryProgress > 0.7) completedSublevels++;
-      levelProgress += categoryProgress;
-    }
-    if (level.sublevels.isNotEmpty) {
-      levelProgress = levelProgress / level.sublevels.length;
-    }
-
-    return Container(
-      margin: EdgeInsets.only(bottom: marginBottom),
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.all(containerPadding),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.2),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(
-                        _getResponsiveValue(
-                          context,
-                          small: 10,
-                          medium: 12,
-                          large: 16,
-                        ),
-                      ),
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${level.level}',
-                        style: GoogleFonts.poppins( 
-                          fontSize: _getResponsiveValue(
-                            context,
-                            small: 20,
-                            medium: 24,
-                            large: 28,
-                          ),
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                      ),
-                    ),
-                    SizedBox(
-                      width: _getResponsiveValue(
-                        context,
-                        small: 12,
-                        medium: 16,
-                        large: 20,
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            level.title,
-                            style: GoogleFonts.poppins( 
-                              fontSize: _getResponsiveValue(
-                                context,
-                                small: 20,
-                                medium: 24,
-                                large: 28,
-                              ),
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                          ),
-                          if (levelProgress > 0) ...[
-                            const SizedBox(height: 8),
-                            LinearProgressIndicator(
-                              value: levelProgress,
-                              backgroundColor: Colors.grey.shade200,
-                              valueColor: AlwaysStoppedAnimation<Color>(color),
-                              minHeight: 4,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${(levelProgress * 100).toInt()}% Complete • $completedSublevels/${level.sublevels.length} lessons',
-                              style: GoogleFonts.poppins( 
-                                fontSize: _getResponsiveValue(
-                                  context,
-                                  small: 12,
-                                  medium: 14,
-                                  large: 16,
-                                ),
-                                color: color,
-                                fontWeight: FontWeight.w600,
-                              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: _getResponsiveValue(
-                    context,
-                    small: 12,
-                    medium: 16,
-                    large: 20,
-                  ),
-                ),
-                level.sublevels.isEmpty
-                    ? Center(
-                      child: Text(
-                        '🔒 Coming Soon!',
-                        style: GoogleFonts.poppins( 
-                          fontSize: _getResponsiveValue(
-                            context,
-                            small: 16,
-                            medium: 20,
-                            large: 24,
-                          ),
-                          color: Colors.grey,
-                          fontStyle: FontStyle.italic,
-                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                      ),
-                    )
-                    : _buildSublevels(level, color, progressService),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSublevels(
-    Level level,
-    Color color,
-    ProgressService progressService,
-  ) {
-    final columns = _getResponsiveColumns(context);
-    final spacing = _getResponsiveValue(
-      context,
-      small: 6,
-      medium: 8,
-      large: 12,
-    );
-    final aspectRatio = _getResponsiveValue(
-      context,
-      small: 1.0,
-      medium: 0.95,
-      large: 0.9,
-    );
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
-        crossAxisSpacing: spacing,
-        mainAxisSpacing: spacing,
-        childAspectRatio: aspectRatio,
-      ),
-      itemCount: level.sublevels.length,
-      itemBuilder: (context, index) {
-        final sublevel = level.sublevels[index];
-        final isLocked = sublevel.isLocked;
-
-        // Check completion status
-        final filename = sublevel.path.split('/').last.split('.').first;
-        final progress = progressService.categoryProgress[filename] ?? 0.0;
-        final isCompleted = progress > 0.7;
-
-        return Hero(
-          tag: 'sublevel_${sublevel.level}_${sublevel.name}',
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                if (isLocked) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Earn ${sublevel.requiredXp} XP to unlock ${sublevel.name}.',
-                      ),
-                    ),
-                  );
-                  return;
-                }
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => QuizScreen(topicFilePath: sublevel.path),
-                  ),
-                );
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: color, width: 2),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Stack(
-                      children: [
-                        Icon(
-                          isLocked
-                              ? Icons.lock
-                              : isCompleted
-                              ? Icons.check_circle
-                              : Icons.play_circle_fill,
-                          color:
-                              isLocked
-                                  ? Colors.grey
-                                  : (isCompleted ? Colors.green : color),
-                          size: _getResponsiveValue(
-                            context,
-                            small: 24,
-                            medium: 28,
-                            large: 32,
-                          ),
-                        ),
-                        if (progress > 0 && !isCompleted)
-                          Positioned.fill(
-                            child: CircularProgressIndicator(
-                              value: progress,
-                              strokeWidth: 2,
-                              backgroundColor: Colors.transparent,
-                              valueColor: AlwaysStoppedAnimation<Color>(color),
-                            ),
-                          ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: _getResponsiveValue(
-                        context,
-                        small: 4,
-                        medium: 6,
-                        large: 8,
-                      ),
-                    ),
-                    Text(
-                      sublevel.level.toString(),
-                      style: GoogleFonts.poppins( 
-                        fontSize: _getResponsiveValue(
-                          context,
-                          small: 14,
-                          medium: 16,
-                          large: 18,
-                        ),
-                        fontWeight: FontWeight.bold,
-                        color: isLocked ? Colors.grey : color,
-                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                    ),
-                    SizedBox(
-                      height: _getResponsiveValue(
-                        context,
-                        small: 2,
-                        medium: 2,
-                        large: 4,
-                      ),
-                    ),
-                    Flexible(
-                      child: Text(
-                        sublevel.name,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins( 
-                          fontSize: _getResponsiveValue(
-                            context,
-                            small: 10,
-                            medium: 12,
-                            large: 14,
-                          ),
-                          color: isLocked ? Colors.grey : color,
-                          fontStyle: FontStyle.italic,
-                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+  Color get _subtitleColor =>
+      _isDark ? Colors.grey.shade400 : Colors.grey.shade600;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ProgressService>(
       builder: (context, progressService, child) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF7F7F7),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             title: Text(
               'Learn Tibetan',
-              style: GoogleFonts.poppins( 
-                fontSize: _getResponsiveValue(
-                  context,
-                  small: 20,
-                  medium: 24,
-                  large: 28,
-                ),
+              style: GoogleFonts.poppins(
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
+                color: _titleColor,
               ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             centerTitle: true,
             elevation: 0,
             backgroundColor: Colors.transparent,
+            foregroundColor: _titleColor,
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings),
@@ -530,56 +128,264 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen>
               isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : levels.isEmpty
-                  ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: _getResponsiveValue(
-                            context,
-                            small: 48,
-                            medium: 64,
-                            large: 80,
-                          ),
-                          color: Colors.grey,
-                        ),
-                        SizedBox(
-                          height: _getResponsiveValue(
-                            context,
-                            small: 12,
-                            medium: 16,
-                            large: 20,
-                          ),
-                        ),
-                        Text(
-                          'No levels found',
-                          style: GoogleFonts.poppins( 
-                            fontSize: _getResponsiveValue(
-                              context,
-                              small: 16,
-                              medium: 20,
-                              large: 24,
-                            ),
-                            color: Colors.grey[700],
-                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              isLoading = true;
-                            });
-                            _loadLevels();
-                          },
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  )
-                  : _buildLevelPath(progressService),
+                  ? _buildEmptyState()
+                  : _buildTopicSections(progressService),
         );
       },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            'Could not load topics',
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              color: _subtitleColor,
+            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Check your connection and try again.',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: _subtitleColor,
+            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                isLoading = true;
+              });
+              _loadLevels();
+            },
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopicSections(ProgressService progressService) {
+    final totalTopics = levels.fold<int>(
+      0,
+      (sum, level) => sum + level.sublevels.length,
+    );
+
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      children: [
+        Text(
+          'Pick a topic',
+          style: GoogleFonts.poppins(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: _titleColor,
+          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '$totalTopics topics to explore. Each lesson is a short quiz.',
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: _subtitleColor,
+          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+        ),
+        const SizedBox(height: 20),
+        for (var i = 0; i < levels.length; i++) ...[
+          if (levels[i].sublevels.isNotEmpty) ...[
+            _buildSectionHeader(levels[i], _sectionColor(i)),
+            const SizedBox(height: 12),
+            _buildTopicGrid(levels[i], _sectionColor(i), progressService),
+            const SizedBox(height: 24),
+          ],
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(Level level, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 6,
+          height: 24,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            level.title,
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: _titleColor,
+            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+          ),
+        ),
+        Text(
+          '${level.sublevels.length} topics',
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            color: _subtitleColor,
+            fontWeight: FontWeight.w500,
+          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTopicGrid(
+    Level level,
+    Color color,
+    ProgressService progressService,
+  ) {
+    final columns = _getColumns(context);
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.5,
+      ),
+      itemCount: level.sublevels.length,
+      itemBuilder: (context, index) {
+        final sublevel = level.sublevels[index];
+        final progressKey = sublevel.path.split('/').last.split('.').first;
+        final progress = progressService.categoryProgress[progressKey] ?? 0.0;
+        return _buildTopicCard(sublevel, color, progress);
+      },
+    );
+  }
+
+  Widget _buildTopicCard(Sublevel sublevel, Color color, double progress) {
+    final isLocked = sublevel.isLocked;
+    final isCompleted = progress > 0.7;
+
+    return Material(
+      color: Theme.of(context).cardColor,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 0,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          if (isLocked) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Earn ${sublevel.requiredXp} XP to unlock ${sublevel.name}.',
+                ),
+              ),
+            );
+            return;
+          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => QuizScreen(topicFilePath: sublevel.path),
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color:
+                  isCompleted
+                      ? Colors.green.withOpacity(0.5)
+                      : _isDark
+                      ? Colors.white12
+                      : Colors.black.withOpacity(0.06),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(_isDark ? 0.25 : 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      topicEmoji(sublevel.name),
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  ),
+                  const Spacer(),
+                  if (isLocked)
+                    Icon(Icons.lock, size: 18, color: Colors.grey.shade500)
+                  else if (isCompleted)
+                    const Icon(
+                      Icons.check_circle,
+                      size: 20,
+                      color: Colors.green,
+                    ),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                sublevel.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: isLocked ? Colors.grey : _titleColor,
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                sublevel.wordCount > 0
+                    ? '${sublevel.wordCount} words'
+                    : 'Lesson',
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: _subtitleColor,
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              ),
+              if (progress > 0) ...[
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress.clamp(0.0, 1.0),
+                    minHeight: 4,
+                    backgroundColor:
+                        _isDark ? Colors.white12 : Colors.grey.shade200,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isCompleted ? Colors.green : color,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

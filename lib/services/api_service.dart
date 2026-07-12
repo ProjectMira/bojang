@@ -224,6 +224,36 @@ class ApiService {
     return null;
   }
 
+  /// Fetch Tibetan-English word pairs for the memory match game.
+  /// Returns a list of cards: {id, tibetan, english, phonetic}.
+  Future<List<Map<String, dynamic>>?> getMemoryMatchCards({
+    required String levelId,
+  }) async {
+    try {
+      final session = await getLearningSession(
+        levelId: levelId,
+        numQuestions: 5,
+        exerciseTypes: const ['memory_match'],
+      );
+      if (session == null) return null;
+      final exercises = List<Map<String, dynamic>>.from(
+        session['exercises'] as List<dynamic>? ?? [],
+      );
+      for (final exercise in exercises) {
+        final type = exercise['type'] ?? exercise['exercise_type'];
+        if (type != 'memory_match') continue;
+        final cards = List<Map<String, dynamic>>.from(
+          exercise['cards'] as List<dynamic>? ?? [],
+        );
+        if (cards.isNotEmpty) return cards;
+      }
+      return null;
+    } catch (e) {
+      print('Get memory match cards error: $e');
+      return null;
+    }
+  }
+
   // =====================================================
   // PROGRESS METHODS
   // =====================================================

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'memory_match_game.dart';
+import 'speed_quiz_screen.dart';
 
 class ExtraGamesScreen extends StatelessWidget {
   const ExtraGamesScreen({super.key});
@@ -11,8 +12,8 @@ class ExtraGamesScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Extra Games',
-          style: GoogleFonts.poppins( 
+          'Games',
+          style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ).copyWith(fontFamilyFallback: const ['Jomolhari']),
@@ -28,131 +29,57 @@ class ExtraGamesScreen extends StatelessWidget {
           children: [
             Text(
               'More Ways to Learn',
-              style: GoogleFonts.poppins( 
+              style: GoogleFonts.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).brightness == Brightness.dark 
-                    ? Colors.white 
-                    : const Color(0xFF2C3E50),
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : const Color(0xFF2C3E50),
               ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             const SizedBox(height: 8),
             Text(
-              'Explore additional games and activities to enhance your Tibetan learning experience.',
-              style: GoogleFonts.poppins( 
+              'Short games that use the same vocabulary as your lessons — perfect for a quick practice break.',
+              style: GoogleFonts.poppins(
                 fontSize: 16,
-                color: Theme.of(context).brightness == Brightness.dark 
-                    ? Colors.grey.shade400 
-                    : Colors.grey.shade600,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade400
+                        : Colors.grey.shade600,
               ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             const SizedBox(height: 24),
-            
-            // Game Cards Grid
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.85,
-              children: [
-                _buildGameCard(
-                  'Memory Match',
-                  'Match Tibetan words with their meanings',
-                  Icons.memory,
-                  Colors.purple,
-                  true,
-                  context,
-                ),
-                _buildGameCard(
-                  'Word Builder',
-                  'Build words from Tibetan letters',
-                  Icons.build,
-                  Colors.orange,
-                  false,
-                  context,
-                ),
-                _buildGameCard(
-                  'Speed Quiz',
-                  'Quick-fire questions to test your knowledge',
-                  Icons.speed,
-                  Colors.red,
-                  false,
-                  context,
-                ),
-                _buildGameCard(
-                  'Audio Challenge',
-                  'Listen and identify Tibetan words',
-                  Icons.headphones,
-                  Colors.green,
-                  false,
-                  context,
-                ),
-                _buildGameCard(
-                  'Story Mode',
-                  'Learn through interactive Tibetan stories',
-                  Icons.book,
-                  Colors.blue,
-                  false,
-                  context,
-                ),
-                _buildGameCard(
-                  'Daily Challenge',
-                  'Special challenges updated daily',
-                  Icons.today,
-                  Colors.amber,
-                  false,
-                  context,
-                ),
-              ],
+            _buildGameCard(
+              context,
+              title: 'Memory Match',
+              description:
+                  'Flip cards to match Tibetan words with their meanings. Pick any topic you\'re learning.',
+              emoji: '🧠',
+              color: Colors.purple,
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MemoryMatchGame(),
+                    ),
+                  ),
             ),
-            
-            const SizedBox(height: 32),
-            
-            // Coming Soon Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.indigo.shade100,
-                    Colors.purple.shade100,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.indigo.shade200),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.rocket_launch,
-                    color: Colors.indigo.shade700,
-                    size: 48,
+            const SizedBox(height: 16),
+            _buildGameCard(
+              context,
+              title: 'Speed Quiz',
+              description:
+                  'Answer as many questions as you can in 60 seconds. Beat your best score!',
+              emoji: '⚡',
+              color: Colors.orange,
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SpeedQuizScreen(),
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'More Games Coming Soon!',
-                    style: GoogleFonts.poppins( 
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.indigo.shade800,
-                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'We\'re working on exciting new games and features to make your Tibetan learning journey even more engaging.',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins( 
-                      fontSize: 14,
-                      color: Colors.indigo.shade600,
-                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                  ),
-                ],
-              ),
             ),
           ],
         ),
@@ -160,129 +87,84 @@ class ExtraGamesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGameCard(String title, String description, IconData icon, Color color, bool isAvailable, BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+  Widget _buildGameCard(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required String emoji,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: Theme.of(context).cardColor,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? Colors.white12 : Colors.black.withOpacity(0.06),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: isAvailable ? () {
-            if (title == 'Memory Match') {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MemoryMatchGame(),
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(isDark ? 0.25 : 0.12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-              );
-            } else {
-              // TODO: Navigate to other games
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('$title coming soon!')),
-              );
-            }
-          } : null,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Stack(
+                child: Text(emoji, style: const TextStyle(fontSize: 32)),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        icon,
-                        color: isAvailable ? color : Colors.grey,
-                        size: 32,
-                      ),
-                    ),
-                    if (!isAvailable)
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.orange,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.lock,
-                            color: Colors.white,
-                            size: 12,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  title,
-                  style: GoogleFonts.poppins( 
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: isAvailable 
-                        ? (Theme.of(context).brightness == Brightness.dark 
-                            ? Colors.white 
-                            : const Color(0xFF2C3E50))
-                        : Colors.grey,
-                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: GoogleFonts.poppins( 
-                    fontSize: 12,
-                    color: isAvailable 
-                        ? (Theme.of(context).brightness == Brightness.dark 
-                            ? Colors.grey.shade400 
-                            : Colors.grey.shade600)
-                        : Colors.grey.shade400,
-                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (!isAvailable) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'Coming Soon',
-                      style: GoogleFonts.poppins( 
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.orange.shade700,
+                    Text(
+                      title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color:
+                            isDark ? Colors.white : const Color(0xFF2C3E50),
                       ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                     ),
-                  ),
-                ],
-              ],
-            ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color:
+                            isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
+                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 18,
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
-

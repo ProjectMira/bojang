@@ -123,18 +123,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                     const SizedBox(height: 24),
 
-                    // Streak Card
-                    _buildStreakCard(progressService),
+                    // Primary CTA: start a lesson
+                    _buildStartLessonHero(progressService),
 
                     const SizedBox(height: 24),
 
-                    // Quick Stats
+                    // Quick Stats (streak lives here, compact)
                     _buildQuickStats(progressService),
-
-                    const SizedBox(height: 32),
-
-                    // Continue Learning Button
-                    _buildContinueLearningButton(),
 
                     const SizedBox(height: 32),
 
@@ -166,10 +161,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildStreakCard(ProgressService progressService) {
+  Widget _buildStartLessonHero(ProgressService progressService) {
+    final hasProgress = progressService.totalQuizzesTaken > 0;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -185,55 +180,70 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LevelSelectionScreen(),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    const Text('🔥', style: TextStyle(fontSize: 28)),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${progressService.currentStreak}',
-                      style: GoogleFonts.poppins( 
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                    ),
-                  ],
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Text('📚', style: TextStyle(fontSize: 32)),
                 ),
-                Text(
-                  progressService.currentStreak == 1
-                      ? 'Day Streak'
-                      : 'Days Streak',
-                  style: GoogleFonts.poppins( fontSize: 16, color: Colors.white70).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hasProgress ? 'Continue Learning' : 'Start a Lesson',
+                        style: GoogleFonts.poppins(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Practice vocabulary, phrases, and verbs',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.white70,
+                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  _getStreakMessage(progressService.currentStreak),
-                  style: GoogleFonts.poppins( fontSize: 14, color: Colors.white70).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 32,
+                  ),
                 ),
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              progressService.currentStreak > 0
-                  ? Icons.local_fire_department
-                  : Icons.play_arrow,
-              color: Colors.white,
-              size: 32,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -324,89 +334,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildContinueLearningButton() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const LevelSelectionScreen(),
-              ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2C97DD).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text('📚', style: TextStyle(fontSize: 32)),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Start a Lesson',
-                        style: GoogleFonts.poppins( 
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white
-                                  : const Color(0xFF2C3E50),
-                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Practice vocabulary, phrases, and verbs',
-                        style: GoogleFonts.poppins( 
-                          fontSize: 14,
-                          color:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.grey.shade400
-                                  : Colors.grey.shade600,
-                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Colors.grey.shade400
-                          : Colors.grey.shade600,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCulturalTip() {
     final tipData = CulturalTipsData.getRandomTip();
     return CulturalTipCard(
@@ -418,12 +345,4 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  String _getStreakMessage(int streak) {
-    if (streak == 0) return 'Start with one short lesson today';
-    if (streak < 3) return 'Great start! Keep it up!';
-    if (streak < 7) return 'Building a habit! 🎯';
-    if (streak < 14) return 'You\'re on fire! 🔥';
-    if (streak < 30) return 'Amazing dedication! 🌟';
-    return 'Learning master! 👑';
-  }
 }
