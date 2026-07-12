@@ -8,13 +8,19 @@ The normal release path is:
 1. Calculate a version from `pubspec.yaml` and the committed version history.
 2. Run static analysis on application code and the stable model test suite.
 3. Build and upload the selected platforms.
-4. After every selected upload succeeds, commit the version to `pubspec.yaml`
-   and create an annotated `v<version>-build.<number>` tag.
+4. As soon as at least one store accepts the upload, commit the version to
+   `pubspec.yaml` and create an annotated `v<version>-build.<number>` tag. A
+   store that consumed a build number must never see it again, so a failure on
+   the other platform does not block the version commit; the failed platform
+   simply ships with the next build number.
 
 Unless `AUTO_MOBILE_RELEASE_PAUSED` is set to `true`, every push to `main`
 creates a build-only version increment, uploads Android to the Play Internal
 track and iOS to TestFlight, then commits the shared version and creates an
-annotated tag.
+annotated tag. Setting the repository variable `ANDROID_RELEASE_PAUSED` to
+`true` makes push-triggered releases skip Android (iOS-only releases) while a
+Play-side blocker such as an upload-key reset is pending; manual dispatch
+ignores it.
 Manual dispatch remains available for version overrides and partial-release
 recovery. The release jobs use the `mobile-production` GitHub Environment.
 
@@ -140,13 +146,23 @@ Two ways out:
 An upload-key reset only changes the key used to sign uploads; Play App
 Signing re-signs bundles for devices, so installed users are unaffected.
 
-While this stayed unresolved, automatic releases were paused with the
-repository variable `AUTO_MOBILE_RELEASE_PAUSED=true`. Workflow run 15 already
-uploaded iOS `1.0.1` build `8` to TestFlight without a version commit. Once
-Play accepts the upload key again, follow the partial-release recovery: run
-`Mobile Release` manually with version `1.0.1`, build number `8`, Android only.
-After it finalizes, delete `AUTO_MOBILE_RELEASE_PAUSED` to resume automatic
-releases.
+While this stayed unresolved, automatic releases were briefly paused with the
+repository variable `AUTO_MOBILE_RELEASE_PAUSED=true`. On 2026-07-12 automatic
+releases were resumed for iOS only: `AUTO_MOBILE_RELEASE_PAUSED` was cleared
+and `ANDROID_RELEASE_PAUSED=true` now makes push-triggered releases skip the
+Android job. iOS `1.0.1` build `8` (uploaded to TestFlight by run 15 without a
+version commit) was recorded directly in `pubspec.yaml`, so numbering resumes
+at build 9.
+
+Once the Play upload-key reset takes effect:
+
+1. Update the repository variable `ANDROID_UPLOAD_CERT_SHA1` to the new upload
+   certificate SHA-1 (see above).
+2. Delete the `ANDROID_RELEASE_PAUSED` repository variable.
+
+The next push to `main` then releases both platforms again. Play jumps from
+versionCode 6 to the current build number; gaps are fine because Play only
+requires versionCode to increase.
 
 ### 2. Configure Google Play
 
@@ -283,24 +299,20 @@ legacy test failures are repaired.
 ## Partial-release recovery
 
 Apple and Google uploads cannot be transactional. One platform can accept a build
-while the other fails. When this happens, the workflow intentionally does not
-commit or tag the version.
+while the other fails. When this happens, the workflow commits and tags the
+version anyway: the successful store consumed the build number, so it must be
+recorded to keep numbering monotonic. The failed platform misses that build and
+ships with the next release; build-number gaps are acceptable on both stores.
 
-To recover:
+Recovery is therefore automatic in the common case — push again (or dispatch
+manually) once the failure cause is fixed, and the next build number goes out
+to both stores.
 
-1. Read the version and build from the failed workflow's **Prepare version**
-   summary.
-2. Start `Mobile Release` again from the same `main` commit.
-3. Enter that exact marketing version and build number.
-4. Disable the platform that already succeeded.
-5. Leave only the failed platform enabled.
-6. Run the workflow. After the remaining upload succeeds, finalization commits
-   the shared version and tag.
-
-If `main` moved after a store upload, either revert the unrelated movement before
-recovery or manually apply the release version to the new head and create the tag
-only after confirming both store builds. Never reuse an Android build number for
-a different binary.
+Manual recovery is only needed when a store accepted an upload but the
+finalize job itself failed (for example, `main` moved during the release). In
+that case apply the release version from the **Prepare version** summary to
+`pubspec.yaml` on the new head and create the tag manually. Never reuse a
+build number for a different binary.
 
 ## Credential rotation
 

@@ -51,11 +51,6 @@ name: Mobile Release
         required: true
         default: false
         type: boolean
-      enable_ios_google_sign_in:
-        description: Enable Google Sign-In on iOS; requires GOOGLE_SERVICE_INFO_PLIST
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -85,7 +80,6 @@ jobs:
       release_ios: ${{ steps.config.outputs.release_ios }}
       android_track: ${{ steps.config.outputs.android_track }}
       enable_ios_firebase: ${{ steps.config.outputs.enable_ios_firebase }}
-      enable_ios_google_sign_in: ${{ steps.config.outputs.enable_ios_google_sign_in }}
     steps:
       - name: Check out repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -102,7 +96,7 @@ jobs:
           INPUT_RELEASE_IOS: ${{ inputs.release_ios }}
           INPUT_ANDROID_TRACK: ${{ inputs.android_track }}
           INPUT_ENABLE_IOS_FIREBASE: ${{ inputs.enable_ios_firebase }}
-          INPUT_ENABLE_IOS_GOOGLE_SIGN_IN: ${{ inputs.enable_ios_google_sign_in }}
+          ANDROID_RELEASE_PAUSED: ${{ vars.ANDROID_RELEASE_PAUSED }}
         run: |
           set -euo pipefail
           if [ "${{ github.ref }}" != "refs/heads/main" ]; then
@@ -115,10 +109,13 @@ jobs:
             requested_version=""
             requested_build=""
             release_android="true"
+            if [ "${ANDROID_RELEASE_PAUSED:-}" = "true" ]; then
+              echo "::notice::Android is paused via the ANDROID_RELEASE_PAUSED repository variable; releasing iOS only."
+              release_android="false"
+            fi
             release_ios="true"
             android_track="internal"
             enable_ios_firebase="false"
-            enable_ios_google_sign_in="false"
           else
             version_bump="$INPUT_VERSION_BUMP"
             requested_version="$INPUT_VERSION"
@@ -127,7 +124,6 @@ jobs:
             release_ios="$INPUT_RELEASE_IOS"
             android_track="$INPUT_ANDROID_TRACK"
             enable_ios_firebase="$INPUT_ENABLE_IOS_FIREBASE"
-            enable_ios_google_sign_in="$INPUT_ENABLE_IOS_GOOGLE_SIGN_IN"
           fi
 
           if [ "$release_android" != "true" ] && [ "$release_ios" != "true" ]; then
@@ -142,7 +138,6 @@ jobs:
           echo "release_ios=$release_ios" >> "$GITHUB_OUTPUT"
           echo "android_track=$android_track" >> "$GITHUB_OUTPUT"
           echo "enable_ios_firebase=$enable_ios_firebase" >> "$GITHUB_OUTPUT"
-          echo "enable_ios_google_sign_in=$enable_ios_google_sign_in" >> "$GITHUB_OUTPUT"
 
       - name: Calculate release version
         id: version
@@ -401,8 +396,12 @@ jobs:
             echo "::error::IOS_BUNDLE_ID must match Xcode bundle identifier com.bojang.app"
             missing=1
           fi
-          if { [ "${{ needs.prepare.outputs.enable_ios_firebase }}" = "true" ] || [ "${{ needs.prepare.outputs.enable_ios_google_sign_in }}" = "true" ]; } && [ -z "$GOOGLE_SERVICE_INFO_PLIST" ]; then
-            echo "::error::GOOGLE_SERVICE_INFO_PLIST is required when iOS Firebase or Google Sign-In is enabled"
+          if [ "${{ needs.prepare.outputs.enable_ios_firebase }}" = "true" ] && [ -z "$GOOGLE_SERVICE_INFO_PLIST" ]; then
+            echo "::error::GOOGLE_SERVICE_INFO_PLIST is required when iOS Firebase is enabled"
+            missing=1
+          fi
+          if grep -q 'TODO_CLIENT_ID\|TODO_REVERSED_CLIENT_ID' ios/Runner/Info.plist; then
+            echo "::error::ios/Runner/Info.plist still has a placeholder Google iOS client ID. Register an iOS OAuth client for bundle com.bojang.app and fill in GIDClientID / the reversed client ID URL scheme."
             missing=1
           fi
           exit "$missing"
@@ -510,8 +509,7 @@ jobs:
             --no-codesign \
             --build-name "${{ needs.prepare.outputs.marketing }}" \
             --build-number "${{ needs.prepare.outputs.build }}" \
-            --dart-define "ENABLE_IOS_FIREBASE=${{ needs.prepare.outputs.enable_ios_firebase }}" \
-            --dart-define "ENABLE_IOS_GOOGLE_SIGN_IN=${{ needs.prepare.outputs.enable_ios_google_sign_in }}"
+            --dart-define "ENABLE_IOS_FIREBASE=${{ needs.prepare.outputs.enable_ios_firebase }}"
 
       - name: Archive iOS app without code signing
         # Fresh runners have empty keychains, so signing during archive makes
@@ -626,12 +624,15 @@ jobs:
 
   finalize:
     name: Commit version and tag
+    # Runs whenever at least one store accepted the build. A consumed build
+    # number must be committed even if the other platform failed; otherwise
+    # the next run recalculates the same number and the store that already
+    # accepted it rejects the upload as a duplicate.
     if: >-
       ${{
         always() &&
         needs.quality.result == 'success' &&
-        (needs.prepare.outputs.release_android != 'true' || needs.android.result == 'success') &&
-        (needs.prepare.outputs.release_ios != 'true' || needs.ios.result == 'success')
+        (needs.android.result == 'success' || needs.ios.result == 'success')
       }}
     needs:
       - prepare
@@ -644,6 +645,21 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Report store upload outcomes
+        env:
+          ANDROID_RESULT: ${{ needs.android.result }}
+          IOS_RESULT: ${{ needs.ios.result }}
+        run: |
+          set -euo pipefail
+          {
+            echo "### Store uploads"
+            echo "- Android: \`$ANDROID_RESULT\`"
+            echo "- iOS: \`$IOS_RESULT\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$ANDROID_RESULT" = "failure" ] || [ "$IOS_RESULT" = "failure" ]; then
+            echo "::warning::One store upload failed. The version is still committed because the other store consumed this build number; the failed platform skips this build and ships with the next release."
+          fi
+
       - name: Check out release source
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
