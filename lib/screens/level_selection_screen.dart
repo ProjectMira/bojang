@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/level_models.dart';
-import '../services/api_service.dart';
+import '../services/levels_repository.dart';
 import '../services/progress_service.dart';
+import '../theme/app_tokens.dart';
 import '../utils/topic_visuals.dart';
+import '../widgets/app_text_style.dart';
 import 'quiz_screen.dart';
 import 'settings_screen.dart';
+
+const List<IconData> _kSectionIcons = [
+  Icons.menu_book_rounded,
+  Icons.translate_rounded,
+  Icons.record_voice_over_rounded,
+  Icons.extension_rounded,
+];
 
 class LevelSelectionScreen extends StatefulWidget {
   const LevelSelectionScreen({super.key});
@@ -20,13 +26,6 @@ class LevelSelectionScreen extends StatefulWidget {
 class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   List<Level> levels = [];
   bool isLoading = true;
-
-  static const List<Color> _sectionColors = [
-    Color(0xFF2C97DD), // Blue
-    Color(0xFF58CC02), // Green
-    Color(0xFFCE82FF), // Purple
-    Color(0xFFFF9600), // Orange
-  ];
 
   int _getColumns(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -42,25 +41,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
 
   Future<void> _loadLevels() async {
     try {
-      final remoteLevels = await ApiService().getLearningLevels();
-      if (remoteLevels != null && remoteLevels.isNotEmpty) {
-        setState(() {
-          levels = Level.fromApiLevels(remoteLevels);
-          isLoading = false;
-        });
-        return;
-      }
-
-      final String jsonString = await rootBundle.loadString(
-        'assets/quiz_data/levels.json',
-      );
-      final Map<String, dynamic> jsonData = json.decode(jsonString);
-
-      final List<Level> loadedLevels =
-          (jsonData['levels'] as List)
-              .map((level) => Level.fromJson(level))
-              .toList();
-
+      final loadedLevels = await LevelsRepository.loadLevels();
       setState(() {
         levels = loadedLevels;
         isLoading = false;
@@ -72,6 +53,10 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             content: Text('Error loading topics: $e'),
             duration: const Duration(seconds: 5),
           ),
@@ -80,16 +65,11 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
     }
   }
 
-  Color _sectionColor(int index) {
-    return _sectionColors[index % _sectionColors.length];
-  }
+  Color _sectionColor(int index) =>
+      kSectionColors[index % kSectionColors.length];
 
-  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
-
-  Color get _titleColor => _isDark ? Colors.white : const Color(0xFF2C3E50);
-
-  Color get _subtitleColor =>
-      _isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+  IconData _sectionIcon(int index) =>
+      _kSectionIcons[index % _kSectionIcons.length];
 
   @override
   Widget build(BuildContext context) {
@@ -100,16 +80,16 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
           appBar: AppBar(
             title: Text(
               'Learn Tibetan',
-              style: GoogleFonts.poppins(
+              style: AppTextStyles.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: _titleColor,
-              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                color: AppTokens.ink(context),
+              ),
             ),
             centerTitle: true,
             elevation: 0,
             backgroundColor: Colors.transparent,
-            foregroundColor: _titleColor,
+            foregroundColor: AppTokens.ink(context),
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings),
@@ -128,14 +108,14 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
               isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : levels.isEmpty
-                  ? _buildEmptyState()
-                  : _buildTopicSections(progressService),
+                  ? _buildEmptyState(context)
+                  : _buildTopicSections(context, progressService),
         );
       },
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -144,18 +124,18 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
           const SizedBox(height: 16),
           Text(
             'Could not load topics',
-            style: GoogleFonts.poppins(
+            style: AppTextStyles.poppins(
               fontSize: 20,
-              color: _subtitleColor,
-            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              color: AppTokens.inkSoft(context),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'Check your connection and try again.',
-            style: GoogleFonts.poppins(
+            style: AppTextStyles.poppins(
               fontSize: 14,
-              color: _subtitleColor,
-            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              color: AppTokens.inkSoft(context),
+            ),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -172,7 +152,10 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
     );
   }
 
-  Widget _buildTopicSections(ProgressService progressService) {
+  Widget _buildTopicSections(
+    BuildContext context,
+    ProgressService progressService,
+  ) {
     final totalTopics = levels.fold<int>(
       0,
       (sum, level) => sum + level.sublevels.length,
@@ -180,72 +163,93 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
 
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
       children: [
-        Text(
-          'Pick a topic',
-          style: GoogleFonts.poppins(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: _titleColor,
-          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+        Text('Pick a topic', style: AppTextStyles.display(context)),
+        const SizedBox(height: 6),
+        Text.rich(
+          TextSpan(
+            style: AppTextStyles.poppins(
+              fontSize: 14,
+              color: AppTokens.inkSoft(context),
+            ),
+            children: [
+              TextSpan(
+                text: '$totalTopics topics',
+                style: AppTextStyles.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
+              ),
+              const TextSpan(text: ' · each lesson is a short quiz'),
+            ],
+          ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          '$totalTopics topics to explore. Each lesson is a short quiz.',
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: _subtitleColor,
-          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-        ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
         for (var i = 0; i < levels.length; i++) ...[
           if (levels[i].sublevels.isNotEmpty) ...[
-            _buildSectionHeader(levels[i], _sectionColor(i)),
-            const SizedBox(height: 12),
-            _buildTopicGrid(levels[i], _sectionColor(i), progressService),
-            const SizedBox(height: 24),
+            _buildSectionHeader(
+              context,
+              levels[i],
+              _sectionColor(i),
+              _sectionIcon(i),
+            ),
+            const SizedBox(height: 14),
+            _buildTopicGrid(
+              context,
+              levels[i],
+              _sectionColor(i),
+              progressService,
+            ),
+            const SizedBox(height: 32),
           ],
         ],
       ],
     );
   }
 
-  Widget _buildSectionHeader(Level level, Color color) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    Level level,
+    Color color,
+    IconData icon,
+  ) {
     return Row(
       children: [
         Container(
-          width: 6,
-          height: 24,
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(8),
           ),
+          child: Icon(icon, size: 16, color: Colors.white),
         ),
-        const SizedBox(width: 10),
-        Expanded(
+        const SizedBox(width: 12),
+        Expanded(child: Text(level.title, style: AppTextStyles.title(context))),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppTokens.tint(color, context),
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Text(
-            level.title,
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: _titleColor,
-            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+            '${level.sublevels.length}',
+            style: AppTextStyles.poppins(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
           ),
-        ),
-        Text(
-          '${level.sublevels.length} topics',
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: _subtitleColor,
-            fontWeight: FontWeight.w500,
-          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
         ),
       ],
     );
   }
 
   Widget _buildTopicGrid(
+    BuildContext context,
     Level level,
     Color color,
     ProgressService progressService,
@@ -257,132 +261,194 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: columns,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.5,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        childAspectRatio: 1.18,
       ),
       itemCount: level.sublevels.length,
       itemBuilder: (context, index) {
         final sublevel = level.sublevels[index];
         final progressKey = sublevel.path.split('/').last.split('.').first;
         final progress = progressService.categoryProgress[progressKey] ?? 0.0;
-        return _buildTopicCard(sublevel, color, progress);
+        return _TopicCard(sublevel: sublevel, color: color, progress: progress);
       },
     );
   }
+}
 
-  Widget _buildTopicCard(Sublevel sublevel, Color color, double progress) {
-    final isLocked = sublevel.isLocked;
-    final isCompleted = progress > 0.7;
+class _TopicCard extends StatefulWidget {
+  final Sublevel sublevel;
+  final Color color;
+  final double progress;
 
-    return Material(
-      color: Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(16),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          if (isLocked) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Earn ${sublevel.requiredXp} XP to unlock ${sublevel.name}.',
+  const _TopicCard({
+    required this.sublevel,
+    required this.color,
+    required this.progress,
+  });
+
+  @override
+  State<_TopicCard> createState() => _TopicCardState();
+}
+
+class _TopicCardState extends State<_TopicCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLocked = widget.sublevel.isLocked;
+    final isCompleted = widget.progress > 0.7;
+    final isDark = AppTokens.isDark(context);
+
+    final tintOpacity = isLocked ? 0.06 : (isDark ? 0.22 : 0.10);
+
+    return Opacity(
+      opacity: isLocked ? 0.45 : 1.0,
+      child: Material(
+        color: AppTokens.tint(widget.color, context, opacity: tintOpacity),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          splashColor: widget.color.withOpacity(0.12),
+          highlightColor: widget.color.withOpacity(0.08),
+          onTap: () {
+            if (isLocked) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  content: Text(
+                    'Earn ${widget.sublevel.requiredXp} XP to unlock ${widget.sublevel.name}.',
+                  ),
                 ),
+              );
+              return;
+            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) =>
+                        QuizScreen(topicFilePath: widget.sublevel.path),
               ),
             );
-            return;
-          }
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => QuizScreen(topicFilePath: sublevel.path),
-            ),
-          );
-        },
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color:
-                  isCompleted
-                      ? Colors.green.withOpacity(0.5)
-                      : _isDark
-                      ? Colors.white12
-                      : Colors.black.withOpacity(0.06),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(_isDark ? 0.25 : 0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      topicEmoji(sublevel.name),
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                  ),
-                  const Spacer(),
-                  if (isLocked)
-                    Icon(Icons.lock, size: 18, color: Colors.grey.shade500)
-                  else if (isCompleted)
-                    const Icon(
-                      Icons.check_circle,
-                      size: 20,
-                      color: Colors.green,
-                    ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                sublevel.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: isLocked ? Colors.grey : _titleColor,
-                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                sublevel.wordCount > 0
-                    ? '${sublevel.wordCount} words'
-                    : 'Lesson',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: _subtitleColor,
-                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-              ),
-              if (progress > 0) ...[
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: progress.clamp(0.0, 1.0),
-                    minHeight: 4,
-                    backgroundColor:
-                        _isDark ? Colors.white12 : Colors.grey.shade200,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      isCompleted ? Colors.green : color,
-                    ),
+          },
+          onHighlightChanged: (value) => setState(() => _pressed = value),
+          child: AnimatedScale(
+            scale: _pressed ? 0.97 : 1.0,
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOut,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: AppTokens.surface(context),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Text(
+                                topicEmoji(widget.sublevel.name),
+                                style: const TextStyle(fontSize: 26),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              widget.sublevel.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.poppins(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    isLocked
+                                        ? AppTokens.inkSoft(context)
+                                        : AppTokens.ink(context),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.sublevel.wordCount > 0
+                                  ? '${widget.sublevel.wordCount} words'
+                                  : 'Lesson',
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.caption(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(3),
+                        child: LinearProgressIndicator(
+                          value: widget.progress.clamp(0.0, 1.0),
+                          minHeight: 6,
+                          backgroundColor:
+                              isDark
+                                  ? Colors.black.withOpacity(0.25)
+                                  : Colors.white.withOpacity(0.6),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            isCompleted ? AppColors.green : widget.color,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                if (isCompleted)
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        color: AppColors.green,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                else if (isLocked)
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppTokens.inkSoft(context).withOpacity(0.4),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.lock,
+                        size: 12,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
               ],
-            ],
+            ),
           ),
         ),
       ),

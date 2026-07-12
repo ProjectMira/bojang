@@ -62,6 +62,8 @@ dependencies:
   # Utilities
   uuid: ^4.2.1
   intl: ^0.19.0
+  url_launcher: ^6.3.0
+  package_info_plus: ^8.0.0
 
 dev_dependencies:
   flutter_test:

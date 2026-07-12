@@ -8,6 +8,9 @@ import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../services/progress_service.dart';
 import '../services/theme_service.dart';
+import '../theme/app_tokens.dart';
+import '../widgets/answer_feedback_banner.dart';
+import 'lesson_complete_screen.dart';
 
 class QuizScreen extends StatefulWidget {
   final String topicFilePath;
@@ -24,6 +27,7 @@ class _QuizScreenState extends State<QuizScreen>
   int currentQuestionIndex = 0;
   int? selectedAnswerIndex;
   bool showFeedback = false;
+  bool lastAnswerCorrect = true;
   int score = 0;
   late AnimationController _animationController;
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -171,118 +175,83 @@ class _QuizScreenState extends State<QuizScreen>
       }
     }
 
+    if (isCorrect) HapticFeedback.lightImpact();
+
     setState(() {
       selectedAnswerIndex = answerIndex;
       showFeedback = true;
+      lastAnswerCorrect = isCorrect;
       if (isCorrect) score++;
     });
 
-    if (isCorrect) {
-      _showFeedbackDialog(true);
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          Navigator.of(context).pop();
-          if (currentQuestionIndex < questions.length - 1) {
-            setState(() {
-              currentQuestionIndex++;
-              selectedAnswerIndex = null;
-              showFeedback = false;
-            });
-            _animationController.reset();
-            _animationController.forward();
-          } else {
-            _showCompletionDialog(questions.length);
-          }
-        }
-      });
-    } else {
-      _showFeedbackDialog(false);
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          Navigator.of(context).pop();
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      if (isCorrect) {
+        if (currentQuestionIndex < questions.length - 1) {
           setState(() {
+            currentQuestionIndex++;
             selectedAnswerIndex = null;
             showFeedback = false;
           });
+          _animationController.reset();
+          _animationController.forward();
+        } else {
+          _goToCompletion(questions.length);
         }
-      });
-    }
+      } else {
+        setState(() {
+          selectedAnswerIndex = null;
+          showFeedback = false;
+        });
+      }
+    });
   }
 
-  void _showCompletionDialog(int totalQuestions) {
-    final percentage = (score / totalQuestions) * 100;
+  Future<void> _goToCompletion(int totalQuestions) async {
     final category = _getCategoryFromFilePath(widget.topicFilePath);
-
-    // Update progress using ProgressService
     final progressService = Provider.of<ProgressService>(
       context,
       listen: false,
     );
-    progressService.updateQuizResults(
+
+    await progressService.updateQuizResults(
       category,
       score,
       totalQuestions,
       context: context,
     );
-    _submitRemoteProgress(totalQuestions);
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text('Quiz Completed!', textAlign: TextAlign.center),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                percentage >= 70 ? Icons.emoji_events : Icons.star,
-                color: percentage >= 70 ? Colors.amber : Colors.blue,
-                size: 64,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Your Score: $score/$totalQuestions',
-                style: GoogleFonts.poppins( 
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue[700],
-                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-              ),
-              Text(
-                '${percentage.toStringAsFixed(0)}%',
-                style: GoogleFonts.poppins( 
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color:
-                      percentage >= 70 ? Colors.green[700] : Colors.blue[700],
-                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                percentage >= 70 ? 'ལེགས་སོ། Excellent!' : 'Keep practicing!',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: percentage >= 70 ? Colors.green : Colors.blue,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).pop(); // Return to sublevel selection
-              },
-              child: const Text('Continue'),
+
+    // updateQuizResults may schedule an achievement dialog on a 500ms
+    // delay; wait it out alongside the remote submit so it has a chance to
+    // open (and get dismissed below) before this route is replaced, rather
+    // than firing later against a disposed context.
+    await Future.wait([
+      Future.delayed(const Duration(milliseconds: 600)),
+      _submitRemoteProgress(totalQuestions),
+    ]);
+
+    if (!mounted) return;
+
+    final xpEarned = score * 10;
+    final accuracy = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0.0;
+
+    Navigator.of(context).popUntil((route) => route is! DialogRoute);
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 400),
+        pageBuilder:
+            (context, animation, secondaryAnimation) => LessonCompleteScreen(
+              score: score,
+              totalQuestions: totalQuestions,
+              xpEarned: xpEarned,
+              accuracy: accuracy,
+              streak: progressService.currentStreak,
+              topicFilePath: widget.topicFilePath,
             ),
-          ],
-        );
-      },
+        transitionsBuilder:
+            (context, animation, secondaryAnimation, child) =>
+                FadeTransition(opacity: animation, child: child),
+      ),
     );
   }
 
@@ -312,56 +281,23 @@ class _QuizScreenState extends State<QuizScreen>
     }
   }
 
-  void _showFeedbackDialog(bool isCorrect) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor:
-              isCorrect ? Colors.green.shade50 : Colors.red.shade50,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                isCorrect ? Icons.check_circle : Icons.error,
-                color: isCorrect ? Colors.green : Colors.red,
-                size: 64,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                isCorrect ? 'ལེགས་སོ། Amazing!' : 'སེམས་ཤུགས་མ་ཆག \nTry again!',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: isCorrect ? Colors.green : Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTokens.background(context),
       appBar: AppBar(
         title: Text(
           _getDisplayNameFromFilePath(widget.topicFilePath),
-          style: GoogleFonts.poppins( 
+          style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppTokens.ink(context),
           ).copyWith(fontFamilyFallback: const ['Jomolhari']),
         ),
         centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTokens.ink(context),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -379,7 +315,7 @@ class _QuizScreenState extends State<QuizScreen>
                   const SizedBox(height: 16),
                   Text(
                     'Loading questions...',
-                    style: GoogleFonts.poppins( 
+                    style: GoogleFonts.poppins(
                       fontSize: 18,
                       color: Colors.grey[600],
                     ).copyWith(fontFamilyFallback: const ['Jomolhari']),
@@ -400,7 +336,7 @@ class _QuizScreenState extends State<QuizScreen>
                     const SizedBox(height: 16),
                     Text(
                       'Error loading questions',
-                      style: GoogleFonts.poppins( 
+                      style: GoogleFonts.poppins(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.red[700],
@@ -450,7 +386,7 @@ class _QuizScreenState extends State<QuizScreen>
                     const SizedBox(height: 16),
                     Text(
                       'No Questions Available',
-                      style: GoogleFonts.poppins( 
+                      style: GoogleFonts.poppins(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey[700],
@@ -482,236 +418,245 @@ class _QuizScreenState extends State<QuizScreen>
 
           final question = questions[currentQuestionIndex];
 
-          return Column(
+          return Stack(
             children: [
-              // Progress and Score
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Question ${currentQuestionIndex + 1} of ${questions.length}',
-                      style: GoogleFonts.poppins( 
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color:
-                            Theme.of(context).brightness == Brightness.dark
-                                ? Colors.grey.shade400
-                                : Colors.grey.shade600,
-                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).primaryColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        'Score: $score',
-                        style: GoogleFonts.poppins( 
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
-                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Progress bar
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: (currentQuestionIndex + 1) / questions.length,
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.dark
-                                ? Colors.grey.shade700
-                                : Colors.grey.shade200,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).primaryColor,
-                        ),
-                        minHeight: 8,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${((currentQuestionIndex + 1) / questions.length * 100).toInt()}% Complete',
-                          style: GoogleFonts.poppins( 
-                            fontSize: 12,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.grey.shade400
-                                    : Colors.grey.shade600,
-                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                        ),
-                        Text(
-                          'Accuracy: ${score > 0 ? ((score / (currentQuestionIndex + 1)) * 100).toInt() : 0}%',
-                          style: GoogleFonts.poppins( 
-                            fontSize: 12,
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // Question Card
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Card(
-                          elevation: 8,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              children: [
-                                // const Text(
-                                //   'Question',
-                                //   style: TextStyle(
-                                //     fontSize: 18,
-                                //     fontWeight: FontWeight.w500,
-                                //     color: Colors.grey,
-                                //   ),
-                                // ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  question.tibetanText,
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        // Answer options
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: question.options.length,
-                          itemBuilder: (context, index) {
-                            final isSelected = selectedAnswerIndex == index;
-                            final isCorrect =
-                                index == question.correctAnswerIndex;
-
-                            Color? buttonColor;
-                            if (showFeedback) {
-                              if (isSelected) {
-                                buttonColor =
-                                    isCorrect
-                                        ? Colors.green.shade100
-                                        : Colors.red.shade100;
-                              }
-                            }
-
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8.0,
-                              ),
-                              child: Card(
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: InkWell(
-                                  onTap:
-                                      showFeedback
-                                          ? null
-                                          : () =>
-                                              _handleAnswer(index, questions),
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(15),
-                                      color: buttonColor ?? Colors.white,
-                                    ),
-                                    padding: const EdgeInsets.all(16),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color:
-                                                showFeedback
-                                                    ? (isSelected
-                                                        ? (isCorrect
-                                                            ? Colors.green
-                                                            : Colors.red)
-                                                        : Colors.grey)
-                                                    : Colors.blue.withValues(
-                                                      alpha: 0.1,
-                                                    ),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              String.fromCharCode(65 + index),
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                color:
-                                                    showFeedback
-                                                        ? (isSelected
-                                                            ? Colors.white
-                                                            : Colors.grey)
-                                                        : Colors.blue,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: Text(
-                                            question.options[index],
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              _buildQuizBody(context, question, questions),
+              AnswerFeedbackBanner(
+                visible: showFeedback,
+                isCorrect: lastAnswerCorrect,
               ),
             ],
           );
         },
       ),
+    );
+  }
+
+  Widget _buildQuizBody(
+    BuildContext context,
+    QuizQuestion question,
+    List<QuizQuestion> questions,
+  ) {
+    return Column(
+      children: [
+        // Progress and Score
+        Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Question ${currentQuestionIndex + 1} of ${questions.length}',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Score: $score',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Progress bar
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: (currentQuestionIndex + 1) / questions.length,
+                  backgroundColor:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade700
+                          : Colors.grey.shade200,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).primaryColor,
+                  ),
+                  minHeight: 8,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${((currentQuestionIndex + 1) / questions.length * 100).toInt()}% Complete',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
+                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                  ),
+                  Text(
+                    'Accuracy: ${score > 0 ? ((score / (currentQuestionIndex + 1)) * 100).toInt() : 0}%',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        // Question Card
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Card(
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        children: [
+                          // const Text(
+                          //   'Question',
+                          //   style: TextStyle(
+                          //     fontSize: 18,
+                          //     fontWeight: FontWeight.w500,
+                          //     color: Colors.grey,
+                          //   ),
+                          // ),
+                          const SizedBox(height: 16),
+                          Text(
+                            question.tibetanText,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Answer options
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: question.options.length,
+                    itemBuilder: (context, index) {
+                      final isSelected = selectedAnswerIndex == index;
+                      final isCorrect = index == question.correctAnswerIndex;
+
+                      Color? buttonColor;
+                      if (showFeedback) {
+                        if (isSelected) {
+                          buttonColor =
+                              isCorrect
+                                  ? Colors.green.shade100
+                                  : Colors.red.shade100;
+                        }
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: InkWell(
+                            onTap:
+                                showFeedback
+                                    ? null
+                                    : () => _handleAnswer(index, questions),
+                            borderRadius: BorderRadius.circular(15),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color:
+                                    buttonColor ?? AppTokens.surface(context),
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color:
+                                          showFeedback
+                                              ? (isSelected
+                                                  ? (isCorrect
+                                                      ? Colors.green
+                                                      : Colors.red)
+                                                  : Colors.grey)
+                                              : Colors.blue.withValues(
+                                                alpha: 0.1,
+                                              ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        String.fromCharCode(65 + index),
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              showFeedback
+                                                  ? (isSelected
+                                                      ? Colors.white
+                                                      : Colors.grey)
+                                                  : Colors.blue,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Text(
+                                      question.options[index],
+                                      style: const TextStyle(fontSize: 18),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

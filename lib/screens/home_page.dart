@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../services/progress_service.dart';
-import '../services/theme_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../models/level_models.dart';
 import '../services/api_service.dart';
+import '../services/levels_repository.dart';
+import '../services/progress_service.dart';
+import '../theme/app_tokens.dart';
+import '../utils/topic_visuals.dart';
+import '../widgets/app_text_style.dart';
 import '../widgets/cultural_tip_card.dart';
+import '../widgets/section_header.dart';
+import '../widgets/shortcut_card.dart';
+import '../widgets/stat_strip.dart';
 import 'level_selection_screen.dart';
+import 'memory_match_game.dart';
+import 'quiz_screen.dart';
 import 'settings_screen.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  /// Switches the bottom nav to the Streak tab. Provided by
+  /// [MainNavigationScreen]; left null when HomePage is used standalone.
+  final VoidCallback? onSeeStreak;
+
+  const HomePage({super.key, this.onSeeStreak});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -18,6 +31,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+
+  List<Level> _levels = [];
+  bool _levelsLoading = true;
 
   @override
   void initState() {
@@ -32,6 +48,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
 
     _animationController.forward();
+    _loadShortcutTopics();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _refreshServerProgress(),
     );
@@ -48,6 +65,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
+  Future<void> _loadShortcutTopics() async {
+    try {
+      final levels = await LevelsRepository.loadLevels();
+      if (!mounted) return;
+      setState(() {
+        _levels = levels;
+        _levelsLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _levelsLoading = false);
+    }
+  }
+
+  List<Sublevel> get _shortcutTopics {
+    final unlocked = <Sublevel>[];
+    for (final level in _levels) {
+      unlocked.addAll(level.sublevels.where((s) => !s.isLocked));
+      if (unlocked.length >= 3) break;
+    }
+    return unlocked.take(3).toList();
+  }
+
+  Future<void> _shareApp() async {
+    final uri = Uri.parse('https://www.bojang.in');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -56,101 +103,63 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ProgressService, ThemeService>(
-      builder: (context, progressService, themeService, child) {
+    return Consumer<ProgressService>(
+      builder: (context, progressService, child) {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: SafeArea(
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.gutter,
+                  vertical: AppSpacing.lg,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header with settings
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Welcome back',
-                              style: GoogleFonts.poppins( 
-                                fontSize: 16,
-                                color:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.grey.shade400
-                                        : Colors.grey.shade600,
-                              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                    _buildHeader(context),
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    _buildStatsStrip(context, progressService),
+
+                    const SizedBox(height: AppSpacing.section),
+
+                    SectionHeader(
+                      title: 'Categories',
+                      actionLabel: 'See all',
+                      onAction:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => const LevelSelectionScreen(),
                             ),
-                            Text(
-                              'Ready for Tibetan?',
-                              style: GoogleFonts.poppins( 
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.white
-                                        : const Color(0xFF2C3E50),
-                              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                            ),
-                          ],
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SettingsScreen(),
-                              ),
-                            );
-                          },
-                          icon: Icon(
-                            Icons.settings,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.grey.shade400
-                                    : Colors.grey.shade600,
-                            size: 28,
                           ),
-                        ),
-                      ],
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.md),
 
-                    // Primary CTA: start a lesson
-                    _buildStartLessonHero(progressService),
+                    _buildShortcutGrid(context),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.section),
 
-                    // Quick Stats (streak lives here, compact)
-                    _buildQuickStats(progressService),
+                    _buildStartLessonHero(context, progressService),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.section),
 
-                    // Cultural Tip of the Day
-                    Text(
-                      'Cultural Tip',
-                      style: GoogleFonts.poppins( 
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color:
-                            Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : const Color(0xFF2C3E50),
-                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                    ),
+                    const SectionHeader(title: 'Cultural Tip'),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
 
                     _buildCulturalTip(),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.section),
+
+                    _buildShareButton(context),
+
+                    const SizedBox(height: AppSpacing.lg),
                   ],
                 ),
               ),
@@ -161,7 +170,205 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildStartLessonHero(ProgressService progressService) {
+  Widget _buildHeader(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Welcome back', style: AppTextStyles.caption(context)),
+            const SizedBox(height: 2),
+            Text('Ready for Tibetan?', style: AppTextStyles.display(context)),
+          ],
+        ),
+        Material(
+          color: AppTokens.tint(AppTokens.inkSoft(context), context),
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: Icon(
+                Icons.settings,
+                color: AppTokens.inkSoft(context),
+                size: 22,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsStrip(
+    BuildContext context,
+    ProgressService progressService,
+  ) {
+    final hasXp = progressService.xp > 0;
+    final hasLessons = progressService.completedLevelsCount > 0;
+
+    return StatStrip(
+      onTap: widget.onSeeStreak,
+      items: [
+        StatStripItem(
+          icon: Icons.local_fire_department,
+          value: '${progressService.currentStreak}',
+          label: 'Streak',
+          color: AppColors.orange,
+        ),
+        StatStripItem(
+          icon: Icons.bolt,
+          value:
+              hasXp
+                  ? '${progressService.xp}'
+                  : '${progressService.accuracy.toStringAsFixed(0)}%',
+          label: hasXp ? 'XP' : 'Accuracy',
+          color: AppColors.gold,
+        ),
+        StatStripItem(
+          icon: Icons.auto_stories_rounded,
+          value:
+              hasLessons
+                  ? '${progressService.completedLevelsCount}'
+                  : '${progressService.currentLevel}',
+          label: hasLessons ? 'Lessons' : 'Level',
+          color: AppColors.green,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShortcutGrid(BuildContext context) {
+    const topicColors = [AppColors.primary, AppColors.green, AppColors.orange];
+    final topics = _shortcutTopics;
+
+    final cards = <Widget>[];
+    if (topics.isEmpty) {
+      final placeholderCount = _levelsLoading ? 3 : 0;
+      for (var i = 0; i < placeholderCount; i++) {
+        cards.add(_buildShortcutSkeleton(context));
+      }
+    } else {
+      for (var i = 0; i < topics.length; i++) {
+        final sublevel = topics[i];
+        cards.add(
+          ShortcutCard(
+            emoji: topicEmoji(sublevel.name),
+            title: sublevel.name,
+            subtitle:
+                sublevel.wordCount > 0
+                    ? '${sublevel.wordCount} words'
+                    : 'Lesson',
+            color: topicColors[i % topicColors.length],
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => QuizScreen(topicFilePath: sublevel.path),
+                ),
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    cards.add(
+      ShortcutCard(
+        emoji: '🧠',
+        title: 'Memory Match',
+        subtitle: 'Game',
+        color: AppColors.purple,
+        leading: _buildMemoryCardFan(context),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const MemoryMatchGame()),
+          );
+        },
+      ),
+    );
+
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 1.45,
+      children: cards,
+    );
+  }
+
+  Widget _buildMemoryCardFan(BuildContext context) {
+    Widget miniCard(double angle, Color color, String? label) {
+      return Transform.rotate(
+        angle: angle,
+        child: Container(
+          width: 30,
+          height: 38,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.14),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child:
+              label != null
+                  ? Text(label, style: const TextStyle(fontSize: 16))
+                  : null,
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: 78,
+      height: 46,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            left: 0,
+            child: miniCard(-0.20, AppTokens.surface(context), null),
+          ),
+          Positioned(
+            right: 0,
+            child: miniCard(0.20, AppTokens.surface(context), null),
+          ),
+          miniCard(0, AppColors.purple, '🧠'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShortcutSkeleton(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTokens.tint(AppTokens.inkSoft(context), context),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
+    );
+  }
+
+  Widget _buildStartLessonHero(
+    BuildContext context,
+    ProgressService progressService,
+  ) {
     final hasProgress = progressService.totalQuizzesTaken > 0;
     return Container(
       width: double.infinity,
@@ -169,167 +376,97 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF2C97DD), Color(0xFF1976D2)],
+          colors: [AppColors.primary, AppColors.primaryDeep],
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2C97DD).withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppRadius.hero),
+        boxShadow: AppTokens.heroShadow(context),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const LevelSelectionScreen(),
-              ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Text('📚', style: TextStyle(fontSize: 32)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.hero),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -18,
+              bottom: -28,
+              child: Text(
+                'ཀ',
+                style: TextStyle(
+                  fontSize: 96,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withOpacity(0.08),
+                  fontFamilyFallback: const ['Jomolhari'],
                 ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppRadius.hero),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LevelSelectionScreen(),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
                     children: [
-                      Text(
-                        hasProgress ? 'Continue Learning' : 'Start a Lesson',
-                        style: GoogleFonts.poppins(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Text('📚', style: TextStyle(fontSize: 32)),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Practice vocabulary, phrases, and verbs',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.white70,
-                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              hasProgress
+                                  ? 'Continue Learning'
+                                  : 'Start a Lesson',
+                              style: AppTextStyles.poppins(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Practice vocabulary, phrases, and verbs',
+                              style: AppTextStyles.poppins(
+                                fontSize: 13,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.white,
+                          size: 30,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.play_arrow_rounded,
-                    color: Colors.white,
-                    size: 32,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildQuickStats(ProgressService progressService) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            progressService.xp > 0 ? 'XP' : 'Accuracy',
-            progressService.xp > 0
-                ? '${progressService.xp}'
-                : '${progressService.accuracy.toStringAsFixed(0)}%',
-            progressService.xp > 0 ? Icons.bolt : Icons.track_changes,
-            Colors.green,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildStatCard(
-            'Streak',
-            '${progressService.currentStreak}',
-            Icons.local_fire_department,
-            Colors.orange,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildStatCard(
-            progressService.completedLevelsCount > 0 ? 'Lessons' : 'Level',
-            progressService.completedLevelsCount > 0
-                ? '${progressService.completedLevelsCount}'
-                : '${progressService.currentLevel}',
-            Icons.trending_up,
-            Colors.purple,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: GoogleFonts.poppins( 
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color:
-                  Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : const Color(0xFF2C3E50),
-            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-          ),
-          Text(
-            title,
-            style: GoogleFonts.poppins( 
-              fontSize: 12,
-              color:
-                  Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey.shade400
-                      : Colors.grey.shade600,
-            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-          ),
-        ],
       ),
     );
   }
@@ -345,4 +482,28 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildShareButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: OutlinedButton.icon(
+        onPressed: _shareApp,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.button),
+          ),
+        ),
+        icon: const Icon(Icons.favorite_rounded, size: 20),
+        label: Text(
+          'Share Bojang — bojang.in',
+          style: AppTextStyles.poppins(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
 }

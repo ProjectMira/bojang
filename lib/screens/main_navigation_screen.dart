@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'home_page.dart';
 import 'streak_view_screen.dart';
 import 'extra_games_screen.dart';
@@ -13,9 +14,11 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
-  
-  final List<Widget> _screens = [
-    const HomePage(),
+
+  void _goToStreak() => setState(() => _currentIndex = 1);
+
+  List<Widget> get _screens => [
+    HomePage(onSeeStreak: _goToStreak),
     const StreakViewScreen(),
     const ExtraGamesScreen(),
     const ProfileScreen(),
@@ -23,21 +26,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTokens.isDark(context);
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
+          color: AppTokens.surface(context),
+          boxShadow: AppTokens.shadow(context),
+          border:
+              isDark
+                  ? Border(
+                    top: BorderSide(color: AppTokens.cardBorder(context)),
+                  )
+                  : null,
         ),
         child: SafeArea(
           child: Padding(
@@ -49,25 +50,25 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   icon: Icons.home_filled,
                   label: 'Home',
                   index: 0,
-                  color: const Color(0xFF2C97DD),
+                  color: AppColors.primary,
                 ),
                 _buildNavItem(
                   icon: Icons.local_fire_department,
                   label: 'Streak',
                   index: 1,
-                  color: Colors.orange,
+                  color: AppColors.orange,
                 ),
                 _buildNavItem(
                   icon: Icons.games,
                   label: 'Games',
                   index: 2,
-                  color: Colors.purple,
+                  color: AppColors.purple,
                 ),
                 _buildNavItem(
                   icon: Icons.person,
                   label: 'Profile',
                   index: 3,
-                  color: Colors.green,
+                  color: AppColors.green,
                 ),
               ],
             ),
@@ -84,18 +85,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     required Color color,
   }) {
     final isSelected = _currentIndex == index;
-    
+    final inactiveColor = AppTokens.inkSoft(context);
+
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
+      onTap: () => setState(() => _currentIndex = index),
+      behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
+          color:
+              isSelected ? AppTokens.tint(color, context) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
@@ -103,26 +103,28 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           children: [
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: isSelected ? color.withOpacity(0.2) : Colors.transparent,
+                color:
+                    isSelected
+                        ? AppTokens.tint(color, context, opacity: 0.22)
+                        : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
-                color: isSelected ? color : Colors.grey.shade600,
-                size: isSelected ? 28 : 24,
+                color: isSelected ? color : inactiveColor,
+                size: 24,
               ),
             ),
             const SizedBox(height: 4),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
+            Text(
+              label,
               style: TextStyle(
-                fontSize: isSelected ? 12 : 10,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? color : Colors.grey.shade600,
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? color : inactiveColor,
               ),
-              child: Text(label),
             ),
           ],
         ),
@@ -130,4 +132,3 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 }
-

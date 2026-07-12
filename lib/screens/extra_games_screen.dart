@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_tokens.dart';
 import 'memory_match_game.dart';
 import 'speed_quiz_screen.dart';
 
@@ -16,10 +17,11 @@ class ExtraGamesScreen extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.bold,
+            color: AppTokens.ink(context),
           ).copyWith(fontFamilyFallback: const ['Jomolhari']),
         ),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppTokens.ink(context),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -137,8 +139,7 @@ class ExtraGamesScreen extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color:
-                            isDark ? Colors.white : const Color(0xFF2C3E50),
+                        color: isDark ? Colors.white : const Color(0xFF2C3E50),
                       ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                     ),
                     const SizedBox(height: 4),

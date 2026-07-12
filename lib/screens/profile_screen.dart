@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/progress_service.dart';
 import '../services/google_auth_service.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
+import '../theme/app_tokens.dart';
+import '../widgets/app_text_style.dart';
+import '../widgets/stat_chip.dart';
 import 'settings_screen.dart';
 import 'auth_screen.dart';
 
@@ -18,11 +23,13 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String playerName = 'Tibetan Learner';
   User? currentUser;
+  PackageInfo? _packageInfo;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadPackageInfo();
   }
 
   Future<void> _loadUserData() async {
@@ -43,6 +50,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _loadPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() => _packageInfo = info);
+    }
+  }
+
+  Future<void> _openMadeBy() async {
+    final uri = Uri.parse('https://ta4tsering.com');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   Future<void> _handleLogout() async {
     final shouldLogout = await showDialog<bool>(
       context: context,
@@ -50,22 +71,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
           (context) => AlertDialog(
             title: Text(
               'Sign Out',
-              style: GoogleFonts.poppins( fontWeight: FontWeight.bold).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             content: Text(
               'Are you sure you want to sign out?',
-              style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              style: GoogleFonts.poppins().copyWith(
+                fontFamilyFallback: const ['Jomolhari'],
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text('Cancel', style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari'])),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.poppins().copyWith(
+                    fontFamilyFallback: const ['Jomolhari'],
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(
                   'Sign Out',
-                  style: GoogleFonts.poppins( 
+                  style: GoogleFonts.poppins(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
                   ).copyWith(fontFamilyFallback: const ['Jomolhari']),
@@ -100,27 +130,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Theme.of(context).cardColor,
             title: Text(
               'Edit Name',
-              style: GoogleFonts.poppins( fontWeight: FontWeight.bold).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             content: TextField(
               controller: controller,
-              style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              style: GoogleFonts.poppins().copyWith(
+                fontFamilyFallback: const ['Jomolhari'],
+              ),
               decoration: InputDecoration(
                 labelText: 'Your Name',
-                labelStyle: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                labelStyle: GoogleFonts.poppins().copyWith(
+                  fontFamilyFallback: const ['Jomolhari'],
+                ),
                 border: const OutlineInputBorder(),
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari'])),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.poppins().copyWith(
+                    fontFamilyFallback: const ['Jomolhari'],
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, controller.text),
                 child: Text(
                   'Save',
-                  style: GoogleFonts.poppins( 
+                  style: GoogleFonts.poppins(
                     color: Theme.of(context).primaryColor,
                     fontWeight: FontWeight.bold,
                   ).copyWith(fontFamilyFallback: const ['Jomolhari']),
@@ -147,13 +188,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           appBar: AppBar(
             title: Text(
               'Profile',
-              style: GoogleFonts.poppins( 
+              style: AppTextStyles.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                color: AppTokens.ink(context),
+              ),
             ),
-            backgroundColor: Theme.of(context).primaryColor,
-            foregroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
+            foregroundColor: AppTokens.ink(context),
             elevation: 0,
             actions: [
               IconButton(
@@ -184,62 +226,79 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Profile Header
                 Container(
                   width: double.infinity,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Color(0xFF2C97DD), Color(0xFFF5F7FA)],
+                      colors: [
+                        AppColors.primary,
+                        Theme.of(context).scaffoldBackgroundColor,
+                      ],
                     ),
                   ),
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.white,
-                        backgroundImage:
-                            currentUser?.profileImageUrl != null
-                                ? NetworkImage(currentUser!.profileImageUrl!)
-                                : null,
-                        child:
-                            currentUser?.profileImageUrl == null
-                                ? Text(
-                                  playerName.isNotEmpty
-                                      ? playerName[0].toUpperCase()
-                                      : 'T',
-                                  style: const TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF2C97DD),
-                                  ),
-                                )
-                                : null,
+                      Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 12,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.white,
+                          backgroundImage:
+                              currentUser?.profileImageUrl != null
+                                  ? NetworkImage(currentUser!.profileImageUrl!)
+                                  : null,
+                          child:
+                              currentUser?.profileImageUrl == null
+                                  ? Text(
+                                    playerName.isNotEmpty
+                                        ? playerName[0].toUpperCase()
+                                        : 'T',
+                                    style: const TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  )
+                                  : null,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         playerName,
-                        style: const TextStyle(
+                        style: AppTextStyles.poppins(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C3E50),
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 8),
                       if (currentUser?.email != null)
                         Text(
                           currentUser!.email,
-                          style: GoogleFonts.poppins( 
+                          style: AppTextStyles.poppins(
                             fontSize: 14,
-                            color: Colors.grey.shade600,
-                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                            color: Colors.white70,
+                          ),
                         ),
                       const SizedBox(height: 4),
                       Text(
                         '${progressService.league} League • ${progressService.xp} XP',
-                        style: GoogleFonts.poppins( 
+                        style: AppTextStyles.poppins(
                           fontSize: 16,
-                          color: Colors.grey.shade600,
-                        ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                          color: Colors.white70,
+                        ),
                       ),
                       if (currentUser?.authProvider == AuthProvider.google)
                         Container(
@@ -249,16 +308,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade100,
+                            color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             'Google Account',
-                            style: GoogleFonts.poppins( 
+                            style: AppTextStyles.poppins(
                               fontSize: 12,
-                              color: Colors.blue.shade800,
+                              color: Colors.white,
                               fontWeight: FontWeight.w600,
-                            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                            ),
                           ),
                         ),
                       const SizedBox(height: 32),
@@ -268,17 +327,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // Stats Section
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Your Progress',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C3E50),
-                        ),
+                        style: AppTextStyles.title(context),
                       ),
                       const SizedBox(height: 16),
 
@@ -287,33 +342,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 1.2,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                        childAspectRatio: 1.35,
                         children: [
                           _buildStatCard(
-                            'XP',
-                            '${progressService.xp}',
+                            context,
                             Icons.bolt,
-                            Colors.blue,
+                            '${progressService.xp}',
+                            'XP',
+                            AppColors.gold,
                           ),
                           _buildStatCard(
-                            'Streak',
-                            '${progressService.currentStreak}',
+                            context,
                             Icons.local_fire_department,
-                            Colors.green,
+                            '${progressService.currentStreak}',
+                            'Streak',
+                            AppColors.orange,
                           ),
                           _buildStatCard(
-                            'Completed Lessons',
-                            '${progressService.completedLevelsCount}',
+                            context,
                             Icons.check_circle,
-                            Colors.orange,
+                            '${progressService.completedLevelsCount}',
+                            'Lessons',
+                            AppColors.green,
                           ),
                           _buildStatCard(
-                            'League',
-                            progressService.league,
+                            context,
                             Icons.emoji_events,
-                            Colors.purple,
+                            progressService.league,
+                            'League',
+                            AppColors.purple,
                           ),
                         ],
                       ),
@@ -321,17 +380,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 32),
 
                       // Settings Section
-                      const Text(
-                        'Settings',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C3E50),
-                        ),
-                      ),
+                      Text('Settings', style: AppTextStyles.title(context)),
                       const SizedBox(height: 16),
 
                       _buildSettingsCard(
+                        context,
                         'Settings',
                         'Manage app preferences and notifications',
                         Icons.settings,
@@ -348,6 +401,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 12),
 
                       _buildSettingsCard(
+                        context,
                         'Reset Progress',
                         'Clear local streaks, scores, and cached progress',
                         Icons.refresh,
@@ -357,13 +411,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 12),
 
                       _buildSettingsCard(
+                        context,
                         'About App',
                         'Learn more about Bojang',
                         Icons.info,
                         _showAboutDialog,
                       ),
 
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 8),
+
+                      _buildFooter(context),
                     ],
                   ),
                 ),
@@ -376,49 +433,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildStatCard(
-    String title,
-    String value,
+    BuildContext context,
     IconData icon,
+    String value,
+    String title,
     Color color,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppTokens.surface(context),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppTokens.cardBorder(context)),
+        boxShadow: AppTokens.shadow(context),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2C3E50),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: Center(
+        child: StatChip(icon: icon, value: value, label: title, color: color),
       ),
     );
   }
 
   Widget _buildSettingsCard(
+    BuildContext context,
     String title,
     String subtitle,
     IconData icon,
@@ -426,42 +462,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTokens.surface(context),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: AppTokens.cardBorder(context)),
+        boxShadow: AppTokens.shadow(context),
       ),
       child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF2C97DD).withOpacity(0.1),
+            color: AppTokens.tint(AppColors.primary, context),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: const Color(0xFF2C97DD)),
+          child: Icon(icon, color: AppColors.primary),
         ),
         title: Text(
           title,
-          style: const TextStyle(
+          style: AppTextStyles.poppins(
             fontWeight: FontWeight.w600,
-            color: Color(0xFF2C3E50),
+            color: AppTokens.ink(context),
           ),
         ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(color: Colors.grey, fontSize: 12),
-        ),
-        trailing: const Icon(
+        subtitle: Text(subtitle, style: AppTextStyles.caption(context)),
+        trailing: Icon(
           Icons.arrow_forward_ios,
           size: 16,
-          color: Colors.grey,
+          color: AppTokens.inkSoft(context),
         ),
         onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildFooter(BuildContext context) {
+    final info = _packageInfo;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Center(
+        child: Column(
+          children: [
+            Text(
+              'ཀ',
+              style: TextStyle(
+                fontSize: 20,
+                color: AppTokens.inkSoft(context).withOpacity(0.5),
+                fontFamilyFallback: const ['Jomolhari'],
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (info != null)
+              Text(
+                'Bojang v${info.version} (${info.buildNumber})',
+                style: AppTextStyles.caption(context),
+              ),
+            const SizedBox(height: 4),
+            GestureDetector(
+              onTap: _openMadeBy,
+              child: Text(
+                'made by ta4tsering.com',
+                style: AppTextStyles.caption(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -474,16 +537,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Theme.of(context).cardColor,
             title: Text(
               'Reset Progress',
-              style: GoogleFonts.poppins( fontWeight: FontWeight.bold).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
             content: Text(
               'Are you sure you want to reset all your progress? This action cannot be undone.',
-              style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              style: GoogleFonts.poppins().copyWith(
+                fontFamilyFallback: const ['Jomolhari'],
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari'])),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.poppins().copyWith(
+                    fontFamilyFallback: const ['Jomolhari'],
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () async {
@@ -491,16 +563,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       content: Text(
                         'Progress reset on this device.',
-                        style: GoogleFonts.poppins( ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                        style: GoogleFonts.poppins().copyWith(
+                          fontFamilyFallback: const ['Jomolhari'],
+                        ),
                       ),
                     ),
                   );
                 },
                 child: Text(
                   'Reset',
-                  style: GoogleFonts.poppins( 
+                  style: GoogleFonts.poppins(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
                   ).copyWith(fontFamilyFallback: const ['Jomolhari']),
@@ -512,20 +590,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showAboutDialog() {
+    final version =
+        _packageInfo != null
+            ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})'
+            : '';
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
             title: const Text('About Bojang'),
-            content: const Column(
+            content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Bojang - Tibetan Learning App'),
-                SizedBox(height: 8),
-                Text('Version 2.0.0'),
-                SizedBox(height: 16),
-                Text(
+                const Text('Bojang - Tibetan Learning App'),
+                const SizedBox(height: 8),
+                Text('Version $version'),
+                const SizedBox(height: 16),
+                const Text(
                   'Bojang teaches Tibetan with short lessons, generated practice sessions, XP, streaks, and league progress. Start with vocabulary and phrases, then build toward verbs and sentence practice.',
                 ),
               ],
