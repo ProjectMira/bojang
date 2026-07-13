@@ -11,6 +11,10 @@ class Sublevel {
   final int wordCount;
   final int sentenceCount;
 
+  /// True when every word in this topic has an illustration, so the
+  /// picture quiz mode can be offered.
+  final bool hasImages;
+
   Sublevel({
     required this.level,
     required this.name,
@@ -20,6 +24,7 @@ class Sublevel {
     this.requiredXp = 0,
     this.wordCount = -1,
     this.sentenceCount = -1,
+    this.hasImages = false,
   });
 
   bool get hasContent => wordCount != 0 || sentenceCount != 0;
@@ -46,6 +51,7 @@ class Sublevel {
       requiredXp: json['required_xp'] as int? ?? 0,
       wordCount: json['word_count'] as int? ?? -1,
       sentenceCount: json['sentence_count'] as int? ?? -1,
+      hasImages: json['has_images'] as bool? ?? false,
     );
   }
 }

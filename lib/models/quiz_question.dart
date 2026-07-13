@@ -4,11 +4,20 @@ class QuizQuestion {
   final int correctAnswerIndex;
   final String? type;
 
+  /// Illustration prompt for picture_choice exercises; null otherwise.
+  final String? imageUrl;
+
+  /// English gloss of the pictured word — shown as the prompt when the
+  /// image fails to load.
+  final String? englishGloss;
+
   QuizQuestion({
     required this.tibetanText,
     required this.options,
     required this.correctAnswerIndex,
     this.type,
+    this.imageUrl,
+    this.englishGloss,
   });
 
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
@@ -60,6 +69,11 @@ class QuizQuestion {
       );
     }
 
+    final type = (json['type'] ?? json['exercise_type'])?.toString();
+    // Only picture_choice renders an image prompt. Plain multiple_choice
+    // payloads also carry image_url, but words mode must stay text-only.
+    final isPicture = type == 'picture_choice';
+
     return QuizQuestion(
       tibetanText: tibetanText,
       options:
@@ -67,7 +81,9 @@ class QuizQuestion {
               .map((option) => option['text'].toString().trim())
               .toList(),
       correctAnswerIndex: correctIndex,
-      type: (json['type'] ?? json['exercise_type'])?.toString(),
+      type: type,
+      imageUrl: isPicture ? json['image_url']?.toString() : null,
+      englishGloss: isPicture ? json['english_word']?.toString() : null,
     );
   }
 }

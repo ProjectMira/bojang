@@ -6,6 +6,7 @@ import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
 import '../utils/topic_visuals.dart';
 import '../widgets/app_text_style.dart';
+import '../widgets/quiz_mode_sheet.dart';
 import 'quiz_screen.dart';
 
 const List<IconData> _kSectionIcons = [
@@ -297,7 +298,7 @@ class _TopicCardState extends State<_TopicCard> {
           borderRadius: BorderRadius.circular(AppRadius.card),
           splashColor: widget.color.withOpacity(0.12),
           highlightColor: widget.color.withOpacity(0.08),
-          onTap: () {
+          onTap: () async {
             if (isLocked) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -312,12 +313,22 @@ class _TopicCardState extends State<_TopicCard> {
               );
               return;
             }
+            // Offer the picture mode only for topics whose words all have
+            // illustrations; other topics go straight to the words quiz.
+            var mode = QuizMode.words;
+            if (widget.sublevel.hasImages) {
+              final picked = await showQuizModePicker(context);
+              if (picked == null || !context.mounted) return;
+              mode = picked;
+            }
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder:
-                    (context) =>
-                        QuizScreen(topicFilePath: widget.sublevel.path),
+                    (context) => QuizScreen(
+                      topicFilePath: widget.sublevel.path,
+                      mode: mode,
+                    ),
               ),
             );
           },

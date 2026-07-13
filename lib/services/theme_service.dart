@@ -12,6 +12,7 @@ class ThemeService extends ChangeNotifier {
   static const String _audioQualityKey = 'audio_quality';
   static const String _dailyQuizTargetKey = 'daily_quiz_target';
   static const String _weeklyGoalKey = 'weekly_goal';
+  static const String _quizModeKey = 'quiz_mode';
 
   bool _isDarkMode = false;
   String _currentLanguage = 'English';
@@ -22,6 +23,7 @@ class ThemeService extends ChangeNotifier {
   String _audioQuality = 'Standard';
   int _dailyQuizTarget = 1;
   int _weeklyGoal = 5;
+  String _quizMode = 'words';
 
   bool get isDarkMode => _isDarkMode;
   String get currentLanguage => _currentLanguage;
@@ -32,6 +34,7 @@ class ThemeService extends ChangeNotifier {
   String get audioQuality => _audioQuality;
   int get dailyQuizTarget => _dailyQuizTarget;
   int get weeklyGoal => _weeklyGoal;
+  String get quizMode => _quizMode;
   
   ThemeService() {
     _loadThemePreference();
@@ -47,6 +50,7 @@ class ThemeService extends ChangeNotifier {
     _audioQuality = prefs.getString(_audioQualityKey) ?? 'Standard';
     _dailyQuizTarget = prefs.getInt(_dailyQuizTargetKey) ?? 1;
     _weeklyGoal = prefs.getInt(_weeklyGoalKey) ?? 5;
+    _quizMode = prefs.getString(_quizModeKey) ?? 'words';
     notifyListeners();
   }
   
@@ -61,6 +65,13 @@ class ThemeService extends ChangeNotifier {
     _currentLanguage = language;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_languageKey, language);
+    notifyListeners();
+  }
+
+  Future<void> setQuizMode(String value) async {
+    _quizMode = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_quizModeKey, value);
     notifyListeners();
   }
 

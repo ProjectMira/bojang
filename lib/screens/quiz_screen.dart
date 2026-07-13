@@ -10,12 +10,18 @@ import '../services/progress_service.dart';
 import '../services/theme_service.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/answer_feedback_banner.dart';
+import '../widgets/quiz_mode_sheet.dart';
 import 'lesson_complete_screen.dart';
 
 class QuizScreen extends StatefulWidget {
   final String topicFilePath;
+  final QuizMode mode;
 
-  const QuizScreen({super.key, required this.topicFilePath});
+  const QuizScreen({
+    super.key,
+    required this.topicFilePath,
+    this.mode = QuizMode.words,
+  });
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -54,7 +60,10 @@ class _QuizScreenState extends State<QuizScreen>
         final session = await ApiService().getLearningSession(
           levelId: levelId,
           numQuestions: 10,
-          exerciseTypes: const ['multiple_choice'],
+          exerciseTypes:
+              widget.mode == QuizMode.pictures
+                  ? const ['picture_choice']
+                  : const ['multiple_choice'],
         );
         if (session == null) {
           throw FormatException(
@@ -65,14 +74,17 @@ class _QuizScreenState extends State<QuizScreen>
         final allExercises = List<Map<String, dynamic>>.from(
           session['exercises'] as List<dynamic>? ?? [],
         );
-        // Only multiple_choice exercises are supported in the quiz screen.
+        // Only choice-style exercises are supported in the quiz screen.
         // memory_match and translation_match use different data shapes.
+        // picture_choice sessions may contain multiple_choice fallbacks
+        // for words that have no illustration yet.
+        const supportedTypes = {'multiple_choice', 'picture_choice'};
         final exercises =
             allExercises
                 .where(
                   (e) =>
-                      e['type'] == 'multiple_choice' ||
-                      e['exercise_type'] == 'multiple_choice',
+                      supportedTypes.contains(e['type']) ||
+                      supportedTypes.contains(e['exercise_type']),
                 )
                 .toList();
         final questions = <QuizQuestion>[];
@@ -550,14 +562,57 @@ class _QuizScreenState extends State<QuizScreen>
                           //   ),
                           // ),
                           const SizedBox(height: 16),
-                          Text(
-                            question.tibetanText,
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
+                          if (question.imageUrl != null) ...[
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                question.imageUrl!,
+                                height: 200,
+                                fit: BoxFit.contain,
+                                loadingBuilder: (context, child, progress) {
+                                  if (progress == null) return child;
+                                  return const SizedBox(
+                                    height: 200,
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                },
+                                // Image failed to load — the English gloss
+                                // becomes the prompt so the question still works.
+                                errorBuilder:
+                                    (context, error, stackTrace) => Text(
+                                      question.englishGloss?.isNotEmpty == true
+                                          ? question.englishGloss!
+                                          : question.tibetanText,
+                                      style: const TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                              ),
                             ),
-                            textAlign: TextAlign.center,
-                          ),
+                            const SizedBox(height: 12),
+                            Text(
+                              question.tibetanText,
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: AppTokens.inkSoft(context),
+                              ).copyWith(
+                                fontFamilyFallback: const ['Jomolhari'],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ] else
+                            Text(
+                              question.tibetanText,
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                         ],
                       ),
                     ),
@@ -640,7 +695,13 @@ class _QuizScreenState extends State<QuizScreen>
                                   Expanded(
                                     child: Text(
                                       question.options[index],
-                                      style: const TextStyle(fontSize: 18),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 18,
+                                      ).copyWith(
+                                        fontFamilyFallback: const [
+                                          'Jomolhari',
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],

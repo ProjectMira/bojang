@@ -9,6 +9,7 @@ import '../theme/app_tokens.dart';
 import '../utils/topic_visuals.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/cultural_tip_card.dart';
+import '../widgets/quiz_mode_sheet.dart';
 import '../widgets/section_header.dart';
 import '../widgets/shortcut_card.dart';
 import '../widgets/stat_strip.dart';
@@ -240,12 +241,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ? '${sublevel.wordCount} words'
                     : 'Lesson',
             color: topicColors[i % topicColors.length],
-            onTap: () {
+            onTap: () async {
+              // Offer the picture mode only for topics whose words all have
+              // illustrations; other topics go straight to the words quiz.
+              var mode = QuizMode.words;
+              if (sublevel.hasImages) {
+                final picked = await showQuizModePicker(context);
+                if (picked == null || !context.mounted) return;
+                mode = picked;
+              }
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder:
-                      (context) => QuizScreen(topicFilePath: sublevel.path),
+                      (context) => QuizScreen(
+                        topicFilePath: sublevel.path,
+                        mode: mode,
+                      ),
                 ),
               );
             },
