@@ -23,10 +23,16 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
   String? _topicId;
   String _topicName = '';
 
+  /// All fetched pairs for the game; played in boards of [_pairsPerBoard].
+  List<Map<String, dynamic>> _allPairs = [];
+  int _boardStart = 0;
+  static const int _pairsPerBoard = 2;
+
   List<MemoryCard> _cards = [];
   int? _firstCardIndex;
   int? _secondCardIndex;
   bool _canFlip = true;
+  int _boardMatches = 0;
   int _matches = 0;
   int _moves = 0;
   int _totalPairs = 0;
@@ -64,9 +70,14 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
     if (!mounted) return;
     setState(() {
       _topicsLoading = false;
+      // Photo matching needs topics where every word has an illustration.
       _topics =
           (levels ?? [])
-              .where((level) => (level['word_count'] as int? ?? 0) >= 4)
+              .where(
+                (level) =>
+                    level['has_images'] == true &&
+                    (level['word_count'] as int? ?? 0) >= 4,
+              )
               .toList();
     });
   }
@@ -123,39 +134,54 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
   }
 
   void _initializeGame(List<Map<String, dynamic>> pairs) {
+    _allPairs = List<Map<String, dynamic>>.from(pairs)..shuffle(Random());
+    _totalPairs = _allPairs.length;
+    _boardStart = 0;
+    _matches = 0;
+    _moves = 0;
+    _loadBoard();
+  }
+
+  /// Puts the next [_pairsPerBoard] pairs on the board: one photo (or
+  /// English) card plus one Tibetan word card per pair, shuffled.
+  void _loadBoard() {
+    final boardPairs = _allPairs.skip(_boardStart).take(_pairsPerBoard);
     final cards = <MemoryCard>[];
-    for (int i = 0; i < pairs.length; i++) {
-      final tibetan = (pairs[i]['tibetan'] ?? '').toString();
-      final english = (pairs[i]['english'] ?? '').toString();
-      final phonetic = (pairs[i]['phonetic'] ?? '').toString();
+    var pairId = 0;
+    for (final pair in boardPairs) {
+      final tibetan = (pair['tibetan'] ?? '').toString();
+      final english = (pair['english'] ?? '').toString();
+      final phonetic = (pair['phonetic'] ?? '').toString();
+      final imageUrl = pair['image_url']?.toString();
+      final hasImage = imageUrl != null && imageUrl.isNotEmpty;
       cards.add(
         MemoryCard(
-          id: i * 2,
+          id: pairId * 2,
           text: tibetan,
           subtitle: '',
           type: CardType.tibetan,
-          pairId: i,
+          pairId: pairId,
         ),
       );
       cards.add(
         MemoryCard(
-          id: i * 2 + 1,
+          id: pairId * 2 + 1,
           text: english,
-          subtitle: phonetic,
-          type: CardType.english,
-          pairId: i,
+          subtitle: hasImage ? '' : phonetic,
+          type: hasImage ? CardType.photo : CardType.english,
+          imageUrl: hasImage ? imageUrl : null,
+          pairId: pairId,
         ),
       );
+      pairId++;
     }
     cards.shuffle(Random());
 
     setState(() {
       _cards = cards;
-      _totalPairs = pairs.length;
       _firstCardIndex = null;
       _secondCardIndex = null;
-      _matches = 0;
-      _moves = 0;
+      _boardMatches = 0;
       _canFlip = true;
       _phase = _GamePhase.playing;
     });
@@ -194,14 +220,25 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
         firstCard.isMatched = true;
         secondCard.isMatched = true;
         _matches++;
+        _boardMatches++;
       });
 
       _matchController.forward().then((_) {
         _matchController.reset();
       });
 
-      if (_matches == _totalPairs) {
-        _showCompletionDialog();
+      final boardSize = _cards.length ~/ 2;
+      if (_boardMatches == boardSize) {
+        if (_boardStart + _pairsPerBoard < _allPairs.length) {
+          // Let the match animation land, then bring in the next four cards.
+          Future.delayed(const Duration(milliseconds: 900), () {
+            if (!mounted) return;
+            _boardStart += _pairsPerBoard;
+            _loadBoard();
+          });
+        } else {
+          _showCompletionDialog();
+        }
       }
     } else {
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -346,7 +383,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
         ),
         const SizedBox(height: 4),
         Text(
-          'Match Tibetan words with their meanings.',
+          'Match photos with their Tibetan words, four cards at a time.',
           style: GoogleFonts.poppins(
             fontSize: 14,
             color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -509,16 +546,17 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
           ),
         ),
 
-        // Game Grid
+        // Game Grid: one board of four cards (two photos + two words).
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(24),
             child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 0.8,
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.85,
               ),
               itemCount: _cards.length,
               itemBuilder: (context, index) {
@@ -532,7 +570,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
         Container(
           padding: const EdgeInsets.all(16),
           child: Text(
-            'Match Tibetan words with their English meanings',
+            'Match each picture with its Tibetan word',
             style: GoogleFonts.poppins(
               fontSize: 14,
               color:
@@ -597,6 +635,76 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
     );
   }
 
+  Widget _buildCardFace(MemoryCard card) {
+    if (card.type == CardType.photo && card.imageUrl != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.network(
+          card.imageUrl!,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return const Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            );
+          },
+          // If the photo can't load, fall back to the English word so the
+          // pair stays matchable.
+          errorBuilder: (context, error, stackTrace) => _cardText(card),
+        ),
+      );
+    }
+    return _cardText(card);
+  }
+
+  Widget _cardText(MemoryCard card) {
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            card.text,
+            textAlign: TextAlign.center,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              fontSize: card.type == CardType.tibetan ? 24 : 15,
+              fontWeight: FontWeight.bold,
+              color:
+                  card.isMatched
+                      ? Colors.green.shade700
+                      : Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : const Color(0xFF2C3E50),
+            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+          ),
+          if (card.type == CardType.english && card.subtitle.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                card.subtitle,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey.shade500,
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCard(MemoryCard card, int index) {
     return GestureDetector(
       onTap: () => _onCardTapped(index),
@@ -630,52 +738,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
               child: Center(
                 child:
                     card.isFlipped || card.isMatched
-                        ? Padding(
-                          padding: const EdgeInsets.all(4),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                card.text,
-                                textAlign: TextAlign.center,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.poppins(
-                                  fontSize:
-                                      card.type == CardType.tibetan ? 18 : 13,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      card.isMatched
-                                          ? Colors.green.shade700
-                                          : Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? Colors.white
-                                          : const Color(0xFF2C3E50),
-                                ).copyWith(
-                                  fontFamilyFallback: const ['Jomolhari'],
-                                ),
-                              ),
-                              if (card.type == CardType.english &&
-                                  card.subtitle.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 2),
-                                  child: Text(
-                                    card.subtitle,
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 9,
-                                      fontStyle: FontStyle.italic,
-                                      color: Colors.grey.shade500,
-                                    ).copyWith(
-                                      fontFamilyFallback: const ['Jomolhari'],
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        )
+                        ? _buildCardFace(card)
                         : const Icon(
                           Icons.help_outline,
                           color: Colors.white,
@@ -695,6 +758,7 @@ class MemoryCard {
   final String text;
   final String subtitle;
   final CardType type;
+  final String? imageUrl;
   final int pairId;
   bool isFlipped;
   bool isMatched;
@@ -705,9 +769,10 @@ class MemoryCard {
     required this.subtitle,
     required this.type,
     required this.pairId,
+    this.imageUrl,
     this.isFlipped = false,
     this.isMatched = false,
   });
 }
 
-enum CardType { tibetan, english }
+enum CardType { tibetan, english, photo }
