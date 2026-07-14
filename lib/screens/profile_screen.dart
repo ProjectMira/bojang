@@ -64,6 +64,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _openSignIn() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const AuthScreen()),
+      (route) => false,
+    );
+  }
+
   Future<void> _handleLogout() async {
     final shouldLogout = await showDialog<bool>(
       context: context,
@@ -320,6 +327,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               fontSize: 12,
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      if (currentUser == null)
+                        Container(
+                          margin: const EdgeInsets.only(top: 12),
+                          child: ElevatedButton.icon(
+                            onPressed: _openSignIn,
+                            icon: const Icon(Icons.login, size: 18),
+                            label: Text(
+                              'Sign in to save your progress',
+                              style: AppTextStyles.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppColors.primary,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
                             ),
                           ),
                         ),
