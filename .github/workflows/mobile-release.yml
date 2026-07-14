@@ -522,25 +522,44 @@ jobs:
           set -euo pipefail
           token="$(ruby "$RUNNER_TEMP/asc_jwt.rb" "$ASC_KEY_ID" "$ASC_ISSUER_ID" "$ASC_KEY_PATH")"
 
-          bundle_resource_id="$(curl -sS \
-            -H "Authorization: Bearer $token" \
-            "https://api.appstoreconnect.apple.com/v1/bundleIds?filter%5Bidentifier%5D=$IOS_BUNDLE_ID&limit=200" \
-            | python3 -c '
+          # Diagnostics go into ::error:: annotations because job logs are not
+          # readable without repo admin access.
+          fetch() { # fetch <name> <method> <url> [body] -> body on stdout, fails with annotated error
+            local name="$1" method="$2" url="$3" body="${4:-}" out status
+            out="$RUNNER_TEMP/asc-$name.json"
+            if [ -n "$body" ]; then
+              status="$(curl -sS -o "$out" -w '%{http_code}' -X "$method" \
+                -H "Authorization: Bearer $token" -H "Content-Type: application/json" \
+                -d "$body" "$url")" || { echo "::error::$name: curl failed"; return 1; }
+            else
+              status="$(curl -sS -o "$out" -w '%{http_code}' -X "$method" \
+                -H "Authorization: Bearer $token" "$url")" || { echo "::error::$name: curl failed"; return 1; }
+            fi
+            case "$status" in
+              2*) cat "$out";;
+              *)
+                echo "::error::$name returned HTTP $status: $(tr -d '\n' < "$out" | head -c 600)"
+                return 1
+                ;;
+            esac
+          }
+
+          bundle_ids_json="$(fetch bundle-ids GET "https://api.appstoreconnect.apple.com/v1/bundleIds?filter%5Bidentifier%5D=$IOS_BUNDLE_ID&limit=200")"
+          bundle_resource_id="$(printf '%s' "$bundle_ids_json" | python3 -c '
           import json, os, sys
-          data = json.load(sys.stdin)["data"]
+          data = json.load(sys.stdin).get("data", [])
           matches = [b for b in data if b["attributes"]["identifier"] == os.environ["IOS_BUNDLE_ID"]
                      and b["attributes"]["platform"] in ("IOS", "UNIVERSAL")]
           print(matches[0]["id"] if matches else "")
           ')"
           if [ -z "$bundle_resource_id" ]; then
-            echo "::error::No App ID found for $IOS_BUNDLE_ID in App Store Connect"
+            echo "::error::No App ID found for $IOS_BUNDLE_ID in App Store Connect (response: $(printf '%s' "$bundle_ids_json" | tr -d '\n' | head -c 400))"
             exit 1
           fi
+          echo "App ID resource: $bundle_resource_id"
 
-          has_capability="$(curl -sS \
-            -H "Authorization: Bearer $token" \
-            "https://api.appstoreconnect.apple.com/v1/bundleIds/$bundle_resource_id/bundleIdCapabilities" \
-            | python3 -c '
+          caps_json="$(fetch capabilities GET "https://api.appstoreconnect.apple.com/v1/bundleIds/$bundle_resource_id/bundleIdCapabilities")"
+          has_capability="$(printf '%s' "$caps_json" | python3 -c '
           import json, sys
           caps = json.load(sys.stdin).get("data", [])
           print("yes" if any(c["attributes"]["capabilityType"] == "SIGN_IN_WITH_APPLE" for c in caps) else "no")
@@ -552,15 +571,9 @@ jobs:
           fi
 
           echo "Enabling Sign in with Apple capability on App ID $IOS_BUNDLE_ID..."
-          status="$(curl -sS -o "$RUNNER_TEMP/capability-response.json" -w '%{http_code}' \
-            -X POST \
-            -H "Authorization: Bearer $token" \
-            -H "Content-Type: application/json" \
-            "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities" \
-            -d "{\"data\":{\"type\":\"bundleIdCapabilities\",\"attributes\":{\"capabilityType\":\"SIGN_IN_WITH_APPLE\"},\"relationships\":{\"bundleId\":{\"data\":{\"type\":\"bundleIds\",\"id\":\"$bundle_resource_id\"}}}}}")"
-          if [ "$status" != "201" ]; then
-            cat "$RUNNER_TEMP/capability-response.json"
-            echo "::error::Could not enable the Sign in with Apple capability (HTTP $status). Enable it manually: developer.apple.com -> Certificates, Identifiers & Profiles -> Identifiers -> $IOS_BUNDLE_ID -> check 'Sign In with Apple'."
+          payload="{\"data\":{\"type\":\"bundleIdCapabilities\",\"attributes\":{\"capabilityType\":\"SIGN_IN_WITH_APPLE\"},\"relationships\":{\"bundleId\":{\"data\":{\"type\":\"bundleIds\",\"id\":\"$bundle_resource_id\"}}}}}"
+          if ! fetch enable-capability POST "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities" "$payload" >/dev/null; then
+            echo "::error::Could not enable the Sign in with Apple capability. Enable it manually: developer.apple.com -> Certificates, Identifiers & Profiles -> Identifiers -> $IOS_BUNDLE_ID -> check 'Sign In with Apple'."
             exit 1
           fi
           echo "Capability enabled."
