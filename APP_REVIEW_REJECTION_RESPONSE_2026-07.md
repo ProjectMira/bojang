@@ -16,10 +16,11 @@ Guideline 2.1 (demo account did not work).
 
 ## Steps to resubmit (manual, in App Store Connect)
 
-1. Wait for the new build (2.0.0, next build number) to finish processing in
-   TestFlight after CI completes.
+1. Wait for build **2.0.0 (18)** to finish processing in TestFlight. (Build 17
+   also has Sign in with Apple, but 18 additionally restores a way for
+   signed-out users to reach the login screen from the Profile tab — use 18.)
 2. In App Store Connect → Bojang → App Store tab → create/select the new
-   version (2.0.0) and attach the new build.
+   version (2.0.0) and attach build 18.
 3. App Information → App Review Information:
    - **Sign-in required: NO** (uncheck it / remove the demo credentials
      ta6tsering@gmail.com — this is what triggered the 2.1 rejection).
@@ -32,7 +33,7 @@ Guideline 2.1 (demo account did not work).
 Hello,
 
 Thank you for the review. We have addressed both issues in the new build
-(version 2.0.0) that we are submitting with this reply.
+(version 2.0.0, build 18) that we are submitting with this reply.
 
 Guideline 4.8 — Design — Login Services:
 We have added Sign in with Apple as an equivalent login option. It is
