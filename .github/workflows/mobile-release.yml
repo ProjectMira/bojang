@@ -630,8 +630,13 @@ jobs:
         # capability (ensured on the App ID earlier in this job).
         run: |
           set -euo pipefail
-          app_path="build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app"
-          test -d "$app_path"
+          # The product is named Bojang.app, so discover it like the verify
+          # step does instead of hardcoding a name.
+          app_path="$(find build/ios/archive/Runner.xcarchive/Products/Applications -maxdepth 1 -name '*.app' -print -quit)"
+          if [ -z "$app_path" ] || [ ! -d "$app_path" ]; then
+            echo "::error::No .app found in the archive at build/ios/archive/Runner.xcarchive/Products/Applications"
+            exit 1
+          fi
           if [ -d "$app_path/Frameworks" ]; then
             find "$app_path/Frameworks" -maxdepth 1 \( -name '*.framework' -o -name '*.dylib' \) -print0 \
               | xargs -0 -n1 codesign --force --sign - --timestamp=none
