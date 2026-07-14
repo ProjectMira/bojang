@@ -559,10 +559,11 @@ jobs:
 
           call capabilities GET "https://api.appstoreconnect.apple.com/v1/bundleIds/$bundle_resource_id/bundleIdCapabilities"
           [ "$CALL_STATUS" = "200" ] || fail_call "GET bundleIdCapabilities"
+          # Sign in with Apple is APPLE_ID_AUTH in the App Store Connect API.
           has_capability="$(python3 -c '
           import json, sys
           caps = json.load(sys.stdin).get("data", [])
-          print("yes" if any(c["attributes"]["capabilityType"] == "SIGN_IN_WITH_APPLE" for c in caps) else "no")
+          print("yes" if any(c["attributes"]["capabilityType"] == "APPLE_ID_AUTH" for c in caps) else "no")
           ' < "$CALL_OUT")"
 
           if [ "$has_capability" = "yes" ]; then
@@ -571,7 +572,7 @@ jobs:
           fi
 
           echo "Enabling Sign in with Apple capability on App ID $IOS_BUNDLE_ID..."
-          payload="{\"data\":{\"type\":\"bundleIdCapabilities\",\"attributes\":{\"capabilityType\":\"SIGN_IN_WITH_APPLE\"},\"relationships\":{\"bundleId\":{\"data\":{\"type\":\"bundleIds\",\"id\":\"$bundle_resource_id\"}}}}}"
+          payload="{\"data\":{\"type\":\"bundleIdCapabilities\",\"attributes\":{\"capabilityType\":\"APPLE_ID_AUTH\",\"settings\":[{\"key\":\"APPLE_ID_AUTH_APP_CONSENT\",\"options\":[{\"key\":\"PRIMARY_APP_CONSENT\"}]}]},\"relationships\":{\"bundleId\":{\"data\":{\"type\":\"bundleIds\",\"id\":\"$bundle_resource_id\"}}}}}"
           call enable-capability POST "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities" "$payload"
           if [ "$CALL_STATUS" != "201" ]; then
             echo "::warning::If the API key cannot manage identifiers, enable the capability manually: developer.apple.com -> Certificates, Identifiers & Profiles -> Identifiers -> $IOS_BUNDLE_ID -> check 'Sign In with Apple', then re-run."
