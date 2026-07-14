@@ -124,6 +124,85 @@ class GoogleAuthService {
     }
   }
 
+  // Sign in with Apple (native flow through Firebase Auth; iOS/macOS only)
+  Future<User?> signInWithApple() async {
+    if (!AppConfig.firebaseEnabled) {
+      print('Apple Sign-In requires Firebase, which is disabled in this build');
+      return null;
+    }
+
+    try {
+      final appleProvider =
+          firebase_auth.AppleAuthProvider()
+            ..addScope('email')
+            ..addScope('name');
+      final credential = await firebase_auth.FirebaseAuth.instance
+          .signInWithProvider(appleProvider);
+      final firebaseUser = credential.user;
+      if (firebaseUser == null) return null;
+
+      final idToken = await firebaseUser.getIdToken();
+      // Apple only shares the name on the first authorization, and the email
+      // may be a private relay address when the user hides their email.
+      final email = firebaseUser.email ?? '';
+      final displayName =
+          (firebaseUser.displayName?.trim().isNotEmpty ?? false)
+              ? firebaseUser.displayName!.trim()
+              : (email.contains('@') ? email.split('@').first : 'Learner');
+
+      final user = User(
+        id: firebaseUser.uid,
+        email: email,
+        username:
+            email.contains('@') ? _generateUsername(email) : firebaseUser.uid,
+        displayName: displayName,
+        profileImageUrl: firebaseUser.photoURL,
+        createdAt: DateTime.now(),
+        lastLogin: DateTime.now(),
+        authProvider: AuthProvider.apple,
+      );
+
+      if (email.isNotEmpty && idToken != null) {
+        try {
+          final result = await _apiService.appleAuth(
+            uid: firebaseUser.uid,
+            email: email,
+            displayName: displayName,
+            profileImageUrl: firebaseUser.photoURL,
+            idToken: idToken,
+          );
+
+          if (result != null) {
+            final backendUser = User.fromJson(result['user']);
+            _currentUser = backendUser;
+            await _cacheUser(backendUser);
+            return backendUser;
+          }
+        } catch (apiError) {
+          print('Backend API error during Apple auth: $apiError');
+          // Continue with offline mode
+        }
+      }
+
+      // Use Apple data if backend is not available or failed
+      _currentUser = user;
+      await _cacheUser(user);
+      return user;
+    } on firebase_auth.FirebaseAuthException catch (error) {
+      if (error.code == 'canceled' ||
+          error.code == 'user-cancelled' ||
+          error.code == 'web-context-cancelled') {
+        print('Apple sign-in cancelled by user');
+        return null;
+      }
+      print('Apple Sign-In error: ${error.code} ${error.message}');
+      return null;
+    } catch (error) {
+      print('Apple Sign-In error: $error');
+      return null;
+    }
+  }
+
   // Sign out
   Future<void> signOut() async {
     try {

@@ -13,7 +13,13 @@
 **Username:** Not Required
 **Password:** Not Required
 
-**Reason:** This app does not require user registration or login. All features are accessible immediately upon app launch.
+**Reason:** No demo account is needed. Sign-in is optional: every learning feature is
+available without an account via the "Continue without account" button on the first
+screen (this is the app's built-in demonstration mode). To review the optional
+account features (cross-device sync of XP, streaks, and leagues), use **Sign in with
+Apple** with any Apple ID — an account is created automatically on first sign-in.
+Do NOT enter Google demo credentials in App Store Connect; Google blocks
+sign-ins from review environments, which caused a Guideline 2.1 rejection in July 2026.
 
 ### Review Notes
 **Copy and paste this into App Store Connect:**
@@ -24,8 +30,14 @@ BOJANG - TIBETAN LANGUAGE LEARNING APP
 APP OVERVIEW:
 Bojang is an educational app designed to teach the Tibetan language to English speakers through interactive quizzes. The app features a progressive learning system with three skill levels and 26 topic-based lessons.
 
+LOGIN INFORMATION (Guidelines 2.1 and 4.8):
+- No account or demo credentials are required. Tap "Continue without account" on the first screen to access ALL learning features. This is the app's demonstration mode.
+- Sign-in is optional and only adds cross-device sync of XP, streaks, and league progress.
+- Two equivalent login options are offered: Sign in with Apple and Sign in with Google. Sign in with Apple collects only name and email, supports Hide My Email, and no app interactions are collected for advertising.
+- To test account features, use Sign in with Apple with any Apple ID; an account is created automatically.
+
 KEY FEATURES TO TEST:
-1. Launch the app - no login required
+1. Launch the app - tap "Continue without account" (no login required), or use Sign in with Apple
 2. Navigate through the level selection screen
 3. Try quizzes from different levels (Beginner, Intermediate, Advanced)
 4. Test audio feedback by answering questions correctly and incorrectly
@@ -43,8 +55,8 @@ CONTENT INFORMATION:
 TECHNICAL NOTES:
 - App works offline after initial installation
 - No network connectivity required for core functionality
-- No data collection or user tracking
-- Local storage only for progress tracking
+- Without an account: progress is stored locally only; no data collection or tracking
+- With an optional account (Apple or Google sign-in): name and email are used to sync learning progress across devices; no advertising or tracking
 - Compatible with iOS devices
 
 CULTURAL SENSITIVITY:

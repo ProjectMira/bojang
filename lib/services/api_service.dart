@@ -64,7 +64,41 @@ class ApiService {
     String? idToken,
     String? accessToken,
   }) async {
-    final token = idToken ?? accessToken;
+    return _providerAuth(
+      providerUserId: googleId,
+      email: email,
+      displayName: displayName,
+      profileImageUrl: profileImageUrl,
+      token: idToken ?? accessToken,
+      authProvider: 'google',
+    );
+  }
+
+  Future<Map<String, dynamic>?> appleAuth({
+    required String uid,
+    required String email,
+    required String displayName,
+    String? profileImageUrl,
+    String? idToken,
+  }) async {
+    return _providerAuth(
+      providerUserId: uid,
+      email: email,
+      displayName: displayName,
+      profileImageUrl: profileImageUrl,
+      token: idToken,
+      authProvider: 'apple',
+    );
+  }
+
+  Future<Map<String, dynamic>?> _providerAuth({
+    required String providerUserId,
+    required String email,
+    required String displayName,
+    String? profileImageUrl,
+    String? token,
+    required String authProvider,
+  }) async {
     if (token == null || token.isEmpty) return null;
 
     try {
@@ -78,7 +112,7 @@ class ApiService {
       );
       if (profile == null) return null;
 
-      final uid = (profile['uid'] ?? googleId).toString();
+      final uid = (profile['uid'] ?? providerUserId).toString();
       final user = {
         'id': uid,
         'uid': uid,
@@ -87,15 +121,15 @@ class ApiService {
         'display_name': profile['display_name'] ?? displayName,
         'profile_image_url': profileImageUrl,
         'created_at': DateTime.now().toIso8601String(),
-        'google_id': googleId,
-        'auth_provider': 'google',
+        if (authProvider == 'google') 'google_id': providerUserId,
+        'auth_provider': authProvider,
         'xp': profile['xp'] ?? 0,
         'streak': profile['streak'] ?? 0,
         'league': profile['league'] ?? 'Bronze',
       };
       return {'token': token, 'user': user, 'profile': profile};
     } catch (e) {
-      print('Google auth sync error: $e');
+      print('$authProvider auth sync error: $e');
       return null;
     }
   }

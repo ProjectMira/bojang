@@ -122,4 +122,4 @@ class User {
   }
 }
 
-enum AuthProvider { email, google }
+enum AuthProvider { email, google, apple }

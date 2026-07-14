@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/app_config.dart';
 import '../services/google_auth_service.dart';
+import '../widgets/apple_sign_in_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import 'main_navigation_screen.dart';
 
@@ -13,8 +15,12 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
+enum _SignInMethod { apple, google }
+
 class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
-  bool _isLoading = false;
+  _SignInMethod? _loadingMethod;
+
+  bool get _isLoading => _loadingMethod != null;
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -58,8 +64,37 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  Future<void> _handleAppleSignIn() async {
+    setState(() => _loadingMethod = _SignInMethod.apple);
+
+    try {
+      final user = await _googleAuthService.signInWithApple();
+      if (user != null && mounted) {
+        _showSnackBar('Welcome ${user.displayName}!', isSuccess: true);
+        await Future.delayed(
+          const Duration(milliseconds: 500),
+        ); // Brief delay to show success
+        _navigateToMainScreen();
+      } else {
+        if (mounted) {
+          _showSnackBar(
+            'Apple sign-in was cancelled or failed. You can still continue without an account.',
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(
+          'Apple sign-in failed.\n\nYou can still continue without an account.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loadingMethod = null);
+    }
+  }
+
   Future<void> _handleGoogleSignIn() async {
-    setState(() => _isLoading = true);
+    setState(() => _loadingMethod = _SignInMethod.google);
 
     try {
       final user = await _googleAuthService.signInWithGoogle();
@@ -91,7 +126,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         );
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _loadingMethod = null);
     }
   }
 
@@ -202,7 +237,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 12),
             Text(
-              'Sign in with Google to sync XP, streaks, and league progress across devices.',
+              'Sign in to sync XP, streaks, and league progress across devices.',
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 color:
@@ -213,9 +248,16 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
+            if (AppConfig.appleSignInEnabled) ...[
+              AppleSignInButton(
+                onPressed: _isLoading ? null : _handleAppleSignIn,
+                isLoading: _loadingMethod == _SignInMethod.apple,
+              ),
+              const SizedBox(height: 12),
+            ],
             GoogleSignInButton(
-              onPressed: _handleGoogleSignIn,
-              isLoading: _isLoading,
+              onPressed: _isLoading ? null : _handleGoogleSignIn,
+              isLoading: _loadingMethod == _SignInMethod.google,
             ),
           ],
         ),

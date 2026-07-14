@@ -144,9 +144,10 @@ void main() {
     });
 
     test('should handle AuthProvider enum correctly', () {
-      expect(AuthProvider.values.length, equals(2));
+      expect(AuthProvider.values.length, equals(3));
       expect(AuthProvider.values.contains(AuthProvider.email), isTrue);
       expect(AuthProvider.values.contains(AuthProvider.google), isTrue);
+      expect(AuthProvider.values.contains(AuthProvider.apple), isTrue);
     });
 
     test('should serialize and deserialize AuthProvider correctly', () {

@@ -47,9 +47,9 @@ name: Mobile Release
           - beta
           - production
       enable_ios_firebase:
-        description: Enable Firebase on iOS; requires GOOGLE_SERVICE_INFO_PLIST
+        description: Enable Firebase on iOS; requires GOOGLE_SERVICE_INFO_PLIST. Sign in with Apple needs this, so App Review (guideline 4.8) fails without it.
         required: true
-        default: false
+        default: true
         type: boolean
 
 permissions:
@@ -115,7 +115,9 @@ jobs:
             fi
             release_ios="true"
             android_track="internal"
-            enable_ios_firebase="false"
+            # Firebase must stay enabled on iOS: Sign in with Apple (App Store
+            # guideline 4.8) and backend account sync both run through it.
+            enable_ios_firebase="true"
           else
             version_bump="$INPUT_VERSION_BUMP"
             requested_version="$INPUT_VERSION"
@@ -513,6 +515,56 @@ jobs:
             exit 1
           fi
 
+      - name: Ensure Sign in with Apple capability on the App ID
+        env:
+          ASC_KEY_PATH: ${{ steps.asc-key.outputs.path }}
+        run: |
+          set -euo pipefail
+          token="$(ruby "$RUNNER_TEMP/asc_jwt.rb" "$ASC_KEY_ID" "$ASC_ISSUER_ID" "$ASC_KEY_PATH")"
+
+          bundle_resource_id="$(curl -sS \
+            -H "Authorization: Bearer $token" \
+            "https://api.appstoreconnect.apple.com/v1/bundleIds?filter%5Bidentifier%5D=$IOS_BUNDLE_ID&limit=200" \
+            | python3 -c '
+          import json, os, sys
+          data = json.load(sys.stdin)["data"]
+          matches = [b for b in data if b["attributes"]["identifier"] == os.environ["IOS_BUNDLE_ID"]
+                     and b["attributes"]["platform"] in ("IOS", "UNIVERSAL")]
+          print(matches[0]["id"] if matches else "")
+          ')"
+          if [ -z "$bundle_resource_id" ]; then
+            echo "::error::No App ID found for $IOS_BUNDLE_ID in App Store Connect"
+            exit 1
+          fi
+
+          has_capability="$(curl -sS \
+            -H "Authorization: Bearer $token" \
+            "https://api.appstoreconnect.apple.com/v1/bundleIds/$bundle_resource_id/bundleIdCapabilities" \
+            | python3 -c '
+          import json, sys
+          caps = json.load(sys.stdin).get("data", [])
+          print("yes" if any(c["attributes"]["capabilityType"] == "SIGN_IN_WITH_APPLE" for c in caps) else "no")
+          ')"
+
+          if [ "$has_capability" = "yes" ]; then
+            echo "App ID $IOS_BUNDLE_ID already has the Sign in with Apple capability."
+            exit 0
+          fi
+
+          echo "Enabling Sign in with Apple capability on App ID $IOS_BUNDLE_ID..."
+          status="$(curl -sS -o "$RUNNER_TEMP/capability-response.json" -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer $token" \
+            -H "Content-Type: application/json" \
+            "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities" \
+            -d "{\"data\":{\"type\":\"bundleIdCapabilities\",\"attributes\":{\"capabilityType\":\"SIGN_IN_WITH_APPLE\"},\"relationships\":{\"bundleId\":{\"data\":{\"type\":\"bundleIds\",\"id\":\"$bundle_resource_id\"}}}}}")"
+          if [ "$status" != "201" ]; then
+            cat "$RUNNER_TEMP/capability-response.json"
+            echo "::error::Could not enable the Sign in with Apple capability (HTTP $status). Enable it manually: developer.apple.com -> Certificates, Identifiers & Profiles -> Identifiers -> $IOS_BUNDLE_ID -> check 'Sign In with Apple'."
+            exit 1
+          fi
+          echo "Capability enabled."
+
       - name: Install dependencies
         run: |
           set -euo pipefail
@@ -612,6 +664,27 @@ jobs:
           test "$actual_version" = "${{ needs.prepare.outputs.marketing }}"
           test "$actual_build" = "${{ needs.prepare.outputs.build }}"
           codesign --verify --deep --strict "$app_path"
+
+          # Sign in with Apple is required by App Review (guideline 4.8). The
+          # unsigned-archive/export flow must not drop the entitlement, so fail
+          # the release if the signed app lacks it.
+          if ! codesign -d --entitlements - "$app_path" 2>/dev/null | grep -aq 'com.apple.developer.applesignin'; then
+            echo "::error::Exported app is missing the com.apple.developer.applesignin entitlement; Sign in with Apple would crash. Check Runner.entitlements, the App ID capability, and the export signing step."
+            exit 1
+          fi
+
+          # Firebase powers Sign in with Apple and account sync; a placeholder
+          # plist means the restore step was skipped and auth would break.
+          gs_plist="$app_path/GoogleService-Info.plist"
+          if [ ! -f "$gs_plist" ]; then
+            echo "::error::GoogleService-Info.plist missing from the app bundle; Firebase cannot initialize."
+            exit 1
+          fi
+          bundled_project="$(/usr/libexec/PlistBuddy -c 'Print :PROJECT_ID' "$gs_plist")"
+          if [ "$bundled_project" = "bojang-placeholder" ]; then
+            echo "::error::App bundle contains the placeholder GoogleService-Info.plist; set the GOOGLE_SERVICE_INFO_PLIST secret."
+            exit 1
+          fi
 
       - name: Upload to TestFlight
         run: |
