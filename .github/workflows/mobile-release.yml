@@ -620,6 +620,27 @@ jobs:
             FLUTTER_BUILD_NUMBER="${{ needs.prepare.outputs.build }}" \
             2>&1 | tee build/ios/xcodebuild-archive.log
 
+      - name: Embed entitlements via ad-hoc signature
+        # The archive is built unsigned, and exportArchive derives the
+        # entitlements to re-sign with from the app's existing signature —
+        # an unsigned app therefore loses com.apple.developer.applesignin.
+        # Ad-hoc signing the archived app with Runner.entitlements gives the
+        # export step a signature to preserve; it then re-signs with the real
+        # distribution certificate and a profile that authorizes the
+        # capability (ensured on the App ID earlier in this job).
+        run: |
+          set -euo pipefail
+          app_path="build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app"
+          test -d "$app_path"
+          if [ -d "$app_path/Frameworks" ]; then
+            find "$app_path/Frameworks" -maxdepth 1 \( -name '*.framework' -o -name '*.dylib' \) -print0 \
+              | xargs -0 -n1 codesign --force --sign - --timestamp=none
+          fi
+          codesign --force --sign - --timestamp=none \
+            --entitlements ios/Runner/Runner.entitlements "$app_path"
+          codesign -d --entitlements - "$app_path" 2>/dev/null | grep -aq 'com.apple.developer.applesignin' \
+            || { echo "::error::Ad-hoc signature is missing the applesignin entitlement"; exit 1; }
+
       - name: Export IPA
         id: export
         run: |
