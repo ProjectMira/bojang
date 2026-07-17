@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../services/theme_service.dart';
 import '../services/progress_service.dart';
 import '../services/api_service.dart';
+import '../services/google_auth_service.dart';
 import 'notification_settings_screen.dart';
+import 'auth_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -145,6 +147,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
 
                 const SizedBox(height: 32),
+
+                // Account Section (signed-in users only)
+                if (Provider.of<GoogleAuthService>(
+                  context,
+                  listen: false,
+                ).isSignedIn) ...[
+                  _buildSectionHeader('Account'),
+                  const SizedBox(height: 16),
+
+                  _buildSettingsCard(
+                    title: 'Delete Account',
+                    subtitle: 'Permanently delete your account and synced data',
+                    icon: Icons.delete_forever,
+                    onTap: _handleDeleteAccount,
+                    isDestructive: true,
+                  ),
+
+                  const SizedBox(height: 32),
+                ],
 
                 // About Section
                 _buildSectionHeader('About'),
@@ -566,6 +587,165 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
     );
+  }
+
+  Future<void> _handleDeleteAccount() async {
+    final wantsToContinue = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Delete Account?',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+            ),
+            content: Text(
+              'This permanently deletes your account and all synced data: '
+              'XP, streaks, league progress, completed levels, and quiz '
+              'history. This cannot be undone.',
+              style: GoogleFonts.poppins().copyWith(
+                fontFamilyFallback: const ['Jomolhari'],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text(
+                  'Continue',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+    );
+    if (wantsToContinue != true || !mounted) return;
+
+    final confirmedDeletion = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Are you sure?',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+            ),
+            content: Text(
+              'Your account will be permanently deleted. You can keep using '
+              'Bojang without an account, but your synced progress cannot '
+              'be recovered.',
+              style: GoogleFonts.poppins().copyWith(
+                fontFamilyFallback: const ['Jomolhari'],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text(
+                  'Delete My Account',
+                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+    );
+    if (confirmedDeletion != true || !mounted) return;
+
+    final apiService = Provider.of<ApiService>(context, listen: false);
+    final authService = Provider.of<GoogleAuthService>(context, listen: false);
+    final progressService = Provider.of<ProgressService>(
+      context,
+      listen: false,
+    );
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    bool success;
+    try {
+      success = await apiService.deleteAccount();
+    } catch (_) {
+      success = false;
+    }
+
+    if (!mounted) return;
+    Navigator.of(context).pop(); // Dismiss the progress indicator.
+
+    if (success) {
+      await authService.signOut();
+      await progressService.resetProgress();
+      if (!mounted) return;
+
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (context) => AlertDialog(
+              title: Text(
+                'Account Deleted',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              ),
+              content: Text(
+                'Your account and synced data have been permanently deleted.',
+                style: GoogleFonts.poppins().copyWith(
+                  fontFamilyFallback: const ['Jomolhari'],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+      );
+      if (!mounted) return;
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const AuthScreen()),
+        (route) => false,
+      );
+    } else {
+      await showDialog<void>(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text(
+                'Something Went Wrong',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              ),
+              content: Text(
+                "We couldn't delete your account. Please check your "
+                "connection and try again.",
+                style: GoogleFonts.poppins().copyWith(
+                  fontFamilyFallback: const ['Jomolhari'],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+      );
+    }
   }
 
   void _showAboutDialog() {
