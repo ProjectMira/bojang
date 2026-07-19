@@ -75,19 +75,10 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           const Duration(milliseconds: 500),
         ); // Brief delay to show success
         _navigateToMainScreen();
-      } else {
-        if (mounted) {
-          _showSnackBar(
-            'Apple sign-in was cancelled or failed. You can still continue without an account.',
-          );
-        }
       }
+      // null means the user dismissed the Apple sign-in sheet: no message.
     } catch (e) {
-      if (mounted) {
-        _showSnackBar(
-          'Apple sign-in failed.\n\nYou can still continue without an account.',
-        );
-      }
+      if (mounted) _showSignInIssueDialog('Apple');
     } finally {
       if (mounted) setState(() => _loadingMethod = null);
     }
@@ -104,30 +95,43 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           const Duration(milliseconds: 500),
         ); // Brief delay to show success
         _navigateToMainScreen();
-      } else {
-        if (mounted) {
-          _showSnackBar(
-            'Google sign-in was cancelled or failed. You can still continue without an account.',
-          );
-        }
       }
+      // null means the user cancelled Google sign-in: no message.
     } catch (e) {
-      if (mounted) {
-        String errorMessage = 'Google sign-in failed';
-        if (e.toString().contains('sign_in_failed')) {
-          errorMessage =
-              'Google sign-in configuration issue. Please try again or continue without an account.';
-        } else if (e.toString().contains('network_error')) {
-          errorMessage =
-              'Network error. Please check your connection and try again.';
-        }
-        _showSnackBar(
-          '$errorMessage\n\nYou can still continue without an account.',
-        );
-      }
+      if (mounted) _showSignInIssueDialog('Google');
     } finally {
       if (mounted) setState(() => _loadingMethod = null);
     }
+  }
+
+  void _showSignInIssueDialog(String provider) {
+    showDialog<void>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              "$provider sign-in didn't complete",
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+            ),
+            content: Text(
+              'Please check your connection and try again in a moment. '
+              'You can also continue without an account — every learning '
+              'feature works on this device, and you can sign in anytime '
+              'from the Profile tab.',
+              style: GoogleFonts.poppins().copyWith(
+                fontFamilyFallback: const ['Jomolhari'],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+    );
   }
 
   void _navigateToMainScreen() {

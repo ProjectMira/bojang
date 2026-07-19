@@ -146,7 +146,7 @@ void main() {
       expect(find.byType(MainNavigationScreen), findsOneWidget);
     });
 
-    testWidgets('should handle Google sign-in cancellation', (
+    testWidgets('cancelled Google sign-in shows no message at all', (
       WidgetTester tester,
     ) async {
       when(
@@ -159,11 +159,13 @@ void main() {
       await tester.tap(find.text('Continue with Google'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('cancelled or failed'), findsOneWidget);
+      // A cancel is a user action, not an error: no snackbar, no dialog.
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.byType(AlertDialog), findsNothing);
       expect(find.byType(AuthScreen), findsOneWidget);
     });
 
-    testWidgets('should handle Google sign-in error without crashing', (
+    testWidgets('Google sign-in failure shows a friendly dialog', (
       WidgetTester tester,
     ) async {
       when(
@@ -176,9 +178,14 @@ void main() {
       await tester.tap(find.text('Continue with Google'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('configuration issue'), findsOneWidget);
+      expect(find.text("Google sign-in didn't complete"), findsOneWidget);
+      expect(find.textContaining('continue without an account'), findsWidgets);
+
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
 
       // Loading state cleared, button back to its normal (usable) label.
+      expect(find.byType(AlertDialog), findsNothing);
       expect(find.text('Signing in...'), findsNothing);
       expect(find.text('Continue with Google'), findsOneWidget);
     });

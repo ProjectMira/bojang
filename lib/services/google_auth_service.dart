@@ -111,16 +111,12 @@ class GoogleAuthService {
       await _cacheUser(user);
       return user;
     } catch (error) {
-      print('Google Sign-In error: $error');
-      // Provide more specific error information
       if (error.toString().contains('sign_in_canceled')) {
         print('User cancelled Google sign-in');
-      } else if (error.toString().contains('network_error')) {
-        print('Network error during Google sign-in');
-      } else if (error.toString().contains('sign_in_failed')) {
-        print('Google sign-in failed - check configuration');
+        return null;
       }
-      return null;
+      print('Google Sign-In error: $error');
+      rethrow;
     }
   }
 
@@ -196,10 +192,10 @@ class GoogleAuthService {
         return null;
       }
       print('Apple Sign-In error: ${error.code} ${error.message}');
-      return null;
+      rethrow;
     } catch (error) {
       print('Apple Sign-In error: $error');
-      return null;
+      rethrow;
     }
   }
 

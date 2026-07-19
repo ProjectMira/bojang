@@ -208,6 +208,97 @@ Thank you for your time.
 
 ---
 
+# Part C — July 18 rejection follow-up (2.1(a) SiwA error + 2.1 demo account)
+
+Apple reviewed **build 17 again** (build 19 was never attached) on an iPad Air 11"
+(iPadOS 26.5.2) and raised: (a) "an error message was displayed when we attempted to
+Sign in with Apple", and (b) the old demo credentials ta6tsering@gmail.com failed.
+
+## What was checked (2026-07-19)
+
+- Firebase apple.com provider: enabled, clientId=com.bojang.app — correct for the
+  native flow (verified via Identity Toolkit API).
+- App ID capabilities: APPLE_ID_AUTH present (verified via ASC API).
+- firebase_auth 5.7.0 iOS plugin: confirmed it runs Sign in with Apple **natively**
+  (ASAuthorizationController) — no URL scheme needed; cancel maps to code "canceled".
+- Runner.entitlements: applesignin present; CI verifies it in every shipped IPA.
+- **Conclusion:** no client/server misconfiguration found. The most likely cause is
+  Apple's review environment failing/dismissing the Apple-ID sheet, which our app
+  answered with error-looking snackbars — including "Apple sign-in was cancelled or
+  failed" even on a plain cancel. That reads as a bug to a reviewer.
+
+## What was fixed
+
+1. **App (→ build 20):** cancel of Apple/Google sign-in now shows nothing (a cancel is
+   not an error); genuine failures show a designed dialog ("<Provider> sign-in didn't
+   complete" + guidance to retry or continue without an account). Underlying error
+   codes still go to the console for diagnosis. Files:
+   `lib/services/google_auth_service.dart` (null only on cancel, rethrow real errors),
+   `lib/screens/auth_screen.dart` (`_showSignInIssueDialog`), tests updated.
+2. **ASC (done via API):** demo account name/password **cleared**, demoAccountRequired
+   false, review notes rewritten — now leads with "no demo account exists, previously
+   provided credentials were removed", and adds the account-deletion path per
+   5.1.1(v).
+
+## Remaining manual steps (Tashi)
+
+1. Verify Sign in with Apple end-to-end on your **physical iPhone AND iPad** with
+   TestFlight build 20 (Apple reviewed on iPad). If you see any error, report the
+   exact dialog text back for diagnosis before resubmitting.
+2. In App Store Connect: fix the version string "2.0.0(17)" → "2.0.0", attach
+   **build 20**.
+3. Record ONE screen recording on a physical device showing: launch → Sign in with
+   Apple completing successfully → Profile → Settings → Account → Delete Account →
+   both confirmations → back at the login screen. This single video covers 2.1(a),
+   4.8, and 5.1.1(v).
+4. Reply in the Resolution Center with the message below (attach the video), then
+   resubmit.
+
+## Resolution Center reply (paste with build 20)
+
+```
+Hello,
+
+Thank you for the continued review. We have addressed all outstanding issues in
+the build attached to this submission (version 2.0.0, build 20).
+
+Guideline 2.1(a) — Sign in with Apple error:
+We tested Sign in with Apple on physical iPhone and iPad devices running the
+attached build and it completes successfully; the attached screen recording,
+captured on a physical device, shows the full flow. We could not reproduce a
+failure, but we did find that the previously reviewed build displayed an
+error-style message even when the Apple ID sheet was simply dismissed. The new
+build corrects this: dismissing the sheet returns to the sign-in screen quietly,
+and only a genuine failure shows a dialog with guidance. Please note the
+previously reviewed binary was build 17; the attached build 20 also contains
+in-app account deletion and the corrected sign-in behavior.
+
+Guideline 2.1 — Demo account:
+We apologize for the confusion: the demo credentials previously listed in App
+Review Information were stale and have now been removed entirely. No demo
+account is needed to review the app — tapping "Continue without account" on the
+first screen unlocks every learning feature. Account features (sync of XP,
+streaks, and league progress) can be reviewed with Sign in with Apple using any
+Apple ID; an account is created automatically on first sign-in.
+
+Guideline 5.1.1(v) — Account deletion (from your July 17 message):
+The attached build includes full in-app account deletion: Profile tab → Settings
+(gear icon) → Account → Delete Account. After a confirmation step, the account
+and all associated data are permanently deleted from our servers, along with the
+underlying authentication account. The attached screen recording demonstrates
+creating an account with Sign in with Apple, navigating to the deletion option,
+and the complete deletion flow.
+
+Guideline 4.8 — Login Services (from your July 17 message):
+Sign in with Apple is offered as the first login option, alongside Google. It
+limits data collection to name and email, supports Hide My Email, and does not
+collect app interactions for advertising.
+
+Thank you for your time.
+```
+
+---
+
 # Reference — facts verified while writing this plan
 
 - Prod API `https://bojang-backend-lbziapssxq-uc.a.run.app` exposes
