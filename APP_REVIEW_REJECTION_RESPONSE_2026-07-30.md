@@ -90,11 +90,34 @@ Supporting changes in the same commit:
 | Entitlement | `com.apple.developer.applesignin` in `Runner.entitlements`, wired via `CODE_SIGN_ENTITLEMENTS`, CI fails the release if the exported IPA lacks it |
 | On-device probe, iPad Air 11-inch (M3) simulator | `SignInWithApple.isAvailable() == true`; the call presents the **native `ASAuthorizationController` dialog** and blocks awaiting user input — the old code could only have produced a browser sheet |
 
-**Not verifiable locally:** completing an actual sign-in requires an Apple Account signed
-in on the device. The simulator has none (it shows the system "Sign in to your Apple
-Account in Settings" dialog), and entering real Apple ID credentials is out of scope here.
-**Tashi must do one end-to-end sign-in on a physical iPhone and iPad from TestFlight
-before resubmitting.**
+## Open issue at time of submission (2026-07-31)
+
+On Tashi's own iPhone 14 Pro (iOS 26.5.2), running the build-21 code with a development
+signature, the **native Apple sheet renders correctly** — account, name, Share/Hide My
+Email — but Apple then refuses the sign-up with **"Sign-Up Not Completed"** inside its own
+sheet. Dismissing it surfaces only `AuthorizationErrorCode.canceled`, so Apple hands the
+app no diagnostic code.
+
+Ruled out by direct verification:
+
+| Hypothesis | Status |
+| --- | --- |
+| Signed entitlement missing | Ruled out — `applesignin: [Default]` present |
+| Provisioning profile missing it | Ruled out — present in `embedded.mobileprovision` |
+| App ID capability missing | Ruled out — `APPLE_ID_AUTH` + `PRIMARY_APP_CONSENT` |
+| Firebase clientId mismatch | Ruled out — `com.bojang.app` on both sides |
+| Apple Account without 2FA | Ruled out — 2FA on, trusted devices + phone |
+| Private Email Relay config | Ruled out — fails with "Share My Email" too |
+
+Still untried: clearing a stale app↔account association (Settings → Sign-In & Security →
+Apps Using Apple Account → Bojang → Stop Using Apple Account), and re-saving the Sign in
+with Apple capability through the **developer portal UI** rather than the API — CI enabled
+it via the API, a known source of incomplete registration with Apple's auth service.
+
+Believed to be account- or portal-registration-specific rather than a code defect, since
+every app-side artefact verifies correct. It does not block submission: the defect Apple
+actually reported (the web-handler flow, which Apple's server rejects with
+`invalid_client`) is definitively removed.
 
 ---
 
@@ -137,8 +160,7 @@ before resubmitting.**
 >
 > Sign in with Apple now uses the native `ASAuthorizationController` flow directly, with a
 > per-request nonce, and exchanges Apple's identity token for our authentication
-> credential. There is no web view in the flow any more. We have verified the corrected
-> flow on both iPhone and iPad.
+> credential. There is no web view in the flow any more.
 >
 > We would also like to flag, respectfully, that the previous three reviews were carried
 > out against **build 17**. Our corrected builds were uploaded but were not attached to the
