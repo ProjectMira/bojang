@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../models/user.dart';
 import 'app_config.dart';
 import 'api_service.dart';
@@ -120,7 +123,17 @@ class GoogleAuthService {
     }
   }
 
-  // Sign in with Apple (native flow through Firebase Auth; iOS/macOS only)
+  // Sign in with Apple.
+  //
+  // This uses the native ASAuthorizationController sheet (via
+  // sign_in_with_apple) and exchanges Apple's identity token for a Firebase
+  // credential. We deliberately do NOT use
+  // `FirebaseAuth.signInWithProvider(AppleAuthProvider())`: on iOS that opens
+  // Firebase's *web* OAuth handler, which requires the project's Apple
+  // provider to carry a Services ID, Team ID, Key ID and private key. A native
+  // app has none of those, so that flow always ended in an error page — which
+  // is what App Review hit. The credential flow below only needs the bundle ID
+  // registered as the provider's client ID, which is already configured.
   Future<User?> signInWithApple() async {
     if (!AppConfig.firebaseEnabled) {
       print('Apple Sign-In requires Firebase, which is disabled in this build');
@@ -128,21 +141,62 @@ class GoogleAuthService {
     }
 
     try {
-      final appleProvider =
-          firebase_auth.AppleAuthProvider()
-            ..addScope('email')
-            ..addScope('name');
+      // Apple signs a nonce we choose, and Firebase checks it against the raw
+      // value, so a replayed identity token cannot be used against us.
+      final rawNonce = _generateNonce();
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: const [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: sha256.convert(utf8.encode(rawNonce)).toString(),
+      );
+
+      final identityToken = appleCredential.identityToken;
+      if (identityToken == null || identityToken.isEmpty) {
+        throw StateError('Apple did not return an identity token');
+      }
+
+      final oauthCredential = firebase_auth.OAuthProvider(
+        'apple.com',
+      ).credential(idToken: identityToken, rawNonce: rawNonce);
+
       final credential = await firebase_auth.FirebaseAuth.instance
-          .signInWithProvider(appleProvider);
-      final firebaseUser = credential.user;
-      if (firebaseUser == null) return null;
+          .signInWithCredential(oauthCredential);
+      final signedInUser = credential.user;
+      if (signedInUser == null) return null;
+      firebase_auth.User firebaseUser = signedInUser;
+
+      // Apple only shares the name on the very first authorization, so persist
+      // it to the Firebase profile while we have it.
+      final appleFullName = [
+            appleCredential.givenName,
+            appleCredential.familyName,
+          ]
+          .whereType<String>()
+          .map((part) => part.trim())
+          .where((part) => part.isNotEmpty)
+          .join(' ');
+      if (appleFullName.isNotEmpty &&
+          (firebaseUser.displayName?.trim().isEmpty ?? true)) {
+        try {
+          await firebaseUser.updateDisplayName(appleFullName);
+          await firebaseUser.reload();
+          firebaseUser =
+              firebase_auth.FirebaseAuth.instance.currentUser ?? firebaseUser;
+        } catch (nameError) {
+          print('Could not persist Apple display name: $nameError');
+        }
+      }
 
       final idToken = await firebaseUser.getIdToken();
-      // Apple only shares the name on the first authorization, and the email
-      // may be a private relay address when the user hides their email.
-      final email = firebaseUser.email ?? '';
+      // The email may be a private relay address when the user hides it, and
+      // Apple omits it on repeat sign-ins — Firebase keeps the stored one.
+      final email = appleCredential.email ?? firebaseUser.email ?? '';
       final displayName =
-          (firebaseUser.displayName?.trim().isNotEmpty ?? false)
+          appleFullName.isNotEmpty
+              ? appleFullName
+              : (firebaseUser.displayName?.trim().isNotEmpty ?? false)
               ? firebaseUser.displayName!.trim()
               : (email.contains('@') ? email.split('@').first : 'Learner');
 
@@ -184,6 +238,15 @@ class GoogleAuthService {
       _currentUser = user;
       await _cacheUser(user);
       return user;
+    } on SignInWithAppleAuthorizationException catch (error) {
+      if (error.code == AuthorizationErrorCode.canceled) {
+        print('Apple sign-in cancelled by user');
+        return null;
+      }
+      print(
+        'Apple Sign-In authorization error: ${error.code} ${error.message}',
+      );
+      rethrow;
     } on firebase_auth.FirebaseAuthException catch (error) {
       if (error.code == 'canceled' ||
           error.code == 'user-cancelled' ||
@@ -197,6 +260,17 @@ class GoogleAuthService {
       print('Apple Sign-In error: $error');
       rethrow;
     }
+  }
+
+  // Cryptographically random nonce, in the URL-safe alphabet Apple accepts.
+  String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(
+      length,
+      (_) => charset[random.nextInt(charset.length)],
+    ).join();
   }
 
   // Sign out
