@@ -284,7 +284,9 @@ class _TopicCardState extends State<_TopicCard> {
   @override
   Widget build(BuildContext context) {
     final isLocked = widget.sublevel.isLocked;
-    final isCompleted = widget.progress > 0.7;
+    // Matches the server's completion gate (accuracy >= 0.7), so a lesson
+    // scored exactly 70% does not read as complete here and incomplete there.
+    final isCompleted = widget.progress >= 0.7;
     final isDark = AppTokens.isDark(context);
 
     final tintOpacity = isLocked ? 0.06 : (isDark ? 0.22 : 0.10);

@@ -4,6 +4,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/app_text_style.dart';
+import '../widgets/quiz_mode_sheet.dart';
 import 'quiz_screen.dart';
 
 /// Full-screen celebration shown after finishing a lesson. Replaces the old
@@ -15,6 +16,7 @@ class LessonCompleteScreen extends StatefulWidget {
   final double accuracy;
   final int streak;
   final String topicFilePath;
+  final QuizMode mode;
 
   const LessonCompleteScreen({
     super.key,
@@ -24,6 +26,7 @@ class LessonCompleteScreen extends StatefulWidget {
     required this.accuracy,
     required this.streak,
     required this.topicFilePath,
+    this.mode = QuizMode.words,
   });
 
   @override
@@ -219,6 +222,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
                             builder:
                                 (context) => QuizScreen(
                                   topicFilePath: widget.topicFilePath,
+                                  mode: widget.mode,
                                 ),
                           ),
                         );

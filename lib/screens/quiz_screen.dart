@@ -196,25 +196,21 @@ class _QuizScreenState extends State<QuizScreen>
       if (isCorrect) score++;
     });
 
+    // One attempt per question: a wrong answer is recorded and the quiz moves
+    // on, so the final score reflects what the learner actually knew. The
+    // delay is time to read the feedback and see the right answer revealed.
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
-      if (isCorrect) {
-        if (currentQuestionIndex < questions.length - 1) {
-          setState(() {
-            currentQuestionIndex++;
-            selectedAnswerIndex = null;
-            showFeedback = false;
-          });
-          _animationController.reset();
-          _animationController.forward();
-        } else {
-          _goToCompletion(questions.length);
-        }
-      } else {
+      if (currentQuestionIndex < questions.length - 1) {
         setState(() {
+          currentQuestionIndex++;
           selectedAnswerIndex = null;
           showFeedback = false;
         });
+        _animationController.reset();
+        _animationController.forward();
+      } else {
+        _goToCompletion(questions.length);
       }
     });
   }
@@ -259,6 +255,7 @@ class _QuizScreenState extends State<QuizScreen>
               accuracy: accuracy,
               streak: progressService.currentStreak,
               topicFilePath: widget.topicFilePath,
+              mode: widget.mode,
             ),
         transitionsBuilder:
             (context, animation, secondaryAnimation, child) =>
@@ -436,6 +433,12 @@ class _QuizScreenState extends State<QuizScreen>
               AnswerFeedbackBanner(
                 visible: showFeedback,
                 isCorrect: lastAnswerCorrect,
+                correctAnswerText:
+                    question.correctAnswerIndex >= 0 &&
+                            question.correctAnswerIndex <
+                                question.options.length
+                        ? question.options[question.correctAnswerIndex]
+                        : null,
               ),
             ],
           );
@@ -627,13 +630,15 @@ class _QuizScreenState extends State<QuizScreen>
                       final isSelected = selectedAnswerIndex == index;
                       final isCorrect = index == question.correctAnswerIndex;
 
+                      // During feedback the right answer is always highlighted,
+                      // tapped or not — a wrong pick moves on, so this is the
+                      // learner's one chance to see what it should have been.
                       Color? buttonColor;
                       if (showFeedback) {
-                        if (isSelected) {
-                          buttonColor =
-                              isCorrect
-                                  ? Colors.green.shade100
-                                  : Colors.red.shade100;
+                        if (isCorrect) {
+                          buttonColor = Colors.green.shade100;
+                        } else if (isSelected) {
+                          buttonColor = Colors.red.shade100;
                         }
                       }
 
@@ -666,11 +671,11 @@ class _QuizScreenState extends State<QuizScreen>
                                       shape: BoxShape.circle,
                                       color:
                                           showFeedback
-                                              ? (isSelected
-                                                  ? (isCorrect
-                                                      ? Colors.green
-                                                      : Colors.red)
-                                                  : Colors.grey)
+                                              ? (isCorrect
+                                                  ? Colors.green
+                                                  : (isSelected
+                                                      ? Colors.red
+                                                      : Colors.grey))
                                               : Colors.blue.withValues(
                                                 alpha: 0.1,
                                               ),
@@ -683,7 +688,7 @@ class _QuizScreenState extends State<QuizScreen>
                                           fontWeight: FontWeight.bold,
                                           color:
                                               showFeedback
-                                                  ? (isSelected
+                                                  ? (isCorrect || isSelected
                                                       ? Colors.white
                                                       : Colors.grey)
                                                   : Colors.blue,

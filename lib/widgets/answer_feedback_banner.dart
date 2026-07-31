@@ -5,14 +5,19 @@ import 'app_text_style.dart';
 /// Non-blocking bottom banner shown after answering a quiz question.
 /// Replaces the old AlertDialog so gameplay feels continuous; the caller
 /// still owns the 2-second auto-advance timing via [visible].
+///
+/// A wrong answer ends the question, so [correctAnswerText] is shown with it —
+/// the learner does not get another attempt to discover the answer.
 class AnswerFeedbackBanner extends StatelessWidget {
   final bool visible;
   final bool isCorrect;
+  final String? correctAnswerText;
 
   const AnswerFeedbackBanner({
     super.key,
     required this.visible,
     required this.isCorrect,
+    this.correctAnswerText,
   });
 
   @override
@@ -72,15 +77,31 @@ class AnswerFeedbackBanner extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Text(
-                    isCorrect
-                        ? 'ལེགས་སོ། Amazing!'
-                        : 'སེམས་ཤུགས་མ་ཆག — try again!',
-                    style: AppTextStyles.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        isCorrect
+                            ? 'ལེགས་སོ། Amazing!'
+                            : 'སེམས་ཤུགས་མ་ཆག — not quite',
+                        style: AppTextStyles.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                      ),
+                      if (!isCorrect &&
+                          correctAnswerText != null &&
+                          correctAnswerText!.isNotEmpty)
+                        Text(
+                          'Answer: $correctAnswerText',
+                          style: AppTextStyles.poppins(
+                            fontSize: 14,
+                            color: AppTokens.inkSoft(context),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],
