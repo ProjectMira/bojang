@@ -5,19 +5,21 @@ Google Play and iOS to TestFlight with one shared Flutter version.
 
 The normal release path is:
 
-1. Calculate a version from `pubspec.yaml` and the committed version history.
+1. Decide the next marketing version from the commits landed since the last
+   release tag, write it to `pubspec.yaml`, and commit it back to `main` with
+   `[skip ci]`. The build number is `github.run_number` plus the optional
+   `BUILD_NUMBER_OFFSET` repository variable — it is never read back out of
+   git, so it always increases and a failed run cannot strand one.
 2. Run static analysis on application code and the stable model test suite.
-3. Build and upload the selected platforms.
-4. As soon as at least one store accepts the upload, commit the version to
-   `pubspec.yaml` and create an annotated `v<version>-build.<number>` tag. A
-   store that consumed a build number must never see it again, so a failure on
-   the other platform does not block the version commit; the failed platform
-   simply ships with the next build number.
+3. Build and upload the selected platforms, from the commit carrying the
+   bumped version.
+4. As soon as at least one store accepts the upload, push the annotated
+   `v<version>-build.<number>` tag and publish a GitHub release with the
+   build artifacts.
 
 Unless `AUTO_MOBILE_RELEASE_PAUSED` is set to `true`, every push to `main`
-creates a build-only version increment, uploads Android to the Play Internal
-track and iOS to TestFlight, then commits the shared version and creates an
-annotated tag. Setting the repository variable `ANDROID_RELEASE_PAUSED` to
+releases: it bumps the marketing version, uploads Android to the Play Internal
+track and iOS to TestFlight, then tags the release. Setting the repository variable `ANDROID_RELEASE_PAUSED` to
 `true` makes push-triggered releases skip Android (iOS-only releases) while a
 Play-side blocker such as an upload-key reset is pending; manual dispatch
 ignores it.
@@ -67,8 +69,8 @@ Create these environment secrets:
 | `ANDROID_KEY_PASSWORD` | Upload-key password |
 | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | Full Google service-account JSON |
 | `APP_STORE_CONNECT_API_PRIVATE_KEY` | Exact App Store Connect `.p8` contents |
-| `GOOGLE_SERVICE_INFO_PLIST` | Correct iOS Firebase plist; optional while iOS Firebase is disabled |
-| `RELEASE_GITHUB_TOKEN` | Token used only for the final version commit/tag when the organization forces read-only workflow tokens |
+| `GOOGLE_SERVICE_INFO_PLIST` | Correct iOS Firebase plist for `com.bojang.app`; required — Sign in with Apple depends on it |
+| `RELEASE_GITHUB_TOKEN` | Token used to push the version bump and the release tag, because the organization forces read-only workflow tokens |
 
 The ProjectMira organization currently forces the standard workflow token to be
 read-only. The `mobile-production` environment therefore contains a release token
@@ -233,11 +235,14 @@ Xcode to sign the archive.
 
 ### Firebase and Google Sign-In on iOS
 
-The tracked `ios/Runner/GoogleService-Info.plist` currently belongs to a different
-bundle ID. Leave the workflow's iOS Firebase and Google Sign-In inputs disabled
-until Firebase contains an Apple app for `com.bojang.app`.
+iOS Firebase is **enabled on every push-triggered release** and must stay that
+way: Sign in with Apple (App Store guideline 4.8) and backend account sync both
+run through it. The tracked `ios/Runner/GoogleService-Info.plist` is a
+deliberate placeholder — the repository is public — and CI overwrites it from
+the `GOOGLE_SERVICE_INFO_PLIST` secret, verifying the bundle ID before building
+and failing the release if the placeholder reaches the IPA.
 
-After registering the correct app:
+If the plist ever needs replacing:
 
 1. Download its `GoogleService-Info.plist`.
 2. Confirm `BUNDLE_ID` is `com.bojang.app`.
@@ -255,18 +260,35 @@ The workflow validates the restored plist's bundle ID before building.
 
 ## Version rules
 
-Flutter versions use `MAJOR.MINOR.PATCH+BUILD`. Android uses the build as its
-global `versionCode`; therefore the number must never go backwards. The workflow
-scans the committed history and defaults to one above the greatest committed
-build number. It cannot see unpublished or manually uploaded store builds.
+Flutter versions use `MAJOR.MINOR.PATCH+BUILD`.
 
-Before the first automated release, check the greatest build/version code in both
-stores. Supply an explicit `build_number` greater than both if necessary.
+**Marketing version** (`MAJOR.MINOR.PATCH`) is decided by
+`ci/scripts/bump_version.sh` from the commit subjects since the last `v*` tag:
+
+| Commit landed since the last release | Bump |
+| --- | --- |
+| `feat:` / `feat(scope):`, or a merged `feat/*` branch | minor |
+| any `type!:` subject, a `BREAKING CHANGE:` footer, or a merged `breaking/*` branch | major |
+| anything else — `fix:`, `chore:`, plain prose | patch |
+
+There is no "no bump" outcome, so the version always advances. A manual
+dispatch can override the level (`version_bump`) or set an exact version
+(`version`). If a run commits a bump and then fails before tagging, the next
+run reuses that pending version instead of bumping again.
+
+**Build number** is `github.run_number + BUILD_NUMBER_OFFSET` (the repository
+variable defaults to 0). Android uses it as its global `versionCode`, so it
+must never go backwards — the run counter guarantees that without consulting
+git or the stores. The offset exists to jump the counter above build numbers
+consumed by the old history-scanning scheme, or by a manual upload.
+
+The `+BUILD` value committed in `pubspec.yaml` is a leftover placeholder; CI
+passes the real number via `--build-number` and never reads it back.
 
 Example:
 
-- Flutter version: `1.0.1+7`
-- Git tag: `v1.0.1-build.7`
+- Flutter version: `2.0.1+38`
+- Git tag: `v2.0.1-build.38`
 
 ## Running a release
 
@@ -283,13 +305,13 @@ and is excluded from the push trigger, preventing a release loop.
 1. Ensure the intended source is committed and pushed to `main`.
 2. Open **Actions > Mobile Release > Run workflow**.
 3. Select `main`.
-4. Choose the version bump.
-5. For the first run, provide an explicit safe build number.
-6. Leave both platforms selected for a normal release.
-7. Keep the Android track on `internal` until the pipeline is proven.
-8. Keep the iOS Firebase options disabled until the plist and URL scheme are fixed.
-9. Approve the `mobile-production` deployment when prompted.
-10. Confirm the TestFlight and Internal testing builds have matching versions.
+4. Leave `version_bump` on `auto` to derive the bump from the commits, or pick
+   a level to force one. `version` sets an exact marketing version.
+5. Leave both platforms selected for a normal release.
+6. Keep the Android track on `internal` until the pipeline is proven.
+7. Leave iOS Firebase enabled — Sign in with Apple does not work without it.
+8. Approve the `mobile-production` deployment if prompted.
+9. Confirm the TestFlight and Internal testing builds have matching versions.
 
 The broader historical test suite currently contains compile-time failures, so
 the release gate runs `flutter analyze lib --no-fatal-infos --no-fatal-warnings`
@@ -308,11 +330,14 @@ Recovery is therefore automatic in the common case — push again (or dispatch
 manually) once the failure cause is fixed, and the next build number goes out
 to both stores.
 
-Manual recovery is only needed when a store accepted an upload but the
-finalize job itself failed (for example, `main` moved during the release). In
-that case apply the release version from the **Prepare version** summary to
-`pubspec.yaml` on the new head and create the tag manually. Never reuse a
-build number for a different binary.
+A re-run of a failed run is also safe: it keeps the same run number, and the
+iOS upload step checks App Store Connect for that build first and skips the
+upload if it is already there.
+
+Manual recovery should no longer be necessary. The version is committed before
+the builds start rather than after they finish, so a store upload can never
+succeed against a version that was not recorded, and build numbers are not
+derived from anything a failed run could leave behind.
 
 ## Credential rotation
 
