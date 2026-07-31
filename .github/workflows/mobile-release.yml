@@ -405,7 +405,7 @@ jobs:
     timeout-minutes: 75
     environment: mobile-production
     env:
-      XCODE_VERSION: ${{ vars.XCODE_VERSION || '26.1' }}
+      XCODE_VERSION: ${{ vars.XCODE_VERSION }}
       IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID || 'com.bojang.app' }}
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID || secrets.APPLE_TEAM_ID }}
       ASC_KEY_ID: ${{ vars.APP_STORE_CONNECT_API_KEY_ID || secrets.APP_STORE_CONNECT_API_KEY_ID }}
@@ -443,15 +443,20 @@ jobs:
       - name: Select Xcode
         run: |
           set -euo pipefail
-          # Pinned so the runner image rolling its default Xcode forward is an
-          # explicit change here rather than a surprise mid-release.
-          preferred="/Applications/Xcode_${XCODE_VERSION}.app"
-          if [ -d "$preferred" ]; then
-            sudo xcode-select -s "$preferred"
-          else
-            echo "::warning::Xcode $XCODE_VERSION is not installed on this runner; using the image default. Available: $(ls -d /Applications/Xcode*.app 2>/dev/null | tr '\n' ' ')"
+          # Opt-in pin: set the XCODE_VERSION repository variable to hold a
+          # specific Xcode when the image default breaks a release. Left unset,
+          # the image default is used — pinning to a version that predates the
+          # Flutter toolchain is its own way to fail.
+          if [ -n "${XCODE_VERSION:-}" ]; then
+            preferred="/Applications/Xcode_${XCODE_VERSION}.app"
+            if [ -d "$preferred" ]; then
+              sudo xcode-select -s "$preferred"
+            else
+              echo "::warning::Xcode $XCODE_VERSION is not installed on this runner; using the image default. Available: $(ls -d /Applications/Xcode*.app 2>/dev/null | tr '\n' ' ')"
+            fi
           fi
-          xcodebuild -version
+          echo "Xcode in use: $(xcodebuild -version | tr '\n' ' ')"
+          echo "Available: $(ls -d /Applications/Xcode*.app 2>/dev/null | tr '\n' ' ')"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -637,12 +642,19 @@ jobs:
       - name: Prepare unsigned Flutter iOS build
         run: |
           set -euo pipefail
-          flutter build ios \
+          mkdir -p build/ios
+          # Job logs need repo admin to read, so surface the failure itself as
+          # an annotation, which is public.
+          if ! flutter build ios \
             --release \
             --no-codesign \
             --build-name "${{ needs.prepare.outputs.marketing }}" \
             --build-number "${{ needs.prepare.outputs.build }}" \
-            --dart-define "ENABLE_IOS_FIREBASE=${{ needs.prepare.outputs.enable_ios_firebase }}"
+            --dart-define "ENABLE_IOS_FIREBASE=${{ needs.prepare.outputs.enable_ios_firebase }}" \
+            2>&1 | tee build/ios/flutter-build.log; then
+            echo "::error::flutter build ios failed: $(tail -n 30 build/ios/flutter-build.log | tr '\n' ' ' | tail -c 900)"
+            exit 1
+          fi
 
       - name: Archive iOS app without code signing
         # Fresh runners have empty keychains, so signing during archive makes
