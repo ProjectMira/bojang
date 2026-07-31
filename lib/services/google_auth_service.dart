@@ -212,7 +212,11 @@ class GoogleAuthService {
         authProvider: AuthProvider.apple,
       );
 
-      if (email.isNotEmpty && idToken != null) {
+      // Apple only returns an email on the first authorization, so a repeat
+      // sign-in can legitimately have none. Sync regardless: /auth/sync
+      // identifies the account from the bearer token, and skipping it would
+      // leave the app "signed in" with no server-side account at all.
+      if (idToken != null) {
         try {
           final result = await _apiService.appleAuth(
             uid: firebaseUser.uid,
@@ -228,10 +232,13 @@ class GoogleAuthService {
             await _cacheUser(backendUser);
             return backendUser;
           }
+          print('Apple sign-in: backend sync returned no profile');
         } catch (apiError) {
           print('Backend API error during Apple auth: $apiError');
           // Continue with offline mode
         }
+      } else {
+        print('Apple sign-in: no Firebase ID token, skipping backend sync');
       }
 
       // Use Apple data if backend is not available or failed
@@ -239,22 +246,22 @@ class GoogleAuthService {
       await _cacheUser(user);
       return user;
     } on SignInWithAppleAuthorizationException catch (error) {
-      if (error.code == AuthorizationErrorCode.canceled) {
-        print('Apple sign-in cancelled by user');
-        return null;
-      }
+      // Always log the code and Apple's localized message, including for
+      // `canceled`: when Apple itself refuses the sign-up (its sheet shows
+      // "Sign-Up Not Completed"), dismissing that sheet arrives here as a
+      // plain cancel, and this line is the only trace of what happened.
       print(
-        'Apple Sign-In authorization error: ${error.code} ${error.message}',
+        'Apple Sign-In authorization error: ${error.code} — ${error.message}',
       );
+      if (error.code == AuthorizationErrorCode.canceled) return null;
       rethrow;
     } on firebase_auth.FirebaseAuthException catch (error) {
+      print('Apple Sign-In Firebase error: ${error.code} — ${error.message}');
       if (error.code == 'canceled' ||
           error.code == 'user-cancelled' ||
           error.code == 'web-context-cancelled') {
-        print('Apple sign-in cancelled by user');
         return null;
       }
-      print('Apple Sign-In error: ${error.code} ${error.message}');
       rethrow;
     } catch (error) {
       print('Apple Sign-In error: $error');

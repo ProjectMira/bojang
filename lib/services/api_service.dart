@@ -110,14 +110,17 @@ class ApiService {
         nativeLang: 'en',
         targetLang: 'bo',
       );
-      if (profile == null) return null;
+      if (profile == null) {
+        print('$authProvider auth: POST auth/sync returned no profile');
+        return null;
+      }
 
       final uid = (profile['uid'] ?? providerUserId).toString();
       final user = {
         'id': uid,
         'uid': uid,
         'email': email,
-        'username': email.split('@').first,
+        'username': email.contains('@') ? email.split('@').first : uid,
         'display_name': profile['display_name'] ?? displayName,
         'profile_image_url': profileImageUrl,
         'created_at': DateTime.now().toIso8601String(),

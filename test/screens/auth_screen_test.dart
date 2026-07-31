@@ -6,6 +6,7 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:bojang/screens/auth_screen.dart';
 import 'package:bojang/screens/main_navigation_screen.dart';
 import 'package:bojang/services/app_config.dart';
@@ -370,6 +371,30 @@ void main() {
       expect(find.byType(AlertDialog), findsNothing);
       expect(find.text('Signing in...'), findsNothing);
       expect(find.text('Continue with Apple'), findsOneWidget);
+    });
+
+    testWidgets('the failure dialog quotes the underlying error', (
+      WidgetTester tester,
+    ) async {
+      when(mockGoogleAuthService.signInWithApple()).thenThrow(
+        const SignInWithAppleAuthorizationException(
+          code: AuthorizationErrorCode.failed,
+          message: 'Apple could not complete the sign-up',
+        ),
+      );
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Continue with Apple'));
+      await tester.pumpAndSettle();
+
+      // A tester's (or App Review's) screenshot of this dialog has to carry
+      // the real error, otherwise the failure is undiagnosable from a report.
+      expect(
+        find.textContaining('Apple could not complete the sign-up'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a pending Apple sign-in blocks the Google button', (
