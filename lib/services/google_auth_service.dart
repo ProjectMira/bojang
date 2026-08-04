@@ -253,7 +253,15 @@ class GoogleAuthService {
       print(
         'Apple Sign-In authorization error: ${error.code} — ${error.message}',
       );
-      if (error.code == AuthorizationErrorCode.canceled) return null;
+      if (error.code == AuthorizationErrorCode.canceled) {
+        print(
+          'Note: If the iOS sheet showed "Sign-Up Not Completed", verify:\n'
+          ' 1. Device: Settings -> Apple Account -> Sign-In & Security -> Apps Using Apple Account -> Bojang -> Stop Using Apple Account\n'
+          ' 2. Developer Portal: Ensure "Sign in with Apple" is saved as Primary App ID for com.bojang.app\n'
+          ' 3. Xcode: Re-sync Provisioning Profile',
+        );
+        return null;
+      }
       rethrow;
     } on firebase_auth.FirebaseAuthException catch (error) {
       print('Apple Sign-In Firebase error: ${error.code} — ${error.message}');
