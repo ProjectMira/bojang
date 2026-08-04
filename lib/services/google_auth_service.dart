@@ -10,6 +10,43 @@ import '../models/user.dart';
 import 'app_config.dart';
 import 'api_service.dart';
 
+/// A native Apple authorization failure that would otherwise be mistaken for
+/// the user dismissing the sheet.
+///
+/// AuthenticationServices uses code 1001 for both a real cancellation and the
+/// server-side "Sign-Up Not Completed" screen. Release diagnostics preserve
+/// that ambiguity but make the code, Apple message, and UTC time visible in a
+/// tester screenshot so the incident can be correlated with Apple's logs.
+class AppleSignInDiagnosticException implements Exception {
+  AppleSignInDiagnosticException({
+    required this.code,
+    required this.message,
+    DateTime? occurredAt,
+  }) : occurredAt = (occurredAt ?? DateTime.now()).toUtc();
+
+  final AuthorizationErrorCode code;
+  final String message;
+  final DateTime occurredAt;
+
+  int get nativeCode => switch (code) {
+    AuthorizationErrorCode.unknown => 1000,
+    AuthorizationErrorCode.canceled => 1001,
+    AuthorizationErrorCode.invalidResponse => 1002,
+    AuthorizationErrorCode.notHandled => 1003,
+    AuthorizationErrorCode.failed => 1004,
+    _ => -1,
+  };
+
+  @override
+  String toString() {
+    final codeLabel = nativeCode < 0 ? code.name : '$nativeCode/${code.name}';
+    final appleMessage = message.trim();
+    return 'Apple authorization $codeLabel at '
+        '${occurredAt.toIso8601String()}'
+        '${appleMessage.isEmpty ? '' : ': $appleMessage'}';
+  }
+}
+
 class GoogleAuthService {
   static final GoogleAuthService _instance = GoogleAuthService._internal();
   factory GoogleAuthService() => _instance;
@@ -262,6 +299,12 @@ class GoogleAuthService {
           ' 2. Developer Portal: Ensure "Sign in with Apple" is saved as Primary App ID for com.bojang.app\n'
           ' 3. Xcode: Re-sync Provisioning Profile',
         );
+        if (AppConfig.appleSignInDiagnosticsEnabled) {
+          throw AppleSignInDiagnosticException(
+            code: error.code,
+            message: error.message,
+          );
+        }
         return null;
       }
       rethrow;

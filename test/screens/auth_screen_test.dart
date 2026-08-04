@@ -373,13 +373,14 @@ void main() {
       expect(find.text('Continue with Apple'), findsOneWidget);
     });
 
-    testWidgets('the failure dialog quotes the underlying error', (
+    testWidgets('the failure dialog exposes Apple code and UTC timestamp', (
       WidgetTester tester,
     ) async {
       when(mockGoogleAuthService.signInWithApple()).thenThrow(
-        const SignInWithAppleAuthorizationException(
+        AppleSignInDiagnosticException(
           code: AuthorizationErrorCode.failed,
           message: 'Apple could not complete the sign-up',
+          occurredAt: DateTime.utc(2026, 8, 5, 12, 34, 56),
         ),
       );
 
@@ -395,6 +396,8 @@ void main() {
         find.textContaining('Apple could not complete the sign-up'),
         findsOneWidget,
       );
+      expect(find.textContaining('1004/failed'), findsOneWidget);
+      expect(find.textContaining('2026-08-05T12:34:56.000Z'), findsOneWidget);
     });
 
     testWidgets('a pending Apple sign-in blocks the Google button', (

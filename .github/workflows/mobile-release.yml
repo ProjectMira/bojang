@@ -1,5 +1,11 @@
 # Mobile Release
 #
+# This GitHub Actions workflow is the sole automated TestFlight/Google Play
+# release pipeline. Keep the legacy Xcode Cloud workflow disabled: it also
+# reacts to the bot's version-bump commit, does not honor [skip ci], and starts
+# from a clean checkout without Flutter/CocoaPods generated files.
+# See docs/mobile-release.md#release-pipeline-ownership.
+#
 # Every push to main releases: the marketing version is bumped from the
 # commits since the last release tag (feat: -> minor, "!" or a BREAKING
 # CHANGE footer -> major, anything else -> patch — see
@@ -651,6 +657,7 @@ jobs:
             --build-name "${{ needs.prepare.outputs.marketing }}" \
             --build-number "${{ needs.prepare.outputs.build }}" \
             --dart-define "ENABLE_IOS_FIREBASE=${{ needs.prepare.outputs.enable_ios_firebase }}" \
+            --dart-define "APPLE_SIGN_IN_DIAGNOSTICS=true" \
             2>&1 | tee build/ios/flutter-build.log; then
             echo "::error::flutter build ios failed: $(tail -n 30 build/ios/flutter-build.log | tr '\n' ' ' | tail -c 900)"
             exit 1
@@ -763,6 +770,24 @@ jobs:
           test "$actual_bundle" = "$IOS_BUNDLE_ID"
           test "$actual_version" = "${{ needs.prepare.outputs.marketing }}"
           test "$actual_build" = "${{ needs.prepare.outputs.build }}"
+
+          # Apple will reject new uploads below iOS 15 starting in Spring 2027.
+          # Validate both the Runner app and Flutter's embedded App.framework
+          # so project/template drift cannot silently reintroduce ITMS-90068.
+          verify_minimum_os() {
+            plist="$1"
+            label="$2"
+            minimum="$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$plist" 2>/dev/null || true)"
+            major="${minimum%%.*}"
+            if ! [[ "$major" =~ ^[0-9]+$ ]] || [ "$major" -lt 15 ]; then
+              echo "::error::$label MinimumOSVersion must be 15.0 or later; found '${minimum:-missing}'."
+              exit 1
+            fi
+            echo "$label MinimumOSVersion: $minimum"
+          }
+          verify_minimum_os "$app_path/Info.plist" "Runner.app"
+          verify_minimum_os "$app_path/Frameworks/App.framework/Info.plist" "App.framework"
+
           codesign --verify --deep --strict "$app_path"
 
           # Sign in with Apple is required by App Review (guideline 4.8). The

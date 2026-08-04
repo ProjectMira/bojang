@@ -3,6 +3,28 @@
 The `Mobile Release` GitHub Actions workflow builds and publishes Android to
 Google Play and iOS to TestFlight with one shared Flutter version.
 
+## Release pipeline ownership
+
+GitHub Actions is the **only automated store-release pipeline** for Bojang.
+Keep the App Store Connect/Xcode Cloud `Archive - iOS` workflow disabled (or
+remove its automatic branch-change start condition). This matches the proven
+WeBuddhist release model: the GitHub macOS runner installs Flutter, runs
+`flutter pub get`, runs `pod install`, builds the IPA, and uploads it to
+TestFlight.
+
+Do not commit `ios/Flutter/Generated.xcconfig`, `ios/Pods`, or CocoaPods
+`.xcfilelist` files to make an Xcode Cloud build pass. They are intentionally
+ignored generated artifacts. The GitHub workflow creates them in its
+`Install dependencies` step before the Flutter and Xcode archive steps.
+
+The release bot's version commit contains `[skip ci]` to prevent a recursive
+GitHub Actions release. Xcode Cloud does not use that marker, so an automatic
+Xcode Cloud workflow would still start from the bot commit, produce a separate
+failure notification, and compete with GitHub Actions for TestFlight delivery.
+If an email says **Xcode Cloud** and reports missing `Generated.xcconfig` or a
+`Pods-*-output-files.xcfilelist`, disable the Xcode Cloud start condition; do
+not change the iOS project or check in generated files.
+
 The normal release path is:
 
 1. Decide the next marketing version from the commits landed since the last
@@ -214,6 +236,14 @@ contain `android/app/google-services.json`. Firebase on Android should be treate
 as a separate configuration task before depending on it in a store build.
 
 ## iOS setup
+
+TestFlight builds set `APPLE_SIGN_IN_DIAGNOSTICS=true`. Apple sometimes returns
+AuthenticationServices error 1001 both when a user dismisses the sheet and when
+its sheet displays **Sign-Up Not Completed**. With diagnostics enabled, that
+otherwise-hidden response is shown in the app with its UTC timestamp so a
+tester screenshot can be attached to Feedback Assistant and correlated with an
+Accounts/AuthKit sysdiagnose. Local and non-release builds retain silent user
+cancellation unless the same Dart define is supplied.
 
 1. Maintain an active Apple Developer Program membership.
 2. Register `com.bojang.app` under Certificates, Identifiers & Profiles.
