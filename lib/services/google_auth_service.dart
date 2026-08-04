@@ -141,15 +141,17 @@ class GoogleAuthService {
     }
 
     try {
-      // Apple signs a nonce we choose, and Firebase checks it against the raw
-      // value, so a replayed identity token cannot be used against us.
+      // Generate a cryptographically random nonce. We pass the sha256 digest
+      // to Apple's request sheet and the raw nonce to Firebase Auth credential.
       final rawNonce = _generateNonce();
+      final nonceDigest = sha256.convert(utf8.encode(rawNonce)).toString();
+
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: const [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
-        nonce: sha256.convert(utf8.encode(rawNonce)).toString(),
+        nonce: nonceDigest,
       );
 
       final identityToken = appleCredential.identityToken;
