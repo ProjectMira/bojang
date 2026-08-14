@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bojang/screens/auth_screen.dart';
@@ -355,8 +354,10 @@ void main() {
     ) async {
       when(mockGoogleAuthService.signInWithApple()).thenThrow(
         AppleSignInFailure(
-          code: AuthorizationErrorCode.canceled,
+          code: 1001,
+          domain: 'com.apple.AuthenticationServices.AuthorizationError',
           message: 'Apple could not complete the sign-up',
+          underlying: const ['AKAuthenticationError -7003: unusable account'],
           occurredAt: DateTime.utc(2026, 8, 14, 12, 34, 56),
         ),
       );
@@ -367,12 +368,15 @@ void main() {
       await tester.tap(find.text('Continue with Apple'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('1001/canceled'), findsOneWidget);
+      expect(find.textContaining('1001'), findsOneWidget);
       expect(find.textContaining('2026-08-14T12:34:56.000Z'), findsOneWidget);
       expect(
         find.textContaining('Apple could not complete the sign-up'),
         findsOneWidget,
       );
+      // The nested error is the whole point of the native bridge: it must
+      // survive all the way into the dialog a tester screenshots.
+      expect(find.textContaining('AKAuthenticationError -7003'), findsOneWidget);
     });
 
     testWidgets('a pending Apple sign-in blocks the Google button', (

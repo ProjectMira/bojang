@@ -106,12 +106,13 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     }
   }
 
-  // A short, quotable description of a failure. Shown in the dialog so a
-  // screenshot from a tester — or from App Review — carries the actual error
-  // instead of only "didn't complete".
+  // A quotable description of a failure. Shown in the dialog so a screenshot
+  // from a tester — or from App Review — carries the actual error instead of
+  // only "didn't complete". Apple's nested error is the useful part and sits
+  // at the end, so keep enough room for it; the dialog scrolls.
   String _errorDetail(Object error) {
     final text = error.toString().replaceAll('\n', ' ').trim();
-    return text.length > 160 ? '${text.substring(0, 157)}…' : text;
+    return text.length > 600 ? '${text.substring(0, 597)}…' : text;
   }
 
   void _showSignInIssueDialog(String provider, {String? detail}) {
@@ -125,30 +126,32 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                 fontWeight: FontWeight.bold,
               ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Please check your connection and try again in a moment. '
-                  'You can also continue without an account — every learning '
-                  'feature works on this device, and you can sign in anytime '
-                  'from the Profile tab.',
-                  style: GoogleFonts.poppins().copyWith(
-                    fontFamilyFallback: const ['Jomolhari'],
-                  ),
-                ),
-                if (detail != null && detail.isNotEmpty) ...[
-                  const SizedBox(height: 12),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    detail,
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      color: Colors.grey.shade600,
-                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                    'Please check your connection and try again in a moment. '
+                    'You can also continue without an account — every learning '
+                    'feature works on this device, and you can sign in anytime '
+                    'from the Profile tab.',
+                    style: GoogleFonts.poppins().copyWith(
+                      fontFamilyFallback: const ['Jomolhari'],
+                    ),
                   ),
+                  if (detail != null && detail.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    SelectableText(
+                      detail,
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
             actions: [
               TextButton(
