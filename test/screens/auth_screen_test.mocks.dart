@@ -59,6 +59,14 @@ class MockGoogleAuthService extends _i1.Mock implements _i2.GoogleAuthService {
           as _i3.Future<_i4.User?>);
 
   @override
+  _i3.Future<_i4.User?> signInWithApple() =>
+      (super.noSuchMethod(
+            Invocation.method(#signInWithApple, []),
+            returnValue: _i3.Future<_i4.User?>.value(),
+          )
+          as _i3.Future<_i4.User?>);
+
+  @override
   _i3.Future<void> signOut() =>
       (super.noSuchMethod(
             Invocation.method(#signOut, []),

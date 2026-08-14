@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import 'app_config.dart';
 import 'api_service.dart';
+import 'apple_sign_in.dart';
 
 class GoogleAuthService {
   static final GoogleAuthService _instance = GoogleAuthService._internal();
@@ -118,6 +119,76 @@ class GoogleAuthService {
       print('Google Sign-In error: $error');
       rethrow;
     }
+  }
+
+  // Sign in with Apple. The native sheet and the Firebase credential exchange
+  // live in [AppleSignIn]; this method turns the resulting Firebase user into
+  // an app account, exactly as the Google path does.
+  Future<User?> signInWithApple() async {
+    if (!AppConfig.firebaseEnabled) {
+      print('Apple Sign-In requires Firebase, which is disabled in this build');
+      return null;
+    }
+
+    final firebaseUser = await const AppleSignIn().signIn(
+      surfaceRefusals: AppConfig.appleSignInDiagnosticsEnabled,
+    );
+    if (firebaseUser == null) return null;
+
+    // Apple hides the address behind a private relay for users who ask it to,
+    // and sends nothing at all on repeat authorizations — Firebase keeps
+    // whatever it was given the first time.
+    final email = firebaseUser.email ?? '';
+    final storedName = firebaseUser.displayName?.trim() ?? '';
+    final displayName =
+        storedName.isNotEmpty
+            ? storedName
+            : (email.contains('@') ? email.split('@').first : 'Learner');
+
+    final user = User(
+      id: firebaseUser.uid,
+      email: email,
+      username:
+          email.contains('@') ? _generateUsername(email) : firebaseUser.uid,
+      displayName: displayName,
+      profileImageUrl: firebaseUser.photoURL,
+      createdAt: DateTime.now(),
+      lastLogin: DateTime.now(),
+      authProvider: AuthProvider.apple,
+    );
+
+    // Sync even without an email: /auth/sync identifies the account from the
+    // bearer token alone, and skipping it would leave the app "signed in"
+    // with no server-side account at all.
+    final idToken = await firebaseUser.getIdToken();
+    if (idToken != null) {
+      try {
+        final result = await _apiService.appleAuth(
+          uid: firebaseUser.uid,
+          email: email,
+          displayName: displayName,
+          profileImageUrl: firebaseUser.photoURL,
+          idToken: idToken,
+        );
+
+        if (result != null) {
+          final backendUser = User.fromJson(result['user']);
+          _currentUser = backendUser;
+          await _cacheUser(backendUser);
+          return backendUser;
+        }
+        print('Apple sign-in: backend sync returned no profile');
+      } catch (apiError) {
+        print('Backend API error during Apple auth: $apiError');
+        // Continue in offline mode with the Apple/Firebase data.
+      }
+    } else {
+      print('Apple sign-in: no Firebase ID token, skipping backend sync');
+    }
+
+    _currentUser = user;
+    await _cacheUser(user);
+    return user;
   }
 
   // Sign out

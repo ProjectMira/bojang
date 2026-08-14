@@ -74,6 +74,23 @@ class ApiService {
     );
   }
 
+  Future<Map<String, dynamic>?> appleAuth({
+    required String uid,
+    required String email,
+    required String displayName,
+    String? profileImageUrl,
+    String? idToken,
+  }) async {
+    return _providerAuth(
+      providerUserId: uid,
+      email: email,
+      displayName: displayName,
+      profileImageUrl: profileImageUrl,
+      token: idToken,
+      authProvider: 'apple',
+    );
+  }
+
   Future<Map<String, dynamic>?> _providerAuth({
     required String providerUserId,
     required String email,

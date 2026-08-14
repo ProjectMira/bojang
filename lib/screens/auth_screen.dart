@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/app_config.dart';
 import '../services/google_auth_service.dart';
+import '../widgets/apple_sign_in_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import 'main_navigation_screen.dart';
 
@@ -13,8 +15,14 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
+/// Which provider's sheet is open, so the other button can be disabled and
+/// only the pressed one shows a spinner.
+enum _SignInMethod { apple, google }
+
 class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
-  bool _isLoading = false;
+  _SignInMethod? _loadingMethod;
+
+  bool get _isLoading => _loadingMethod != null;
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -58,8 +66,28 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  Future<void> _handleAppleSignIn() async {
+    setState(() => _loadingMethod = _SignInMethod.apple);
+
+    try {
+      final user = await _googleAuthService.signInWithApple();
+      if (user != null && mounted) {
+        _showSnackBar('Welcome ${user.displayName}!', isSuccess: true);
+        await Future.delayed(
+          const Duration(milliseconds: 500),
+        ); // Brief delay to show success
+        _navigateToMainScreen();
+      }
+      // null means the user dismissed Apple's sheet: no message.
+    } catch (e) {
+      if (mounted) _showSignInIssueDialog('Apple', detail: _errorDetail(e));
+    } finally {
+      if (mounted) setState(() => _loadingMethod = null);
+    }
+  }
+
   Future<void> _handleGoogleSignIn() async {
-    setState(() => _isLoading = true);
+    setState(() => _loadingMethod = _SignInMethod.google);
 
     try {
       final user = await _googleAuthService.signInWithGoogle();
@@ -74,7 +102,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     } catch (e) {
       if (mounted) _showSignInIssueDialog('Google', detail: _errorDetail(e));
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _loadingMethod = null);
     }
   }
 
@@ -250,9 +278,16 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
+            if (AppConfig.appleSignInEnabled) ...[
+              AppleSignInButton(
+                onPressed: _isLoading ? null : _handleAppleSignIn,
+                isLoading: _loadingMethod == _SignInMethod.apple,
+              ),
+              const SizedBox(height: 12),
+            ],
             GoogleSignInButton(
               onPressed: _isLoading ? null : _handleGoogleSignIn,
-              isLoading: _isLoading,
+              isLoading: _loadingMethod == _SignInMethod.google,
             ),
           ],
         ),

@@ -106,6 +106,26 @@ class MockApiService extends _i1.Mock implements _i2.ApiService {
           as _i3.Future<Map<String, dynamic>?>);
 
   @override
+  _i3.Future<Map<String, dynamic>?> appleAuth({
+    required String? uid,
+    required String? email,
+    required String? displayName,
+    String? profileImageUrl,
+    String? idToken,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#appleAuth, [], {
+              #uid: uid,
+              #email: email,
+              #displayName: displayName,
+              #profileImageUrl: profileImageUrl,
+              #idToken: idToken,
+            }),
+            returnValue: _i3.Future<Map<String, dynamic>?>.value(),
+          )
+          as _i3.Future<Map<String, dynamic>?>);
+
+  @override
   _i3.Future<void> logout() =>
       (super.noSuchMethod(
             Invocation.method(#logout, []),
