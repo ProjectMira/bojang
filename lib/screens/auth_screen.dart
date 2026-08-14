@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../services/app_config.dart';
 import '../services/google_auth_service.dart';
-import '../widgets/apple_sign_in_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import 'main_navigation_screen.dart';
 
@@ -15,12 +13,8 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-enum _SignInMethod { apple, google }
-
 class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
-  _SignInMethod? _loadingMethod;
-
-  bool get _isLoading => _loadingMethod != null;
+  bool _isLoading = false;
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -64,28 +58,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _handleAppleSignIn() async {
-    setState(() => _loadingMethod = _SignInMethod.apple);
-
-    try {
-      final user = await _googleAuthService.signInWithApple();
-      if (user != null && mounted) {
-        _showSnackBar('Welcome ${user.displayName}!', isSuccess: true);
-        await Future.delayed(
-          const Duration(milliseconds: 500),
-        ); // Brief delay to show success
-        _navigateToMainScreen();
-      }
-      // null means the user dismissed the Apple sign-in sheet: no message.
-    } catch (e) {
-      if (mounted) _showSignInIssueDialog('Apple', detail: _errorDetail(e));
-    } finally {
-      if (mounted) setState(() => _loadingMethod = null);
-    }
-  }
-
   Future<void> _handleGoogleSignIn() async {
-    setState(() => _loadingMethod = _SignInMethod.google);
+    setState(() => _isLoading = true);
 
     try {
       final user = await _googleAuthService.signInWithGoogle();
@@ -100,7 +74,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     } catch (e) {
       if (mounted) _showSignInIssueDialog('Google', detail: _errorDetail(e));
     } finally {
-      if (mounted) setState(() => _loadingMethod = null);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -276,16 +250,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            if (AppConfig.appleSignInEnabled) ...[
-              AppleSignInButton(
-                onPressed: _isLoading ? null : _handleAppleSignIn,
-                isLoading: _loadingMethod == _SignInMethod.apple,
-              ),
-              const SizedBox(height: 12),
-            ],
             GoogleSignInButton(
               onPressed: _isLoading ? null : _handleGoogleSignIn,
-              isLoading: _loadingMethod == _SignInMethod.google,
+              isLoading: _isLoading,
             ),
           ],
         ),

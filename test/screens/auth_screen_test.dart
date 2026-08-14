@@ -6,10 +6,8 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:bojang/screens/auth_screen.dart';
 import 'package:bojang/screens/main_navigation_screen.dart';
-import 'package:bojang/services/app_config.dart';
 import 'package:bojang/services/google_auth_service.dart';
 import 'package:bojang/services/progress_service.dart';
 import 'package:bojang/services/theme_service.dart';
@@ -221,10 +219,7 @@ void main() {
     );
   });
 
-  // Sign in with Apple is compiled in only on iOS builds that carry the
-  // Firebase configuration, so these tests force the button on through the
-  // AppConfig test seam.
-  group('AuthScreen Sign in with Apple', () {
+  group('AuthScreen layout', () {
     late MockGoogleAuthService mockGoogleAuthService;
 
     setUp(() {
@@ -232,29 +227,10 @@ void main() {
       mockGoogleAuthService = MockGoogleAuthService();
       when(mockGoogleAuthService.initialize()).thenAnswer((_) async => {});
       when(mockGoogleAuthService.isInitialized).thenReturn(true);
-      AppConfig.debugAppleSignInEnabled = true;
     });
-
-    tearDown(() => AppConfig.debugAppleSignInEnabled = null);
 
     Widget createTestWidget() =>
         MaterialApp(home: AuthScreen(authService: mockGoogleAuthService));
-
-    testWidgets('offers Apple sign-in above Google on Apple platforms', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      expect(find.text('Continue with Apple'), findsOneWidget);
-      expect(find.text('Continue with Google'), findsOneWidget);
-
-      // Apple requires Sign in with Apple to sit at least as prominently as
-      // the other providers.
-      final appleY = tester.getTopLeft(find.text('Continue with Apple')).dy;
-      final googleY = tester.getTopLeft(find.text('Continue with Google')).dy;
-      expect(appleY, lessThan(googleY));
-    });
 
     // App Review rejected 2026-07-18 on an iPad Air 11-inch (M3), so pin the
     // sign-in screen's layout at that geometry.
@@ -269,13 +245,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('Continue with Apple'), findsOneWidget);
       expect(find.text('Continue with Google'), findsOneWidget);
       expect(find.text('Continue without account'), findsOneWidget);
 
       // Every control sits inside the 820x1180pt screen.
       for (final label in const [
-        'Continue with Apple',
         'Continue with Google',
         'Continue without account',
       ]) {
@@ -285,145 +259,6 @@ void main() {
         expect(rect.left, greaterThanOrEqualTo(0.0), reason: label);
         expect(rect.right, lessThanOrEqualTo(820.0), reason: label);
       }
-    });
-
-    testWidgets('successful Apple sign-in greets the user and navigates', (
-      WidgetTester tester,
-    ) async {
-      final testUser = User(
-        id: 'apple-uid',
-        email: 'abc123@privaterelay.appleid.com',
-        username: 'abc123',
-        displayName: 'Tenzin',
-        createdAt: DateTime.now(),
-        authProvider: AuthProvider.apple,
-      );
-
-      when(
-        mockGoogleAuthService.signInWithApple(),
-      ).thenAnswer((_) async => testUser);
-      when(mockGoogleAuthService.currentUser).thenReturn(testUser);
-
-      await tester.pumpWidget(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => ThemeService()),
-            ChangeNotifierProvider(create: (_) => ProgressService()),
-            Provider<GoogleAuthService>.value(value: mockGoogleAuthService),
-          ],
-          child: MaterialApp(
-            home: AuthScreen(authService: mockGoogleAuthService),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Continue with Apple'));
-      await tester.pump();
-
-      verify(mockGoogleAuthService.signInWithApple()).called(1);
-      expect(find.text('Welcome Tenzin!'), findsOneWidget);
-
-      await tester.pump(const Duration(milliseconds: 600));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(AuthScreen), findsNothing);
-      expect(find.byType(MainNavigationScreen), findsOneWidget);
-    });
-
-    testWidgets('dismissing the Apple sheet shows no message at all', (
-      WidgetTester tester,
-    ) async {
-      when(
-        mockGoogleAuthService.signInWithApple(),
-      ).thenAnswer((_) async => null);
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Continue with Apple'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(SnackBar), findsNothing);
-      expect(find.byType(AlertDialog), findsNothing);
-      expect(find.byType(AuthScreen), findsOneWidget);
-    });
-
-    testWidgets('Apple sign-in failure shows a friendly, recoverable dialog', (
-      WidgetTester tester,
-    ) async {
-      when(
-        mockGoogleAuthService.signInWithApple(),
-      ).thenThrow(Exception('apple sign-in failed'));
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Continue with Apple'));
-      await tester.pumpAndSettle();
-
-      expect(find.text("Apple sign-in didn't complete"), findsOneWidget);
-      expect(find.textContaining('continue without an account'), findsWidgets);
-
-      await tester.tap(find.text('OK'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(AlertDialog), findsNothing);
-      expect(find.text('Signing in...'), findsNothing);
-      expect(find.text('Continue with Apple'), findsOneWidget);
-    });
-
-    testWidgets('the failure dialog exposes Apple code and UTC timestamp', (
-      WidgetTester tester,
-    ) async {
-      when(mockGoogleAuthService.signInWithApple()).thenThrow(
-        AppleSignInDiagnosticException(
-          code: AuthorizationErrorCode.failed,
-          message: 'Apple could not complete the sign-up',
-          occurredAt: DateTime.utc(2026, 8, 5, 12, 34, 56),
-        ),
-      );
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Continue with Apple'));
-      await tester.pumpAndSettle();
-
-      // A tester's (or App Review's) screenshot of this dialog has to carry
-      // the real error, otherwise the failure is undiagnosable from a report.
-      expect(
-        find.textContaining('Apple could not complete the sign-up'),
-        findsOneWidget,
-      );
-      expect(find.textContaining('1004/failed'), findsOneWidget);
-      expect(find.textContaining('2026-08-05T12:34:56.000Z'), findsOneWidget);
-    });
-
-    testWidgets('a pending Apple sign-in blocks the Google button', (
-      WidgetTester tester,
-    ) async {
-      final completer = Completer<User?>();
-      when(
-        mockGoogleAuthService.signInWithApple(),
-      ).thenAnswer((_) => completer.future);
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Continue with Apple'));
-      await tester.pump();
-
-      expect(find.text('Signing in...'), findsOneWidget);
-
-      await tester.tap(find.text('Continue with Google'), warnIfMissed: false);
-      await tester.pump();
-
-      completer.complete(null);
-      await tester.pumpAndSettle();
-
-      verify(mockGoogleAuthService.signInWithApple()).called(1);
-      verifyNever(mockGoogleAuthService.signInWithGoogle());
     });
   });
 }

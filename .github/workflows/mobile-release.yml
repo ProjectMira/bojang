@@ -56,7 +56,7 @@ name: Mobile Release
           - beta
           - production
       enable_ios_firebase:
-        description: Enable Firebase on iOS; requires GOOGLE_SERVICE_INFO_PLIST. Sign in with Apple needs this, so App Review (guideline 4.8) fails without it.
+        description: Enable Firebase on iOS; requires GOOGLE_SERVICE_INFO_PLIST. Google sign-in and backend account sync need this.
         required: true
         default: true
         type: boolean
@@ -133,8 +133,8 @@ jobs:
             fi
             release_ios="true"
             android_track="internal"
-            # Firebase must stay enabled on iOS: Sign in with Apple (App Store
-            # guideline 4.8) and backend account sync both run through it.
+            # Firebase must stay enabled on iOS: Google sign-in and backend
+            # account sync both run through it.
             enable_ios_firebase="true"
           else
             # "auto" means: let bump_version.sh read the commits.
@@ -572,71 +572,6 @@ jobs:
             exit 1
           fi
 
-      - name: Ensure Sign in with Apple capability on the App ID
-        env:
-          ASC_KEY_PATH: ${{ steps.asc-key.outputs.path }}
-        run: |
-          set -euo pipefail
-          token="$(ruby "$RUNNER_TEMP/asc_jwt.rb" "$ASC_KEY_ID" "$ASC_ISSUER_ID" "$ASC_KEY_PATH")"
-
-          # Diagnostics go into ::error:: annotations (echoed at top level on
-          # stdout, never inside $() or redirects) because job logs are not
-          # readable without repo admin access.
-          call() { # call <name> <method> <url> [body]; sets CALL_STATUS and CALL_OUT
-            local name="$1" method="$2" url="$3" body="${4:-}"
-            CALL_OUT="$RUNNER_TEMP/asc-$name.json"
-            if [ -n "$body" ]; then
-              CALL_STATUS="$(curl -sS --retry 3 --retry-all-errors -o "$CALL_OUT" -w '%{http_code}' -X "$method" \
-                -H "Authorization: Bearer $token" -H "Content-Type: application/json" \
-                -d "$body" "$url")" || CALL_STATUS=000
-            else
-              CALL_STATUS="$(curl -sS --retry 3 --retry-all-errors -o "$CALL_OUT" -w '%{http_code}' -X "$method" \
-                -H "Authorization: Bearer $token" "$url")" || CALL_STATUS=000
-            fi
-          }
-          fail_call() {
-            echo "::error::$1 returned HTTP $CALL_STATUS: $(tr -d '\n' < "$CALL_OUT" 2>/dev/null | head -c 600)"
-            exit 1
-          }
-
-          call bundle-ids GET "https://api.appstoreconnect.apple.com/v1/bundleIds?filter%5Bidentifier%5D=$IOS_BUNDLE_ID&limit=200"
-          [ "$CALL_STATUS" = "200" ] || fail_call "GET bundleIds"
-          bundle_resource_id="$(python3 -c '
-          import json, os, sys
-          data = json.load(sys.stdin).get("data", [])
-          matches = [b for b in data if b["attributes"]["identifier"] == os.environ["IOS_BUNDLE_ID"]
-                     and b["attributes"]["platform"] in ("IOS", "UNIVERSAL")]
-          print(matches[0]["id"] if matches else "")
-          ' < "$CALL_OUT")"
-          if [ -z "$bundle_resource_id" ]; then
-            echo "::error::No App ID found for $IOS_BUNDLE_ID in App Store Connect (response: $(tr -d '\n' < "$CALL_OUT" | head -c 400))"
-            exit 1
-          fi
-          echo "App ID resource: $bundle_resource_id"
-
-          call capabilities GET "https://api.appstoreconnect.apple.com/v1/bundleIds/$bundle_resource_id/bundleIdCapabilities"
-          [ "$CALL_STATUS" = "200" ] || fail_call "GET bundleIdCapabilities"
-          # Sign in with Apple is APPLE_ID_AUTH in the App Store Connect API.
-          has_capability="$(python3 -c '
-          import json, sys
-          caps = json.load(sys.stdin).get("data", [])
-          print("yes" if any(c["attributes"]["capabilityType"] == "APPLE_ID_AUTH" for c in caps) else "no")
-          ' < "$CALL_OUT")"
-
-          if [ "$has_capability" = "yes" ]; then
-            echo "App ID $IOS_BUNDLE_ID already has the Sign in with Apple capability."
-            exit 0
-          fi
-
-          echo "Enabling Sign in with Apple capability on App ID $IOS_BUNDLE_ID..."
-          payload="{\"data\":{\"type\":\"bundleIdCapabilities\",\"attributes\":{\"capabilityType\":\"APPLE_ID_AUTH\",\"settings\":[{\"key\":\"APPLE_ID_AUTH_APP_CONSENT\",\"options\":[{\"key\":\"PRIMARY_APP_CONSENT\"}]}]},\"relationships\":{\"bundleId\":{\"data\":{\"type\":\"bundleIds\",\"id\":\"$bundle_resource_id\"}}}}}"
-          call enable-capability POST "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities" "$payload"
-          if [ "$CALL_STATUS" != "201" ]; then
-            echo "::warning::If the API key cannot manage identifiers, enable the capability manually: developer.apple.com -> Certificates, Identifiers & Profiles -> Identifiers -> $IOS_BUNDLE_ID -> check 'Sign In with Apple', then re-run."
-            fail_call "POST bundleIdCapabilities"
-          fi
-          echo "Capability enabled."
-
       - name: Install dependencies
         run: |
           set -euo pipefail
@@ -657,7 +592,6 @@ jobs:
             --build-name "${{ needs.prepare.outputs.marketing }}" \
             --build-number "${{ needs.prepare.outputs.build }}" \
             --dart-define "ENABLE_IOS_FIREBASE=${{ needs.prepare.outputs.enable_ios_firebase }}" \
-            --dart-define "APPLE_SIGN_IN_DIAGNOSTICS=true" \
             2>&1 | tee build/ios/flutter-build.log; then
             echo "::error::flutter build ios failed: $(tail -n 30 build/ios/flutter-build.log | tr '\n' ' ' | tail -c 900)"
             exit 1
@@ -688,12 +622,10 @@ jobs:
 
       - name: Embed entitlements via ad-hoc signature
         # The archive is built unsigned, and exportArchive derives the
-        # entitlements to re-sign with from the app's existing signature —
-        # an unsigned app therefore loses com.apple.developer.applesignin.
+        # entitlements to re-sign with from the app's existing signature.
         # Ad-hoc signing the archived app with Runner.entitlements gives the
         # export step a signature to preserve; it then re-signs with the real
-        # distribution certificate and a profile that authorizes the
-        # capability (ensured on the App ID earlier in this job).
+        # distribution certificate.
         run: |
           set -euo pipefail
           # The product is named Bojang.app, so discover it like the verify
@@ -709,8 +641,6 @@ jobs:
           fi
           codesign --force --sign - --timestamp=none \
             --entitlements ios/Runner/Runner.entitlements "$app_path"
-          codesign -d --entitlements - "$app_path" 2>/dev/null | grep -aq 'com.apple.developer.applesignin' \
-            || { echo "::error::Ad-hoc signature is missing the applesignin entitlement"; exit 1; }
 
       - name: Export IPA
         id: export
@@ -790,15 +720,7 @@ jobs:
 
           codesign --verify --deep --strict "$app_path"
 
-          # Sign in with Apple is required by App Review (guideline 4.8). The
-          # unsigned-archive/export flow must not drop the entitlement, so fail
-          # the release if the signed app lacks it.
-          if ! codesign -d --entitlements - "$app_path" 2>/dev/null | grep -aq 'com.apple.developer.applesignin'; then
-            echo "::error::Exported app is missing the com.apple.developer.applesignin entitlement; Sign in with Apple would crash. Check Runner.entitlements, the App ID capability, and the export signing step."
-            exit 1
-          fi
-
-          # Firebase powers Sign in with Apple and account sync; a placeholder
+          # Firebase powers Google sign-in and account sync; a placeholder
           # plist means the restore step was skipped and auth would break.
           gs_plist="$app_path/GoogleService-Info.plist"
           if [ ! -f "$gs_plist" ]; then
