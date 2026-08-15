@@ -377,3 +377,19 @@ derived from anything a failed run could leave behind.
 - Rotate the Google service-account JSON and remove the old key.
 - Keep offline backups of the Android upload keystore and Apple `.p8` outside the
   repository and outside the developer accounts that use them.
+
+## Sign in with Apple capability re-registration (2026-08-16)
+
+Apple DTS attributes ASAuthorizationError 1001 (surfacing as "Sign-Up Not
+Completed", underlying AKAuthenticationError -7003) to the authentication
+backend not yet recognizing the App ID's Sign in with Apple entitlement —
+propagation after enabling the capability takes 15 minutes to 24 hours, and
+provisioning profiles must be (re)generated afterwards
+(https://developer.apple.com/forums/thread/789697).
+
+com.bojang.app's APPLE_ID_AUTH capability was deleted and re-created via the
+ASC API on 2026-08-16 to force re-registration. This release exists to mint a
+fresh cloud-managed provisioning profile after that re-add. If sign-in still
+fails >24h later, re-save the capability through the developer portal UI
+(Identifiers → com.bojang.app → Sign In with Apple → Edit → Save), retest
+without rebuilding, and escalate to Apple Developer Support if it persists.
