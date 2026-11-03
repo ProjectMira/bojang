@@ -6,7 +6,7 @@ Apple's July 18 review (iPad Air 11-inch (M3), iPadOS 26.5.2, version "2.0.0(17)
 1. **Guideline 2.1(a) — Performance: App Completeness.** "An error message was displayed
    when we attempted to Sign in with Apple."
 2. **Guideline 2.1 — Information Needed.** The demo credentials
-   `ta6tsering@gmail.com` / `Velocidade$2995` did not work.
+   (the old demo login, now removed; kept in `_private/bojang-credentials.md`) did not work.
 
 ---
 

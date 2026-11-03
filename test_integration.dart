@@ -127,8 +127,13 @@ Future<void> testApiContent() async {
 
 Future<void> testDatabaseData() async {
   try {
+    final databaseUrl = Platform.environment['DATABASE_URL'];
+    if (databaseUrl == null) {
+      print('⏭️  Database: skipped (set DATABASE_URL to run)');
+      return;
+    }
     final result = await Process.run('psql', [
-      'postgresql://bojang_db_user:SuZ3kFziKVjHetqB6r4uls5WyhKu8Vei@dpg-d33tguripnbc73e9q49g-a.singapore-postgres.render.com/bojang_db?sslmode=require',
+      databaseUrl,
       '-c',
       'SELECT COUNT(*) as categories FROM categories; SELECT COUNT(*) as questions FROM questions; SELECT COUNT(*) as users FROM users;'
     ]);

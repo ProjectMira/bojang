@@ -108,7 +108,7 @@ Time: 10:20 PM
 ```bash
 # Start backend with Render database
 cd backend
-DATABASE_URL="postgresql://bojang_db_user:SuZ3kFziKVjHetqB6r4uls5WyhKu8Vei@dpg-d33tguripnbc73e9q49g-a.singapore-postgres.render.com/bojang_db?sslmode=require" npm start
+DATABASE_URL="$DATABASE_URL" npm start   # real value in ~/Desktop/Projects/_private/bojang-credentials.md
 
 # In another terminal, run Flutter app
 cd /Users/tashitsering/Desktop/bojang
@@ -141,14 +141,14 @@ curl http://localhost:3000/health
 # Authentication Test
 curl -X POST http://localhost:3000/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"testpass123"}'
+  -d '{"email":"test@example.com","password":"$TEST_PASSWORD"}'
 
 # Categories Test (with auth)
 curl http://localhost:3000/api/v1/content/categories \
   -H "Authorization: Bearer [JWT_TOKEN]"
 
 # Database Connection Test
-psql "postgresql://bojang_db_user:SuZ3kFziKVjHetqB6r4uls5WyhKu8Vei@dpg-d33tguripnbc73e9q49g-a.singapore-postgres.render.com/bojang_db?sslmode=require" -c "\dt"
+psql "$DATABASE_URL" -c "\dt"   # real value in ~/Desktop/Projects/_private/bojang-credentials.md
 ```
 
 ---
