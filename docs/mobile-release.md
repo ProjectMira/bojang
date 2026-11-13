@@ -378,6 +378,24 @@ derived from anything a failed run could leave behind.
 - Keep offline backups of the Android upload keystore and Apple `.p8` outside the
   repository and outside the developer accounts that use them.
 
+## macOS runner capacity and the Intel fallback (2026-11-13)
+
+GitHub's arm64 macOS runners (`macos-26`) sometimes run out of capacity. A job
+that no runner picks up within about 15 minutes is cancelled with "The job was
+not acquired by Runner of type hosted even after multiple attempts"; runs 47
+and 48 were lost this way with green analysis and tests.
+
+The iOS job now has a twin, `ios-fallback`, that reuses its environment and
+steps through YAML anchors (`&ios_env`, `&ios_steps`) and runs on the separate
+x64 pool (`macos-26-intel`) only when the arm64 job ends `cancelled`. The
+release job tags the build if either one uploads. A run cancelled by a person
+is not retried (`!cancelled()`).
+
+- Edit iOS steps in the `ios` job only; the fallback picks them up.
+- Repository variables `IOS_RUNNER` and `IOS_FALLBACK_RUNNER` override the two
+  runner labels without a code change.
+- GitHub supports anchors and aliases but not merge keys (`<<:`).
+
 ## Sign in with Apple capability re-registration (2026-08-16)
 
 Apple DTS attributes ASAuthorizationError 1001 (surfacing as "Sign-Up Not

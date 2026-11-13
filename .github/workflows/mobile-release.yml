@@ -405,12 +405,16 @@ jobs:
     needs:
       - prepare
       - quality
-    runs-on: macos-26
+    # GitHub's arm64 macOS pool. When it is out of capacity GitHub cancels a
+    # job no runner picks up within ~15 minutes ("not acquired by Runner of
+    # type hosted"), which is what stopped runs 47 and 48; ios-fallback below
+    # then repeats this job on the separate Intel pool.
+    runs-on: ${{ vars.IOS_RUNNER || 'macos-26' }}
     # Two full builds (flutter, then xcodebuild archive) plus a several
     # hundred MB upload; 60 was the binding constraint on a slow runner.
     timeout-minutes: 75
     environment: mobile-production
-    env:
+    env: &ios_env
       XCODE_VERSION: ${{ vars.XCODE_VERSION }}
       IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID || 'com.bojang.app' }}
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID || secrets.APPLE_TEAM_ID }}
@@ -418,7 +422,7 @@ jobs:
       ASC_ISSUER_ID: ${{ vars.APP_STORE_CONNECT_API_ISSUER_ID || secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
       ASC_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
       GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
-    steps:
+    steps: &ios_steps
       - name: Check out repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -881,6 +885,29 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  ios-fallback:
+    name: iOS / TestFlight (Intel fallback)
+    # Runs only when the arm64 job above was cancelled without finishing,
+    # normally because GitHub had no arm64 macOS runner for it. Same
+    # environment and steps (YAML aliases), on the x64 pool, which GitHub
+    # provisions separately. A run cancelled by a person stays cancelled.
+    if: >-
+      ${{
+        !cancelled() &&
+        needs.prepare.outputs.release_ios == 'true' &&
+        needs.ios.result == 'cancelled'
+      }}
+    needs:
+      - prepare
+      - quality
+      - ios
+    runs-on: ${{ vars.IOS_FALLBACK_RUNNER || 'macos-26-intel' }}
+    # Intel runners build more slowly than arm64.
+    timeout-minutes: 100
+    environment: mobile-production
+    env: *ios_env
+    steps: *ios_steps
+
   release:
     name: Tag and publish release
     # Runs whenever at least one store accepted the build. Build numbers come
@@ -890,13 +917,16 @@ jobs:
       ${{
         always() &&
         needs.quality.result == 'success' &&
-        (needs.android.result == 'success' || needs.ios.result == 'success')
+        (needs.android.result == 'success' ||
+         needs.ios.result == 'success' ||
+         needs.ios-fallback.result == 'success')
       }}
     needs:
       - prepare
       - quality
       - android
       - ios
+      - ios-fallback
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment: mobile-production
@@ -906,7 +936,8 @@ jobs:
       - name: Report store upload outcomes
         env:
           ANDROID_RESULT: ${{ needs.android.result }}
-          IOS_RESULT: ${{ needs.ios.result }}
+          # The fallback's result counts when it ran; otherwise the arm64 job's.
+          IOS_RESULT: ${{ needs.ios-fallback.result != 'skipped' && needs.ios-fallback.result || needs.ios.result }}
         run: |
           set -euo pipefail
           {
