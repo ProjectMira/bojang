@@ -11,6 +11,11 @@ class QuizQuestion {
   /// image fails to load.
   final String? englishGloss;
 
+  /// Pronunciation of the question's Tibetan word: the prompt for
+  /// multiple_choice, the correct option for picture_choice. Null when the
+  /// word has no recording.
+  final String? audioUrl;
+
   QuizQuestion({
     required this.tibetanText,
     required this.options,
@@ -18,6 +23,7 @@ class QuizQuestion {
     this.type,
     this.imageUrl,
     this.englishGloss,
+    this.audioUrl,
   });
 
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
@@ -84,6 +90,12 @@ class QuizQuestion {
       type: type,
       imageUrl: isPicture ? json['image_url']?.toString() : null,
       englishGloss: isPicture ? json['english_word']?.toString() : null,
+      audioUrl: _nonEmpty(json['audio_url']),
     );
+  }
+
+  static String? _nonEmpty(Object? value) {
+    final text = value?.toString().trim() ?? '';
+    return text.isEmpty ? null : text;
   }
 }

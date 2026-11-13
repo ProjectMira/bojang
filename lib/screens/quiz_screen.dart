@@ -7,10 +7,12 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../services/progress_service.dart';
+import '../services/pronunciation_player.dart';
 import '../services/theme_service.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/answer_feedback_banner.dart';
 import '../widgets/quiz_mode_sheet.dart';
+import '../widgets/speaker_button.dart';
 import 'lesson_complete_screen.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -39,11 +41,21 @@ class _QuizScreenState extends State<QuizScreen>
   final AudioPlayer _audioPlayer = AudioPlayer();
   String? _remoteSessionId;
   String? _remoteLevelId;
+  // Question index whose pronunciation already auto-played, so rebuilds
+  // don't replay it.
+  int? _autoPlayedIndex;
 
   @override
   void initState() {
     super.initState();
     questionsFuture = _loadQuestions();
+    // Fetch every question's pronunciation up front so it plays instantly.
+    questionsFuture.then(
+      (questions) => PronunciationPlayer.instance.prefetch(
+        questions.map((q) => q.audioUrl),
+      ),
+      onError: (Object _) {},
+    );
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -167,7 +179,23 @@ class _QuizScreenState extends State<QuizScreen>
   void dispose() {
     _animationController.dispose();
     _audioPlayer.dispose();
+    PronunciationPlayer.instance.stop();
     super.dispose();
+  }
+
+  /// Speaks a multiple_choice prompt once when its question appears (the
+  /// options are English, so hearing the Tibetan gives nothing away). Follows
+  /// the sound-effects switch; the speaker button always works.
+  void _autoPlayPrompt(QuizQuestion question) {
+    if (_autoPlayedIndex == currentQuestionIndex) return;
+    _autoPlayedIndex = currentQuestionIndex;
+    final url = question.audioUrl;
+    if (url == null || question.type == 'picture_choice') return;
+    final themeService = Provider.of<ThemeService>(context, listen: false);
+    if (!themeService.soundEffectsEnabled) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) PronunciationPlayer.instance.play(url);
+    });
   }
 
   void _handleAnswer(int answerIndex, List<QuizQuestion> questions) async {
@@ -189,6 +217,23 @@ class _QuizScreenState extends State<QuizScreen>
 
     if (isCorrect) HapticFeedback.lightImpact();
 
+    // Picture questions have Tibetan options, so their word is only spoken
+    // once answered (earlier would give the answer away). It follows the
+    // chime, which is ducked so the word stays clear.
+    final question = questions[currentQuestionIndex];
+    final revealAudio =
+        question.type == 'picture_choice' && question.audioUrl != null;
+    if (revealAudio && themeService.soundEffectsEnabled) {
+      Future.delayed(const Duration(milliseconds: 600), () async {
+        if (!mounted || currentQuestionIndex >= questions.length) return;
+        if (questions[currentQuestionIndex] != question) return;
+        try {
+          await _audioPlayer.setVolume(themeService.soundEffectsVolume * 0.3);
+        } catch (_) {}
+        await PronunciationPlayer.instance.play(question.audioUrl);
+      });
+    }
+
     setState(() {
       selectedAnswerIndex = answerIndex;
       showFeedback = true;
@@ -199,7 +244,11 @@ class _QuizScreenState extends State<QuizScreen>
     // One attempt per question: a wrong answer is recorded and the quiz moves
     // on, so the final score reflects what the learner actually knew. The
     // delay is time to read the feedback and see the right answer revealed.
-    Future.delayed(const Duration(seconds: 2), () {
+    final feedbackTime =
+        revealAudio
+            ? const Duration(milliseconds: 2800)
+            : const Duration(seconds: 2);
+    Future.delayed(feedbackTime, () {
       if (!mounted) return;
       if (currentQuestionIndex < questions.length - 1) {
         setState(() {
@@ -426,6 +475,7 @@ class _QuizScreenState extends State<QuizScreen>
           }
 
           final question = questions[currentQuestionIndex];
+          _autoPlayPrompt(question);
 
           return Stack(
             children: [
@@ -607,7 +657,11 @@ class _QuizScreenState extends State<QuizScreen>
                               ),
                               textAlign: TextAlign.center,
                             ),
-                          ] else
+                            if (showFeedback && question.audioUrl != null) ...[
+                              const SizedBox(height: 8),
+                              SpeakerButton(url: question.audioUrl!),
+                            ],
+                          ] else ...[
                             Text(
                               question.tibetanText,
                               style: const TextStyle(
@@ -616,6 +670,11 @@ class _QuizScreenState extends State<QuizScreen>
                               ),
                               textAlign: TextAlign.center,
                             ),
+                            if (question.audioUrl != null) ...[
+                              const SizedBox(height: 12),
+                              SpeakerButton(url: question.audioUrl!),
+                            ],
+                          ],
                         ],
                       ),
                     ),

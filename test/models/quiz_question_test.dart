@@ -209,6 +209,49 @@ void main() {
       });
     });
   });
+
+  group('QuizQuestion.fromApiExercise audio', () {
+    Map<String, dynamic> exercise(String type, {Object? audio}) => {
+      'type': type,
+      'tibetan_word': 'ཁྱི།',
+      'question': 'Select the Tibetan word for this picture',
+      'image_url': 'https://example.com/dog.jpg',
+      'english_word': 'dog',
+      'options': [
+        {'id': 'w-1', 'text': 'dog', 'is_correct': true},
+        {'id': 'w-2', 'text': 'cat', 'is_correct': false},
+      ],
+      'correct_answer_id': 'w-1',
+      if (audio != null) 'audio_url': audio,
+    };
+
+    test('reads audio_url for multiple_choice', () {
+      final q = QuizQuestion.fromApiExercise(
+        exercise('multiple_choice', audio: 'https://example.com/w-1.mp3'),
+      );
+      expect(q.audioUrl, equals('https://example.com/w-1.mp3'));
+    });
+
+    test('reads audio_url for picture_choice', () {
+      final q = QuizQuestion.fromApiExercise(
+        exercise('picture_choice', audio: 'https://example.com/w-1.mp3'),
+      );
+      expect(q.audioUrl, equals('https://example.com/w-1.mp3'));
+    });
+
+    test('missing or blank audio_url is null', () {
+      expect(
+        QuizQuestion.fromApiExercise(exercise('multiple_choice')).audioUrl,
+        isNull,
+      );
+      expect(
+        QuizQuestion.fromApiExercise(
+          exercise('multiple_choice', audio: '  '),
+        ).audioUrl,
+        isNull,
+      );
+    });
+  });
 }
 
 
