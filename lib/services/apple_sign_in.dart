@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'firebase_account_link.dart';
 import 'package:flutter/services.dart';
 
 /// The native Sign in with Apple exchange, isolated from the rest of auth so
@@ -82,8 +83,7 @@ class AppleSignIn {
           ),
         );
 
-    final result = await firebase_auth.FirebaseAuth.instance
-        .signInWithCredential(appleCredential);
+    final result = await signInOrLinkAnonymous(appleCredential);
     return result.user;
   }
 

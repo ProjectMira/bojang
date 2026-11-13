@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/google_auth_service.dart';
 import '../services/api_service.dart';
 import 'main_navigation_screen.dart';
-import 'auth_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -47,20 +46,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     // Try to sign in silently with Google
     final user = await _googleAuthService.signInSilently();
-    
+
+    // No sign-in wall: learners who have not created an account get an
+    // anonymous one so their progress still syncs. If that cannot happen
+    // (offline), progress stays on the device and the app works the same.
+    if (user == null) {
+      await _googleAuthService.ensureAnonymousSession().timeout(
+        const Duration(seconds: 6),
+        onTimeout: () => false,
+      );
+    }
+
     // Small delay for better UX
     await Future.delayed(const Duration(milliseconds: 500));
 
     if (mounted) {
-      Widget nextScreen;
-      
-      if (user != null || _apiService.isAuthenticated) {
-        // User is authenticated, go to main screen
-        nextScreen = const MainNavigationScreen();
-      } else {
-        // User is not authenticated, show auth screen
-        nextScreen = const AuthScreen();
-      }
+      // Everyone starts learning right away; signing in is offered from the
+      // Profile tab.
+      const Widget nextScreen = MainNavigationScreen();
 
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(

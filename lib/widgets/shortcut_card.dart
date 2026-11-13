@@ -53,20 +53,29 @@ class _ShortcutCardState extends State<ShortcutCard> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                widget.leading ??
-                    Container(
-                      width: 40,
-                      height: 40,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: AppTokens.surface(context),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        widget.emoji,
-                        style: const TextStyle(fontSize: 22),
-                      ),
-                    ),
+                // A custom leading (the Memory Match card stack) is taller
+                // than the standard icon; let it shrink when the card is
+                // short instead of overflowing the text below it.
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child:
+                        widget.leading ??
+                        Container(
+                          width: 40,
+                          height: 40,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: AppTokens.surface(context),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            widget.emoji,
+                            style: const TextStyle(fontSize: 22),
+                          ),
+                        ),
+                  ),
+                ),
                 const SizedBox(height: 10),
                 Text(
                   widget.title,

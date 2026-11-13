@@ -30,6 +30,12 @@ class AppConfig {
   static bool get emailSignInEnabled =>
       debugEmailSignInEnabled ?? (!kIsWeb && firebaseEnabled);
 
+  // Every learner gets a Firebase anonymous account on first launch, so
+  // progress syncs to the backend with no sign-up. Creating an account later
+  // upgrades that same account (same uid), keeping the progress.
+  static bool get anonymousSessionsEnabled =>
+      debugAnonymousSessionsEnabled ?? (!kIsWeb && firebaseEnabled);
+
   // When Apple refuses an authorization it is reported exactly like a
   // dismissal. TestFlight builds set this so the refusal reaches the on-screen
   // error dialog with its code and timestamp instead of vanishing.
@@ -50,6 +56,10 @@ class AppConfig {
   /// Test-only override for [emailSignInEnabled].
   @visibleForTesting
   static bool? debugEmailSignInEnabled;
+
+  /// Test-only override for [anonymousSessionsEnabled].
+  @visibleForTesting
+  static bool? debugAnonymousSessionsEnabled;
 
   /// Test-only override for [appleSignInDiagnosticsEnabled].
   @visibleForTesting

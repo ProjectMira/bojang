@@ -46,6 +46,14 @@ class MockGoogleAuthService extends _i1.Mock implements _i2.GoogleAuthService {
           as bool);
 
   @override
+  bool get isAnonymousSession =>
+      (super.noSuchMethod(
+            Invocation.getter(#isAnonymousSession),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
   _i3.Future<void> initialize() =>
       (super.noSuchMethod(
             Invocation.method(#initialize, []),
@@ -99,6 +107,14 @@ class MockGoogleAuthService extends _i1.Mock implements _i2.GoogleAuthService {
             returnValue: _i3.Future<_i4.User?>.value(),
           )
           as _i3.Future<_i4.User?>);
+
+  @override
+  _i3.Future<bool> ensureAnonymousSession() =>
+      (super.noSuchMethod(
+            Invocation.method(#ensureAnonymousSession, []),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
   _i3.Future<void> sendPasswordResetEmail(String? email) =>

@@ -338,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             onPressed: _openSignIn,
                             icon: const Icon(Icons.login, size: 18),
                             label: Text(
-                              'Sign in to save your progress',
+                              'Create an account or sign in',
                               style: AppTextStyles.poppins(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,

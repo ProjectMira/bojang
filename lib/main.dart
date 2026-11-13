@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -25,9 +26,6 @@ void main() async {
   }
 
   try {
-    if (!kIsWeb) {
-      await NotificationService().init();
-    }
     await GoogleAuthService().initialize();
     await ApiService().initialize();
   } catch (e) {
@@ -35,6 +33,17 @@ void main() async {
   }
 
   runApp(const MyApp());
+
+  // Set up reminders only once the app is on screen: on a fresh install this
+  // shows iOS's notification permission prompt, and awaiting it before
+  // runApp left new learners on a blank screen until they answered.
+  if (!kIsWeb) {
+    unawaited(
+      NotificationService().init().catchError(
+        (Object e) => debugPrint('Notification setup failed: $e'),
+      ),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {

@@ -7,6 +7,8 @@ import '../models/user.dart';
 import 'app_config.dart';
 import 'api_service.dart';
 import 'apple_sign_in.dart';
+import 'firebase_account_link.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class GoogleAuthService {
   static final GoogleAuthService _instance = GoogleAuthService._internal();
@@ -164,8 +166,22 @@ class GoogleAuthService {
     if (!AppConfig.firebaseEnabled) {
       throw StateError('Email sign-up requires Firebase');
     }
-    final credential = await firebase_auth.FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email.trim(), password: password);
+    final auth = firebase_auth.FirebaseAuth.instance;
+    final current = auth.currentUser;
+    // Upgrade the anonymous first-launch account in place so the progress
+    // already synced under its uid stays with the learner.
+    final credential =
+        (current != null && current.isAnonymous)
+            ? await current.linkWithCredential(
+              firebase_auth.EmailAuthProvider.credential(
+                email: email.trim(),
+                password: password,
+              ),
+            )
+            : await auth.createUserWithEmailAndPassword(
+              email: email.trim(),
+              password: password,
+            );
     final createdUser = credential.user;
     if (createdUser == null) return null;
     var firebaseUser = createdUser;
@@ -181,11 +197,60 @@ class GoogleAuthService {
         print('Email sign-up: could not store display name: $e');
       }
     }
-    return _completeFirebaseSignIn(
+    final user = await _completeFirebaseSignIn(
       firebaseUser,
       AuthProvider.email,
       fallbackName: trimmedName,
     );
+    // An upgraded anonymous account already exists on the backend without a
+    // name, and /auth/sync leaves existing profiles alone.
+    if (user != null && trimmedName.isNotEmpty) {
+      try {
+        await _apiService.updateUserProfile(displayName: trimmedName);
+      } catch (e) {
+        print('Email sign-up: could not sync display name: $e');
+      }
+    }
+    return user;
+  }
+
+  /// Gives a learner who has not signed in an anonymous Firebase account, so
+  /// their progress syncs to the backend without any sign-up. Returns true when
+  /// an anonymous session is active. Never throws: offline, the app simply
+  /// keeps progress on the device.
+  Future<bool> ensureAnonymousSession() async {
+    if (!AppConfig.anonymousSessionsEnabled || _currentUser != null) {
+      return false;
+    }
+    try {
+      if (Firebase.apps.isEmpty) return false;
+      final auth = firebase_auth.FirebaseAuth.instance;
+      var firebaseUser = auth.currentUser;
+      if (firebaseUser != null && !firebaseUser.isAnonymous) return false;
+      firebaseUser ??= (await auth.signInAnonymously()).user;
+      if (firebaseUser == null) return false;
+
+      final idToken = await firebaseUser.getIdToken();
+      if (idToken == null || idToken.isEmpty) return false;
+      await _apiService.setAuthToken(idToken);
+      await _apiService.syncUser(email: '');
+      return true;
+    } catch (e) {
+      print('Anonymous session unavailable: $e');
+      return false;
+    }
+  }
+
+  /// True while the learner is on the automatic anonymous account.
+  bool get isAnonymousSession {
+    if (!AppConfig.anonymousSessionsEnabled) return false;
+    try {
+      if (Firebase.apps.isEmpty) return false;
+      return firebase_auth.FirebaseAuth.instance.currentUser?.isAnonymous ??
+          false;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> sendPasswordResetEmail(String email) {
@@ -368,8 +433,7 @@ class GoogleAuthService {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      final result = await firebase_auth.FirebaseAuth.instance
-          .signInWithCredential(credential);
+      final result = await signInOrLinkAnonymous(credential);
       return result.user?.getIdToken();
     } catch (e) {
       print('Firebase token exchange skipped: $e');
