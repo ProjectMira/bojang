@@ -890,10 +890,16 @@ jobs:
     # Runs only when the arm64 job above was cancelled without finishing,
     # normally because GitHub had no arm64 macOS runner for it. Same
     # environment and steps (YAML aliases), on the x64 pool, which GitHub
-    # provisions separately. A run cancelled by a person stays cancelled.
+    # provisions separately.
+    # always() is required: GitHub counts a cancelled dependency as a
+    # cancelled run for status functions, so `!cancelled()` skipped this job
+    # in run 49 exactly when it was needed. Cancelling a whole run by hand
+    # therefore also starts the fallback; cancel it a second time to stop it.
     if: >-
       ${{
-        !cancelled() &&
+        always() &&
+        needs.prepare.result == 'success' &&
+        needs.quality.result == 'success' &&
         needs.prepare.outputs.release_ios == 'true' &&
         needs.ios.result == 'cancelled'
       }}

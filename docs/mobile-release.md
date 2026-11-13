@@ -388,8 +388,10 @@ and 48 were lost this way with green analysis and tests.
 The iOS job now has a twin, `ios-fallback`, that reuses its environment and
 steps through YAML anchors (`&ios_env`, `&ios_steps`) and runs on the separate
 x64 pool (`macos-26-intel`) only when the arm64 job ends `cancelled`. The
-release job tags the build if either one uploads. A run cancelled by a person
-is not retried (`!cancelled()`).
+release job tags the build if either one uploads. Its condition uses
+`always()`: with `!cancelled()` GitHub skipped the fallback in run 49, because a
+cancelled dependency makes `cancelled()` true. So cancelling a whole run by
+hand also starts the fallback; cancel a second time to stop it.
 
 - Edit iOS steps in the `ios` job only; the fallback picks them up.
 - Repository variables `IOS_RUNNER` and `IOS_FALLBACK_RUNNER` override the two
