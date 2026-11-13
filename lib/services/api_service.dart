@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
@@ -23,6 +25,25 @@ class ApiService {
     'Accept': 'application/json',
     if (_authToken != null) 'Authorization': 'Bearer $_authToken',
   };
+
+  // Firebase ID tokens expire after an hour. Before each request, swap the
+  // stored token for the signed-in Firebase user's current one (refreshed by
+  // the SDK when needed) so long sessions keep reaching the API.
+  Future<void> _refreshAuthToken() async {
+    if (_authToken == null) return;
+    try {
+      if (Firebase.apps.isEmpty) return;
+      final user = firebase_auth.FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      final fresh = await user.getIdToken();
+      if (fresh != null && fresh.isNotEmpty && fresh != _authToken) {
+        _authToken = fresh;
+        await _storeAuthToken(fresh);
+      }
+    } catch (e) {
+      print('Auth token refresh skipped: $e');
+    }
+  }
 
   // Initialize service with stored auth token
   Future<void> initialize() async {
@@ -74,12 +95,15 @@ class ApiService {
     );
   }
 
-  Future<Map<String, dynamic>?> appleAuth({
+  // Apple and email/password sign-ins both end in a Firebase user whose ID
+  // token /auth/sync accepts directly.
+  Future<Map<String, dynamic>?> firebaseAuth({
     required String uid,
     required String email,
     required String displayName,
     String? profileImageUrl,
     String? idToken,
+    required String authProvider,
   }) async {
     return _providerAuth(
       providerUserId: uid,
@@ -87,7 +111,7 @@ class ApiService {
       displayName: displayName,
       profileImageUrl: profileImageUrl,
       token: idToken,
-      authProvider: 'apple',
+      authProvider: authProvider,
     );
   }
 
@@ -434,6 +458,7 @@ class ApiService {
     String endpoint, {
     Map<String, String>? queryParameters,
   }) async {
+    await _refreshAuthToken();
     try {
       final response = await _client.get(
         _uri(endpoint, queryParameters),
@@ -454,6 +479,7 @@ class ApiService {
     String endpoint, {
     Map<String, String>? queryParameters,
   }) async {
+    await _refreshAuthToken();
     try {
       final response = await _client.get(
         _uri(endpoint, queryParameters),
@@ -474,6 +500,7 @@ class ApiService {
     String endpoint,
     Map<String, dynamic> data,
   ) async {
+    await _refreshAuthToken();
     try {
       final response = await _client.post(
         _uri(endpoint),
@@ -495,6 +522,7 @@ class ApiService {
     String endpoint,
     Map<String, dynamic> data,
   ) async {
+    await _refreshAuthToken();
     try {
       final response = await _client.patch(
         _uri(endpoint),
@@ -512,6 +540,7 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>?> _delete(String endpoint) async {
+    await _refreshAuthToken();
     try {
       final response = await _client.delete(_uri(endpoint), headers: _headers);
       if (response.statusCode >= 200 && response.statusCode < 300) {

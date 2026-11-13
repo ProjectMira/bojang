@@ -307,8 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           color: Colors.white70,
                         ),
                       ),
-                      if (currentUser?.authProvider == AuthProvider.google ||
-                          currentUser?.authProvider == AuthProvider.apple)
+                      if (currentUser != null)
                         Container(
                           margin: const EdgeInsets.only(top: 8),
                           padding: const EdgeInsets.symmetric(
@@ -320,9 +319,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            currentUser?.authProvider == AuthProvider.apple
-                                ? 'Apple Account'
-                                : 'Google Account',
+                            switch (currentUser!.authProvider) {
+                              AuthProvider.apple => 'Apple Account',
+                              AuthProvider.google => 'Google Account',
+                              AuthProvider.email => 'Email Account',
+                            },
                             style: AppTextStyles.poppins(
                               fontSize: 12,
                               color: Colors.white,

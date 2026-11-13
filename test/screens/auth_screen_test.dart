@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -42,6 +43,15 @@ void main() {
       // Set up default mock behaviors
       when(mockGoogleAuthService.initialize()).thenAnswer((_) async => {});
       when(mockGoogleAuthService.isInitialized).thenReturn(true);
+      // These cover the Google path on its own; the email form has its own
+      // group below.
+      AppConfig.debugEmailSignInEnabled = false;
+      AppConfig.debugGoogleSignInEnabled = true;
+    });
+
+    tearDown(() {
+      AppConfig.debugEmailSignInEnabled = null;
+      AppConfig.debugGoogleSignInEnabled = null;
     });
 
     Widget createTestWidget({List<NavigatorObserver> observers = const []}) {
@@ -62,7 +72,7 @@ void main() {
       expect(find.byIcon(Icons.school), findsNothing);
     });
 
-    testWidgets('should only offer Google sign-in, no email form', (
+    testWidgets('without the email form, offers only Google sign-in', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(createTestWidget());
@@ -233,10 +243,14 @@ void main() {
       when(mockGoogleAuthService.initialize()).thenAnswer((_) async => {});
       when(mockGoogleAuthService.isInitialized).thenReturn(true);
       AppConfig.debugAppleSignInEnabled = true;
+      AppConfig.debugGoogleSignInEnabled = true;
+      AppConfig.debugEmailSignInEnabled = false;
     });
 
     tearDown(() {
       AppConfig.debugAppleSignInEnabled = null;
+      AppConfig.debugGoogleSignInEnabled = null;
+      AppConfig.debugEmailSignInEnabled = null;
       AppConfig.debugAppleSignInDiagnosticsEnabled = null;
     });
 
@@ -415,9 +429,15 @@ void main() {
       when(mockGoogleAuthService.initialize()).thenAnswer((_) async => {});
       when(mockGoogleAuthService.isInitialized).thenReturn(true);
       AppConfig.debugAppleSignInEnabled = true;
+      AppConfig.debugGoogleSignInEnabled = true;
+      AppConfig.debugEmailSignInEnabled = true;
     });
 
-    tearDown(() => AppConfig.debugAppleSignInEnabled = null);
+    tearDown(() {
+      AppConfig.debugAppleSignInEnabled = null;
+      AppConfig.debugGoogleSignInEnabled = null;
+      AppConfig.debugEmailSignInEnabled = null;
+    });
 
     Widget createTestWidget() =>
         MaterialApp(home: AuthScreen(authService: mockGoogleAuthService));
@@ -441,6 +461,7 @@ void main() {
 
       // Every control sits inside the 820x1180pt screen.
       for (final label in const [
+        'Sign in',
         'Continue with Apple',
         'Continue with Google',
         'Continue without account',
@@ -451,6 +472,290 @@ void main() {
         expect(rect.left, greaterThanOrEqualTo(0.0), reason: label);
         expect(rect.right, lessThanOrEqualTo(820.0), reason: label);
       }
+    });
+  });
+
+  group('AuthScreen email sign-in', () {
+    late MockGoogleAuthService mockGoogleAuthService;
+
+    final emailUser = User(
+      id: 'uid-1',
+      email: 'learner@example.com',
+      username: 'learner',
+      displayName: 'Learner One',
+      createdAt: DateTime(2026, 11, 13),
+      authProvider: AuthProvider.email,
+    );
+
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+      mockGoogleAuthService = MockGoogleAuthService();
+      when(mockGoogleAuthService.initialize()).thenAnswer((_) async => {});
+      when(mockGoogleAuthService.isInitialized).thenReturn(true);
+      // The shipping iOS configuration while Apple's Sign in with Apple
+      // backend is broken: email accounts only, no Google or Apple.
+      AppConfig.debugEmailSignInEnabled = true;
+      AppConfig.debugGoogleSignInEnabled = false;
+      AppConfig.debugAppleSignInEnabled = false;
+    });
+
+    tearDown(() {
+      AppConfig.debugEmailSignInEnabled = null;
+      AppConfig.debugGoogleSignInEnabled = null;
+      AppConfig.debugAppleSignInEnabled = null;
+    });
+
+    // The success paths navigate to MainNavigationScreen, whose tabs pull
+    // these services from Provider.
+    Widget createTestWidget({List<NavigatorObserver> observers = const []}) {
+      return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ThemeService()),
+          ChangeNotifierProvider(create: (_) => ProgressService()),
+          Provider<GoogleAuthService>.value(value: mockGoogleAuthService),
+        ],
+        child: MaterialApp(
+          navigatorObservers: observers,
+          home: AuthScreen(authService: mockGoogleAuthService),
+        ),
+      );
+    }
+
+    // Success paths build MainNavigationScreen, which is laid out at the
+    // default 800x600 test surface like the Google success test.
+    Future<void> pumpDefault(WidgetTester tester, Widget widget) async {
+      when(mockGoogleAuthService.currentUser).thenReturn(emailUser);
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+      await tester.ensureVisible(finder);
+      await tester.pumpAndSettle();
+      await tester.tap(finder);
+    }
+
+    Future<void> pumpTall(WidgetTester tester, Widget widget) async {
+      tester.view.physicalSize = const Size(1170, 2532);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('iOS configuration shows the email form and no social logins', (
+      WidgetTester tester,
+    ) async {
+      await pumpTall(tester, createTestWidget());
+
+      expect(find.byKey(const Key('emailField')), findsOneWidget);
+      expect(find.byKey(const Key('passwordField')), findsOneWidget);
+      expect(find.byKey(const Key('nameField')), findsNothing);
+      expect(find.text('Forgot password?'), findsOneWidget);
+      expect(find.text('Continue with Google'), findsNothing);
+      expect(find.text('Continue with Apple'), findsNothing);
+      expect(find.text('or'), findsNothing);
+      expect(find.text('Continue without account'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('invalid input is caught before calling Firebase', (
+      WidgetTester tester,
+    ) async {
+      await pumpTall(tester, createTestWidget());
+
+      await tester.enterText(find.byKey(const Key('emailField')), 'not-an-email');
+      await tester.tap(find.byKey(const Key('emailSubmitButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Please enter a valid email'), findsOneWidget);
+      expect(find.text('Please enter your password'), findsOneWidget);
+      verifyNever(
+        mockGoogleAuthService.signInWithEmail(
+          email: anyNamed('email'),
+          password: anyNamed('password'),
+        ),
+      );
+    });
+
+    testWidgets('signing in with email navigates to the main screen', (
+      WidgetTester tester,
+    ) async {
+      when(
+        mockGoogleAuthService.signInWithEmail(
+          email: 'learner@example.com',
+          password: 'secret123',
+        ),
+      ).thenAnswer((_) async => emailUser);
+      final observer = _RecordingNavigatorObserver();
+      await pumpDefault(tester, createTestWidget(observers: [observer]));
+
+      await tester.enterText(
+        find.byKey(const Key('emailField')),
+        'learner@example.com',
+      );
+      await tester.enterText(find.byKey(const Key('passwordField')), 'secret123');
+      await tapVisible(tester, find.byKey(const Key('emailSubmitButton')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+
+      expect(find.text('Welcome Learner One!'), findsOneWidget);
+      expect(observer.lastReplacedWith?.settings.name, '/main');
+      await tester.pumpAndSettle();
+      expect(find.byType(MainNavigationScreen), findsOneWidget);
+    });
+
+    testWidgets('wrong password shows a clear inline error', (
+      WidgetTester tester,
+    ) async {
+      when(
+        mockGoogleAuthService.signInWithEmail(
+          email: anyNamed('email'),
+          password: anyNamed('password'),
+        ),
+      ).thenThrow(
+        firebase_auth.FirebaseAuthException(code: 'invalid-credential'),
+      );
+      await pumpTall(tester, createTestWidget());
+
+      await tester.enterText(
+        find.byKey(const Key('emailField')),
+        'learner@example.com',
+      );
+      await tester.enterText(find.byKey(const Key('passwordField')), 'wrong');
+      await tester.tap(find.byKey(const Key('emailSubmitButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Email or password is incorrect.'), findsOneWidget);
+      expect(find.byKey(const Key('emailSubmitButton')), findsOneWidget);
+    });
+
+    testWidgets('create-account mode asks for a name and creates the account', (
+      WidgetTester tester,
+    ) async {
+      when(
+        mockGoogleAuthService.createAccountWithEmail(
+          name: 'Learner One',
+          email: 'learner@example.com',
+          password: 'secret123',
+        ),
+      ).thenAnswer((_) async => emailUser);
+      final observer = _RecordingNavigatorObserver();
+      await pumpDefault(tester, createTestWidget(observers: [observer]));
+
+      await tapVisible(tester, find.byKey(const Key('toggleAuthModeButton')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('nameField')), findsOneWidget);
+      expect(find.text('Create account'), findsOneWidget);
+
+      await tester.enterText(find.byKey(const Key('passwordField')), '123');
+      await tapVisible(tester, find.byKey(const Key('emailSubmitButton')));
+      await tester.pumpAndSettle();
+      expect(find.text('Please enter your name'), findsOneWidget);
+      expect(find.text('Use at least 6 characters'), findsOneWidget);
+
+      await tester.enterText(find.byKey(const Key('nameField')), 'Learner One');
+      await tester.enterText(
+        find.byKey(const Key('emailField')),
+        'learner@example.com',
+      );
+      await tester.enterText(find.byKey(const Key('passwordField')), 'secret123');
+      await tapVisible(tester, find.byKey(const Key('emailSubmitButton')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+
+      verify(
+        mockGoogleAuthService.createAccountWithEmail(
+          name: 'Learner One',
+          email: 'learner@example.com',
+          password: 'secret123',
+        ),
+      ).called(1);
+      expect(observer.lastReplacedWith?.settings.name, '/main');
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('an existing email on sign-up says to sign in instead', (
+      WidgetTester tester,
+    ) async {
+      when(
+        mockGoogleAuthService.createAccountWithEmail(
+          name: anyNamed('name'),
+          email: anyNamed('email'),
+          password: anyNamed('password'),
+        ),
+      ).thenThrow(
+        firebase_auth.FirebaseAuthException(code: 'email-already-in-use'),
+      );
+      await pumpTall(tester, createTestWidget());
+
+      await tester.tap(find.byKey(const Key('toggleAuthModeButton')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('nameField')), 'Learner');
+      await tester.enterText(
+        find.byKey(const Key('emailField')),
+        'learner@example.com',
+      );
+      await tester.enterText(find.byKey(const Key('passwordField')), 'secret123');
+      await tester.tap(find.byKey(const Key('emailSubmitButton')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('An account already exists for this email. Sign in instead.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('forgot password sends a reset email for the typed address', (
+      WidgetTester tester,
+    ) async {
+      when(
+        mockGoogleAuthService.sendPasswordResetEmail('learner@example.com'),
+      ).thenAnswer((_) async {});
+      await pumpTall(tester, createTestWidget());
+
+      await tester.tap(find.text('Forgot password?'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Enter your email above, then tap "Forgot password?"'),
+        findsOneWidget,
+      );
+      verifyNever(mockGoogleAuthService.sendPasswordResetEmail(any));
+
+      await tester.enterText(
+        find.byKey(const Key('emailField')),
+        'learner@example.com',
+      );
+      await tester.tap(find.text('Forgot password?'));
+      await tester.pump();
+
+      verify(
+        mockGoogleAuthService.sendPasswordResetEmail('learner@example.com'),
+      ).called(1);
+      expect(
+        find.textContaining('a reset link is on its way'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('iOS configuration fits an iPad Air 11-inch and an iPhone SE', (
+      WidgetTester tester,
+    ) async {
+      for (final (size, ratio, width, height) in const [
+        (Size(1640, 2360), 2.0, 820.0, 1180.0),
+        (Size(750, 1334), 2.0, 375.0, 667.0),
+      ]) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = ratio;
+        await tester.pumpWidget(createTestWidget());
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        final rect = tester.getRect(find.byKey(const Key('emailSubmitButton')));
+        expect(rect.left, greaterThanOrEqualTo(0.0));
+        expect(rect.right, lessThanOrEqualTo(width));
+        expect(rect.top, lessThan(height));
+      }
+      tester.view.reset();
     });
   });
 }

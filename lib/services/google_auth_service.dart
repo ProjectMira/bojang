@@ -135,6 +135,73 @@ class GoogleAuthService {
     );
     if (firebaseUser == null) return null;
 
+    return _completeFirebaseSignIn(firebaseUser, AuthProvider.apple);
+  }
+
+  // Sign in to an existing email/password account. Firebase errors
+  // (wrong-password, user-not-found, ...) propagate as
+  // FirebaseAuthException so the screen can explain them.
+  Future<User?> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    if (!AppConfig.firebaseEnabled) {
+      throw StateError('Email sign-in requires Firebase');
+    }
+    final credential = await firebase_auth.FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email.trim(), password: password);
+    final firebaseUser = credential.user;
+    if (firebaseUser == null) return null;
+    return _completeFirebaseSignIn(firebaseUser, AuthProvider.email);
+  }
+
+  // Create an email/password account and sign it in.
+  Future<User?> createAccountWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    if (!AppConfig.firebaseEnabled) {
+      throw StateError('Email sign-up requires Firebase');
+    }
+    final credential = await firebase_auth.FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email.trim(), password: password);
+    final createdUser = credential.user;
+    if (createdUser == null) return null;
+    var firebaseUser = createdUser;
+
+    final trimmedName = name.trim();
+    if (trimmedName.isNotEmpty) {
+      try {
+        await firebaseUser.updateDisplayName(trimmedName);
+        await firebaseUser.reload();
+        firebaseUser =
+            firebase_auth.FirebaseAuth.instance.currentUser ?? firebaseUser;
+      } catch (e) {
+        print('Email sign-up: could not store display name: $e');
+      }
+    }
+    return _completeFirebaseSignIn(
+      firebaseUser,
+      AuthProvider.email,
+      fallbackName: trimmedName,
+    );
+  }
+
+  Future<void> sendPasswordResetEmail(String email) {
+    return firebase_auth.FirebaseAuth.instance.sendPasswordResetEmail(
+      email: email.trim(),
+    );
+  }
+
+  // Turns a signed-in Firebase user (Apple or email) into an app account:
+  // syncs it with the backend and caches it, falling back to the Firebase
+  // data when the backend is unreachable.
+  Future<User?> _completeFirebaseSignIn(
+    firebase_auth.User firebaseUser,
+    AuthProvider provider, {
+    String fallbackName = '',
+  }) async {
     // Apple hides the address behind a private relay for users who ask it to,
     // and sends nothing at all on repeat authorizations — Firebase keeps
     // whatever it was given the first time.
@@ -143,6 +210,8 @@ class GoogleAuthService {
     final displayName =
         storedName.isNotEmpty
             ? storedName
+            : fallbackName.isNotEmpty
+            ? fallbackName
             : (email.contains('@') ? email.split('@').first : 'Learner');
 
     final user = User(
@@ -154,8 +223,9 @@ class GoogleAuthService {
       profileImageUrl: firebaseUser.photoURL,
       createdAt: DateTime.now(),
       lastLogin: DateTime.now(),
-      authProvider: AuthProvider.apple,
+      authProvider: provider,
     );
+    final providerName = provider.name;
 
     // Sync even without an email: /auth/sync identifies the account from the
     // bearer token alone, and skipping it would leave the app "signed in"
@@ -163,12 +233,13 @@ class GoogleAuthService {
     final idToken = await firebaseUser.getIdToken();
     if (idToken != null) {
       try {
-        final result = await _apiService.appleAuth(
+        final result = await _apiService.firebaseAuth(
           uid: firebaseUser.uid,
           email: email,
           displayName: displayName,
           profileImageUrl: firebaseUser.photoURL,
           idToken: idToken,
+          authProvider: providerName,
         );
 
         if (result != null) {
@@ -177,13 +248,13 @@ class GoogleAuthService {
           await _cacheUser(backendUser);
           return backendUser;
         }
-        print('Apple sign-in: backend sync returned no profile');
+        print('$providerName sign-in: backend sync returned no profile');
       } catch (apiError) {
-        print('Backend API error during Apple auth: $apiError');
-        // Continue in offline mode with the Apple/Firebase data.
+        print('Backend API error during $providerName auth: $apiError');
+        // Continue in offline mode with the Firebase data.
       }
     } else {
-      print('Apple sign-in: no Firebase ID token, skipping backend sync');
+      print('$providerName sign-in: no Firebase ID token, skipping sync');
     }
 
     _currentUser = user;

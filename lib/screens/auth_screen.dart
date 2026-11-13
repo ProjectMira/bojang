@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/app_config.dart';
@@ -17,7 +18,7 @@ class AuthScreen extends StatefulWidget {
 
 /// Which provider's sheet is open, so the other button can be disabled and
 /// only the pressed one shows a spinner.
-enum _SignInMethod { apple, google }
+enum _SignInMethod { apple, google, email }
 
 class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   _SignInMethod? _loadingMethod;
@@ -30,6 +31,14 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
   late final GoogleAuthService _googleAuthService =
       widget.authService ?? GoogleAuthService();
+
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isCreatingAccount = false;
+  bool _obscurePassword = true;
+  String? _emailError;
 
   @override
   void initState() {
@@ -63,7 +72,93 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleEmailSubmit() async {
+    setState(() => _emailError = null);
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    FocusScope.of(context).unfocus();
+    setState(() => _loadingMethod = _SignInMethod.email);
+
+    try {
+      final user =
+          _isCreatingAccount
+              ? await _googleAuthService.createAccountWithEmail(
+                name: _nameController.text,
+                email: _emailController.text,
+                password: _passwordController.text,
+              )
+              : await _googleAuthService.signInWithEmail(
+                email: _emailController.text,
+                password: _passwordController.text,
+              );
+      if (user != null && mounted) {
+        _showSnackBar('Welcome ${user.displayName}!', isSuccess: true);
+        await Future.delayed(const Duration(milliseconds: 500));
+        _navigateToMainScreen();
+      } else if (mounted) {
+        setState(() => _emailError = _emailErrorMessage(null));
+      }
+    } catch (e) {
+      if (mounted) setState(() => _emailError = _emailErrorMessage(e));
+    } finally {
+      if (mounted) setState(() => _loadingMethod = null);
+    }
+  }
+
+  Future<void> _handleForgotPassword() async {
+    final email = _emailController.text.trim();
+    if (!_looksLikeEmail(email)) {
+      setState(
+        () => _emailError = 'Enter your email above, then tap "Forgot password?"',
+      );
+      return;
+    }
+    try {
+      await _googleAuthService.sendPasswordResetEmail(email);
+      if (mounted) {
+        setState(() => _emailError = null);
+        _showSnackBar(
+          'If an account exists for $email, a reset link is on its way.',
+          isSuccess: true,
+        );
+      }
+    } catch (e) {
+      if (mounted) setState(() => _emailError = _emailErrorMessage(e));
+    }
+  }
+
+  static bool _looksLikeEmail(String value) =>
+      RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value.trim());
+
+  String _emailErrorMessage(Object? error) {
+    final code =
+        error is firebase_auth.FirebaseAuthException ? error.code : null;
+    switch (code) {
+      case 'invalid-email':
+        return "That email address doesn't look right.";
+      case 'user-not-found':
+      case 'wrong-password':
+      case 'invalid-credential':
+      case 'INVALID_LOGIN_CREDENTIALS':
+        return 'Email or password is incorrect.';
+      case 'email-already-in-use':
+        return 'An account already exists for this email. Sign in instead.';
+      case 'weak-password':
+        return 'Choose a password with at least 6 characters.';
+      case 'user-disabled':
+        return 'This account has been disabled.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please wait a moment and try again.';
+      case 'network-request-failed':
+        return 'No internet connection. Check your connection and try again.';
+      default:
+        return 'Something went wrong. Please try again.';
+    }
   }
 
   Future<void> _handleAppleSignIn() async {
@@ -270,7 +365,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 12),
             Text(
-              'Sign in to sync XP, streaks, and league progress across devices.',
+              'Sign in to keep your XP, streaks, and league progress across devices.',
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 color:
@@ -281,6 +376,11 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
+            if (AppConfig.emailSignInEnabled) _buildEmailForm(),
+            if (AppConfig.emailSignInEnabled &&
+                (AppConfig.appleSignInEnabled ||
+                    AppConfig.googleSignInEnabled))
+              _buildDivider(),
             if (AppConfig.appleSignInEnabled) ...[
               AppleSignInButton(
                 onPressed: _isLoading ? null : _handleAppleSignIn,
@@ -288,12 +388,189 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 12),
             ],
-            GoogleSignInButton(
-              onPressed: _isLoading ? null : _handleGoogleSignIn,
-              isLoading: _loadingMethod == _SignInMethod.google,
+            if (AppConfig.googleSignInEnabled)
+              GoogleSignInButton(
+                onPressed: _isLoading ? null : _handleGoogleSignIn,
+                isLoading: _loadingMethod == _SignInMethod.google,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  TextStyle get _fieldTextStyle =>
+      GoogleFonts.poppins().copyWith(fontFamilyFallback: const ['Jomolhari']);
+
+  InputDecoration _fieldDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+    );
+  }
+
+  Widget _buildEmailForm() {
+    final isEmailLoading = _loadingMethod == _SignInMethod.email;
+    return AutofillGroup(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_isCreatingAccount) ...[
+              TextFormField(
+                key: const Key('nameField'),
+                controller: _nameController,
+                enabled: !_isLoading,
+                style: _fieldTextStyle,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.name],
+                decoration: _fieldDecoration('Your name', Icons.person_outline),
+                validator:
+                    (value) =>
+                        (value == null || value.trim().isEmpty)
+                            ? 'Please enter your name'
+                            : null,
+              ),
+              const SizedBox(height: 12),
+            ],
+            TextFormField(
+              key: const Key('emailField'),
+              controller: _emailController,
+              enabled: !_isLoading,
+              style: _fieldTextStyle,
+              keyboardType: TextInputType.emailAddress,
+              autocorrect: false,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.email],
+              decoration: _fieldDecoration('Email', Icons.mail_outline),
+              validator:
+                  (value) =>
+                      _looksLikeEmail(value ?? '')
+                          ? null
+                          : 'Please enter a valid email',
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              key: const Key('passwordField'),
+              controller: _passwordController,
+              enabled: !_isLoading,
+              style: _fieldTextStyle,
+              obscureText: _obscurePassword,
+              textInputAction: TextInputAction.done,
+              autofillHints: [
+                _isCreatingAccount
+                    ? AutofillHints.newPassword
+                    : AutofillHints.password,
+              ],
+              onFieldSubmitted: (_) => _isLoading ? null : _handleEmailSubmit(),
+              decoration: _fieldDecoration(
+                'Password',
+                Icons.lock_outline,
+              ).copyWith(
+                suffixIcon: IconButton(
+                  tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed:
+                      () => setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
+              validator: (value) {
+                final password = value ?? '';
+                if (password.isEmpty) return 'Please enter your password';
+                if (_isCreatingAccount && password.length < 6) {
+                  return 'Use at least 6 characters';
+                }
+                return null;
+              },
+            ),
+            if (!_isCreatingAccount)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _isLoading ? null : _handleForgotPassword,
+                  child: const Text('Forgot password?'),
+                ),
+              )
+            else
+              const SizedBox(height: 12),
+            if (_emailError != null) ...[
+              Text(
+                _emailError!,
+                key: const Key('emailError'),
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.error,
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+            ],
+            SizedBox(
+              height: 52,
+              child: ElevatedButton(
+                key: const Key('emailSubmitButton'),
+                onPressed: _isLoading ? null : _handleEmailSubmit,
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child:
+                    isEmailLoading
+                        ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                        )
+                        : Text(
+                          _isCreatingAccount ? 'Create account' : 'Sign in',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                        ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              key: const Key('toggleAuthModeButton'),
+              onPressed:
+                  _isLoading
+                      ? null
+                      : () => setState(() {
+                        _isCreatingAccount = !_isCreatingAccount;
+                        _emailError = null;
+                      }),
+              child: Text(
+                _isCreatingAccount
+                    ? 'Already have an account? Sign in'
+                    : 'New to Bojang? Create an account',
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    final color = Colors.grey.shade400;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          Expanded(child: Divider(color: color)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text('or', style: TextStyle(color: color)),
+          ),
+          Expanded(child: Divider(color: color)),
+        ],
       ),
     );
   }

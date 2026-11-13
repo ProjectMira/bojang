@@ -67,6 +67,45 @@ class MockGoogleAuthService extends _i1.Mock implements _i2.GoogleAuthService {
           as _i3.Future<_i4.User?>);
 
   @override
+  _i3.Future<_i4.User?> signInWithEmail({
+    required String? email,
+    required String? password,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#signInWithEmail, [], {
+              #email: email,
+              #password: password,
+            }),
+            returnValue: _i3.Future<_i4.User?>.value(),
+          )
+          as _i3.Future<_i4.User?>);
+
+  @override
+  _i3.Future<_i4.User?> createAccountWithEmail({
+    required String? name,
+    required String? email,
+    required String? password,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#createAccountWithEmail, [], {
+              #name: name,
+              #email: email,
+              #password: password,
+            }),
+            returnValue: _i3.Future<_i4.User?>.value(),
+          )
+          as _i3.Future<_i4.User?>);
+
+  @override
+  _i3.Future<void> sendPasswordResetEmail(String? email) =>
+      (super.noSuchMethod(
+            Invocation.method(#sendPasswordResetEmail, [email]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
   _i3.Future<void> signOut() =>
       (super.noSuchMethod(
             Invocation.method(#signOut, []),
