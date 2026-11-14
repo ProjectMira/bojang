@@ -5,8 +5,10 @@ import '../services/levels_repository.dart';
 import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
 import '../utils/topic_visuals.dart';
+import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/quiz_mode_sheet.dart';
+import '../widgets/yak_says.dart';
 import 'quiz_screen.dart';
 
 const List<IconData> _kSectionIcons = [
@@ -93,7 +95,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
           ),
           body:
               isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const YakLoader(message: 'Laying out your topics…')
                   : levels.isEmpty
                   ? _buildEmptyState(context)
                   : _buildTopicSections(context, progressService),
@@ -103,39 +105,15 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(
-            'Could not load topics',
-            style: AppTextStyles.poppins(
-              fontSize: 20,
-              color: AppTokens.inkSoft(context),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Check your connection and try again.',
-            style: AppTextStyles.poppins(
-              fontSize: 14,
-              color: AppTokens.inkSoft(context),
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                isLoading = true;
-              });
-              _loadLevels();
-            },
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
+    return YakNotice.line(
+      YakLines.offline,
+      actionLabel: 'Retry',
+      onAction: () {
+        setState(() {
+          isLoading = true;
+        });
+        _loadLevels();
+      },
     );
   }
 

@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
 import '../services/api_service.dart';
 import '../utils/topic_visuals.dart';
+import '../widgets/yak_mascot.dart';
+import '../widgets/yak_says.dart';
 
 class MemoryMatchGame extends StatefulWidget {
   const MemoryMatchGame({super.key});
@@ -278,8 +280,8 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.emoji_events, color: Colors.amber, size: 64),
-                const SizedBox(height: 16),
+                const YakMascot(mood: YakMood.cheering, size: 132),
+                const SizedBox(height: 12),
                 Text(
                   'You matched all $_totalPairs $_topicName words!',
                   style: GoogleFonts.poppins(
@@ -356,7 +358,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
       ),
       body: switch (_phase) {
         _GamePhase.pickingTopic => _buildTopicPicker(),
-        _GamePhase.loading => const Center(child: CircularProgressIndicator()),
+        _GamePhase.loading => const YakLoader(message: 'Shuffling the cards…'),
         _GamePhase.playing => _buildGame(),
       },
     );
@@ -367,7 +369,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
     final titleColor = isDark ? Colors.white : const Color(0xFF2C3E50);
 
     if (_topicsLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const YakLoader(message: 'Finding topics to play…');
     }
 
     return ListView(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
+import 'yak_mascot.dart';
 
 class AchievementDialog extends StatefulWidget {
   final String achievementId;
@@ -119,17 +120,45 @@ class _AchievementDialogState extends State<AchievementDialog>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Achievement Icon
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: widget.color.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            widget.icon,
-                            size: 64,
-                            color: widget.color,
+                        // The yak celebrates; the achievement's own icon
+                        // rides along as a badge.
+                        SizedBox(
+                          width: 150,
+                          height: 150,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: widget.color.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const YakMascot(
+                                mood: YakMood.cheering,
+                                size: 132,
+                              ),
+                              Positioned(
+                                right: 0,
+                                bottom: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: widget.color,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Theme.of(context).cardColor,
+                                      width: 3,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    widget.icon,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         

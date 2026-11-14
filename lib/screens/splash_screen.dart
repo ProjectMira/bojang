@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/google_auth_service.dart';
 import '../services/api_service.dart';
+import '../utils/yak_lines.dart';
+import '../widgets/yak_mascot.dart';
 import 'main_navigation_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -102,15 +104,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo with blue background showing yak head in color
-              Image.asset(
-                'logos/Bojang/logo.jpg',
-                width: 280,
-                height: 280,
-                fit: BoxFit.contain,
+              // The yak waves hello — the same character learners meet on
+              // every screen after this one.
+              const YakMascot(
+                mood: YakMood.waving,
+                size: 280,
+                semanticLabel: '${YakLines.name} the yak waving hello',
               ),
-              
-              const SizedBox(height: 30),
+
+              const SizedBox(height: 24),
               
               // App Name - "Bojang" in big and bold
                Text(

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/progress_service.dart';
+import '../utils/yak_lines.dart';
+import '../widgets/yak_mascot.dart';
 import 'level_selection_screen.dart';
 
 class StreakViewScreen extends StatelessWidget {
@@ -129,16 +131,41 @@ class StreakViewScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Text('🔥', style: TextStyle(fontSize: 56)),
-          const SizedBox(height: 8),
-          Text(
-            '${progress.currentStreak}',
-            style: GoogleFonts.poppins(
-              fontSize: 56,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              height: 1.0,
-            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+          // The yak wears the streak: asleep at zero, urging you on while
+          // today is still open, proud once it is done.
+          Container(
+            width: 148,
+            height: 148,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.22),
+              shape: BoxShape.circle,
+            ),
+            child: YakMascot(
+              mood: YakLines.streakMood(
+                streak: progress.currentStreak,
+                practicedToday: practicedToday,
+              ),
+              size: 128,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text('🔥', style: TextStyle(fontSize: 40)),
+              const SizedBox(width: 6),
+              Text(
+                '${progress.currentStreak}',
+                style: GoogleFonts.poppins(
+                  fontSize: 56,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.0,
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              ),
+            ],
           ),
           Text(
             progress.currentStreak == 1 ? 'Day Streak' : 'Days Streak',

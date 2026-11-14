@@ -9,6 +9,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/quiz_question.dart';
 import '../services/api_service.dart';
 import '../services/progress_service.dart';
+import '../utils/yak_lines.dart';
+import '../widgets/yak_mascot.dart';
+import '../widgets/yak_says.dart';
 
 /// Quick-fire quiz: answer as many questions as possible in 60 seconds.
 class SpeedQuizScreen extends StatefulWidget {
@@ -230,7 +233,7 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
       ),
       body: switch (_phase) {
         _QuizPhase.intro => _buildIntro(),
-        _QuizPhase.loading => const Center(child: CircularProgressIndicator()),
+        _QuizPhase.loading => const YakLoader(message: 'Get ready…'),
         _QuizPhase.playing => _buildPlaying(),
         _QuizPhase.finished => _buildFinished(),
       },
@@ -244,8 +247,8 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('⚡', style: TextStyle(fontSize: 64)),
-            const SizedBox(height: 16),
+            const YakMascot(mood: YakMood.encouraging, size: 160),
+            const SizedBox(height: 12),
             Text(
               'Quick-fire round',
               style: GoogleFonts.poppins(
@@ -462,11 +465,11 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              isNewBest ? '🏆' : '⏱️',
-              style: const TextStyle(fontSize: 64),
+            YakMascot(
+              mood: YakLines.gameWon(newBest: isNewBest).mood,
+              size: 170,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               isNewBest ? 'New best score!' : 'Time\'s up!',
               style: GoogleFonts.poppins(

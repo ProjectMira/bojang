@@ -10,6 +10,7 @@ import '../models/user.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/stat_chip.dart';
+import '../widgets/yak_mascot.dart';
 import 'settings_screen.dart';
 import 'auth_screen.dart';
 
@@ -266,18 +267,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               currentUser?.profileImageUrl != null
                                   ? NetworkImage(currentUser!.profileImageUrl!)
                                   : null,
+                          // No photo yet: the yak stands in.
                           child:
                               currentUser?.profileImageUrl == null
-                                  ? Text(
-                                    playerName.isNotEmpty
-                                        ? playerName[0].toUpperCase()
-                                        : 'T',
-                                    style: const TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                    ),
-                                  )
+                                  ? const YakMascot(size: 86, showBody: false)
                                   : null,
                         ),
                       ),

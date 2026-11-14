@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'dart:io';
+import '../utils/yak_lines.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -96,12 +97,17 @@ class NotificationService {
     // Use custom time or default to 11:30 AM
     final TimeOfDay scheduledTime = customTime ?? const TimeOfDay(hour: 11, minute: 30);
     
+    // The reminder speaks in the yak's voice. The wording is fixed when the
+    // reminder is scheduled, so it changes whenever it is rescheduled.
+    final when = _nextInstanceOfTime(scheduledTime);
+    final (title, body) = YakLines.reminder(when);
+
     // Schedule notification for the specified time
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
-      'Daily Reminder',
-      'Don\'t Forget to Learn Tibetan Today with BoJang',
-      _nextInstanceOfTime(scheduledTime),
+      title,
+      body,
+      when,
       platformChannelSpecifics,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,

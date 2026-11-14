@@ -5,6 +5,7 @@ import '../services/app_config.dart';
 import '../services/google_auth_service.dart';
 import '../widgets/apple_sign_in_button.dart';
 import '../widgets/google_sign_in_button.dart';
+import '../widgets/yak_mascot.dart';
 import 'main_navigation_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -298,9 +299,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 24),
                   _buildLogo(),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 32),
                   _buildAuthCard(),
                   const SizedBox(height: 32),
                   _buildSkipButton(),
@@ -316,6 +317,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   Widget _buildLogo() {
     return Column(
       children: [
+        const YakMascot(mood: YakMood.waving, size: 150),
+        const SizedBox(height: 12),
         Text(
           'Bojang',
           style: GoogleFonts.poppins(

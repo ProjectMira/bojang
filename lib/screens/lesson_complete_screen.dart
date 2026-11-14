@@ -3,8 +3,10 @@ import 'dart:math' as math;
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
+import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/quiz_mode_sheet.dart';
+import '../widgets/yak_mascot.dart';
 import 'quiz_screen.dart';
 
 /// Full-screen celebration shown after finishing a lesson. Replaces the old
@@ -33,10 +35,7 @@ class LessonCompleteScreen extends StatefulWidget {
   State<LessonCompleteScreen> createState() => _LessonCompleteScreenState();
 }
 
-class _LessonCompleteScreenState extends State<LessonCompleteScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ringController;
-  late final Animation<double> _ringAnimation;
+class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
   late final ConfettiController _confettiLeft;
   late final ConfettiController _confettiRight;
 
@@ -45,22 +44,12 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
   @override
   void initState() {
     super.initState();
-    _ringController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    final target =
-        widget.totalQuestions > 0 ? widget.score / widget.totalQuestions : 0.0;
-    _ringAnimation = Tween<double>(begin: 0, end: target).animate(
-      CurvedAnimation(parent: _ringController, curve: Curves.easeOutCubic),
-    );
     _confettiLeft = ConfettiController(
       duration: const Duration(milliseconds: 2500),
     );
     _confettiRight = ConfettiController(
       duration: const Duration(milliseconds: 2500),
     );
-    _ringController.forward();
     if (_isSuccess) {
       _confettiLeft.play();
       _confettiRight.play();
@@ -69,7 +58,6 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
 
   @override
   void dispose() {
-    _ringController.dispose();
     _confettiLeft.dispose();
     _confettiRight.dispose();
     super.dispose();
@@ -79,6 +67,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
   Widget build(BuildContext context) {
     final isDark = AppTokens.isDark(context);
     final resultColor = _isSuccess ? AppColors.gold : AppColors.primary;
+    final line = YakLines.lessonComplete(accuracy: widget.accuracy);
     const confettiColors = [
       AppColors.primary,
       AppColors.gold,
@@ -144,15 +133,36 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
                             ),
                           ),
                         ),
-                        _buildScoreRing(context, resultColor),
+                        // The yak is the celebration: it jumps for a pass
+                        // and cheers the learner on otherwise.
+                        YakMascot(
+                          mood: line.mood,
+                          size: 230,
+                          semanticLabel:
+                              _isSuccess
+                                  ? '${YakLines.name} the yak is cheering'
+                                  : '${YakLines.name} the yak is cheering you on',
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 16),
                     Text(
-                      _isSuccess ? 'ལེགས་སོ། Excellent!' : 'Keep practicing!',
+                      line.title,
                       style: AppTextStyles.display(context),
                       textAlign: TextAlign.center,
                     ),
+                    if (line.body != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        line.body!,
+                        style: AppTextStyles.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: AppTokens.ink(context),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     Text(
                       'You scored ${widget.score} of ${widget.totalQuestions} '
@@ -242,64 +252,6 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildScoreRing(BuildContext context, Color ringColor) {
-    return SizedBox(
-      width: 160,
-      height: 160,
-      child: AnimatedBuilder(
-        animation: _ringAnimation,
-        builder: (context, child) {
-          return Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: 160,
-                height: 160,
-                child: CircularProgressIndicator(
-                  value: 1,
-                  strokeWidth: 12,
-                  strokeCap: StrokeCap.round,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppTokens.tint(ringColor, context),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 160,
-                height: 160,
-                child: CircularProgressIndicator(
-                  value: _ringAnimation.value,
-                  strokeWidth: 12,
-                  strokeCap: StrokeCap.round,
-                  backgroundColor: Colors.transparent,
-                  valueColor: AlwaysStoppedAnimation<Color>(ringColor),
-                ),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _isSuccess ? '🏆' : '⭐',
-                    style: const TextStyle(fontSize: 32),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${widget.score}/${widget.totalQuestions}',
-                    style: AppTextStyles.poppins(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppTokens.ink(context),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
       ),
     );
   }

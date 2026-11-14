@@ -7,12 +7,14 @@ import '../services/levels_repository.dart';
 import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
 import '../utils/topic_visuals.dart';
+import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/cultural_tip_card.dart';
 import '../widgets/quiz_mode_sheet.dart';
 import '../widgets/section_header.dart';
 import '../widgets/shortcut_card.dart';
 import '../widgets/stat_strip.dart';
+import '../widgets/yak_says.dart';
 import 'level_selection_screen.dart';
 import 'memory_match_game.dart';
 import 'quiz_screen.dart';
@@ -118,7 +120,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(context),
+                    _buildHeader(context, progressService),
 
                     const SizedBox(height: AppSpacing.xl),
 
@@ -170,14 +172,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Welcome back', style: AppTextStyles.caption(context)),
-        const SizedBox(height: 2),
-        Text('Ready for Tibetan?', style: AppTextStyles.display(context)),
-      ],
+  /// The yak greets the learner and says the one thing that matters right
+  /// now: start, keep the streak, or well done for today.
+  Widget _buildHeader(BuildContext context, ProgressService progress) {
+    final now = DateTime.now();
+    final practicedToday = progress.playDates.any(
+      (d) => d.year == now.year && d.month == now.month && d.day == now.day,
+    );
+    return YakSays.line(
+      YakLines.home(
+        now: now,
+        streak: progress.currentStreak,
+        practicedToday: practicedToday,
+        isNewLearner: progress.totalQuizzesTaken == 0,
+      ),
+      yakSize: 112,
     );
   }
 

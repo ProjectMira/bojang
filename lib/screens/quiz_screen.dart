@@ -10,7 +10,10 @@ import '../services/progress_service.dart';
 import '../services/pronunciation_player.dart';
 import '../services/theme_service.dart';
 import '../theme/app_tokens.dart';
+import '../utils/yak_lines.dart';
 import '../widgets/answer_feedback_banner.dart';
+import '../widgets/yak_mascot.dart';
+import '../widgets/yak_says.dart';
 import '../widgets/quiz_mode_sheet.dart';
 import '../widgets/speaker_button.dart';
 import 'lesson_complete_screen.dart';
@@ -37,6 +40,8 @@ class _QuizScreenState extends State<QuizScreen>
   bool showFeedback = false;
   bool lastAnswerCorrect = true;
   int score = 0;
+  // Right answers in a row; the yak calls out runs of them.
+  int _combo = 0;
   late AnimationController _animationController;
   final AudioPlayer _audioPlayer = AudioPlayer();
   String? _remoteSessionId;
@@ -239,6 +244,7 @@ class _QuizScreenState extends State<QuizScreen>
       showFeedback = true;
       lastAnswerCorrect = isCorrect;
       if (isCorrect) score++;
+      _combo = isCorrect ? _combo + 1 : 0;
     });
 
     // One attempt per question: a wrong answer is recorded and the quiz moves
@@ -365,112 +371,32 @@ class _QuizScreenState extends State<QuizScreen>
         future: questionsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Loading questions...',
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      color: Colors.grey[600],
-                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                  ),
-                ],
-              ),
-            );
+            return const YakLoader();
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, color: Colors.red[400], size: 64),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error loading questions',
-                      style: GoogleFonts.poppins(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red[700],
-                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      snapshot.error.toString(),
-                      style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          questionsFuture = _loadQuestions(); // Retry loading
-                        });
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Try Again'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            // The raw exception is logged, not shown: learners get the yak
+            // and a way forward.
+            debugPrint('Quiz load failed: ${snapshot.error}');
+            return YakNotice.line(
+              YakLines.error,
+              actionLabel: 'Try again',
+              onAction: () {
+                setState(() {
+                  questionsFuture = _loadQuestions();
+                });
+              },
             );
           }
 
           final questions = snapshot.data ?? [];
           if (questions.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.quiz_outlined,
-                      color: Colors.grey[400],
-                      size: 64,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No Questions Available',
-                      style: GoogleFonts.poppins(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'This quiz section is currently empty. Please try another section.',
-                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Go Back'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            return YakNotice(
+              mood: YakMood.thinking,
+              title: 'Nothing here yet',
+              body: "I'm still gathering words for this one. Try another topic.",
+              actionLabel: 'Go back',
+              onAction: () => Navigator.of(context).pop(),
             );
           }
 
@@ -483,6 +409,8 @@ class _QuizScreenState extends State<QuizScreen>
               AnswerFeedbackBanner(
                 visible: showFeedback,
                 isCorrect: lastAnswerCorrect,
+                combo: _combo,
+                seed: currentQuestionIndex,
                 correctAnswerText:
                     question.correctAnswerIndex >= 0 &&
                             question.correctAnswerIndex <
