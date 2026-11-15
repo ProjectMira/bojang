@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import '../models/lesson_style.dart';
 import '../models/quiz_question.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -14,18 +15,27 @@ import '../utils/yak_lines.dart';
 import '../widgets/answer_feedback_banner.dart';
 import '../widgets/yak_mascot.dart';
 import '../widgets/yak_says.dart';
-import '../widgets/quiz_mode_sheet.dart';
+import '../widgets/lesson_style_sheet.dart';
 import '../widgets/speaker_button.dart';
 import 'lesson_complete_screen.dart';
+import '../widgets/content_width.dart';
 
 class QuizScreen extends StatefulWidget {
   final String topicFilePath;
-  final QuizMode mode;
+
+  /// Topic name for the app bar. Falls back to a name derived from
+  /// [topicFilePath].
+  final String? title;
+
+  /// Forces a lesson style. Null (the normal case) uses the learner's saved
+  /// preference, [ThemeService.lessonStyle].
+  final LessonStyle? style;
 
   const QuizScreen({
     super.key,
     required this.topicFilePath,
-    this.mode = QuizMode.words,
+    this.title,
+    this.style,
   });
 
   @override
@@ -49,10 +59,24 @@ class _QuizScreenState extends State<QuizScreen>
   // Question index whose pronunciation already auto-played, so rebuilds
   // don't replay it.
   int? _autoPlayedIndex;
+  late LessonStyle _style;
+  // Bumped when the lesson restarts, so timers from the old run do nothing.
+  int _generation = 0;
 
   @override
   void initState() {
     super.initState();
+    _style =
+        widget.style ??
+        Provider.of<ThemeService>(context, listen: false).lessonStyle;
+    _startLoading();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  void _startLoading() {
     questionsFuture = _loadQuestions();
     // Fetch every question's pronunciation up front so it plays instantly.
     final voice =
@@ -63,10 +87,25 @@ class _QuizScreenState extends State<QuizScreen>
       ),
       onError: (Object _) {},
     );
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
+  }
+
+  /// Lets the learner switch lesson style from inside a lesson. The choice
+  /// is saved for every topic and this lesson restarts in the new style.
+  Future<void> _changeStyle() async {
+    final picked = await showLessonStylePicker(context);
+    if (picked == null || picked == _style || !mounted) return;
+    PronunciationPlayer.instance.stop();
+    setState(() {
+      _style = picked;
+      currentQuestionIndex = 0;
+      selectedAnswerIndex = null;
+      showFeedback = false;
+      score = 0;
+      _combo = 0;
+      _autoPlayedIndex = null;
+      _generation++;
+      _startLoading();
+    });
   }
 
   Future<List<QuizQuestion>> _loadQuestions() async {
@@ -79,10 +118,7 @@ class _QuizScreenState extends State<QuizScreen>
         final session = await ApiService().getLearningSession(
           levelId: levelId,
           numQuestions: 10,
-          exerciseTypes:
-              widget.mode == QuizMode.pictures
-                  ? const ['picture_choice']
-                  : const ['multiple_choice'],
+          exerciseTypes: _style.exerciseTypes,
         );
         if (session == null) {
           throw FormatException(
@@ -118,7 +154,7 @@ class _QuizScreenState extends State<QuizScreen>
         if (questions.isEmpty) {
           throw FormatException('No exercises found for this lesson yet.');
         }
-        return questions;
+        return _style.arrange(questions);
       }
 
       // Try to load the JSON file
@@ -203,8 +239,11 @@ class _QuizScreenState extends State<QuizScreen>
     _autoPlayedIndex = currentQuestionIndex;
     final themeService = Provider.of<ThemeService>(context, listen: false);
     final url = question.audioFor(themeService.pronunciationVoice);
-    if (url == null || question.type == 'picture_choice') return;
-    if (!themeService.soundEffectsEnabled) return;
+    if (url == null || question.hasTibetanOptions) return;
+    // A listening question IS its recording, so it plays even with sound
+    // effects off; a written prompt's read-aloud follows that switch.
+    final isListening = question.type == QuizQuestion.listening;
+    if (!isListening && !themeService.soundEffectsEnabled) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         PronunciationPlayer.instance.play(
@@ -239,11 +278,12 @@ class _QuizScreenState extends State<QuizScreen>
     // chime, which is ducked so the word stays clear.
     final question = questions[currentQuestionIndex];
     final revealUrl = question.audioFor(themeService.pronunciationVoice);
-    final revealAudio =
-        question.type == 'picture_choice' && revealUrl != null;
+    final revealAudio = question.hasTibetanOptions && revealUrl != null;
     if (revealAudio && themeService.soundEffectsEnabled) {
+      final revealGeneration = _generation;
       Future.delayed(const Duration(milliseconds: 600), () async {
-        if (!mounted || currentQuestionIndex >= questions.length) return;
+        if (!mounted || revealGeneration != _generation) return;
+        if (currentQuestionIndex >= questions.length) return;
         if (questions[currentQuestionIndex] != question) return;
         try {
           await _audioPlayer.setVolume(themeService.soundEffectsVolume * 0.3);
@@ -270,8 +310,9 @@ class _QuizScreenState extends State<QuizScreen>
         revealAudio
             ? const Duration(milliseconds: 2800)
             : const Duration(seconds: 2);
+    final generation = _generation;
     Future.delayed(feedbackTime, () {
-      if (!mounted) return;
+      if (!mounted || generation != _generation) return;
       if (currentQuestionIndex < questions.length - 1) {
         setState(() {
           currentQuestionIndex++;
@@ -326,7 +367,7 @@ class _QuizScreenState extends State<QuizScreen>
               accuracy: accuracy,
               streak: progressService.currentStreak,
               topicFilePath: widget.topicFilePath,
-              mode: widget.mode,
+              title: widget.title,
             ),
         transitionsBuilder:
             (context, animation, secondaryAnimation, child) =>
@@ -367,7 +408,7 @@ class _QuizScreenState extends State<QuizScreen>
       backgroundColor: AppTokens.background(context),
       appBar: AppBar(
         title: Text(
-          _getDisplayNameFromFilePath(widget.topicFilePath),
+          widget.title ?? _getDisplayNameFromFilePath(widget.topicFilePath),
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -382,8 +423,17 @@ class _QuizScreenState extends State<QuizScreen>
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          // Bundled offline lessons only have one question kind.
+          if (widget.topicFilePath.startsWith('api://level/'))
+            IconButton(
+              icon: Icon(lessonStyleIcon(_style)),
+              tooltip: 'Lesson style: ${_style.title}',
+              onPressed: _changeStyle,
+            ),
+        ],
       ),
-      body: FutureBuilder<List<QuizQuestion>>(
+      body: ContentWidth(maxWidth: ContentWidth.reading, child: FutureBuilder<List<QuizQuestion>>(
         future: questionsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -397,11 +447,7 @@ class _QuizScreenState extends State<QuizScreen>
             return YakNotice.line(
               YakLines.error,
               actionLabel: 'Try again',
-              onAction: () {
-                setState(() {
-                  questionsFuture = _loadQuestions();
-                });
-              },
+              onAction: () => setState(_startLoading),
             );
           }
 
@@ -437,7 +483,7 @@ class _QuizScreenState extends State<QuizScreen>
             ],
           );
         },
-      ),
+      ),),
     );
   }
 
@@ -520,7 +566,7 @@ class _QuizScreenState extends State<QuizScreen>
                     ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                   ),
                   Text(
-                    'Accuracy: ${score > 0 ? ((score / (currentQuestionIndex + 1)) * 100).toInt() : 0}%',
+                    'Accuracy: ${_accuracySoFar()}%',
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: Theme.of(context).primaryColor,
@@ -550,75 +596,17 @@ class _QuizScreenState extends State<QuizScreen>
                       padding: const EdgeInsets.all(24.0),
                       child: Column(
                         children: [
-                          // const Text(
-                          //   'Question',
-                          //   style: TextStyle(
-                          //     fontSize: 18,
-                          //     fontWeight: FontWeight.w500,
-                          //     color: Colors.grey,
-                          //   ),
-                          // ),
+                          Text(
+                            _instructionFor(question),
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppTokens.inkSoft(context),
+                            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                          ),
                           const SizedBox(height: 16),
-                          if (question.imageUrl != null) ...[
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                question.imageUrl!,
-                                height: 200,
-                                fit: BoxFit.contain,
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return const SizedBox(
-                                    height: 200,
-                                    child: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  );
-                                },
-                                // Image failed to load — the English gloss
-                                // becomes the prompt so the question still works.
-                                errorBuilder:
-                                    (context, error, stackTrace) => Text(
-                                      question.englishGloss?.isNotEmpty == true
-                                          ? question.englishGloss!
-                                          : question.tibetanText,
-                                      style: const TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              question.tibetanText,
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                color: AppTokens.inkSoft(context),
-                              ).copyWith(
-                                fontFamilyFallback: const ['Jomolhari'],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            if (showFeedback && _audioOf(question) != null) ...[
-                              const SizedBox(height: 8),
-                              SpeakerButton(url: _audioOf(question)!),
-                            ],
-                          ] else ...[
-                            Text(
-                              question.tibetanText,
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            if (_audioOf(question) != null) ...[
-                              const SizedBox(height: 12),
-                              SpeakerButton(url: _audioOf(question)!),
-                            ],
-                          ],
+                          ..._buildPrompt(context, question),
                         ],
                       ),
                     ),
@@ -704,7 +692,12 @@ class _QuizScreenState extends State<QuizScreen>
                                     child: Text(
                                       question.options[index],
                                       style: GoogleFonts.poppins(
-                                        fontSize: 18,
+                                        // Tibetan script needs more size
+                                        // than Latin to read comfortably.
+                                        fontSize:
+                                            question.hasTibetanOptions
+                                                ? 24
+                                                : 18,
                                       ).copyWith(
                                         fontFamilyFallback: const [
                                           'Jomolhari',
@@ -727,6 +720,113 @@ class _QuizScreenState extends State<QuizScreen>
         ),
       ],
     );
+  }
+
+  /// Share of the questions answered so far that were right. The question
+  /// on screen only counts once it has been answered.
+  int _accuracySoFar() {
+    final answered = currentQuestionIndex + (showFeedback ? 1 : 0);
+    return answered == 0 ? 0 : (score / answered * 100).round();
+  }
+
+  String _instructionFor(QuizQuestion question) => switch (question.type) {
+    QuizQuestion.pictureChoice => 'Which word matches the picture?',
+    QuizQuestion.listening => 'What do you hear?',
+    QuizQuestion.reverseChoice => 'How do you say this in Tibetan?',
+    _ => 'What does this mean?',
+  };
+
+  /// The part of the question card under the instruction line: a picture,
+  /// a speaker, an English word or a Tibetan word, by question kind.
+  List<Widget> _buildPrompt(BuildContext context, QuizQuestion question) {
+    final audio = _audioOf(question);
+
+    if (question.type == QuizQuestion.listening && audio != null) {
+      return [
+        SpeakerButton(url: audio, size: 56),
+        const SizedBox(height: 12),
+        // The written word stays hidden until answered, so the question is
+        // answered by ear.
+        Visibility(
+          visible: showFeedback,
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
+          child: Text(
+            question.tibetanText,
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ];
+    }
+
+    if (question.type == QuizQuestion.reverseChoice) {
+      return [
+        Text(
+          question.englishGloss ?? '',
+          style: GoogleFonts.poppins(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: AppTokens.ink(context),
+          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+          textAlign: TextAlign.center,
+        ),
+        if (showFeedback && audio != null) ...[
+          const SizedBox(height: 12),
+          SpeakerButton(url: audio),
+        ],
+      ];
+    }
+
+    if (question.imageUrl != null) {
+      return [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            question.imageUrl!,
+            height: 200,
+            fit: BoxFit.contain,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return const SizedBox(
+                height: 200,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            },
+            // Image failed to load — the English gloss becomes the prompt
+            // so the question still works.
+            errorBuilder:
+                (context, error, stackTrace) => Text(
+                  question.englishGloss?.isNotEmpty == true
+                      ? question.englishGloss!
+                      : question.tibetanText,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+          ),
+        ),
+        if (showFeedback && audio != null) ...[
+          const SizedBox(height: 8),
+          SpeakerButton(url: audio),
+        ],
+      ];
+    }
+
+    return [
+      Text(
+        question.tibetanText,
+        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+      if (audio != null) ...[
+        const SizedBox(height: 12),
+        SpeakerButton(url: audio),
+      ],
+    ];
   }
 
   String _getDisplayNameFromFilePath(String filePath) {

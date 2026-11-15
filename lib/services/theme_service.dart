@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../models/lesson_style.dart';
 import 'pronunciation_player.dart';
 
 class ThemeService extends ChangeNotifier {
@@ -15,7 +16,7 @@ class ThemeService extends ChangeNotifier {
   static const String _pronunciationVoiceKey = 'pronunciation_voice';
   static const String _dailyQuizTargetKey = 'daily_quiz_target';
   static const String _weeklyGoalKey = 'weekly_goal';
-  static const String _quizModeKey = 'quiz_mode';
+  static const String _lessonStyleKey = 'lesson_style';
 
   bool _isDarkMode = false;
   String _currentLanguage = 'English';
@@ -27,7 +28,7 @@ class ThemeService extends ChangeNotifier {
   String _pronunciationVoice = PronunciationVoices.defaultVoice;
   int _dailyQuizTarget = 1;
   int _weeklyGoal = 5;
-  String _quizMode = 'words';
+  LessonStyle _lessonStyle = LessonStyle.mixed;
 
   bool get isDarkMode => _isDarkMode;
   String get currentLanguage => _currentLanguage;
@@ -39,7 +40,7 @@ class ThemeService extends ChangeNotifier {
   String get pronunciationVoice => _pronunciationVoice;
   int get dailyQuizTarget => _dailyQuizTarget;
   int get weeklyGoal => _weeklyGoal;
-  String get quizMode => _quizMode;
+  LessonStyle get lessonStyle => _lessonStyle;
   
   ThemeService() {
     _loadThemePreference();
@@ -59,7 +60,7 @@ class ThemeService extends ChangeNotifier {
         : PronunciationVoices.defaultVoice;
     _dailyQuizTarget = prefs.getInt(_dailyQuizTargetKey) ?? 1;
     _weeklyGoal = prefs.getInt(_weeklyGoalKey) ?? 5;
-    _quizMode = prefs.getString(_quizModeKey) ?? 'words';
+    _lessonStyle = LessonStyle.fromId(prefs.getString(_lessonStyleKey));
     notifyListeners();
   }
   
@@ -77,11 +78,11 @@ class ThemeService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setQuizMode(String value) async {
-    _quizMode = value;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_quizModeKey, value);
+  Future<void> setLessonStyle(LessonStyle value) async {
+    _lessonStyle = value;
     notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_lessonStyleKey, value.name);
   }
 
   Future<void> setSoundEffectsEnabled(bool value) async {

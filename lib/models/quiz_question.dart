@@ -19,6 +19,20 @@ class QuizQuestion {
   /// The same pronunciation per TTS voice (e.g. lhasa_female, kham_male).
   final Map<String, String> audioUrls;
 
+  /// Tibetan prompt, English options. The prompt is spoken when it appears.
+  static const String multipleChoice = 'multiple_choice';
+
+  /// Picture prompt, Tibetan options.
+  static const String pictureChoice = 'picture_choice';
+
+  /// Audio-only prompt, English options. Made on the device from a
+  /// [multipleChoice] exercise; see [asListening].
+  static const String listening = 'listening';
+
+  /// English prompt, Tibetan options. Made on the device from a
+  /// [pictureChoice] exercise; see [asReverse].
+  static const String reverseChoice = 'reverse_choice';
+
   QuizQuestion({
     required this.tibetanText,
     required this.options,
@@ -32,6 +46,41 @@ class QuizQuestion {
 
   /// Recording in [voice], falling back to the default voice.
   String? audioFor(String voice) => audioUrls[voice] ?? audioUrl;
+
+  /// True when the options are Tibetan words, so the word's recording must
+  /// wait until the learner has answered (earlier would give it away).
+  bool get hasTibetanOptions => type == pictureChoice || type == reverseChoice;
+
+  bool get _hasAudio => audioUrl != null || audioUrls.isNotEmpty;
+
+  /// This question asked by ear: the Tibetan word is heard, not shown.
+  /// Null unless this is a [multipleChoice] question with a recording.
+  QuizQuestion? asListening() {
+    if (type != multipleChoice || !_hasAudio) return null;
+    return _copyWithType(listening);
+  }
+
+  /// This question asked from English: "how do you say X?" with the same
+  /// Tibetan options and no picture. Null unless this is a [pictureChoice]
+  /// question that knows its English meaning.
+  QuizQuestion? asReverse() {
+    final gloss = englishGloss?.trim() ?? '';
+    if (type != pictureChoice || gloss.isEmpty) return null;
+    return _copyWithType(reverseChoice, keepImage: false);
+  }
+
+  QuizQuestion _copyWithType(String newType, {bool keepImage = true}) {
+    return QuizQuestion(
+      tibetanText: tibetanText,
+      options: options,
+      correctAnswerIndex: correctAnswerIndex,
+      type: newType,
+      imageUrl: keepImage ? imageUrl : null,
+      englishGloss: englishGloss,
+      audioUrl: audioUrl,
+      audioUrls: audioUrls,
+    );
+  }
 
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
     return QuizQuestion(

@@ -5,6 +5,7 @@ import '../services/progress_service.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
 import 'level_selection_screen.dart';
+import '../widgets/content_width.dart';
 
 class StreakViewScreen extends StatelessWidget {
   const StreakViewScreen({super.key});
@@ -51,7 +52,7 @@ class StreakViewScreen extends StatelessWidget {
             foregroundColor: Colors.white,
             elevation: 0,
           ),
-          body: SingleChildScrollView(
+          body: ContentWidth(child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -105,7 +106,7 @@ class StreakViewScreen extends StatelessWidget {
                 ),
               ],
             ),
-          ),
+          ),),
         );
       },
     );

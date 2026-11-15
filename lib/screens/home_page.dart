@@ -10,7 +10,6 @@ import '../utils/topic_visuals.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/cultural_tip_card.dart';
-import '../widgets/quiz_mode_sheet.dart';
 import '../widgets/section_header.dart';
 import '../widgets/shortcut_card.dart';
 import '../widgets/stat_strip.dart';
@@ -18,6 +17,7 @@ import '../widgets/yak_says.dart';
 import 'level_selection_screen.dart';
 import 'memory_match_game.dart';
 import 'quiz_screen.dart';
+import '../widgets/content_width.dart';
 
 class HomePage extends StatefulWidget {
   /// Switches the bottom nav to the Streak tab. Provided by
@@ -109,60 +109,62 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       builder: (context, progressService, child) {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          body: SafeArea(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.gutter,
-                  vertical: AppSpacing.lg,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(context, progressService),
+          body: ContentWidth(
+            child: SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.gutter,
+                    vertical: AppSpacing.lg,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(context, progressService),
 
-                    const SizedBox(height: AppSpacing.xl),
+                      const SizedBox(height: AppSpacing.xl),
 
-                    _buildStatsStrip(context, progressService),
+                      _buildStatsStrip(context, progressService),
 
-                    const SizedBox(height: AppSpacing.section),
+                      const SizedBox(height: AppSpacing.section),
 
-                    SectionHeader(
-                      title: 'Categories',
-                      actionLabel: 'See all',
-                      onAction:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => const LevelSelectionScreen(),
+                      SectionHeader(
+                        title: 'Categories',
+                        actionLabel: 'See all',
+                        onAction:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => const LevelSelectionScreen(),
+                              ),
                             ),
-                          ),
-                    ),
+                      ),
 
-                    const SizedBox(height: AppSpacing.md),
+                      const SizedBox(height: AppSpacing.md),
 
-                    _buildShortcutGrid(context),
+                      _buildShortcutGrid(context),
 
-                    const SizedBox(height: AppSpacing.section),
+                      const SizedBox(height: AppSpacing.section),
 
-                    _buildStartLessonHero(context, progressService),
+                      _buildStartLessonHero(context, progressService),
 
-                    const SizedBox(height: AppSpacing.section),
+                      const SizedBox(height: AppSpacing.section),
 
-                    const SectionHeader(title: 'Cultural Tip'),
+                      const SectionHeader(title: 'Cultural Tip'),
 
-                    const SizedBox(height: AppSpacing.md),
+                      const SizedBox(height: AppSpacing.md),
 
-                    _buildCulturalTip(),
+                      _buildCulturalTip(),
 
-                    const SizedBox(height: AppSpacing.section),
+                      const SizedBox(height: AppSpacing.section),
 
-                    _buildShareButton(context),
+                      _buildShareButton(context),
 
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
+                      const SizedBox(height: AppSpacing.lg),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -250,22 +252,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ? '${sublevel.wordCount} words'
                     : 'Lesson',
             color: topicColors[i % topicColors.length],
-            onTap: () async {
-              // Offer the picture mode only for topics whose words all have
-              // illustrations; other topics go straight to the words quiz.
-              var mode = QuizMode.words;
-              if (sublevel.hasImages) {
-                final picked = await showQuizModePicker(context);
-                if (picked == null || !context.mounted) return;
-                mode = picked;
-              }
+            onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder:
                       (context) => QuizScreen(
                         topicFilePath: sublevel.path,
-                        mode: mode,
+                        title: sublevel.name,
                       ),
                 ),
               );
@@ -291,13 +285,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
     );
 
+    // Phone: a 2x2 block. iPad: the same four cards in one row.
+    final wide = Breakpoints.isTablet(context);
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
+      crossAxisCount: wide ? 4 : 2,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 1.45,
+      childAspectRatio: wide ? 1.2 : 1.45,
       children: cards,
     );
   }

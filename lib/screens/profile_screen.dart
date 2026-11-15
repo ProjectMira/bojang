@@ -13,6 +13,7 @@ import '../widgets/stat_chip.dart';
 import '../widgets/yak_mascot.dart';
 import 'settings_screen.dart';
 import 'auth_screen.dart';
+import '../widgets/content_width.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -228,233 +229,246 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
             ],
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                // Profile Header
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppColors.primary,
-                        Theme.of(context).scaffoldBackgroundColor,
-                      ],
+          body: ContentWidth(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Profile Header
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      // On an iPad the header is narrower than the screen,
+                      // so it gets rounded top corners instead of ending in
+                      // two hard edges.
+                      borderRadius:
+                          Breakpoints.isTablet(context)
+                              ? const BorderRadius.vertical(
+                                top: Radius.circular(AppRadius.hero),
+                              )
+                              : null,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppColors.primary,
+                          Theme.of(context).scaffoldBackgroundColor,
+                        ],
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 12,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 12,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundColor: Colors.white,
+                            backgroundImage:
+                                currentUser?.profileImageUrl != null
+                                    ? NetworkImage(
+                                      currentUser!.profileImageUrl!,
+                                    )
+                                    : null,
+                            // No photo yet: the yak stands in.
+                            child:
+                                currentUser?.profileImageUrl == null
+                                    ? const YakMascot(size: 86, showBody: false)
+                                    : null,
+                          ),
                         ),
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.white,
-                          backgroundImage:
-                              currentUser?.profileImageUrl != null
-                                  ? NetworkImage(currentUser!.profileImageUrl!)
-                                  : null,
-                          // No photo yet: the yak stands in.
-                          child:
-                              currentUser?.profileImageUrl == null
-                                  ? const YakMascot(size: 86, showBody: false)
-                                  : null,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        playerName,
-                        style: AppTextStyles.poppins(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (currentUser?.email != null)
+                        const SizedBox(height: 16),
                         Text(
-                          currentUser!.email,
+                          playerName,
                           style: AppTextStyles.poppins(
-                            fontSize: 14,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        if (currentUser?.email != null)
+                          Text(
+                            currentUser!.email,
+                            style: AppTextStyles.poppins(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${progressService.league} League • ${progressService.xp} XP',
+                          style: AppTextStyles.poppins(
+                            fontSize: 16,
                             color: Colors.white70,
                           ),
                         ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${progressService.league} League • ${progressService.xp} XP',
-                        style: AppTextStyles.poppins(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
-                      ),
-                      if (currentUser != null)
-                        Container(
-                          margin: const EdgeInsets.only(top: 8),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            switch (currentUser!.authProvider) {
-                              AuthProvider.apple => 'Apple Account',
-                              AuthProvider.google => 'Google Account',
-                              AuthProvider.email => 'Email Account',
-                            },
-                            style: AppTextStyles.poppins(
-                              fontSize: 12,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
+                        if (currentUser != null)
+                          Container(
+                            margin: const EdgeInsets.only(top: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
                             ),
-                          ),
-                        ),
-                      if (currentUser == null)
-                        Container(
-                          margin: const EdgeInsets.only(top: 12),
-                          child: ElevatedButton.icon(
-                            onPressed: _openSignIn,
-                            icon: const Icon(Icons.login, size: 18),
-                            label: Text(
-                              'Create an account or sign in',
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              switch (currentUser!.authProvider) {
+                                AuthProvider.apple => 'Apple Account',
+                                AuthProvider.google => 'Google Account',
+                                AuthProvider.email => 'Email Account',
+                              },
                               style: AppTextStyles.poppins(
-                                fontSize: 14,
+                                fontSize: 12,
+                                color: Colors.white,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: AppColors.primary,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
+                          ),
+                        if (currentUser == null)
+                          Container(
+                            margin: const EdgeInsets.only(top: 12),
+                            child: ElevatedButton.icon(
+                              onPressed: _openSignIn,
+                              icon: const Icon(Icons.login, size: 18),
+                              label: Text(
+                                'Create an account or sign in',
+                                style: AppTextStyles.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: AppColors.primary,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
                               ),
                             ),
                           ),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  ),
+
+                  // Stats Section
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Your Progress',
+                          style: AppTextStyles.title(context),
                         ),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
+                        const SizedBox(height: 16),
 
-                // Stats Section
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Your Progress',
-                        style: AppTextStyles.title(context),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Stats Grid
-                      GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 14,
-                        mainAxisSpacing: 14,
-                        childAspectRatio: 1.35,
-                        children: [
-                          _buildStatCard(
-                            context,
-                            Icons.bolt,
-                            '${progressService.xp}',
-                            'XP',
-                            AppColors.gold,
-                          ),
-                          _buildStatCard(
-                            context,
-                            Icons.local_fire_department,
-                            '${progressService.currentStreak}',
-                            'Streak',
-                            AppColors.orange,
-                          ),
-                          _buildStatCard(
-                            context,
-                            Icons.check_circle,
-                            '${progressService.completedLevelsCount}',
-                            'Lessons',
-                            AppColors.green,
-                          ),
-                          _buildStatCard(
-                            context,
-                            Icons.emoji_events,
-                            progressService.league,
-                            'League',
-                            AppColors.purple,
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Settings Section
-                      Text('Settings', style: AppTextStyles.title(context)),
-                      const SizedBox(height: 16),
-
-                      _buildSettingsCard(
-                        context,
-                        'Settings',
-                        'Manage app preferences and notifications',
-                        Icons.settings,
-                        () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SettingsScreen(),
+                        // Stats Grid
+                        GridView.count(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisCount: Breakpoints.isTablet(context) ? 4 : 2,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
+                          childAspectRatio: 1.35,
+                          children: [
+                            _buildStatCard(
+                              context,
+                              Icons.bolt,
+                              '${progressService.xp}',
+                              'XP',
+                              AppColors.gold,
                             ),
-                          );
-                        },
-                      ),
+                            _buildStatCard(
+                              context,
+                              Icons.local_fire_department,
+                              '${progressService.currentStreak}',
+                              'Streak',
+                              AppColors.orange,
+                            ),
+                            _buildStatCard(
+                              context,
+                              Icons.check_circle,
+                              '${progressService.completedLevelsCount}',
+                              'Lessons',
+                              AppColors.green,
+                            ),
+                            _buildStatCard(
+                              context,
+                              Icons.emoji_events,
+                              progressService.league,
+                              'League',
+                              AppColors.purple,
+                            ),
+                          ],
+                        ),
 
-                      const SizedBox(height: 12),
+                        const SizedBox(height: 32),
 
-                      _buildSettingsCard(
-                        context,
-                        'Reset Progress',
-                        'Clear local streaks, scores, and cached progress',
-                        Icons.refresh,
-                        () => _showResetDialog(progressService),
-                      ),
+                        // Settings Section
+                        Text('Settings', style: AppTextStyles.title(context)),
+                        const SizedBox(height: 16),
 
-                      const SizedBox(height: 12),
+                        _buildSettingsCard(
+                          context,
+                          'Settings',
+                          'Manage app preferences and notifications',
+                          Icons.settings,
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SettingsScreen(),
+                              ),
+                            );
+                          },
+                        ),
 
-                      _buildSettingsCard(
-                        context,
-                        'About App',
-                        'Learn more about Bojang',
-                        Icons.info,
-                        _showAboutDialog,
-                      ),
+                        const SizedBox(height: 12),
 
-                      const SizedBox(height: 8),
+                        _buildSettingsCard(
+                          context,
+                          'Reset Progress',
+                          'Clear local streaks, scores, and cached progress',
+                          Icons.refresh,
+                          () => _showResetDialog(progressService),
+                        ),
 
-                      _buildFooter(context),
-                    ],
+                        const SizedBox(height: 12),
+
+                        _buildSettingsCard(
+                          context,
+                          'About App',
+                          'Learn more about Bojang',
+                          Icons.info,
+                          _showAboutDialog,
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        _buildFooter(context),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

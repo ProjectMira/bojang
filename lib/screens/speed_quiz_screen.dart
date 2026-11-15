@@ -12,6 +12,7 @@ import '../services/progress_service.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
 import '../widgets/yak_says.dart';
+import '../widgets/content_width.dart';
 
 /// Quick-fire quiz: answer as many questions as possible in 60 seconds.
 class SpeedQuizScreen extends StatefulWidget {
@@ -231,12 +232,12 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
       ),
-      body: switch (_phase) {
+      body: ContentWidth(maxWidth: ContentWidth.reading, child: switch (_phase) {
         _QuizPhase.intro => _buildIntro(),
         _QuizPhase.loading => const YakLoader(message: 'Get ready…'),
         _QuizPhase.playing => _buildPlaying(),
         _QuizPhase.finished => _buildFinished(),
-      },
+      },),
     );
   }
 

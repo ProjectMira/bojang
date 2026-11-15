@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../utils/topic_visuals.dart';
 import '../widgets/yak_mascot.dart';
 import '../widgets/yak_says.dart';
+import '../widgets/content_width.dart';
 
 class MemoryMatchGame extends StatefulWidget {
   const MemoryMatchGame({super.key});
@@ -356,11 +357,11 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             ),
         ],
       ),
-      body: switch (_phase) {
+      body: ContentWidth(child: switch (_phase) {
         _GamePhase.pickingTopic => _buildTopicPicker(),
         _GamePhase.loading => const YakLoader(message: 'Shuffling the cards…'),
         _GamePhase.playing => _buildGame(),
-      },
+      },),
     );
   }
 

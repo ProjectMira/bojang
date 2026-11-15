@@ -6,8 +6,10 @@ import '../services/pronunciation_player.dart';
 import '../services/progress_service.dart';
 import '../services/api_service.dart';
 import '../services/google_auth_service.dart';
+import '../widgets/lesson_style_sheet.dart';
 import 'notification_settings_screen.dart';
 import 'auth_screen.dart';
+import '../widgets/content_width.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -35,7 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             foregroundColor: Colors.white,
             elevation: 0,
           ),
-          body: SingleChildScrollView(
+          body: ContentWidth(child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,6 +76,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // Learning Section
                 _buildSectionHeader('Learning'),
                 const SizedBox(height: 16),
+
+                _buildSettingsCard(
+                  title: 'Lesson Style',
+                  subtitle:
+                      '${themeService.lessonStyle.title} · ${themeService.lessonStyle.subtitle}',
+                  icon: lessonStyleIcon(themeService.lessonStyle),
+                  onTap: () => showLessonStylePicker(context),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                ),
+
+                const SizedBox(height: 12),
 
                 _buildSettingsCard(
                   title: 'Notifications',
@@ -203,7 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 32),
               ],
             ),
-          ),
+          ),),
         );
       },
     );

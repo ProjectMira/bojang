@@ -7,6 +7,7 @@ import '../widgets/apple_sign_in_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/yak_mascot.dart';
 import 'main_navigation_screen.dart';
+import '../widgets/content_width.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key, this.authService});
@@ -289,7 +290,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           Theme.of(context).brightness == Brightness.dark
               ? const Color(0xFF1E1E1E)
               : const Color(0xFFF8F9FA),
-      body: SafeArea(
+      body: ContentWidth(maxWidth: ContentWidth.reading, child: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: SlideTransition(
@@ -310,7 +311,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             ),
           ),
         ),
-      ),
+      ),),
     );
   }
 

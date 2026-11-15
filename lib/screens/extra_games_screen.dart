@@ -1,168 +1,258 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../theme/app_tokens.dart';
+import '../widgets/app_text_style.dart';
+import 'games/flashcards_game.dart';
+import 'games/match_pairs_game.dart';
+import 'games/picture_pick_game.dart';
+import 'games/true_false_game.dart';
+import 'games/word_builder_game.dart';
 import 'memory_match_game.dart';
 import 'speed_quiz_screen.dart';
+import '../widgets/content_width.dart';
 
+class _Game {
+  /// The skill the game trains, shown as a tag on its card.
+  final String skill;
+  final String title;
+  final String description;
+  final String emoji;
+  final Color color;
+  final WidgetBuilder builder;
+
+  const _Game({
+    required this.skill,
+    required this.title,
+    required this.description,
+    required this.emoji,
+    required this.color,
+    required this.builder,
+  });
+}
+
+/// The Games tab: every practice game, tagged with the skill it trains.
 class ExtraGamesScreen extends StatelessWidget {
   const ExtraGamesScreen({super.key});
 
+  static final List<_Game> _games = [
+    _Game(
+      skill: 'Listening',
+      title: 'Listen & Tap',
+      description: 'Hear a word, tap its picture.',
+      emoji: '🎧',
+      color: AppColors.primary,
+      builder: (_) => const ListenAndTapScreen(),
+    ),
+    _Game(
+      skill: 'Reading',
+      title: 'Picture Pick',
+      description: 'Read a word, tap its picture.',
+      emoji: '🖼️',
+      color: AppColors.green,
+      builder: (_) => const PicturePickScreen(),
+    ),
+    _Game(
+      skill: 'Reading',
+      title: 'Match Pairs',
+      description: 'Pair each word with its meaning.',
+      emoji: '🔗',
+      color: AppColors.purple,
+      builder: (_) => const MatchPairsScreen(),
+    ),
+    _Game(
+      skill: 'Reading',
+      title: 'True or False',
+      description: 'Is that the right meaning?',
+      emoji: '✅',
+      color: AppColors.orange,
+      builder: (_) => const TrueOrFalseScreen(),
+    ),
+    _Game(
+      skill: 'Spelling',
+      title: 'Word Builder',
+      description: 'Put the syllables in order.',
+      emoji: '🧩',
+      color: AppColors.gold,
+      builder: (_) => const WordBuilderScreen(),
+    ),
+    _Game(
+      skill: 'Memory',
+      title: 'Flashcards',
+      description: 'Flip, check, repeat what you miss.',
+      emoji: '🃏',
+      color: AppColors.primary,
+      builder: (_) => const FlashcardsScreen(),
+    ),
+    _Game(
+      skill: 'Memory',
+      title: 'Memory Match',
+      description: 'Find the photo and word pairs.',
+      emoji: '🧠',
+      color: AppColors.purple,
+      builder: (_) => const MemoryMatchGame(),
+    ),
+    _Game(
+      skill: 'Speed',
+      title: 'Speed Quiz',
+      description: 'As many as you can in 60 seconds.',
+      emoji: '⚡',
+      color: AppColors.orange,
+      builder: (_) => const SpeedQuizScreen(),
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    // Eight games: two columns on a phone, a 4x2 block on an iPad.
+    final columns = Breakpoints.isTablet(context) ? 4 : 2;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: AppTokens.background(context),
       appBar: AppBar(
         title: Text(
           'Games',
-          style: GoogleFonts.poppins(
+          style: AppTextStyles.poppins(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: AppTokens.ink(context),
-          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+          ),
         ),
         backgroundColor: Colors.transparent,
         foregroundColor: AppTokens.ink(context),
         elevation: 0,
+        scrolledUnderElevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: ContentWidth(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
           children: [
             Text(
-              'More Ways to Learn',
-              style: GoogleFonts.poppins(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : const Color(0xFF2C3E50),
-              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Short games that use the same vocabulary as your lessons — perfect for a quick practice break.',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                color:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey.shade400
-                        : Colors.grey.shade600,
-              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-            ),
-            const SizedBox(height: 24),
-            _buildGameCard(
-              context,
-              title: 'Memory Match',
-              description:
-                  'Flip cards to match Tibetan words with their meanings. Pick any topic you\'re learning.',
-              emoji: '🧠',
-              color: Colors.purple,
-              onTap:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MemoryMatchGame(),
-                    ),
-                  ),
+              '${_games.length} games with the words from your lessons. '
+              'Every right answer earns XP and keeps your streak.',
+              style: AppTextStyles.poppins(
+                fontSize: 14,
+                color: AppTokens.inkSoft(context),
+              ),
             ),
             const SizedBox(height: 16),
-            _buildGameCard(
-              context,
-              title: 'Speed Quiz',
-              description:
-                  'Answer as many questions as you can in 60 seconds. Beat your best score!',
-              emoji: '⚡',
-              color: Colors.orange,
-              onTap:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SpeedQuizScreen(),
-                    ),
-                  ),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+                mainAxisExtent: 150,
+              ),
+              itemCount: _games.length,
+              itemBuilder: (context, index) => _GameCard(game: _games[index]),
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildGameCard(
-    BuildContext context, {
-    required String title,
-    required String description,
-    required String emoji,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Material(
-      color: Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? Colors.white12 : Colors.black.withOpacity(0.06),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+class _GameCard extends StatelessWidget {
+  final _Game game;
+
+  const _GameCard({required this.game});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: '${game.title}, ${game.skill} game. ${game.description}',
+      excludeSemantics: true,
+      child: Material(
+        color: AppTokens.tint(game.color, context),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          splashColor: game.color.withOpacity(0.12),
+          highlightColor: game.color.withOpacity(0.08),
+          onTap:
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: game.builder),
               ),
-            ],
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(isDark ? 0.25 : 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Text(emoji, style: const TextStyle(fontSize: 32)),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF2C3E50),
-                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                    Container(
+                      width: 44,
+                      height: 44,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppTokens.surface(context),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        game.emoji,
+                        style: const TextStyle(fontSize: 24),
+                      ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color:
-                            isDark
-                                ? Colors.grey.shade400
-                                : Colors.grey.shade600,
-                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                    const SizedBox(width: 8),
+                    // Scales down rather than overflowing on narrow cards or
+                    // with large system text.
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTokens.surface(context),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              game.skill,
+                              style: AppTextStyles.poppins(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: AppTokens.inkSoft(context),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 18,
-                color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-              ),
-            ],
+                const Spacer(),
+                Text(
+                  game.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppTokens.ink(context),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  game.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.poppins(
+                    fontSize: 12,
+                    height: 1.25,
+                    color: AppTokens.inkSoft(context),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

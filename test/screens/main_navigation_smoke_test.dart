@@ -53,10 +53,12 @@ void main() {
     await tester.tap(find.text('Games'));
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.text('Memory Match'), findsOneWidget);
-    expect(find.text('Speed Quiz'), findsOneWidget);
+    // test/screens/games/games_test.dart checks all eight on a tall screen.
+    expect(find.textContaining('8 games'), findsOneWidget);
+    expect(find.text('Listen & Tap'), findsOneWidget);
+    expect(find.text('Picture Pick'), findsOneWidget);
+    expect(find.text('Match Pairs'), findsOneWidget);
     expect(find.text('Coming Soon'), findsNothing);
-    expect(find.text('Word Builder'), findsNothing);
     expect(find.text('Audio Challenge'), findsNothing);
     expect(find.text('Story Mode'), findsNothing);
     expect(find.text('Daily Challenge'), findsNothing);

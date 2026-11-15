@@ -7,9 +7,9 @@ import '../theme/app_tokens.dart';
 import '../utils/topic_visuals.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
-import '../widgets/quiz_mode_sheet.dart';
 import '../widgets/yak_says.dart';
 import 'quiz_screen.dart';
+import '../widgets/content_width.dart';
 
 const List<IconData> _kSectionIcons = [
   Icons.menu_book_rounded,
@@ -93,12 +93,14 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
             backgroundColor: Colors.transparent,
             foregroundColor: AppTokens.ink(context),
           ),
-          body:
-              isLoading
-                  ? const YakLoader(message: 'Laying out your topics…')
-                  : levels.isEmpty
-                  ? _buildEmptyState(context)
-                  : _buildTopicSections(context, progressService),
+          body: ContentWidth(
+            child:
+                isLoading
+                    ? const YakLoader(message: 'Laying out your topics…')
+                    : levels.isEmpty
+                    ? _buildEmptyState(context)
+                    : _buildTopicSections(context, progressService),
+          ),
         );
       },
     );
@@ -278,7 +280,7 @@ class _TopicCardState extends State<_TopicCard> {
           borderRadius: BorderRadius.circular(AppRadius.card),
           splashColor: widget.color.withOpacity(0.12),
           highlightColor: widget.color.withOpacity(0.08),
-          onTap: () async {
+          onTap: () {
             if (isLocked) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -293,21 +295,15 @@ class _TopicCardState extends State<_TopicCard> {
               );
               return;
             }
-            // Offer the picture mode only for topics whose words all have
-            // illustrations; other topics go straight to the words quiz.
-            var mode = QuizMode.words;
-            if (widget.sublevel.hasImages) {
-              final picked = await showQuizModePicker(context);
-              if (picked == null || !context.mounted) return;
-              mode = picked;
-            }
+            // Straight into the lesson: its style comes from the learner's
+            // saved preference (Settings, or the tune button in the lesson).
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder:
                     (context) => QuizScreen(
                       topicFilePath: widget.sublevel.path,
-                      mode: mode,
+                      title: widget.sublevel.name,
                     ),
               ),
             );

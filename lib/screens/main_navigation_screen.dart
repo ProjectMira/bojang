@@ -43,34 +43,44 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  icon: Icons.home_filled,
-                  label: 'Home',
-                  index: 0,
-                  color: AppColors.primary,
+            // Capped so the four tabs stay within thumb reach of each other
+            // on an iPad rather than spreading across the whole width.
+            child: Center(
+              // heightFactor keeps the bar its own height: a bare Center
+              // here would grow to fill the screen.
+              heightFactor: 1,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(
+                      icon: Icons.home_filled,
+                      label: 'Home',
+                      index: 0,
+                      color: AppColors.primary,
+                    ),
+                    _buildNavItem(
+                      icon: Icons.local_fire_department,
+                      label: 'Streak',
+                      index: 1,
+                      color: AppColors.orange,
+                    ),
+                    _buildNavItem(
+                      icon: Icons.games,
+                      label: 'Games',
+                      index: 2,
+                      color: AppColors.purple,
+                    ),
+                    _buildNavItem(
+                      icon: Icons.person,
+                      label: 'Profile',
+                      index: 3,
+                      color: AppColors.green,
+                    ),
+                  ],
                 ),
-                _buildNavItem(
-                  icon: Icons.local_fire_department,
-                  label: 'Streak',
-                  index: 1,
-                  color: AppColors.orange,
-                ),
-                _buildNavItem(
-                  icon: Icons.games,
-                  label: 'Games',
-                  index: 2,
-                  color: AppColors.purple,
-                ),
-                _buildNavItem(
-                  icon: Icons.person,
-                  label: 'Profile',
-                  index: 3,
-                  color: AppColors.green,
-                ),
-              ],
+              ),
             ),
           ),
         ),

@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
-import '../widgets/quiz_mode_sheet.dart';
 import '../widgets/yak_mascot.dart';
 import 'quiz_screen.dart';
+import '../widgets/content_width.dart';
 
 /// Full-screen celebration shown after finishing a lesson. Replaces the old
 /// blocking completion AlertDialog.
@@ -18,7 +18,7 @@ class LessonCompleteScreen extends StatefulWidget {
   final double accuracy;
   final int streak;
   final String topicFilePath;
-  final QuizMode mode;
+  final String? title;
 
   const LessonCompleteScreen({
     super.key,
@@ -28,7 +28,7 @@ class LessonCompleteScreen extends StatefulWidget {
     required this.accuracy,
     required this.streak,
     required this.topicFilePath,
-    this.mode = QuizMode.words,
+    this.title,
   });
 
   @override
@@ -77,180 +77,183 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
 
     return Scaffold(
       backgroundColor: AppTokens.background(context),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: ConfettiWidget(
-                confettiController: _confettiLeft,
-                blastDirection: math.pi / 3,
-                emissionFrequency: 0.06,
-                numberOfParticles: 10,
-                maxBlastForce: 18,
-                minBlastForce: 6,
-                gravity: 0.3,
-                shouldLoop: false,
-                colors: confettiColors,
-              ),
-            ),
-            Align(
-              alignment: Alignment.topRight,
-              child: ConfettiWidget(
-                confettiController: _confettiRight,
-                blastDirection: math.pi - math.pi / 3,
-                emissionFrequency: 0.06,
-                numberOfParticles: 10,
-                maxBlastForce: 18,
-                minBlastForce: 6,
-                gravity: 0.3,
-                shouldLoop: false,
-                colors: confettiColors,
-              ),
-            ),
-            Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 32,
+      body: ContentWidth(
+        maxWidth: ContentWidth.reading,
+        child: SafeArea(
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: ConfettiWidget(
+                  confettiController: _confettiLeft,
+                  blastDirection: math.pi / 3,
+                  emissionFrequency: 0.06,
+                  numberOfParticles: 10,
+                  maxBlastForce: 18,
+                  minBlastForce: 6,
+                  gravity: 0.3,
+                  shouldLoop: false,
+                  colors: confettiColors,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 280,
-                          height: 280,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: RadialGradient(
-                              colors: [
-                                resultColor.withOpacity(isDark ? 0.16 : 0.08),
-                                resultColor.withOpacity(0),
-                              ],
+              ),
+              Align(
+                alignment: Alignment.topRight,
+                child: ConfettiWidget(
+                  confettiController: _confettiRight,
+                  blastDirection: math.pi - math.pi / 3,
+                  emissionFrequency: 0.06,
+                  numberOfParticles: 10,
+                  maxBlastForce: 18,
+                  minBlastForce: 6,
+                  gravity: 0.3,
+                  shouldLoop: false,
+                  colors: confettiColors,
+                ),
+              ),
+              Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 32,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: 280,
+                            height: 280,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  resultColor.withOpacity(isDark ? 0.16 : 0.08),
+                                  resultColor.withOpacity(0),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        // The yak is the celebration: it jumps for a pass
-                        // and cheers the learner on otherwise.
-                        YakMascot(
-                          mood: line.mood,
-                          size: 230,
-                          semanticLabel:
-                              _isSuccess
-                                  ? '${YakLines.name} the yak is cheering'
-                                  : '${YakLines.name} the yak is cheering you on',
+                          // The yak is the celebration: it jumps for a pass
+                          // and cheers the learner on otherwise.
+                          YakMascot(
+                            mood: line.mood,
+                            size: 230,
+                            semanticLabel:
+                                _isSuccess
+                                    ? '${YakLines.name} the yak is cheering'
+                                    : '${YakLines.name} the yak is cheering you on',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        line.title,
+                        style: AppTextStyles.display(context),
+                        textAlign: TextAlign.center,
+                      ),
+                      if (line.body != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          line.body!,
+                          style: AppTextStyles.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: AppTokens.ink(context),
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      line.title,
-                      style: AppTextStyles.display(context),
-                      textAlign: TextAlign.center,
-                    ),
-                    if (line.body != null) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
-                        line.body!,
+                        'You scored ${widget.score} of ${widget.totalQuestions} '
+                        '(${widget.accuracy.toStringAsFixed(0)}%)',
                         style: AppTextStyles.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: AppTokens.ink(context),
+                          fontSize: 14,
+                          color: AppTokens.inkSoft(context),
                         ),
                         textAlign: TextAlign.center,
                       ),
-                    ],
-                    const SizedBox(height: 8),
-                    Text(
-                      'You scored ${widget.score} of ${widget.totalQuestions} '
-                      '(${widget.accuracy.toStringAsFixed(0)}%)',
-                      style: AppTextStyles.poppins(
-                        fontSize: 14,
-                        color: AppTokens.inkSoft(context),
+                      const SizedBox(height: 24),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _buildStatChip(
+                            context,
+                            '⚡',
+                            '+${widget.xpEarned} XP',
+                            AppColors.gold,
+                          ),
+                          _buildStatChip(
+                            context,
+                            '🎯',
+                            '${widget.accuracy.toStringAsFixed(0)}%',
+                            AppColors.primary,
+                          ),
+                          _buildStatChip(
+                            context,
+                            '🔥',
+                            '${widget.streak} streak',
+                            AppColors.orange,
+                          ),
+                        ],
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        _buildStatChip(
-                          context,
-                          '⚡',
-                          '+${widget.xpEarned} XP',
-                          AppColors.gold,
-                        ),
-                        _buildStatChip(
-                          context,
-                          '🎯',
-                          '${widget.accuracy.toStringAsFixed(0)}%',
-                          AppColors.primary,
-                        ),
-                        _buildStatChip(
-                          context,
-                          '🔥',
-                          '${widget.streak} streak',
-                          AppColors.orange,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 36),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppRadius.button,
+                      const SizedBox(height: 36),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.button,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'Continue',
+                            style: AppTextStyles.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => QuizScreen(
+                                    topicFilePath: widget.topicFilePath,
+                                    title: widget.title,
+                                  ),
+                            ),
+                          );
+                        },
                         child: Text(
-                          'Continue',
+                          'Practice again',
                           style: AppTextStyles.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppTokens.inkSoft(context),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder:
-                                (context) => QuizScreen(
-                                  topicFilePath: widget.topicFilePath,
-                                  mode: widget.mode,
-                                ),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        'Practice again',
-                        style: AppTextStyles.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppTokens.inkSoft(context),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
