@@ -55,9 +55,11 @@ class _QuizScreenState extends State<QuizScreen>
     super.initState();
     questionsFuture = _loadQuestions();
     // Fetch every question's pronunciation up front so it plays instantly.
+    final voice =
+        Provider.of<ThemeService>(context, listen: false).pronunciationVoice;
     questionsFuture.then(
       (questions) => PronunciationPlayer.instance.prefetch(
-        questions.map((q) => q.audioUrl),
+        questions.map((q) => q.audioFor(voice)),
       ),
       onError: (Object _) {},
     );
@@ -191,15 +193,25 @@ class _QuizScreenState extends State<QuizScreen>
   /// Speaks a multiple_choice prompt once when its question appears (the
   /// options are English, so hearing the Tibetan gives nothing away). Follows
   /// the sound-effects switch; the speaker button always works.
+  /// The question's recording in the learner's chosen voice.
+  String? _audioOf(QuizQuestion question) => question.audioFor(
+    Provider.of<ThemeService>(context).pronunciationVoice,
+  );
+
   void _autoPlayPrompt(QuizQuestion question) {
     if (_autoPlayedIndex == currentQuestionIndex) return;
     _autoPlayedIndex = currentQuestionIndex;
-    final url = question.audioUrl;
-    if (url == null || question.type == 'picture_choice') return;
     final themeService = Provider.of<ThemeService>(context, listen: false);
+    final url = question.audioFor(themeService.pronunciationVoice);
+    if (url == null || question.type == 'picture_choice') return;
     if (!themeService.soundEffectsEnabled) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) PronunciationPlayer.instance.play(url);
+      if (mounted) {
+        PronunciationPlayer.instance.play(
+          url,
+          volume: themeService.pronunciationVolume,
+        );
+      }
     });
   }
 
@@ -226,8 +238,9 @@ class _QuizScreenState extends State<QuizScreen>
     // once answered (earlier would give the answer away). It follows the
     // chime, which is ducked so the word stays clear.
     final question = questions[currentQuestionIndex];
+    final revealUrl = question.audioFor(themeService.pronunciationVoice);
     final revealAudio =
-        question.type == 'picture_choice' && question.audioUrl != null;
+        question.type == 'picture_choice' && revealUrl != null;
     if (revealAudio && themeService.soundEffectsEnabled) {
       Future.delayed(const Duration(milliseconds: 600), () async {
         if (!mounted || currentQuestionIndex >= questions.length) return;
@@ -235,7 +248,10 @@ class _QuizScreenState extends State<QuizScreen>
         try {
           await _audioPlayer.setVolume(themeService.soundEffectsVolume * 0.3);
         } catch (_) {}
-        await PronunciationPlayer.instance.play(question.audioUrl);
+        await PronunciationPlayer.instance.play(
+          revealUrl,
+          volume: themeService.pronunciationVolume,
+        );
       });
     }
 
@@ -585,9 +601,9 @@ class _QuizScreenState extends State<QuizScreen>
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            if (showFeedback && question.audioUrl != null) ...[
+                            if (showFeedback && _audioOf(question) != null) ...[
                               const SizedBox(height: 8),
-                              SpeakerButton(url: question.audioUrl!),
+                              SpeakerButton(url: _audioOf(question)!),
                             ],
                           ] else ...[
                             Text(
@@ -598,9 +614,9 @@ class _QuizScreenState extends State<QuizScreen>
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            if (question.audioUrl != null) ...[
+                            if (_audioOf(question) != null) ...[
                               const SizedBox(height: 12),
-                              SpeakerButton(url: question.audioUrl!),
+                              SpeakerButton(url: _audioOf(question)!),
                             ],
                           ],
                         ],

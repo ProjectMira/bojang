@@ -239,6 +239,28 @@ void main() {
       expect(q.audioUrl, equals('https://example.com/w-1.mp3'));
     });
 
+    test('reads per-voice audio_urls and picks the chosen voice', () {
+      final q = QuizQuestion.fromApiExercise({
+        ...exercise('multiple_choice', audio: 'https://example.com/lhasa.mp3'),
+        'audio_urls': {
+          'lhasa_female': 'https://example.com/lhasa.mp3',
+          'kham_male': 'https://example.com/kham.mp3',
+          'broken': '  ',
+        },
+      });
+      expect(q.audioUrls.keys, unorderedEquals(['lhasa_female', 'kham_male']));
+      expect(q.audioFor('kham_male'), equals('https://example.com/kham.mp3'));
+      expect(q.audioFor('lhasa_female'), equals('https://example.com/lhasa.mp3'));
+    });
+
+    test('unknown voice falls back to the default audio_url', () {
+      final q = QuizQuestion.fromApiExercise(
+        exercise('multiple_choice', audio: 'https://example.com/lhasa.mp3'),
+      );
+      expect(q.audioUrls, isEmpty);
+      expect(q.audioFor('kham_male'), equals('https://example.com/lhasa.mp3'));
+    });
+
     test('missing or blank audio_url is null', () {
       expect(
         QuizQuestion.fromApiExercise(exercise('multiple_choice')).audioUrl,

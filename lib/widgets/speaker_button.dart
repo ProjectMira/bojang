@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../services/pronunciation_player.dart';
+import '../services/theme_service.dart';
 import '../theme/app_tokens.dart';
 
 /// Tap-to-hear button for a word's pronunciation recording. Shows a filled
@@ -27,7 +29,10 @@ class SpeakerButton extends StatelessWidget {
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
-              onTap: () => player.play(url),
+              onTap: () => player.play(
+                url,
+                volume: context.read<ThemeService>().pronunciationVolume,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(10),
                 child: Icon(

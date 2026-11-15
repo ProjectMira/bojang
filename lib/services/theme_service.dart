@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'pronunciation_player.dart';
+
 class ThemeService extends ChangeNotifier {
   static const String _themeKey = 'app_theme';
   static const String _languageKey = 'app_language';
@@ -10,6 +12,7 @@ class ThemeService extends ChangeNotifier {
   static const String _soundEffectsVolumeKey = 'sound_effects_volume';
   static const String _pronunciationVolumeKey = 'pronunciation_volume';
   static const String _audioQualityKey = 'audio_quality';
+  static const String _pronunciationVoiceKey = 'pronunciation_voice';
   static const String _dailyQuizTargetKey = 'daily_quiz_target';
   static const String _weeklyGoalKey = 'weekly_goal';
   static const String _quizModeKey = 'quiz_mode';
@@ -21,6 +24,7 @@ class ThemeService extends ChangeNotifier {
   double _soundEffectsVolume = 1.0;
   double _pronunciationVolume = 1.0;
   String _audioQuality = 'Standard';
+  String _pronunciationVoice = PronunciationVoices.defaultVoice;
   int _dailyQuizTarget = 1;
   int _weeklyGoal = 5;
   String _quizMode = 'words';
@@ -32,6 +36,7 @@ class ThemeService extends ChangeNotifier {
   double get soundEffectsVolume => _soundEffectsVolume;
   double get pronunciationVolume => _pronunciationVolume;
   String get audioQuality => _audioQuality;
+  String get pronunciationVoice => _pronunciationVoice;
   int get dailyQuizTarget => _dailyQuizTarget;
   int get weeklyGoal => _weeklyGoal;
   String get quizMode => _quizMode;
@@ -48,6 +53,10 @@ class ThemeService extends ChangeNotifier {
     _soundEffectsVolume = prefs.getDouble(_soundEffectsVolumeKey) ?? 1.0;
     _pronunciationVolume = prefs.getDouble(_pronunciationVolumeKey) ?? 1.0;
     _audioQuality = prefs.getString(_audioQualityKey) ?? 'Standard';
+    final voice = prefs.getString(_pronunciationVoiceKey);
+    _pronunciationVoice = PronunciationVoices.labels.containsKey(voice)
+        ? voice!
+        : PronunciationVoices.defaultVoice;
     _dailyQuizTarget = prefs.getInt(_dailyQuizTargetKey) ?? 1;
     _weeklyGoal = prefs.getInt(_weeklyGoalKey) ?? 5;
     _quizMode = prefs.getString(_quizModeKey) ?? 'words';
@@ -93,6 +102,14 @@ class ThemeService extends ChangeNotifier {
     _pronunciationVolume = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_pronunciationVolumeKey, value);
+    notifyListeners();
+  }
+
+  Future<void> setPronunciationVoice(String value) async {
+    if (!PronunciationVoices.labels.containsKey(value)) return;
+    _pronunciationVoice = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_pronunciationVoiceKey, value);
     notifyListeners();
   }
 

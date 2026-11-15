@@ -8,6 +8,19 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
+/// TTS voices the backend publishes per word (`audio_urls` keys).
+class PronunciationVoices {
+  PronunciationVoices._();
+
+  static const String defaultVoice = 'lhasa_female';
+
+  /// Voice id -> label shown in Settings, in display order.
+  static const Map<String, String> labels = {
+    'lhasa_female': 'Lhasa · female',
+    'kham_male': 'Kham · male',
+  };
+}
+
 /// Plays word pronunciation recordings (Monlam TTS MP3s served from the
 /// backend's `audio_url`).
 ///
@@ -100,7 +113,7 @@ class PronunciationPlayer {
 
   /// Plays [url]. Failures (offline, missing file) are logged and swallowed:
   /// audio is an aid, never a reason to break the quiz.
-  Future<void> play(String? url) async {
+  Future<void> play(String? url, {double volume = 1.0}) async {
     if (url == null || url.isEmpty) return;
     playingUrl.value = url;
     final file = await _localFile(url);
@@ -114,7 +127,7 @@ class PronunciationPlayer {
       final player = _audio;
       await player.stop();
       playingUrl.value = url; // stop() cleared it
-      await player.setVolume(1.0);
+      await player.setVolume(volume.clamp(0.0, 1.0));
       await player.play(DeviceFileSource(file.path, mimeType: 'audio/mpeg'));
     } catch (e) {
       debugPrint('Pronunciation playback failed for $url: $e');

@@ -16,6 +16,9 @@ class QuizQuestion {
   /// word has no recording.
   final String? audioUrl;
 
+  /// The same pronunciation per TTS voice (e.g. lhasa_female, kham_male).
+  final Map<String, String> audioUrls;
+
   QuizQuestion({
     required this.tibetanText,
     required this.options,
@@ -24,7 +27,11 @@ class QuizQuestion {
     this.imageUrl,
     this.englishGloss,
     this.audioUrl,
+    this.audioUrls = const {},
   });
+
+  /// Recording in [voice], falling back to the default voice.
+  String? audioFor(String voice) => audioUrls[voice] ?? audioUrl;
 
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
     return QuizQuestion(
@@ -91,7 +98,18 @@ class QuizQuestion {
       imageUrl: isPicture ? json['image_url']?.toString() : null,
       englishGloss: isPicture ? json['english_word']?.toString() : null,
       audioUrl: _nonEmpty(json['audio_url']),
+      audioUrls: _voiceUrls(json['audio_urls']),
     );
+  }
+
+  static Map<String, String> _voiceUrls(Object? value) {
+    if (value is! Map) return const {};
+    final urls = <String, String>{};
+    value.forEach((voice, url) {
+      final text = _nonEmpty(url);
+      if (voice is String && text != null) urls[voice] = text;
+    });
+    return urls;
   }
 
   static String? _nonEmpty(Object? value) {

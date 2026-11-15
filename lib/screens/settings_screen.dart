@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/theme_service.dart';
+import '../services/pronunciation_player.dart';
 import '../services/progress_service.dart';
 import '../services/api_service.dart';
 import '../services/google_auth_service.dart';
@@ -383,21 +384,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text('Audio Quality'),
+                  const Text('Pronunciation Voice'),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: themeService.audioQuality,
+                    value: themeService.pronunciationVoice,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 'Standard', child: Text('Standard (Recommended)')),
-                      DropdownMenuItem(value: 'High', child: Text('High Quality')),
+                    items: [
+                      for (final entry in PronunciationVoices.labels.entries)
+                        DropdownMenuItem(value: entry.key, child: Text(entry.value)),
                     ],
                     onChanged: (val) {
                       if (val != null) {
-                        themeService.setAudioQuality(val);
+                        themeService.setPronunciationVoice(val);
                       }
                     },
                   ),
