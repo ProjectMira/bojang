@@ -418,6 +418,7 @@ class _QuizScreenState extends State<QuizScreen>
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
+        systemOverlayStyle: AppTokens.statusBar(context),
         foregroundColor: AppTokens.ink(context),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

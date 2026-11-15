@@ -211,6 +211,7 @@ class _GameHostState extends State<GameHost> {
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.transparent,
+        systemOverlayStyle: AppTokens.statusBar(context),
         foregroundColor: AppTokens.ink(context),
       ),
       body: ContentWidth(

@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AppColors {
   AppColors._();
@@ -46,6 +47,12 @@ class AppTokens {
 
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
+
+  /// Status bar icon style for a screen whose header shows the page
+  /// background (a transparent app bar). Without it the app-wide blue
+  /// `appBarTheme` asks for white icons, which vanish on a light page.
+  static SystemUiOverlayStyle statusBar(BuildContext context) =>
+      isDark(context) ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark;
 
   static Color ink(BuildContext context) =>
       isDark(context) ? AppColors.inkDark : AppColors.inkLight;

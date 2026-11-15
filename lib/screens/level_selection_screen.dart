@@ -91,6 +91,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
             centerTitle: true,
             elevation: 0,
             backgroundColor: Colors.transparent,
+            systemOverlayStyle: AppTokens.statusBar(context),
             foregroundColor: AppTokens.ink(context),
           ),
           body: ContentWidth(

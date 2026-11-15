@@ -204,6 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             backgroundColor: Colors.transparent,
+            systemOverlayStyle: AppTokens.statusBar(context),
             foregroundColor: AppTokens.ink(context),
             elevation: 0,
             actions: [

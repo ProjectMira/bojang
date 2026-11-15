@@ -118,6 +118,7 @@ class ExtraGamesScreen extends StatelessWidget {
           ),
         ),
         backgroundColor: Colors.transparent,
+        systemOverlayStyle: AppTokens.statusBar(context),
         foregroundColor: AppTokens.ink(context),
         elevation: 0,
         scrolledUnderElevation: 0,
