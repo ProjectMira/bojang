@@ -59,6 +59,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _refreshServerProgress() async {
     if (!ApiService().isAuthenticated || !mounted) return;
+    // Send any day that couldn't reach the server last time first, so the
+    // stats below already include it.
+    await Provider.of<ProgressService>(
+      context,
+      listen: false,
+    ).flushPendingActivity();
+    if (!mounted) return;
     final stats = await ApiService().getUserProgress();
     if (stats != null && mounted) {
       await Provider.of<ProgressService>(

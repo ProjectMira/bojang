@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'analytics.dart';
+import 'api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../widgets/achievement_dialog.dart';
@@ -43,9 +44,18 @@ class ProgressService extends ChangeNotifier {
   int? get rank => _rank;
   int get completedLevelsCount => _completedLevelsCount;
 
-  ProgressService() {
+  ProgressService({
+    bool Function()? isSignedIn,
+    Future<Map<String, dynamic>?> Function(String localDate)? recordActivity,
+  }) : _isSignedIn = isSignedIn ?? (() => ApiService().isAuthenticated),
+       _recordActivity = recordActivity ?? ApiService().recordActivity {
     _loadProgressData();
   }
+
+  // Server hooks; injectable so the activity sync can be unit-tested.
+  final bool Function() _isSignedIn;
+  final Future<Map<String, dynamic>?> Function(String localDate)
+  _recordActivity;
 
   Future<void> _loadProgressData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -104,13 +114,15 @@ class ProgressService extends ChangeNotifier {
       final leagueInfo = stats['league'] as Map<String, dynamic>?;
       final levelsInfo = stats['levels'] as Map<String, dynamic>?;
       _xp = xpInfo?['total'] as int? ?? _xp;
-      _currentStreak = streakInfo?['current'] as int? ?? _currentStreak;
+      final serverStreak = streakInfo?['current'] as int?;
+      if (serverStreak != null) _currentStreak = _mergedStreak(serverStreak);
       _league = (leagueInfo?['current'] ?? _league).toString();
       _completedLevelsCount =
           levelsInfo?['count'] as int? ?? _completedLevelsCount;
     } else {
       _xp = data['xp'] as int? ?? _xp;
-      _currentStreak = data['streak'] as int? ?? _currentStreak;
+      final serverStreak = data['streak'] as int?;
+      if (serverStreak != null) _currentStreak = _mergedStreak(serverStreak);
       _league = (data['league'] ?? _league).toString();
       _rank = data['rank'] as int?;
       _completedLevelsCount =
@@ -168,7 +180,7 @@ class ProgressService extends ChangeNotifier {
     final todayKey = DateTime(today.year, today.month, today.day);
 
     if (_lastPlayDate == null || !_isSameDay(_lastPlayDate!, today)) {
-      if (_lastPlayDate != null && _isConsecutiveDay(_lastPlayDate!, today)) {
+      if (_lastPlayDate != null && isConsecutiveDay(_lastPlayDate!, today)) {
         _currentStreak++;
       } else if (_lastPlayDate == null || !_isSameDay(_lastPlayDate!, today)) {
         _currentStreak = 1;
@@ -206,6 +218,9 @@ class ProgressService extends ChangeNotifier {
     // Save all data
     await _saveProgressData(prefs);
     notifyListeners();
+
+    // Count the day on the server too (fire-and-forget; retried if it fails).
+    _reportActivity(localDateString(today));
 
     // Show achievement dialogs if context is provided
     if (context != null && newAchievements.isNotEmpty) {
@@ -329,6 +344,8 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('league');
     await prefs.remove('rank');
     await prefs.remove('completed_levels_count');
+    // Unsent streak days belong to this account; never post them for the next.
+    await prefs.remove(_pendingActivityKey);
     notifyListeners();
   }
 
@@ -346,9 +363,114 @@ class ProgressService extends ChangeNotifier {
         date1.day == date2.day;
   }
 
-  bool _isConsecutiveDay(DateTime lastDate, DateTime currentDate) {
-    final difference = currentDate.difference(lastDate).inDays;
-    return difference == 1;
+  /// True when [currentDate] is the calendar day right after [lastDate].
+  ///
+  /// Compares calendar dates, not elapsed time: 23:00 then 08:00 the next
+  /// morning is consecutive even though only 9 hours passed. The dates are
+  /// rebuilt in UTC so a 23- or 25-hour daylight-saving day can't skew it.
+  static bool isConsecutiveDay(DateTime lastDate, DateTime currentDate) {
+    final last = DateTime.utc(lastDate.year, lastDate.month, lastDate.day);
+    final current = DateTime.utc(
+      currentDate.year,
+      currentDate.month,
+      currentDate.day,
+    );
+    return current.difference(last).inDays == 1;
+  }
+
+  /// The device's local calendar day as `YYYY-MM-DD` for the API.
+  ///
+  /// Built by hand rather than with a locale-aware formatter, so a Tibetan
+  /// (or any non-Latin-digit) locale can never send digits the server rejects.
+  static String localDateString(DateTime date) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${date.year.toString().padLeft(4, '0')}-${two(date.month)}-${two(date.day)}';
+  }
+
+  static const _pendingActivityKey = 'pending_activity_dates';
+
+  // Report and flush calls run one at a time, so the pending list is read
+  // and written in a fixed order even when a game and Home overlap.
+  Future<void> _activityQueue = Future.value();
+
+  Future<void> _enqueueActivity(Future<void> Function() job) {
+    final next = _activityQueue.then((_) => job()).catchError((
+      Object e,
+      StackTrace st,
+    ) {
+      debugPrint('Activity sync error: $e');
+    });
+    _activityQueue = next;
+    return next;
+  }
+
+  /// Reports a day of activity so the server streak counts it. Lessons,
+  /// local-topic lessons, games and the speed quiz all come through
+  /// [updateQuizResults], so this is the single hook. Days that can't be sent
+  /// stay pending and go out (oldest first) on the next report or
+  /// [flushPendingActivity].
+  Future<void> _reportActivity(String localDate) => _enqueueActivity(() async {
+    final prefs = await SharedPreferences.getInstance();
+    await _sendPending(prefs, [..._recentPending(prefs), localDate]);
+  });
+
+  /// Retries days that couldn't be sent before (offline, signed out).
+  Future<void> flushPendingActivity() => _enqueueActivity(() async {
+    final prefs = await SharedPreferences.getInstance();
+    await _sendPending(prefs, _recentPending(prefs));
+  });
+
+  /// Stored pending days still worth sending: only today and yesterday. The
+  /// server treats anything older as "today", which would be wrong.
+  List<String> _recentPending(SharedPreferences prefs) {
+    final now = DateTime.now();
+    final keep = {
+      localDateString(now),
+      localDateString(DateTime(now.year, now.month, now.day - 1)),
+    };
+    return (prefs.getStringList(_pendingActivityKey) ?? const <String>[])
+        .where(keep.contains)
+        .toList();
+  }
+
+  /// Sends [dates] oldest first, stopping at the first failure, so the server
+  /// sees day N before day N+1. Only acknowledged days leave the list.
+  Future<void> _sendPending(
+    SharedPreferences prefs,
+    Iterable<String> dates,
+  ) async {
+    // YYYY-MM-DD sorts chronologically as text.
+    final remaining = dates.toSet().toList()..sort();
+    while (remaining.isNotEmpty && await _sendOne(prefs, remaining.first)) {
+      remaining.removeAt(0);
+    }
+    if (remaining.isEmpty) {
+      await prefs.remove(_pendingActivityKey);
+    } else {
+      await prefs.setStringList(_pendingActivityKey, remaining);
+    }
+  }
+
+  Future<bool> _sendOne(SharedPreferences prefs, String localDate) async {
+    if (!_isSignedIn()) return false;
+    final response = await _recordActivity(localDate);
+    if (response == null) return false;
+    final serverStreak = response['streak'];
+    if (serverStreak is int) {
+      _currentStreak = _mergedStreak(serverStreak);
+      await prefs.setInt('current_streak', _currentStreak);
+      notifyListeners();
+    }
+    return true;
+  }
+
+  /// The server is the source of truth, except that a day already played
+  /// on this device is never taken away while the server catches up.
+  int _mergedStreak(int serverStreak) {
+    final playedToday =
+        _lastPlayDate != null && _isSameDay(_lastPlayDate!, DateTime.now());
+    if (playedToday && _currentStreak > serverStreak) return _currentStreak;
+    return serverStreak;
   }
 
   String getAchievementTitle(String achievementId) {

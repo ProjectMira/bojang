@@ -463,6 +463,13 @@ class _QuizScreenState extends State<QuizScreen>
         !ApiService().isAuthenticated) {
       return;
     }
+    // Let queued activity (e.g. an offline "yesterday") reach the server
+    // first; otherwise this lesson can land first, see a gap and reset the
+    // streak before yesterday is recorded.
+    await Provider.of<ProgressService>(
+      context,
+      listen: false,
+    ).flushPendingActivity();
     final xpEarned = score * 10;
     final success = await ApiService().submitProgressCompletion({
       'session_id': _remoteSessionId,
@@ -471,6 +478,7 @@ class _QuizScreenState extends State<QuizScreen>
       'correct_answers': score,
       'total_questions': totalQuestions,
       'time_taken_seconds': 0,
+      'local_date': ProgressService.localDateString(DateTime.now()),
     });
     Analytics.track('lesson_progress_submitted', {
       'success': success,

@@ -337,6 +337,17 @@ class ApiService {
     }
   }
 
+  /// Marks [localDate] (YYYY-MM-DD) active for the streak, with no XP.
+  /// Returns `{streak, streak_extended}`, or null on failure.
+  Future<Map<String, dynamic>?> recordActivity(String localDate) async {
+    try {
+      return await _post('progress/activity', {'local_date': localDate});
+    } catch (e) {
+      print('Record activity error: $e');
+      return null;
+    }
+  }
+
   Future<bool> submitGameScore(Map<String, dynamic> scoreData) async {
     try {
       return false;
