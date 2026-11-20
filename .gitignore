@@ -43,3 +43,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Secrets and stale backends (never commit these; see APP_UPDATE_PLAN.md Phase 0 item 4)
+/backend/
+.env
+.env.*
+!.env.example
+token.txt
+*.pem
+*.p8
+*.p12
+*.jks
+*.keystore
+key.properties
