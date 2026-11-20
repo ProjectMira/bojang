@@ -72,6 +72,8 @@ dependencies:
   firebase_app_check: ^0.3.2+10
   firebase_crashlytics: ^4.3.10
   firebase_performance: ^0.10.1+10
+  geolocator: ^14.0.2
+  geocoding: ^5.0.1
 
 dev_dependencies:
   flutter_test:

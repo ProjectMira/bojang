@@ -138,6 +138,10 @@ deletes its rows.
 | `push_token_unavailable` | push service | `reason` |
 | `push_received` | push service (app open) | `campaign`, `screen`, `foreground` |
 | `push_opened` | push service | `campaign`, `screen` |
+| `location_prompt_shown` / `location_prompt_answered` | lesson complete (first lesson, once) | `source`, `share` |
+| `location_sharing_changed` | location service | `enabled`, `permission`, `source` (settings/lesson_complete) |
+| `location_shared` | location service (at most daily) | `approx_lat`, `approx_lon` (rounded to 0.1°, ~10 km), `accuracy_km`, `country`, `country_code`, `region`, `city`; also set as `location_*` person properties |
+| `location_unavailable` | location service | `reason` |
 | `remote_config_activated` | remote settings | every `exp_*` parameter and its value |
 | `announcement_viewed` / `announcement_tapped` / `announcement_dismissed` | home banner | `announcement`, `url` |
 | `auth_token_refresh_failed` | api service | `error` |

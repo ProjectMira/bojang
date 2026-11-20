@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import '../services/analytics.dart';
+import '../services/location_service.dart';
 import '../theme/app_tokens.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
@@ -55,6 +56,11 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
       _confettiLeft.play();
       _confettiRight.play();
     }
+    // After the first finished lesson, ask once to share approximate
+    // location (once the celebration has had a moment).
+    Future<void>.delayed(const Duration(milliseconds: 1800), () {
+      if (mounted) LocationService.instance.maybePromptAfterLesson(context);
+    });
   }
 
   @override

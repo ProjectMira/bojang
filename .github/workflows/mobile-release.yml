@@ -280,6 +280,7 @@ jobs:
           test/widgets/update_gate_test.dart
           test/services/event_tracker_test.dart
           test/services/firebase_features_test.dart
+          test/services/location_service_test.dart
           test/widgets/interaction_capture_test.dart
 
   android:

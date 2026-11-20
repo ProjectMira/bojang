@@ -51,6 +51,10 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Bojang uses your approximate location (about 10 km) to see which regions learners are in, so we can plan lessons, dialects and voices for them. Bojang works the same if you say no.</string>
+	<key>NSLocationDefaultAccuracyReduced</key>
+	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>GIDClientID</key>

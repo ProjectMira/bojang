@@ -8,6 +8,7 @@ import 'package:posthog_flutter/posthog_flutter.dart';
 import 'services/analytics.dart';
 import 'services/app_check_service.dart';
 import 'services/crash_reporting.dart';
+import 'services/location_service.dart';
 import 'services/push_service.dart';
 import 'services/remote_settings.dart';
 import 'services/app_config.dart';
@@ -64,6 +65,8 @@ void main() async {
           .catchError((Object e) => debugPrint('Notification setup failed: $e'))
           .whenComplete(() => PushService.instance.init()),
     );
+    // Approximate location, if the learner turned it on (at most daily).
+    unawaited(LocationService.instance.refreshIfAllowed());
   }
 }
 

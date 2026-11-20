@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/analytics.dart';
+import '../services/location_service.dart';
 import '../services/theme_service.dart';
 import '../services/pronunciation_player.dart';
 import '../services/progress_service.dart';
@@ -24,6 +25,16 @@ class SettingsScreen extends StatefulWidget {
 const String privacyPolicyUrl = 'https://www.bojang.in/privacy-policy.html';
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  bool _locationSharing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    LocationService.instance.sharingEnabled.then((on) {
+      if (mounted) setState(() => _locationSharing = on);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<ThemeService, ProgressService>(
@@ -208,6 +219,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       }
                       if (mounted) setState(() {});
                     },
+                    activeColor: Theme.of(context).primaryColor,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                _buildSettingsCard(
+                  title: 'Share approximate location',
+                  subtitle: Analytics.optedOut
+                      ? 'Needs usage analytics to be on'
+                      : 'About 10 km, never your exact position',
+                  icon: Icons.place_outlined,
+                  trailing: Switch.adaptive(
+                    value: _locationSharing && !Analytics.optedOut,
+                    onChanged: Analytics.optedOut
+                        ? null
+                        : (on) async {
+                            final result = await LocationService.instance
+                                .setSharing(on, source: 'settings');
+                            if (!mounted) return;
+                            setState(() => _locationSharing = result);
+                            if (on && !result) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Location is off for Bojang. You can allow it in your device Settings.',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
                     activeColor: Theme.of(context).primaryColor,
                   ),
                 ),
