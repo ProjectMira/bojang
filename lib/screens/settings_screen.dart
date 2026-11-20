@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/analytics.dart';
 import '../services/theme_service.dart';
 import '../services/pronunciation_player.dart';
@@ -18,6 +19,9 @@ class SettingsScreen extends StatefulWidget {
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
+
+/// The published privacy policy (also the App Store Connect privacy URL).
+const String privacyPolicyUrl = 'https://www.bojang.in/privacy-policy.html';
 
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
@@ -871,6 +875,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             actions: [
+              TextButton(
+                onPressed: () {
+                  Analytics.track('privacy_policy_link_opened', {'source': 'settings'});
+                  launchUrl(
+                    Uri.parse(privacyPolicyUrl),
+                    mode: LaunchMode.externalApplication,
+                  ).catchError((Object _) => false);
+                },
+                child: const Text('Full policy'),
+              ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('Close'),

@@ -1,3 +1,5 @@
+> **Outdated copy (July 2026).** The current policy is published at https://www.bojang.in/privacy-policy.html (source: the Bojang-website repo).
+
 # Privacy Policy for Bojang - Learn Tibetan Language
 
 **Effective Date:** [Insert Date]
