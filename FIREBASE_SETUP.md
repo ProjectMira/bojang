@@ -74,19 +74,23 @@ Console:
 - Backend:
   - `POST /admin/notifications/send` (admin token): `{"title", "body", "uids": [...]}` or
     `"all": true`, optional `"data": {"screen": "home", "campaign": "name"}` and `"dry_run"`.
-  - `POST /jobs/streak-reminders`: the streak-at-risk push, meant to run hourly. It needs the
-    `CRON_SECRET` env on Cloud Run and the same value in the `X-Cron-Secret` header.
-    `STREAK_REMINDER_HOUR` (default 20) is the learner's local hour.
+  - `POST /jobs/streak-reminders`: the streak-at-risk push, run hourly. It checks the
+    `X-Cron-Secret` header against `CRON_SECRET`. `STREAK_REMINDER_HOUR` (default 20) is the
+    learner's local hour.
+  - Set up on 2026-11-21: secret `CRON_SECRET` in Secret Manager (project `bojang-backend`,
+    readable by `1042932678350-compute@developer.gserviceaccount.com`), passed to the function by
+    `SecretParam("CRON_SECRET")` in `functions/main.py`. Do not set it on the Cloud Run service
+    by hand: `firebase deploy` replaces the service's environment. Cloud Scheduler job
+    `bojang-streak-reminders` (us-central1, `0 * * * *` UTC) posts to the route with the header.
+    To rotate: add a new secret version, redeploy, then
+    `gcloud scheduler jobs update http bojang-streak-reminders --location=us-central1 --update-headers=X-Cron-Secret=<new>`.
 
 Console:
 1. Apple Developer > Keys > create a key with **Apple Push Notifications service (APNs)**,
    download the `.p8` (the DeviceCheck key above can be the same key).
 2. Firebase > Project settings > Cloud Messaging > Apple app configuration > APNs
    authentication key > upload the `.p8` with its Key ID and Team ID `W66Z24ZPWQ`.
-3. Cloud Run: set `CRON_SECRET` to a long random value.
-4. Cloud Scheduler: an hourly job (`0 * * * *`) that sends `POST` to
-   `https://bojang-backend-lbziapssxq-uc.a.run.app/jobs/streak-reminders` with the header
-   `X-Cron-Secret: <the same value>`.
+3. Done: `CRON_SECRET` and the hourly Cloud Scheduler job (see above).
 
 ## App Store privacy label
 
