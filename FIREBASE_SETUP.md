@@ -103,6 +103,12 @@ Other Diagnostic Data) does not list. Add these, as App Functionality + Analytic
 - **Device ID** (Firebase installation IDs used by Crashlytics, Performance, Remote Config and
   FCM tokens), not used for tracking.
 
+## Privacy policy
+
+Published at https://www.bojang.in/privacy-policy.html (repo `Bojang-website`, deployed by Render
+on push to main). App Store Connect's privacy policy URL points there (changed 2026-11-21; it goes
+live with the next app version). Update the policy whenever the app starts collecting something new.
+
 ## Android (not set up)
 
 Android has no Firebase app config. To turn these services on there: add an Android app with
