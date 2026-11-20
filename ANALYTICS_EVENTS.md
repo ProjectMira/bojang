@@ -1,9 +1,19 @@
-# Bojang analytics events (PostHog)
+# Bojang analytics events
 
-PostHog project: "Default project" (id 754455, US Cloud). Code: `lib/services/analytics.dart`.
+Events go to two places:
+
+- **PostHog** (project "Bojang", id 754455, US Cloud): named events, `$screen`, person profiles,
+  session replay and error tracking. Code: `lib/services/analytics.dart`.
+- **Bojang backend**, table `app_events` (`POST /analytics/events`): every named event below, plus
+  every tap, long press, swipe, scroll, screen dwell time and app session, with device context.
+  Code: `lib/services/event_tracker.dart` and `lib/widgets/interaction_capture.dart`. Taps and other
+  gesture events go only to the backend, not to PostHog (event volume).
 
 - Release builds send events. Debug builds and tests send nothing unless they are run with
-  `--dart-define=POSTHOG_IN_DEBUG=true`.
+  `--dart-define=POSTHOG_IN_DEBUG=true`. Add `--dart-define=LOG_EVENTS=true` to print each backend
+  event in a debug run, and `--dart-define=POSTHOG_KEY=` to keep PostHog off.
+- Settings > Privacy > "Share usage analytics" turns both off (`Analytics.setOptOut`). While it is
+  off nothing is sent, and the unsent backend queue is deleted.
 - Calls are fire-and-forget (`Analytics.track(name, {...})`). They never throw, and null property
   values are dropped.
 - Naming: `object_action`, snake_case. Properties are snake_case as well.
@@ -19,6 +29,40 @@ PostHog project: "Default project" (id 754455, US Cloud). Code: `lib/services/an
   crashes (error tracking).
 - **Session replay**: screen recordings of sessions, with text visible. The auth form fields are
   masked with `PostHogMaskWidget`. Replay must also be switched on in the PostHog project settings.
+
+## Backend-only interaction events
+
+Every backend event has `event`, `ts` (UTC), `session_id`, `seq` (order within the session) and
+`screen` (the screen on display). Each upload batch carries the context stored on every row:
+`app_version`, `app_build`, `platform`, `os_version`, `device_model` (for example `iPhone17,1`),
+`locale` and `timezone` (abbreviation and UTC offset).
+
+| Event | Properties |
+|---|---|
+| `tap` / `long_press` | `widget` (control type, e.g. ElevatedButton, ListTile), `target` (visible label: text, tooltip or semantics label, max 80 chars, or `icon:<codepoint>`), `kind` (button/list_item/switch/checkbox/radio/slider/text_field/navigation/back), `key` (ValueKey), `value` (toggle state before the tap), `dead` (nothing tappable there), `masked` (inside `PostHogMaskWidget`, label left out), `x`, `y` (0–1 of the screen), `duration_ms` |
+| `rage_tap` | `taps` (3+ within 1 s and 40 px), `target` |
+| `swipe` | `direction` (left/right/up/down), `distance`, `duration_ms`, `x`, `y`, `end_x`, `end_y` |
+| `multi_touch` | (pinch or other two-finger gesture) |
+| `scroll` | `axis`, `offset`, `max_offset`, `depth` (0–1), `viewport`, `nested`, `page` (PageView) |
+| `$screen` | `previous_screen`, plus the properties passed to `Analytics.screen` |
+| `screen_exit` | `duration_ms` (time on that screen in the foreground), `next_screen` |
+| `app_session_started` | `cold_start`, `screen_w`, `screen_h`, `pixel_ratio`, `text_scale`, `system_dark_mode` |
+| `app_session_ended` | `duration_s` (foreground), `wall_s`, `taps`, `screens`, `reason` (timeout/killed_in_background/app_terminated) |
+| `app_backgrounded` | `foreground_s`, `session_foreground_s` |
+| `app_foregrounded` | `background_s` (a session continues if the app is back within 5 minutes) |
+| `network_status` | `network` (wifi/mobile/none/...) at session start |
+| `identify` | `auth_provider`, `is_anonymous` (no email or name) |
+| `person_properties` | the same properties as PostHog person properties |
+| `$exception` | `error_type`, `message` (200 chars), `where` |
+
+Screen names come from `RouteSettings.name` (`screenRoute()`), `Analytics.screen()` for tabs and
+dialogs, `root` for the first route, `<screen>:dialog` / `<screen>:popup` for unnamed dialogs and
+sheets, and `unnamed_page` for unnamed routes (give those a name).
+
+Admin views (Firebase admin token): `GET /admin/analytics/summary?days=7` (totals, top events,
+screens and tap targets, platforms, versions) and `GET /admin/analytics/users/{uid}/events`
+(one learner's timeline, newest first, `before`/`event`/`session_id` filters). Deleting an account
+deletes its rows.
 
 ## Identity
 
@@ -95,5 +139,9 @@ PostHog project: "Default project" (id 754455, US Cloud). Code: `lib/services/an
 
 ## Not tracked on purpose
 
-- Passwords and typed text.
+- Passwords and typed text (text field taps report the field label only).
+- Labels inside `PostHogMaskWidget` (the sign-in form).
 - Full answer option lists.
+- Anything outside the app: contacts, photos, location, clipboard, other apps, the advertising ID
+  (IDFA/AAID) or device fingerprints. Collecting these would need new permission prompts, App
+  Tracking Transparency and new App Store privacy label entries.

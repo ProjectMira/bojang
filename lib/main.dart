@@ -12,6 +12,7 @@ import 'services/theme_service.dart';
 import 'services/progress_service.dart';
 import 'services/google_auth_service.dart';
 import 'services/api_service.dart';
+import 'widgets/interaction_capture.dart';
 import 'widgets/update_gate.dart';
 
 void main() async {
@@ -74,10 +75,12 @@ class MyApp extends StatelessWidget {
                 themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             home: const SplashScreen(),
             // Above the navigator, so an out-of-date install cannot get
-            // past the update notice by any route.
-            builder: (context, child) =>
-                UpdateGate(child: child ?? const SizedBox.shrink()),
-            navigatorObservers: [Analytics.observer],
+            // past the update notice by any route, and every tap, swipe and
+            // scroll on any route, dialog or sheet is recorded.
+            builder: (context, child) => InteractionCapture(
+              child: UpdateGate(child: child ?? const SizedBox.shrink()),
+            ),
+            navigatorObservers: [Analytics.observer, Analytics.screenObserver],
             debugShowCheckedModeBanner: false,
           );
         },

@@ -182,6 +182,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 32),
                 ],
 
+                // Privacy Section
+                _buildSectionHeader('Privacy'),
+                const SizedBox(height: 16),
+
+                _buildSettingsCard(
+                  title: 'Share usage analytics',
+                  subtitle: Analytics.optedOut
+                      ? 'Off: nothing about how you use Bojang is sent'
+                      : 'Taps, screens and lessons help us improve Bojang',
+                  icon: Icons.insights,
+                  trailing: Switch.adaptive(
+                    value: !Analytics.optedOut,
+                    onChanged: (share) async {
+                      await Analytics.setOptOut(!share);
+                      if (share) {
+                        Analytics.track('setting_changed', {
+                          'setting': 'usage_analytics',
+                          'value': true,
+                        });
+                      }
+                      if (mounted) setState(() {});
+                    },
+                    activeColor: Theme.of(context).primaryColor,
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
                 // About Section
                 _buildSectionHeader('About'),
                 const SizedBox(height: 16),
@@ -832,7 +860,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Privacy Policy'),
             content: const SingleChildScrollView(
               child: Text(
-                'Bojang stores local lesson progress on your device and syncs account progress when you sign in. You can export your synced data, restore purchases, and request account deletion from your profile settings when authenticated.',
+                'Bojang stores your lesson progress on your device and, when you have an account, on our servers so it syncs.\n\n'
+                'Usage analytics: to improve the app we record how it is used: '
+                'the screens you open and for how long, the buttons and answers you tap, swipes and scrolls, '
+                'lessons and games you play and your scores, settings you change, crashes, and screen recordings of app sessions. '
+                'Each event carries your account ID, app version, device model, operating system, language and time zone. '
+                'This goes to our servers and to PostHog, our analytics provider. We never read what you type in text fields, '
+                'and we do not collect your contacts, photos, location, or advertising ID, and do not sell your data or use it to track you across other apps.\n\n'
+                'You can turn usage analytics off in Settings > Privacy. Deleting your account deletes your progress and your analytics events from our servers.',
               ),
             ),
             actions: [

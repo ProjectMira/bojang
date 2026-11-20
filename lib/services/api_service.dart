@@ -589,6 +589,26 @@ class ApiService {
     }
   }
 
+  /// Uploads one batch of in-app analytics events (EventTracker). Returns
+  /// the HTTP status, or null when offline or without a session. Never
+  /// reports api_error: that would queue more events about the failure.
+  Future<int?> sendAnalyticsEvents(Map<String, Object?> body) async {
+    await _refreshAuthToken();
+    if (_authToken == null) return null;
+    try {
+      final response = await _client
+          .post(
+            _uri('/analytics/events'),
+            headers: _headers,
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 15));
+      return response.statusCode;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Uri _uri(String endpoint, [Map<String, String>? queryParameters]) {
     final cleanBase =
         baseUrl.endsWith('/')

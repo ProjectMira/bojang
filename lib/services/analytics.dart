@@ -1,13 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Product analytics, backed by PostHog (project "Default project", US cloud).
+import 'event_tracker.dart';
+
+/// Product analytics, sent to two places:
+/// - PostHog (project "Bojang", US cloud): named events, screens, person
+///   profiles, session replay and error tracking.
+/// - The Bojang backend (`app_events` table) through [EventTracker]: every
+///   named event plus every tap, swipe, scroll, screen dwell time and app
+///   session, with device context.
 ///
 /// Every call is fire-and-forget and never throws: analytics must not break a
 /// lesson. Event names are snake_case `object_action`; the full catalog with
-/// properties lives in ANALYTICS_EVENTS.md next to pubspec.yaml.
+/// properties lives in ANALYTICS_EVENTS.md next to pubspec.yaml. Learners can
+/// switch both off in Settings ([setOptOut]).
 class Analytics {
   Analytics._();
 
@@ -26,8 +37,23 @@ class Analytics {
   /// local development does not pollute the production numbers.
   static const bool _sendInDebug = bool.fromEnvironment('POSTHOG_IN_DEBUG');
 
+  static const String _optOutKey = 'analytics_opt_out';
+
   static bool _enabled = false;
   static bool get enabled => _enabled;
+
+  static bool _posthogReady = false;
+  static bool _optedOut = false;
+
+  /// True when the learner switched "Share usage analytics" off.
+  static bool get optedOut => _optedOut;
+
+  static bool get _buildSends => !kDebugMode || _sendInDebug;
+
+  /// Tracks the screen on display for the backend events (route pushes,
+  /// pops, dialogs). Add next to [observer] in navigatorObservers.
+  static NavigatorObserver get screenObserver =>
+      EventTracker.instance.routeObserver;
 
   /// Route observer that turns every pushed page into a `$screen` event.
   /// Routes without a name are labelled by their widget type (see
@@ -37,8 +63,30 @@ class Analytics {
   );
 
   static Future<void> init() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _optedOut = prefs.getBool(_optOutKey) ?? false;
+    } catch (_) {}
+    if (_optedOut || !_buildSends) return;
+    await _startPosthog();
+    await _startTracker();
+  }
+
+  static Future<void> _startTracker() async {
+    final tracker = EventTracker.instance;
+    tracker.onSessionStarted = (id) => register('bojang_session_id', id);
+    await tracker.start();
+  }
+
+  static Future<void> _startPosthog() async {
     if (_projectToken.isEmpty) return;
-    if (kDebugMode && !_sendInDebug) return;
+    if (_posthogReady) {
+      await Posthog().optIn().catchError(
+        (Object e) => debugPrint('Analytics opt-in failed: $e'),
+      );
+      _enabled = true;
+      return;
+    }
     try {
       final config = PostHogConfig(_projectToken)
         ..host = _host
@@ -53,6 +101,9 @@ class Analytics {
         ..errorTrackingConfig.captureIsolateErrors = true
         ..debug = kDebugMode;
       await Posthog().setup(config);
+      // An earlier opt-out is stored by the native SDK too.
+      if (await Posthog().isOptOut()) await Posthog().optIn();
+      _posthogReady = true;
       _enabled = true;
 
       final info = await PackageInfo.fromPlatform();
@@ -67,8 +118,34 @@ class Analytics {
     }
   }
 
+  /// Turns all analytics off (PostHog and backend events) or back on, and
+  /// remembers the choice. Nothing is sent while it is off.
+  static Future<void> setOptOut(bool optOut) async {
+    if (optOut == _optedOut) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_optOutKey, optOut);
+    } catch (_) {}
+    if (optOut) {
+      _optedOut = true;
+      if (_enabled) {
+        _enabled = false;
+        await Posthog().optOut().catchError(
+          (Object e) => debugPrint('Analytics disable failed: $e'),
+        );
+      }
+      await EventTracker.instance.stop();
+      return;
+    }
+    _optedOut = false;
+    if (!_buildSends) return;
+    await _startPosthog();
+    await _startTracker();
+  }
+
   /// Records an event. Null property values are dropped.
   static void track(String event, [Map<String, Object?> properties = const {}]) {
+    EventTracker.instance.record(event, properties: properties);
     if (!_enabled) return;
     final props = <String, Object>{
       for (final e in properties.entries)
@@ -81,6 +158,7 @@ class Analytics {
 
   /// Manually records a screen view, for tabs and sheets that are not routes.
   static void screen(String name, [Map<String, Object?> properties = const {}]) {
+    EventTracker.instance.manualScreen(name, properties);
     if (!_enabled) return;
     final props = <String, Object>{
       for (final e in properties.entries)
@@ -97,7 +175,14 @@ class Analytics {
     Map<String, Object?> properties = const {},
     Map<String, Object?> setOnce = const {},
   }) {
-    if (!_enabled || userId.isEmpty) return;
+    if (userId.isEmpty) return;
+    // The backend already knows the account; it gets the provider details
+    // without repeating the email and name on every identify.
+    EventTracker.instance.record('identify', properties: {
+      for (final e in properties.entries)
+        if (e.key != 'email' && e.key != 'name') e.key: e.value,
+    });
+    if (!_enabled) return;
     Map<String, Object>? clean(Map<String, Object?> m) {
       final out = <String, Object>{
         for (final e in m.entries)
@@ -117,6 +202,7 @@ class Analytics {
 
   /// Sets properties on the current person (settings, totals, preferences).
   static void setPersonProperties(Map<String, Object?> properties) {
+    EventTracker.instance.record('person_properties', properties: properties);
     if (!_enabled) return;
     final props = <String, Object>{
       for (final e in properties.entries)
@@ -138,6 +224,8 @@ class Analytics {
 
   /// Forgets the identity on sign-out / account deletion.
   static void reset() {
+    // Upload what this account did before the session token changes.
+    unawaited(EventTracker.instance.flush());
     if (!_enabled) return;
     Posthog().reset().catchError(
       (Object e) => debugPrint('Analytics reset failed: $e'),
@@ -145,6 +233,12 @@ class Analytics {
   }
 
   static void captureException(Object error, StackTrace? stack, {String? where}) {
+    final message = error.toString();
+    EventTracker.instance.record(r'$exception', properties: {
+      'error_type': error.runtimeType.toString(),
+      'message': message.length > 200 ? message.substring(0, 200) : message,
+      'where': where,
+    });
     if (!_enabled) return;
     Posthog()
         .captureException(
