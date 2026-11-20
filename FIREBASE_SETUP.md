@@ -4,6 +4,10 @@ Bojang's backend is its own server (FastAPI + Postgres on Cloud Run, repo `bojan
 Firebase provides sign-in (Auth) and the services below. The code is in place; each service
 needs a one-time console step before it works in production.
 
+Firebase project: `bojang-backend` (console account ta3tsering@gmail.com, which is `/u/1/` in
+Chrome). iOS app `com.bojang.app`, Team ID `W66Z24ZPWQ` and App Store ID `6752509504` set
+2026-11-21.
+
 Firebase only runs where a real `GoogleService-Info.plist` is bundled (iOS release builds; CI
 writes it from the `GOOGLE_SERVICE_INFO_PLIST` secret). Android has no `google-services.json`
 yet, so none of this runs on Android (see the last section). Without Firebase every service
@@ -39,7 +43,9 @@ are created. Nothing else is required.
 | `home_announcement_id` | "" | change it to show a new card to learners who dismissed the old one |
 | `exp_<name>` | (none) | experiment: the value is attached to every analytics event as `exp_<name>`, so PostHog can compare groups. Use a "User in random percentile" condition to split learners. |
 
-Console: Remote Config > Create configuration > add the parameters you want to change.
+Console: the six parameters above were published on 2026-11-21 (template version 1, values equal
+to the in-app defaults; announcement fields use the in-app default). Edit them under Remote
+Config > Parameters, then Publish changes.
 
 ## App Check
 
@@ -50,11 +56,12 @@ Console: Remote Config > Create configuration > add the parameters you want to c
   `monitor` (default: verify and count, never block), `enforce` (401 without a valid token),
   `off`. Counts per server instance: `GET /admin/app-check/stats` (admin token).
 
-Console:
+Console (App Check was opened on 2026-11-21; `com.bojang.app` already shows App Attest as
+registered, but the app uses DeviceCheck, so DeviceCheck must be added):
 1. Apple Developer > Keys > create a key with **DeviceCheck** enabled (the APNs key below can
    have both services), download the `.p8`.
-2. Firebase > App Check > Apps > iOS app > DeviceCheck > upload the `.p8`, enter the Key ID and
-   Team ID `W66Z24ZPWQ`.
+2. Firebase > App Check > Apps > `com.bojang.app` > ⋮ > edit providers > DeviceCheck > upload
+   the `.p8` and enter its Key ID.
 3. Watch `/admin/app-check/stats` for a week after the build ships. When `valid_share` is close
    to 1 for current app versions, set `APP_CHECK_MODE=enforce` on Cloud Run. Older app versions
    send no token and are refused from then on, so enforce only once few people still use them.
