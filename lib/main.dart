@@ -12,6 +12,7 @@ import 'services/theme_service.dart';
 import 'services/progress_service.dart';
 import 'services/google_auth_service.dart';
 import 'services/api_service.dart';
+import 'widgets/update_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,6 +73,10 @@ class MyApp extends StatelessWidget {
             themeMode:
                 themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             home: const SplashScreen(),
+            // Above the navigator, so an out-of-date install cannot get
+            // past the update notice by any route.
+            builder: (context, child) =>
+                UpdateGate(child: child ?? const SizedBox.shrink()),
             navigatorObservers: [Analytics.observer],
             debugShowCheckedModeBanner: false,
           );

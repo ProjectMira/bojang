@@ -273,8 +273,11 @@ jobs:
       - name: Analyze
         run: flutter analyze lib --no-fatal-infos --no-fatal-warnings
 
-      - name: Run stable model tests
-        run: flutter test test/models
+      - name: Run stable model and force-update tests
+        run: >-
+          flutter test test/models
+          test/services/app_update_service_test.dart
+          test/widgets/update_gate_test.dart
 
   android:
     name: Android / Google Play

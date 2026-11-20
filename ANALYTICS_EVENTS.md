@@ -90,6 +90,8 @@ PostHog project: "Default project" (id 754455, US Cloud). Code: `lib/services/an
 | `rate_app_tapped` / `about_opened` / `privacy_opened` / `made_by_opened` | settings / profile | |
 | `api_error` | api service | `endpoint`, `method`, `status`, `error` |
 | `auth_token_refresh_failed` | api service | `error` |
+| `force_update_shown` | update gate (iOS) | `installed_version`, `store_version` |
+| `force_update_tapped` | update gate (iOS) | `installed_version`, `store_version`, `opened` (bool: App Store or web page opened) |
 
 ## Not tracked on purpose
 
