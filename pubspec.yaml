@@ -67,6 +67,11 @@ dependencies:
   share_plus: ^10.1.0
   posthog_flutter: ^5.61.2
   device_info_plus: ^12.4.0
+  firebase_messaging: ^15.2.10
+  firebase_remote_config: ^5.5.0
+  firebase_app_check: ^0.3.2+10
+  firebase_crashlytics: ^4.3.10
+  firebase_performance: ^0.10.1+10
 
 dev_dependencies:
   flutter_test:

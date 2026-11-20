@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'crash_reporting.dart';
 import 'event_tracker.dart';
 
 /// Product analytics, sent to two places:
@@ -67,6 +68,7 @@ class Analytics {
       final prefs = await SharedPreferences.getInstance();
       _optedOut = prefs.getBool(_optOutKey) ?? false;
     } catch (_) {}
+    await CrashReporting.setCollection(!_optedOut);
     if (_optedOut || !_buildSends) return;
     await _startPosthog();
     await _startTracker();
@@ -97,7 +99,9 @@ class Analytics {
         ..sessionReplayConfig.maskAllImages = false
         ..errorTrackingConfig.captureFlutterErrors = true
         ..errorTrackingConfig.capturePlatformDispatcherErrors = true
-        ..errorTrackingConfig.captureNativeExceptions = true
+        // Crashlytics owns native crashes: two crash reporters in one app
+        // compete for the same signal handlers.
+        ..errorTrackingConfig.captureNativeExceptions = false
         ..errorTrackingConfig.captureIsolateErrors = true
         ..debug = kDebugMode;
       await Posthog().setup(config);
@@ -135,9 +139,11 @@ class Analytics {
         );
       }
       await EventTracker.instance.stop();
+      await CrashReporting.setCollection(false);
       return;
     }
     _optedOut = false;
+    await CrashReporting.setCollection(true);
     if (!_buildSends) return;
     await _startPosthog();
     await _startTracker();
@@ -176,6 +182,7 @@ class Analytics {
     Map<String, Object?> setOnce = const {},
   }) {
     if (userId.isEmpty) return;
+    CrashReporting.setUser(userId);
     // The backend already knows the account; it gets the provider details
     // without repeating the email and name on every identify.
     EventTracker.instance.record('identify', properties: {
@@ -226,6 +233,7 @@ class Analytics {
   static void reset() {
     // Upload what this account did before the session token changes.
     unawaited(EventTracker.instance.flush());
+    CrashReporting.setUser('');
     if (!_enabled) return;
     Posthog().reset().catchError(
       (Object e) => debugPrint('Analytics reset failed: $e'),

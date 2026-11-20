@@ -865,7 +865,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 'the screens you open and for how long, the buttons and answers you tap, swipes and scrolls, '
                 'lessons and games you play and your scores, settings you change, crashes, and screen recordings of app sessions. '
                 'Each event carries your account ID, app version, device model, operating system, language and time zone. '
-                'This goes to our servers and to PostHog, our analytics provider. We never read what you type in text fields, '
+                'This goes to our servers, to PostHog (analytics) and to Google Firebase (crash reports, app performance and push notifications). We never read what you type in text fields, '
                 'and we do not collect your contacts, photos, location, or advertising ID, and do not sell your data or use it to track you across other apps.\n\n'
                 'You can turn usage analytics off in Settings > Privacy. Deleting your account deletes your progress and your analytics events from our servers.',
               ),

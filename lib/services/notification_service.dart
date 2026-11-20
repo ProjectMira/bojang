@@ -38,6 +38,14 @@ class NotificationService {
       initializationSettings,
     );
 
+    // Channel for pushes from the backend (FCM android channel_id).
+    if (Platform.isAndroid) {
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(_announcements);
+    }
+
     // Request permissions for Android 13+ and iOS
     await _requestPermissions();
   }
@@ -67,6 +75,32 @@ class NotificationService {
       );
       Analytics.track('notification_permission_result', {'granted': granted});
     }
+  }
+
+  static const AndroidNotificationChannel _announcements = AndroidNotificationChannel(
+    'announcements',
+    'Reminders and news',
+    description: 'Streak reminders and news from Bojang',
+    importance: Importance.high,
+  );
+
+  /// Shows a push that arrived while the app is open (Android only; iOS
+  /// shows it itself).
+  Future<void> showNow(String title, String body) async {
+    await flutterLocalNotificationsPlugin.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000 % 100000 + 1000,
+      title,
+      body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          _announcements.id,
+          _announcements.name,
+          channelDescription: _announcements.description,
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+    );
   }
 
   Future<void> scheduleDailyNotification([TimeOfDay? customTime]) async {

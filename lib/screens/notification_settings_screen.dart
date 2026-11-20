@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/analytics.dart';
 import '../services/notification_service.dart';
+import '../services/push_service.dart';
 import '../widgets/content_width.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class NotificationSettingsScreen extends StatefulWidget {
 
 class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
   bool _notificationsEnabled = false;
+  bool _streakReminders = true;
   TimeOfDay _selectedTime = const TimeOfDay(hour: 11, minute: 30);
   final NotificationService _notificationService = NotificationService();
 
@@ -34,6 +36,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     if (!mounted) return;
     setState(() {
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? false;
+      _streakReminders = prefs.getBool(PushService.streakRemindersKey) ?? true;
       final hour = prefs.getInt('notification_hour') ?? 11;
       final minute = prefs.getInt('notification_minute') ?? 30;
       _selectedTime = TimeOfDay(hour: hour, minute: minute);
@@ -61,6 +64,17 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     }
     
     await _saveSettings();
+  }
+
+  Future<void> _toggleStreakReminders(bool value) async {
+    setState(() => _streakReminders = value);
+    Analytics.track('setting_changed', {
+      'setting': 'streak_reminders',
+      'value': value,
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(PushService.streakRemindersKey, value);
+    await PushService.instance.syncSettings();
   }
 
   Future<void> _selectTime() async {
@@ -140,6 +154,14 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               title: const Text('Enable Daily Reminder'),
               value: _notificationsEnabled,
               onChanged: _toggleNotifications,
+            ),
+            SwitchListTile(
+              title: const Text('Streak reminders'),
+              subtitle: const Text(
+                'An evening nudge when your streak would end at midnight',
+              ),
+              value: _streakReminders,
+              onChanged: _toggleStreakReminders,
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(

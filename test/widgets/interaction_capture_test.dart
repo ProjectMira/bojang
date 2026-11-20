@@ -192,6 +192,18 @@ void main() {
     await done(tester);
   });
 
+  testWidgets('the Remote Config kill switch stops tap capture', (tester) async {
+    await pumpApp(
+      tester,
+      Center(child: ElevatedButton(onPressed: () {}, child: const Text('Go'))),
+    );
+    tracker.captureTaps = false;
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+    expect(tracker.queue.where((e) => e['event'] == 'tap'), isEmpty);
+    await done(tester);
+  });
+
   testWidgets('nothing is recorded while tracking is off', (tester) async {
     await pumpApp(
       tester,

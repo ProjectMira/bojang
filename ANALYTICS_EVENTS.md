@@ -133,9 +133,19 @@ deletes its rows.
 | `achievements_viewed` | settings | |
 | `rate_app_tapped` / `about_opened` / `privacy_opened` / `made_by_opened` | settings / profile | |
 | `api_error` | api service | `endpoint`, `method`, `status`, `error` |
+| `push_permission` | push service | `status` (authorized/denied/provisional/notDetermined) |
+| `push_token_registered` | push service | `refresh` |
+| `push_token_unavailable` | push service | `reason` |
+| `push_received` | push service (app open) | `campaign`, `screen`, `foreground` |
+| `push_opened` | push service | `campaign`, `screen` |
+| `remote_config_activated` | remote settings | every `exp_*` parameter and its value |
+| `announcement_viewed` / `announcement_tapped` / `announcement_dismissed` | home banner | `announcement`, `url` |
 | `auth_token_refresh_failed` | api service | `error` |
 | `force_update_shown` | update gate (iOS) | `installed_version`, `store_version` |
 | `force_update_tapped` | update gate (iOS) | `installed_version`, `store_version`, `opened` (bool: App Store or web page opened) |
+
+Experiments: Remote Config parameters named `exp_*` are also registered as super properties,
+so every later PostHog event carries them (see FIREBASE_SETUP.md).
 
 ## Not tracked on purpose
 

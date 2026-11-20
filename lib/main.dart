@@ -6,6 +6,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 import 'services/analytics.dart';
+import 'services/app_check_service.dart';
+import 'services/crash_reporting.dart';
+import 'services/push_service.dart';
+import 'services/remote_settings.dart';
 import 'services/app_config.dart';
 import 'services/notification_service.dart';
 import 'services/theme_service.dart';
@@ -29,8 +33,16 @@ void main() async {
     debugPrint('Firebase initialization skipped: iOS config disabled');
   }
 
+  // App Check before any backend or Firebase Auth call, so they carry a token.
+  await AppCheckService.init();
+  // Crashlytics' error handlers before Analytics, so PostHog's wrap them.
+  await CrashReporting.init(collect: true);
+
   // Analytics first, so sign-in restored during start-up is attributed.
+  // It also applies the "Share usage analytics" switch to Crashlytics.
   await Analytics.init();
+  // Remote Config: cached values now, fresh ones in the background.
+  await RemoteSettings.init();
 
   try {
     await GoogleAuthService().initialize();
@@ -44,11 +56,13 @@ void main() async {
   // Set up reminders only once the app is on screen: on a fresh install this
   // shows iOS's notification permission prompt, and awaiting it before
   // runApp left new learners on a blank screen until they answered.
+  // Push notifications follow, once that prompt has been answered.
   if (!kIsWeb) {
     unawaited(
-      NotificationService().init().catchError(
-        (Object e) => debugPrint('Notification setup failed: $e'),
-      ),
+      NotificationService()
+          .init()
+          .catchError((Object e) => debugPrint('Notification setup failed: $e'))
+          .whenComplete(() => PushService.instance.init()),
     );
   }
 }

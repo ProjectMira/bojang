@@ -273,12 +273,13 @@ jobs:
       - name: Analyze
         run: flutter analyze lib --no-fatal-infos --no-fatal-warnings
 
-      - name: Run stable model, force-update and analytics tests
+      - name: Run stable model, force-update, analytics and Firebase tests
         run: >-
           flutter test test/models
           test/services/app_update_service_test.dart
           test/widgets/update_gate_test.dart
           test/services/event_tracker_test.dart
+          test/services/firebase_features_test.dart
           test/widgets/interaction_capture_test.dart
 
   android:
@@ -581,7 +582,8 @@ jobs:
             exit 1
           fi
 
-      - name: Ensure Sign in with Apple capability on the App ID
+      - name: Ensure Sign in with Apple and Push capabilities on the App ID
+        id: capabilities
         env:
           ASC_KEY_PATH: ${{ steps.asc-key.outputs.path }}
         run: |
@@ -625,26 +627,48 @@ jobs:
 
           call capabilities GET "https://api.appstoreconnect.apple.com/v1/bundleIds/$bundle_resource_id/bundleIdCapabilities"
           [ "$CALL_STATUS" = "200" ] || fail_call "GET bundleIdCapabilities"
-          # Sign in with Apple is APPLE_ID_AUTH in the App Store Connect API.
-          has_capability="$(python3 -c '
+          caps_json="$RUNNER_TEMP/asc-capabilities-list.json"
+          cp "$CALL_OUT" "$caps_json"
+          has_cap() { # has_cap <capabilityType>; prints yes or no
+            python3 -c '
           import json, sys
-          caps = json.load(sys.stdin).get("data", [])
-          print("yes" if any(c["attributes"]["capabilityType"] == "APPLE_ID_AUTH" for c in caps) else "no")
-          ' < "$CALL_OUT")"
+          caps = json.load(open(sys.argv[1])).get("data", [])
+          print("yes" if any(c["attributes"]["capabilityType"] == sys.argv[2] for c in caps) else "no")
+          ' "$caps_json" "$1"
+          }
 
-          if [ "$has_capability" = "yes" ]; then
+          # Sign in with Apple is APPLE_ID_AUTH in the App Store Connect API.
+          if [ "$(has_cap APPLE_ID_AUTH)" = "yes" ]; then
             echo "App ID $IOS_BUNDLE_ID already has the Sign in with Apple capability."
-            exit 0
+          else
+            echo "Enabling Sign in with Apple capability on App ID $IOS_BUNDLE_ID..."
+            payload="{\"data\":{\"type\":\"bundleIdCapabilities\",\"attributes\":{\"capabilityType\":\"APPLE_ID_AUTH\",\"settings\":[{\"key\":\"APPLE_ID_AUTH_APP_CONSENT\",\"options\":[{\"key\":\"PRIMARY_APP_CONSENT\"}]}]},\"relationships\":{\"bundleId\":{\"data\":{\"type\":\"bundleIds\",\"id\":\"$bundle_resource_id\"}}}}}"
+            call enable-capability POST "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities" "$payload"
+            if [ "$CALL_STATUS" != "201" ]; then
+              echo "::warning::If the API key cannot manage identifiers, enable the capability manually: developer.apple.com -> Certificates, Identifiers & Profiles -> Identifiers -> $IOS_BUNDLE_ID -> check 'Sign In with Apple', then re-run."
+              fail_call "POST bundleIdCapabilities"
+            fi
+            echo "Capability enabled."
           fi
 
-          echo "Enabling Sign in with Apple capability on App ID $IOS_BUNDLE_ID..."
-          payload="{\"data\":{\"type\":\"bundleIdCapabilities\",\"attributes\":{\"capabilityType\":\"APPLE_ID_AUTH\",\"settings\":[{\"key\":\"APPLE_ID_AUTH_APP_CONSENT\",\"options\":[{\"key\":\"PRIMARY_APP_CONSENT\"}]}]},\"relationships\":{\"bundleId\":{\"data\":{\"type\":\"bundleIds\",\"id\":\"$bundle_resource_id\"}}}}}"
-          call enable-capability POST "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities" "$payload"
-          if [ "$CALL_STATUS" != "201" ]; then
-            echo "::warning::If the API key cannot manage identifiers, enable the capability manually: developer.apple.com -> Certificates, Identifiers & Profiles -> Identifiers -> $IOS_BUNDLE_ID -> check 'Sign In with Apple', then re-run."
-            fail_call "POST bundleIdCapabilities"
+          # Push notifications (Firebase Cloud Messaging). Optional: when the
+          # capability cannot be enabled the build ships without push rather
+          # than failing (the signing step then drops aps-environment).
+          if [ "$(has_cap PUSH_NOTIFICATIONS)" = "yes" ]; then
+            echo "App ID $IOS_BUNDLE_ID already has the Push Notifications capability."
+            echo "push=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "Enabling Push Notifications capability on App ID $IOS_BUNDLE_ID..."
+            payload="{\"data\":{\"type\":\"bundleIdCapabilities\",\"attributes\":{\"capabilityType\":\"PUSH_NOTIFICATIONS\"},\"relationships\":{\"bundleId\":{\"data\":{\"type\":\"bundleIds\",\"id\":\"$bundle_resource_id\"}}}}}"
+            call enable-push POST "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities" "$payload"
+            if [ "$CALL_STATUS" = "201" ]; then
+              echo "Push Notifications enabled."
+              echo "push=yes" >> "$GITHUB_OUTPUT"
+            else
+              echo "::warning::Could not enable Push Notifications on App ID $IOS_BUNDLE_ID (HTTP $CALL_STATUS: $(tr -d '\n' < "$CALL_OUT" | head -c 300)). This build ships without push. Enable it at developer.apple.com -> Identifiers -> $IOS_BUNDLE_ID -> Push Notifications, then re-run."
+              echo "push=no" >> "$GITHUB_OUTPUT"
+            fi
           fi
-          echo "Capability enabled."
 
       - name: Install dependencies
         run: |
@@ -696,6 +720,8 @@ jobs:
             2>&1 | tee build/ios/xcodebuild-archive.log
 
       - name: Embed entitlements via ad-hoc signature
+        env:
+          PUSH_CAPABILITY: ${{ steps.capabilities.outputs.push }}
         # The archive is built unsigned, and exportArchive derives the
         # entitlements to re-sign with from the app's existing signature —
         # an unsigned app therefore loses com.apple.developer.applesignin.
@@ -716,8 +742,18 @@ jobs:
             find "$app_path/Frameworks" -maxdepth 1 \( -name '*.framework' -o -name '*.dylib' \) -print0 \
               | xargs -0 -n1 codesign --force --sign - --timestamp=none
           fi
+          # App Store builds use the production push environment; without the
+          # Push capability on the App ID the export profile cannot carry it.
+          entitlements="$RUNNER_TEMP/Runner.release.entitlements"
+          cp ios/Runner/Runner.entitlements "$entitlements"
+          if [ "${PUSH_CAPABILITY:-no}" = "yes" ]; then
+            /usr/libexec/PlistBuddy -c 'Set :aps-environment production' "$entitlements"
+          else
+            /usr/libexec/PlistBuddy -c 'Delete :aps-environment' "$entitlements" 2>/dev/null || true
+            echo "::warning::Signing without aps-environment: push notifications are off in this build."
+          fi
           codesign --force --sign - --timestamp=none \
-            --entitlements ios/Runner/Runner.entitlements "$app_path"
+            --entitlements "$entitlements" "$app_path"
           codesign -d --entitlements - "$app_path" 2>/dev/null | grep -aq 'com.apple.developer.applesignin' \
             || { echo "::error::Ad-hoc signature is missing the applesignin entitlement"; exit 1; }
 
@@ -807,6 +843,13 @@ jobs:
             exit 1
           fi
 
+          # Push notifications need aps-environment=production in the signed app.
+          if codesign -d --entitlements - "$app_path" 2>/dev/null | grep -aq 'aps-environment'; then
+            echo "Push entitlement present."
+          else
+            echo "::warning::Exported app has no aps-environment entitlement: push notifications will not reach this build."
+          fi
+
           # Firebase powers Sign in with Apple and account sync; a placeholder
           # plist means the restore step was skipped and auth would break.
           gs_plist="$app_path/GoogleService-Info.plist"
@@ -819,6 +862,19 @@ jobs:
             echo "::error::App bundle contains the placeholder GoogleService-Info.plist; set the GOOGLE_SERVICE_INFO_PLIST secret."
             exit 1
           fi
+
+      - name: Upload dSYMs to Crashlytics
+        # Symbolicated native crash reports. Never blocks a release.
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          dsyms=build/ios/archive/Runner.xcarchive/dSYMs
+          if [ ! -d "$dsyms" ] || [ -z "$(ls -A "$dsyms")" ]; then
+            echo "::warning::No dSYMs in the archive; Crashlytics crashes will be unsymbolicated."
+            exit 0
+          fi
+          ios/Pods/FirebaseCrashlytics/upload-symbols \
+            -gsp ios/Runner/GoogleService-Info.plist -p ios "$dsyms"
 
       - name: Upload to TestFlight
         env:

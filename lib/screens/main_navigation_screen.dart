@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/analytics.dart';
+import '../services/push_service.dart';
 import '../theme/app_tokens.dart';
 import 'home_page.dart';
 import 'streak_view_screen.dart';
@@ -22,6 +23,24 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     Analytics.screen('tab_home');
+    PushService.requestedScreen.addListener(_openRequestedTab);
+    // A notification tapped while the app was closed is already waiting.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openRequestedTab());
+  }
+
+  @override
+  void dispose() {
+    PushService.requestedScreen.removeListener(_openRequestedTab);
+    super.dispose();
+  }
+
+  /// Opens the tab a tapped push notification names (data.screen).
+  void _openRequestedTab() {
+    final screen = PushService.requestedScreen.value;
+    if (screen == null || !mounted) return;
+    PushService.requestedScreen.value = null;
+    final index = _tabNames.indexOf(screen);
+    if (index >= 0) _selectTab(index, via: 'push');
   }
 
   void _selectTab(int index, {String via = 'nav_bar'}) {

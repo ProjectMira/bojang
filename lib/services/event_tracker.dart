@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import 'api_service.dart';
+import 'crash_reporting.dart';
 
 /// Sends every in-app interaction to the Bojang backend
 /// (`POST /analytics/events`, table `app_events`).
@@ -48,6 +49,11 @@ class EventTracker with WidgetsBindingObserver {
 
   bool _enabled = false;
   bool get enabled => _enabled;
+
+  /// Remote Config kill switches (RemoteSettings): stop recording taps,
+  /// swipes and scrolls, or pause uploads (events keep queueing, capped).
+  bool captureTaps = true;
+  bool uploadsEnabled = true;
 
   /// Debug builds print each event (`[event] tap @tab_home {...}`).
   bool logEvents = const bool.fromEnvironment('LOG_EVENTS');
@@ -269,6 +275,7 @@ class EventTracker with WidgetsBindingObserver {
       });
     }
     _screen = name;
+    CrashReporting.setKey('screen', name);
     _screenSince = _pausedAt == null ? now : null;
     _screenAccum = Duration.zero;
     _sessionScreens++;
@@ -290,7 +297,7 @@ class EventTracker with WidgetsBindingObserver {
 
   /// Uploads what is queued. Events stay queued while offline or signed out.
   Future<void> flush() async {
-    if (!_enabled || _flushing || _queue.isEmpty) return;
+    if (!_enabled || !uploadsEnabled || _flushing || _queue.isEmpty) return;
     _flushing = true;
     try {
       while (_enabled && _queue.isNotEmpty) {

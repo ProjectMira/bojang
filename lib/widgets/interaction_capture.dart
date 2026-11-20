@@ -113,7 +113,7 @@ class _InteractionCaptureState extends State<InteractionCapture> {
   }
 
   void _onDown(PointerDownEvent e) {
-    if (!_tracker.enabled) return;
+    if (!_tracker.enabled || !_tracker.captureTaps) return;
     final down = _Down(e.position, e.timeStamp, _hitStore.last);
     if (_downs.isNotEmpty) {
       down.multiTouch = true;
@@ -179,7 +179,7 @@ class _InteractionCaptureState extends State<InteractionCapture> {
   }
 
   bool _onScrollEnd(ScrollEndNotification n) {
-    if (!_tracker.enabled) return false;
+    if (!_tracker.enabled || !_tracker.captureTaps) return false;
     final m = n.metrics;
     if (!m.hasContentDimensions || m.maxScrollExtent <= m.minScrollExtent) {
       return false;

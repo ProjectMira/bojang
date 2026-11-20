@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'analytics.dart';
+import 'app_check_service.dart';
+import 'crash_reporting.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -17,20 +19,25 @@ class ApiService {
   factory ApiService() => _instance;
   ApiService._internal();
 
-  final http.Client _client = http.Client();
+  // Performance Monitoring times every request (CrashReporting).
+  final http.Client _client = PerformanceHttpClient(http.Client());
   String? _authToken;
+  String? _appCheckToken;
 
   // Headers for API requests
   Map<String, String> get _headers => {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     if (_authToken != null) 'Authorization': 'Bearer $_authToken',
+    if (_appCheckToken != null) 'X-Firebase-AppCheck': _appCheckToken!,
   };
 
   // Firebase ID tokens expire after an hour. Before each request, swap the
   // stored token for the signed-in Firebase user's current one (refreshed by
   // the SDK when needed) so long sessions keep reaching the API.
   Future<void> _refreshAuthToken() async {
+    // App Check token for every request (cached by the SDK).
+    _appCheckToken = await AppCheckService.token();
     if (_authToken == null) return;
     try {
       if (Firebase.apps.isEmpty) return;
@@ -607,6 +614,12 @@ class ApiService {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Registers this phone's FCM token for push notifications (PushService).
+  Future<bool> registerPushDevice(Map<String, Object?> body) async {
+    final response = await _post('/notifications/devices', body);
+    return response?['registered'] == true;
   }
 
   Uri _uri(String endpoint, [Map<String, String>? queryParameters]) {

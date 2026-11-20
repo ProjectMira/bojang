@@ -9,6 +9,7 @@ import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
 import '../utils/topic_visuals.dart';
 import '../utils/yak_lines.dart';
+import '../widgets/announcement_banner.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/cultural_tip_card.dart';
 import '../widgets/section_header.dart';
@@ -134,6 +135,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       _buildHeader(context, progressService),
 
                       const SizedBox(height: AppSpacing.xl),
+
+                      const AnnouncementBanner(),
 
                       _buildStatsStrip(context, progressService),
 
