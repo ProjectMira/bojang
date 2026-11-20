@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
+import 'analytics.dart';
 import 'app_config.dart';
 import 'api_service.dart';
 import 'apple_sign_in.dart';
@@ -168,6 +169,12 @@ class GoogleAuthService {
     }
     final auth = firebase_auth.FirebaseAuth.instance;
     final current = auth.currentUser;
+    if (current != null && current.isAnonymous) {
+      Analytics.track('account_linked', {
+        'provider': 'password',
+        'outcome': 'linked',
+      });
+    }
     // Upgrade the anonymous first-launch account in place so the progress
     // already synced under its uid stays with the learner.
     final credential =
@@ -234,9 +241,15 @@ class GoogleAuthService {
       if (idToken == null || idToken.isEmpty) return false;
       await _apiService.setAuthToken(idToken);
       await _apiService.syncUser(email: '');
+      _identify(null, anonymous: true);
+      Analytics.track('anonymous_session_started', {'success': true});
       return true;
     } catch (e) {
       print('Anonymous session unavailable: $e');
+      Analytics.track('anonymous_session_started', {
+        'success': false,
+        'error': e.toString().substring(0, e.toString().length.clamp(0, 200)),
+      });
       return false;
     }
   }
@@ -341,6 +354,7 @@ class GoogleAuthService {
       await _apiService.logout();
       _currentUser = null;
       await _clearCachedUser();
+      Analytics.reset();
     } catch (error) {
       print('Sign out error: $error');
     }
@@ -400,7 +414,34 @@ class GoogleAuthService {
     return email.split('@')[0].replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
   }
 
+  // The distinct id is the Firebase uid when there is one: it survives the
+  // anonymous-to-account upgrade, so pre-sign-up events join the same person.
+  String? _firebaseUid() {
+    try {
+      if (Firebase.apps.isEmpty) return null;
+      return firebase_auth.FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _identify(User? user, {bool anonymous = false}) {
+    final id = _firebaseUid() ?? user?.id;
+    if (id == null || id.isEmpty) return;
+    Analytics.identify(
+      id,
+      properties: {
+        if (user != null && user.email.isNotEmpty) 'email': user.email,
+        if (user != null) 'name': user.displayName,
+        'auth_provider': anonymous ? 'anonymous' : user?.authProvider.name,
+        'is_anonymous': anonymous,
+        if (user != null && user.id != id) 'backend_user_id': user.id,
+      },
+    );
+  }
+
   Future<void> _cacheUser(User user) async {
+    _identify(user);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('cached_user', jsonEncode(user.toJson()));
   }
@@ -412,6 +453,7 @@ class GoogleAuthService {
       try {
         final userMap = jsonDecode(cachedUserJson) as Map<String, dynamic>;
         _currentUser = User.fromJson(userMap);
+        _identify(_currentUser);
       } catch (e) {
         print('Error loading cached user: $e');
       }

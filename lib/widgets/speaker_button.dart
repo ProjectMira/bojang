@@ -32,6 +32,7 @@ class SpeakerButton extends StatelessWidget {
               onTap: () => player.play(
                 url,
                 volume: context.read<ThemeService>().pronunciationVolume,
+                source: 'tap',
               ),
               child: Padding(
                 padding: const EdgeInsets.all(10),

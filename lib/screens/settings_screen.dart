@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../services/analytics.dart';
 import '../services/theme_service.dart';
 import '../services/pronunciation_player.dart';
 import '../services/progress_service.dart';
@@ -95,9 +96,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => const NotificationSettingsScreen(),
+                      screenRoute(
+                        'notification_settings',
+                        (context) => const NotificationSettingsScreen(),
                       ),
                     );
                   },
@@ -300,6 +301,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showLanguageDialog(ThemeService themeService) {
+    Analytics.screen('settings_language');
     showDialog(
       context: context,
       builder:
@@ -348,6 +350,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showAudioSettings() {
+    Analytics.screen('settings_audio');
     showDialog(
       context: context,
       builder: (context) {
@@ -431,6 +434,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showGoalsDialog() {
+    Analytics.screen('settings_goals');
     showDialog(
       context: context,
       builder: (context) {
@@ -499,6 +503,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showAchievements(ProgressService progressService) {
+    Analytics.track('achievements_viewed', {
+      'source': 'settings',
+      'unlocked': progressService.unlockedAchievements.length,
+    });
     showDialog(
       context: context,
       builder:
@@ -539,6 +547,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _exportProgress() async {
     if (!ApiService().isAuthenticated) {
+      Analytics.track('progress_exported', {
+        'success': false,
+        'reason': 'not_signed_in',
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -551,6 +563,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     final export = await ApiService().exportUserData();
+    Analytics.track('progress_exported', {
+      'success': export != null,
+      'reason': export != null ? null : 'api_failed',
+    });
     if (!mounted) return;
     showDialog(
       context: context,
@@ -590,6 +606,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               TextButton(
                 onPressed: () async {
+                  Analytics.track('progress_reset', {'source': 'settings'});
                   await progressService.resetProgress();
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -604,6 +621,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _handleDeleteAccount() async {
+    Analytics.track('account_deletion_started');
     final wantsToContinue = await showDialog<bool>(
       context: context,
       builder:
@@ -637,6 +655,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
     );
+    if (wantsToContinue != true) {
+      Analytics.track('account_deletion_cancelled', {'step': 'first_confirm'});
+    }
     if (wantsToContinue != true || !mounted) return;
 
     final confirmedDeletion = await showDialog<bool>(
@@ -672,6 +693,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
     );
+    if (confirmedDeletion != true) {
+      Analytics.track('account_deletion_cancelled', {'step': 'final_confirm'});
+    }
     if (confirmedDeletion != true || !mounted) return;
 
     final apiService = Provider.of<ApiService>(context, listen: false);
@@ -698,6 +722,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Navigator.of(context).pop(); // Dismiss the progress indicator.
 
     if (success) {
+      // Recorded before signOut, which resets the analytics identity.
+      Analytics.track('account_deleted');
       await authService.signOut();
       await progressService.resetProgress();
       if (!mounted) return;
@@ -730,10 +756,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (!mounted) return;
 
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const AuthScreen()),
+        screenRoute('auth', (context) => const AuthScreen()),
         (route) => false,
       );
     } else {
+      Analytics.track('account_deletion_failed', {'step': 'api'});
       await showDialog<void>(
         context: context,
         builder:
@@ -763,6 +790,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showAboutDialog() {
+    Analytics.track('about_opened', {'source': 'settings'});
     showDialog(
       context: context,
       builder:
@@ -796,6 +824,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showPrivacyPolicy() {
+    Analytics.track('privacy_opened', {'source': 'settings'});
     showDialog(
       context: context,
       builder:
@@ -817,6 +846,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _rateApp() {
+    Analytics.track('rate_app_tapped', {'source': 'settings'});
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Thank you! App store rating coming soon!'),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
+import '../services/analytics.dart';
 import '../services/api_service.dart';
 import '../utils/topic_visuals.dart';
 import '../widgets/yak_mascot.dart';
@@ -39,6 +40,9 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
   int _matches = 0;
   int _moves = 0;
   int _totalPairs = 0;
+  DateTime? _startedAt;
+  bool _roundFinished = false;
+  bool _usedFallback = false;
 
   // Offline fallback: Tibetan alphabet pronunciation pairs.
   static const List<Map<String, String>> _fallbackPairs = [
@@ -64,8 +68,22 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
 
   @override
   void dispose() {
+    if (_phase == _GamePhase.playing && !_roundFinished) {
+      Analytics.track('game_quit', {
+        'game': 'memory_match',
+        'topic': _topicName,
+        'matches': _matches,
+        'moves': _moves,
+        'duration_s': _elapsedSeconds(),
+      });
+    }
     _matchController.dispose();
     super.dispose();
+  }
+
+  int? _elapsedSeconds() {
+    final started = _startedAt;
+    return started == null ? null : DateTime.now().difference(started).inSeconds;
   }
 
   Future<void> _loadTopics() async {
@@ -86,6 +104,11 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
   }
 
   Future<void> _startGame(String? topicId, String topicName) async {
+    Analytics.track('game_topic_selected', {
+      'game': 'memory_match',
+      'topic': topicName,
+      'topic_id': topicId,
+    });
     setState(() {
       _phase = _GamePhase.loading;
       _topicId = topicId;
@@ -106,6 +129,8 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
           ),
         );
       }
+      if (topicId != null) _topicName = 'Alphabet';
+      _usedFallback = topicId != null;
       _initializeGame(
         _fallbackPairs
             .map(
@@ -117,10 +142,10 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             )
             .toList(),
       );
-      if (topicId != null) _topicName = 'Alphabet';
       return;
     }
 
+    _usedFallback = false;
     _initializeGame(apiCards);
   }
 
@@ -142,6 +167,14 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
     _boardStart = 0;
     _matches = 0;
     _moves = 0;
+    _roundFinished = false;
+    _startedAt = DateTime.now();
+    Analytics.track('game_started', {
+      'game': 'memory_match',
+      'topic': _topicName,
+      'word_count': _totalPairs,
+      'fallback': _usedFallback,
+    });
     _loadBoard();
   }
 
@@ -261,6 +294,15 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
   }
 
   void _showCompletionDialog() {
+    _roundFinished = true;
+    Analytics.track('game_completed', {
+      'game': 'memory_match',
+      'topic': _topicName,
+      'correct': _matches,
+      'total': _totalPairs,
+      'moves': _moves,
+      'duration_s': _elapsedSeconds(),
+    });
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -304,6 +346,10 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             actions: [
               TextButton(
                 onPressed: () {
+                  Analytics.track('game_result_action', {
+                    'game': 'memory_match',
+                    'action': 'change_topic',
+                  });
                   Navigator.pop(context);
                   setState(() {
                     _phase = _GamePhase.pickingTopic;
@@ -318,6 +364,10 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
               ),
               TextButton(
                 onPressed: () {
+                  Analytics.track('game_result_action', {
+                    'game': 'memory_match',
+                    'action': 'play_again',
+                  });
                   Navigator.pop(context);
                   _startGame(_topicId, _topicName);
                 },

@@ -1,11 +1,45 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../models/lesson_style.dart';
+import 'analytics.dart';
 import 'pronunciation_player.dart';
 
 class ThemeService extends ChangeNotifier {
+  // Sliders call their setter on every drag tick; only the value the learner
+  // settles on is reported.
+  final Map<String, Timer> _settingTimers = {};
+
+  void _reportSetting(String setting, Object value, {bool debounce = false}) {
+    void send() {
+      Analytics.track('setting_changed', {'setting': setting, 'value': value});
+      Analytics.setPersonProperties({setting: value});
+      if (setting == 'voice' || setting == 'lesson_style') {
+        Analytics.register(setting, value);
+      }
+    }
+
+    _settingTimers.remove(setting)?.cancel();
+    if (!debounce) return send();
+    _settingTimers[setting] = Timer(const Duration(milliseconds: 800), send);
+  }
+
+  void _reportLoadedSettings() {
+    Analytics.setPersonProperties({
+      'dark_mode': _isDarkMode,
+      'language': _currentLanguage,
+      'lesson_style': _lessonStyle.name,
+      'voice': _pronunciationVoice,
+      'sound_effects': _soundEffectsEnabled,
+      'daily_target': _dailyQuizTarget,
+      'weekly_goal': _weeklyGoal,
+    });
+    Analytics.register('voice', _pronunciationVoice);
+    Analytics.register('lesson_style', _lessonStyle.name);
+  }
+
   static const String _themeKey = 'app_theme';
   static const String _languageKey = 'app_language';
   
@@ -61,6 +95,7 @@ class ThemeService extends ChangeNotifier {
     _dailyQuizTarget = prefs.getInt(_dailyQuizTargetKey) ?? 1;
     _weeklyGoal = prefs.getInt(_weeklyGoalKey) ?? 5;
     _lessonStyle = LessonStyle.fromId(prefs.getString(_lessonStyleKey));
+    _reportLoadedSettings();
     notifyListeners();
   }
   
@@ -68,6 +103,7 @@ class ThemeService extends ChangeNotifier {
     _isDarkMode = !_isDarkMode;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_themeKey, _isDarkMode);
+    _reportSetting('dark_mode', _isDarkMode);
     notifyListeners();
   }
   
@@ -75,11 +111,13 @@ class ThemeService extends ChangeNotifier {
     _currentLanguage = language;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_languageKey, language);
+    _reportSetting('language', language);
     notifyListeners();
   }
 
   Future<void> setLessonStyle(LessonStyle value) async {
     _lessonStyle = value;
+    _reportSetting('lesson_style', value.name);
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_lessonStyleKey, value.name);
@@ -89,6 +127,7 @@ class ThemeService extends ChangeNotifier {
     _soundEffectsEnabled = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_soundEffectsEnabledKey, value);
+    _reportSetting('sound_effects', value);
     notifyListeners();
   }
 
@@ -96,6 +135,7 @@ class ThemeService extends ChangeNotifier {
     _soundEffectsVolume = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_soundEffectsVolumeKey, value);
+    _reportSetting('sound_effects_volume', value, debounce: true);
     notifyListeners();
   }
 
@@ -103,6 +143,7 @@ class ThemeService extends ChangeNotifier {
     _pronunciationVolume = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_pronunciationVolumeKey, value);
+    _reportSetting('pronunciation_volume', value, debounce: true);
     notifyListeners();
   }
 
@@ -111,6 +152,7 @@ class ThemeService extends ChangeNotifier {
     _pronunciationVoice = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_pronunciationVoiceKey, value);
+    _reportSetting('voice', value);
     notifyListeners();
   }
 
@@ -118,6 +160,7 @@ class ThemeService extends ChangeNotifier {
     _audioQuality = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_audioQualityKey, value);
+    _reportSetting('audio_quality', value);
     notifyListeners();
   }
 
@@ -125,6 +168,7 @@ class ThemeService extends ChangeNotifier {
     _dailyQuizTarget = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_dailyQuizTargetKey, value);
+    _reportSetting('daily_target', value, debounce: true);
     notifyListeners();
   }
 
@@ -132,6 +176,7 @@ class ThemeService extends ChangeNotifier {
     _weeklyGoal = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_weeklyGoalKey, value);
+    _reportSetting('weekly_goal', value, debounce: true);
     notifyListeners();
   }
   

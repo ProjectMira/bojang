@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/analytics.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/app_text_style.dart';
 import 'games/flashcards_game.dart';
@@ -173,11 +174,17 @@ class _GameCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.card),
           splashColor: game.color.withOpacity(0.12),
           highlightColor: game.color.withOpacity(0.08),
-          onTap:
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: game.builder),
-              ),
+          onTap: () {
+            final slug = game.title
+                .toLowerCase()
+                .replaceAll('&', 'and')
+                .replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+            Analytics.track('game_selected', {
+              'game': slug,
+              'skill': game.skill,
+            });
+            Navigator.push(context, screenRoute('game_$slug', game.builder));
+          },
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(

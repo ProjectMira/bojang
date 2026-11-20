@@ -6,6 +6,7 @@ import '../models/quiz_question.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
+import '../services/analytics.dart';
 import '../services/api_service.dart';
 import '../services/progress_service.dart';
 import '../services/pronunciation_player.dart';
@@ -62,6 +63,27 @@ class _QuizScreenState extends State<QuizScreen>
   late LessonStyle _style;
   // Bumped when the lesson restarts, so timers from the old run do nothing.
   int _generation = 0;
+  // Analytics: when the current run started, its length, and whether it
+  // reached the completion screen (so leaving afterwards is not a quit).
+  DateTime _startedAt = DateTime.now();
+  int _questionCount = 0;
+  bool _completed = false;
+
+  String get _topicName =>
+      widget.title ?? _getDisplayNameFromFilePath(widget.topicFilePath);
+
+  void _trackQuit() {
+    if (_completed || _questionCount == 0) return;
+    Analytics.track('lesson_quit', {
+      'topic': _topicName,
+      'topic_path': widget.topicFilePath,
+      'question_index': currentQuestionIndex,
+      'question_count': _questionCount,
+      'score': score,
+      'style': _style.name,
+      'duration_s': DateTime.now().difference(_startedAt).inSeconds,
+    });
+  }
 
   @override
   void initState() {
@@ -78,6 +100,29 @@ class _QuizScreenState extends State<QuizScreen>
 
   void _startLoading() {
     questionsFuture = _loadQuestions();
+    _startedAt = DateTime.now();
+    _questionCount = 0;
+    questionsFuture.then(
+      (questions) {
+        _questionCount = questions.length;
+        Analytics.track('lesson_started', {
+          'topic': _topicName,
+          'topic_path': widget.topicFilePath,
+          'style': _style.name,
+          'question_count': questions.length,
+          'remote_session': _remoteSessionId != null,
+        });
+      },
+      onError: (Object e) {
+        final msg = e.toString();
+        Analytics.track('lesson_load_failed', {
+          'topic': _topicName,
+          'topic_path': widget.topicFilePath,
+          'style': _style.name,
+          'error': msg.length > 200 ? msg.substring(0, 200) : msg,
+        });
+      },
+    );
     // Fetch every question's pronunciation up front so it plays instantly.
     final voice =
         Provider.of<ThemeService>(context, listen: false).pronunciationVoice;
@@ -94,6 +139,12 @@ class _QuizScreenState extends State<QuizScreen>
   Future<void> _changeStyle() async {
     final picked = await showLessonStylePicker(context);
     if (picked == null || picked == _style || !mounted) return;
+    Analytics.track('lesson_style_selected', {
+      'style': picked.name,
+      'previous_style': _style.name,
+      'source': 'quiz',
+      'topic': _topicName,
+    });
     PronunciationPlayer.instance.stop();
     setState(() {
       _style = picked;
@@ -273,6 +324,20 @@ class _QuizScreenState extends State<QuizScreen>
 
     if (isCorrect) HapticFeedback.lightImpact();
 
+    final answered = questions[currentQuestionIndex];
+    Analytics.track('question_answered', {
+      'topic': _topicName,
+      'topic_path': widget.topicFilePath,
+      'question_index': currentQuestionIndex,
+      'question_count': questions.length,
+      'question_type': answered.type,
+      'correct': isCorrect,
+      'combo': isCorrect ? _combo + 1 : 0,
+      'tibetan': answered.tibetanText,
+      'english': answered.englishGloss,
+      'style': _style.name,
+    });
+
     // Picture questions have Tibetan options, so their word is only spoken
     // once answered (earlier would give the answer away). It follows the
     // chime, which is ducked so the word stays clear.
@@ -328,6 +393,7 @@ class _QuizScreenState extends State<QuizScreen>
   }
 
   Future<void> _goToCompletion(int totalQuestions) async {
+    _completed = true;
     final category = _getCategoryFromFilePath(widget.topicFilePath);
     final progressService = Provider.of<ProgressService>(
       context,
@@ -355,9 +421,24 @@ class _QuizScreenState extends State<QuizScreen>
     final xpEarned = score * 10;
     final accuracy = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0.0;
 
+    Analytics.track('lesson_completed', {
+      'topic': _topicName,
+      'topic_path': widget.topicFilePath,
+      'category': category,
+      'style': _style.name,
+      'score': score,
+      'total': totalQuestions,
+      'accuracy': accuracy.round(),
+      'xp_earned': xpEarned,
+      'streak': progressService.currentStreak,
+      'duration_s': DateTime.now().difference(_startedAt).inSeconds,
+      'remote_session': _remoteSessionId != null,
+    });
+
     Navigator.of(context).popUntil((route) => route is! DialogRoute);
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
+        settings: const RouteSettings(name: 'lesson_complete'),
         transitionDuration: const Duration(milliseconds: 400),
         pageBuilder:
             (context, animation, secondaryAnimation) => LessonCompleteScreen(
@@ -391,6 +472,10 @@ class _QuizScreenState extends State<QuizScreen>
       'total_questions': totalQuestions,
       'time_taken_seconds': 0,
     });
+    Analytics.track('lesson_progress_submitted', {
+      'success': success,
+      'topic_path': widget.topicFilePath,
+    });
     if (!success) return;
 
     final stats = await ApiService().getUserProgress();
@@ -404,7 +489,13 @@ class _QuizScreenState extends State<QuizScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    // Any way out of an unfinished lesson (app bar back, system back gesture)
+    // is recorded as a quit; leaving still works exactly as before.
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) _trackQuit();
+      },
+      child: Scaffold(
       backgroundColor: AppTokens.background(context),
       appBar: AppBar(
         title: Text(
@@ -485,6 +576,7 @@ class _QuizScreenState extends State<QuizScreen>
           );
         },
       ),),
+    ),
     );
   }
 

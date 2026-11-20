@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/quiz_question.dart';
+import '../services/analytics.dart';
 import '../services/api_service.dart';
 import '../services/progress_service.dart';
 import '../utils/yak_lines.dart';
@@ -48,6 +49,15 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
 
   @override
   void dispose() {
+    if (_phase == _QuizPhase.playing) {
+      Analytics.track('game_quit', {
+        'game': 'speed_quiz',
+        'topic': _topicName,
+        'correct': _correct,
+        'answered': _answered,
+        'seconds_left': _secondsLeft,
+      });
+    }
     _timer?.cancel();
     super.dispose();
   }
@@ -111,6 +121,10 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
     if (!mounted) return;
 
     if (questions.isEmpty) {
+      Analytics.track('game_not_enough_words', {
+        'game': 'speed_quiz',
+        'usable': 0,
+      });
       setState(() {
         _phase = _QuizPhase.intro;
       });
@@ -133,6 +147,13 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
       _selectedIndex = null;
       _showingFeedback = false;
       _phase = _QuizPhase.playing;
+    });
+
+    Analytics.track('game_started', {
+      'game': 'speed_quiz',
+      'topic': _topicName,
+      'word_count': questions.length,
+      'round_seconds': roundSeconds,
     });
 
     _timer?.cancel();
@@ -163,7 +184,21 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
   }
 
   void _finishRound() {
+    if (_phase != _QuizPhase.playing) return;
     _timer?.cancel();
+    final previousBest = _bestScore;
+    final newBest = _correct > previousBest;
+    Analytics.track('game_completed', {
+      'game': 'speed_quiz',
+      'topic': _topicName,
+      'correct': _correct,
+      'total': _answered,
+      'accuracy': _answered > 0 ? _correct / _answered : null,
+      'best': newBest ? _correct : previousBest,
+      'new_best': newBest,
+      'duration_s': roundSeconds - _secondsLeft,
+      'ran_out_of_questions': _secondsLeft > 1,
+    });
     _saveBestScore();
     if (_answered > 0) {
       // Speed quiz counts toward streak and stats like any other quiz.
@@ -182,6 +217,13 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
 
     final question = _questions[_currentIndex];
     final isCorrect = index == question.correctAnswerIndex;
+    Analytics.track('game_answered', {
+      'game': 'speed_quiz',
+      'correct': isCorrect,
+      'question_type': question.type,
+      'question_index': _answered,
+      'seconds_left': _secondsLeft,
+    });
 
     setState(() {
       _selectedIndex = index;

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../services/analytics.dart';
 import '../services/progress_service.dart';
 import '../services/google_auth_service.dart';
 import '../services/api_service.dart';
@@ -60,6 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _openMadeBy() async {
+    Analytics.track('made_by_opened', {'source': 'profile'});
     final uri = Uri.parse('https://ta4tsering.com');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -67,8 +69,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _openSignIn() {
+    Analytics.track('sign_in_opened', {'source': 'profile'});
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const AuthScreen()),
+      screenRoute('auth', (context) => const AuthScreen()),
       (route) => false,
     );
   }
@@ -119,11 +122,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         context,
         listen: false,
       );
+      Analytics.track('signed_out', {'source': 'profile'});
       await googleAuthService.signOut();
 
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const AuthScreen()),
+          screenRoute('auth', (context) => const AuthScreen()),
           (route) => false,
         );
       }
@@ -181,6 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (result != null && result.isNotEmpty) {
+      Analytics.track('player_name_changed', {'source': 'profile'});
       await ApiService().updateUserProfile(displayName: result.trim());
       setState(() {
         playerName = result.trim();
@@ -217,8 +222,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsScreen(),
+                    screenRoute(
+                      'settings',
+                      (context) => const SettingsScreen(),
                     ),
                   );
                 },
@@ -435,8 +441,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => const SettingsScreen(),
+                              screenRoute(
+                                'settings',
+                                (context) => const SettingsScreen(),
                               ),
                             );
                           },
@@ -604,6 +611,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               TextButton(
                 onPressed: () async {
+                  Analytics.track('progress_reset', {'source': 'profile'});
                   await progressService.resetProgress();
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -635,6 +643,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showAboutDialog() {
+    Analytics.track('about_opened', {'source': 'profile'});
     final version =
         _packageInfo != null
             ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})'

@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
 import 'main_navigation_screen.dart';
+import '../services/analytics.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -52,12 +53,18 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // No sign-in wall: learners who have not created an account get an
     // anonymous one so their progress still syncs. If that cannot happen
     // (offline), progress stays on the device and the app works the same.
+    var anonymous = false;
     if (user == null) {
-      await _googleAuthService.ensureAnonymousSession().timeout(
+      anonymous = await _googleAuthService.ensureAnonymousSession().timeout(
         const Duration(seconds: 6),
         onTimeout: () => false,
       );
     }
+    Analytics.track('app_launched', {
+      'restored_session': user != null,
+      'auth_provider': user?.authProvider.name,
+      'is_anonymous': user == null ? anonymous : null,
+    });
 
     // Small delay for better UX
     await Future.delayed(const Duration(milliseconds: 500));
@@ -69,6 +76,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
+          settings: const RouteSettings(name: 'main'),
           pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(

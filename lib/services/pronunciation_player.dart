@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'analytics.dart';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:crypto/crypto.dart';
@@ -113,13 +114,23 @@ class PronunciationPlayer {
 
   /// Plays [url]. Failures (offline, missing file) are logged and swallowed:
   /// audio is an aid, never a reason to break the quiz.
-  Future<void> play(String? url, {double volume = 1.0}) async {
+  Future<void> play(
+    String? url, {
+    double volume = 1.0,
+    String source = 'auto',
+  }) async {
     if (url == null || url.isEmpty) return;
+    final clip = Uri.tryParse(url)?.pathSegments.lastOrNull;
     playingUrl.value = url;
     final file = await _localFile(url);
     // Another word was requested while this one downloaded.
     if (playingUrl.value != url) return;
     if (file == null) {
+      Analytics.track('pronunciation_failed', {
+        'reason': 'unavailable',
+        'clip': clip,
+        'source': source,
+      });
       _clear();
       return;
     }
@@ -129,8 +140,15 @@ class PronunciationPlayer {
       playingUrl.value = url; // stop() cleared it
       await player.setVolume(volume.clamp(0.0, 1.0));
       await player.play(DeviceFileSource(file.path, mimeType: 'audio/mpeg'));
+      Analytics.track('pronunciation_played', {'source': source, 'clip': clip});
     } catch (e) {
       debugPrint('Pronunciation playback failed for $url: $e');
+      Analytics.track('pronunciation_failed', {
+        'reason': 'error',
+        'clip': clip,
+        'source': source,
+        'error': e.toString().substring(0, e.toString().length.clamp(0, 200)),
+      });
       _clear();
     }
   }

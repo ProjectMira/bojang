@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'analytics.dart';
 
 /// Signs in with a Google or Apple [credential]. When the learner is still on
 /// the anonymous account the app created at first launch, that account is
@@ -12,14 +13,27 @@ Future<firebase_auth.UserCredential> signInOrLinkAnonymous(
   final current = auth.currentUser;
   if (current != null && current.isAnonymous) {
     try {
-      return await current.linkWithCredential(credential);
+      final linked = await current.linkWithCredential(credential);
+      Analytics.track('account_linked', {
+        'provider': credential.providerId,
+        'outcome': 'linked',
+      });
+      return linked;
     } on firebase_auth.FirebaseAuthException catch (e) {
       if (e.code != 'credential-already-in-use' &&
           e.code != 'email-already-in-use') {
         rethrow;
       }
+      Analytics.track('account_linked', {
+        'provider': credential.providerId,
+        'outcome': 'switched_to_existing',
+      });
       return auth.signInWithCredential(e.credential ?? credential);
     }
   }
+  Analytics.track('account_linked', {
+    'provider': credential.providerId,
+    'outcome': 'signed_in',
+  });
   return auth.signInWithCredential(credential);
 }

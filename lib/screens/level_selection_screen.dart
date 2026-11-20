@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/level_models.dart';
+import '../services/analytics.dart';
 import '../services/levels_repository.dart';
 import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
@@ -44,11 +45,23 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   Future<void> _loadLevels() async {
     try {
       final loadedLevels = await LevelsRepository.loadLevels();
+      Analytics.track('levels_loaded', {
+        'level_count': loadedLevels.length,
+        'topic_count': loadedLevels.fold<int>(
+          0,
+          (sum, level) => sum + level.sublevels.length,
+        ),
+      });
       setState(() {
         levels = loadedLevels;
         isLoading = false;
       });
     } catch (e) {
+      final msg = e.toString();
+      Analytics.track('levels_loaded', {
+        'level_count': 0,
+        'error': msg.length > 200 ? msg.substring(0, 200) : msg,
+      });
       setState(() {
         isLoading = false;
       });
@@ -283,6 +296,12 @@ class _TopicCardState extends State<_TopicCard> {
           highlightColor: widget.color.withOpacity(0.08),
           onTap: () {
             if (isLocked) {
+              Analytics.track('topic_locked_tapped', {
+                'topic': widget.sublevel.name,
+                'topic_path': widget.sublevel.path,
+                'required_xp': widget.sublevel.requiredXp,
+                'xp': Provider.of<ProgressService>(context, listen: false).xp,
+              });
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   behavior: SnackBarBehavior.floating,
@@ -298,14 +317,22 @@ class _TopicCardState extends State<_TopicCard> {
             }
             // Straight into the lesson: its style comes from the learner's
             // saved preference (Settings, or the tune button in the lesson).
+            Analytics.track('topic_selected', {
+              'topic': widget.sublevel.name,
+              'topic_path': widget.sublevel.path,
+              'level': widget.sublevel.level,
+              'word_count': widget.sublevel.wordCount,
+              'progress': widget.progress,
+              'completed': isCompleted,
+            });
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder:
-                    (context) => QuizScreen(
-                      topicFilePath: widget.sublevel.path,
-                      title: widget.sublevel.name,
-                    ),
+              screenRoute(
+                'quiz',
+                (context) => QuizScreen(
+                  topicFilePath: widget.sublevel.path,
+                  title: widget.sublevel.name,
+                ),
               ),
             );
           },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/analytics.dart';
 import '../theme/app_tokens.dart';
 import 'home_page.dart';
 import 'streak_view_screen.dart';
@@ -15,7 +16,27 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  void _goToStreak() => setState(() => _currentIndex = 1);
+  static const _tabNames = ['home', 'streak', 'games', 'profile'];
+
+  @override
+  void initState() {
+    super.initState();
+    Analytics.screen('tab_home');
+  }
+
+  void _selectTab(int index, {String via = 'nav_bar'}) {
+    if (index != _currentIndex) {
+      Analytics.track('tab_selected', {
+        'tab': _tabNames[index],
+        'from_tab': _tabNames[_currentIndex],
+        'via': via,
+      });
+      Analytics.screen('tab_${_tabNames[index]}');
+    }
+    setState(() => _currentIndex = index);
+  }
+
+  void _goToStreak() => _selectTab(1, via: 'home_streak_card');
 
   List<Widget> get _screens => [
     HomePage(onSeeStreak: _goToStreak),
@@ -98,7 +119,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final inactiveColor = AppTokens.inkSoft(context);
 
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () => _selectTab(index),
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

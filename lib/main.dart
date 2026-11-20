@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
+import 'services/analytics.dart';
 import 'services/app_config.dart';
 import 'services/notification_service.dart';
 import 'services/theme_service.dart';
@@ -25,6 +27,9 @@ void main() async {
     debugPrint('Firebase initialization skipped: iOS config disabled');
   }
 
+  // Analytics first, so sign-in restored during start-up is attributed.
+  await Analytics.init();
+
   try {
     await GoogleAuthService().initialize();
     await ApiService().initialize();
@@ -32,7 +37,7 @@ void main() async {
     debugPrint('Service initialization failed: $e');
   }
 
-  runApp(const MyApp());
+  runApp(const PostHogWidget(child: MyApp()));
 
   // Set up reminders only once the app is on screen: on a fresh install this
   // shows iOS's notification permission prompt, and awaiting it before
@@ -67,6 +72,7 @@ class MyApp extends StatelessWidget {
             themeMode:
                 themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             home: const SplashScreen(),
+            navigatorObservers: [Analytics.observer],
             debugShowCheckedModeBanner: false,
           );
         },

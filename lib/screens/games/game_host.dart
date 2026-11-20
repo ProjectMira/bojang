@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/game_word.dart';
+import '../../services/analytics.dart';
 import '../../services/game_words_repository.dart';
 import '../../services/pronunciation_player.dart';
 import '../../services/progress_service.dart';
@@ -75,6 +76,7 @@ class _GameHostState extends State<GameHost> {
   bool _newBest = false;
   // Rebuilds the game from scratch for every round.
   int _roundId = 0;
+  DateTime? _roundStartedAt;
 
   String get _bestKey => 'game_best_${widget.gameId}';
 
@@ -87,8 +89,20 @@ class _GameHostState extends State<GameHost> {
 
   @override
   void dispose() {
+    if (_phase == _Phase.playing) {
+      Analytics.track('game_quit', {
+        'game': widget.gameId,
+        'topic': _topic?.name,
+        'duration_s': _roundSeconds(),
+      });
+    }
     PronunciationPlayer.instance.stop();
     super.dispose();
+  }
+
+  int? _roundSeconds() {
+    final started = _roundStartedAt;
+    return started == null ? null : DateTime.now().difference(started).inSeconds;
   }
 
   Future<void> _loadBest() async {
@@ -119,7 +133,13 @@ class _GameHostState extends State<GameHost> {
     });
   }
 
-  Future<void> _start(GameTopic topic) async {
+  Future<void> _start(GameTopic topic, {bool random = false}) async {
+    Analytics.track('game_topic_selected', {
+      'game': widget.gameId,
+      'topic': topic.name,
+      'topic_id': topic.id,
+      'random': random,
+    });
     setState(() {
       _phase = _Phase.loading;
       _topic = topic;
@@ -141,6 +161,13 @@ class _GameHostState extends State<GameHost> {
           ..shuffle(Random());
 
     if (usable.length < widget.minWords) {
+      Analytics.track('game_not_enough_words', {
+        'game': widget.gameId,
+        'topic': topic.name,
+        'usable': usable.length,
+        'loaded': words.length,
+        'min_words': widget.minWords,
+      });
       setState(() => _phase = _Phase.pickingTopic);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -157,6 +184,12 @@ class _GameHostState extends State<GameHost> {
 
     prefetchWordAudio(context, usable);
     precacheWordImages(context, usable);
+    _roundStartedAt = DateTime.now();
+    Analytics.track('game_started', {
+      'game': widget.gameId,
+      'topic': topic.name,
+      'word_count': usable.length,
+    });
     setState(() {
       _words = usable;
       _roundId++;
@@ -167,13 +200,23 @@ class _GameHostState extends State<GameHost> {
   void _startRandom() {
     final topics = _topics ?? const [];
     if (topics.isEmpty) return;
-    _start(topics[Random().nextInt(topics.length)]);
+    _start(topics[Random().nextInt(topics.length)], random: true);
   }
 
   Future<void> _finish(GameResult result) async {
     if (_phase != _Phase.playing) return;
     PronunciationPlayer.instance.stop();
     final newBest = result.correct > _best;
+    Analytics.track('game_completed', {
+      'game': widget.gameId,
+      'topic': _topic?.name,
+      'correct': result.correct,
+      'total': result.total,
+      'accuracy': result.total > 0 ? result.correct / result.total : null,
+      'best': newBest ? result.correct : _best,
+      'new_best': newBest,
+      'duration_s': _roundSeconds(),
+    });
     setState(() {
       _result = result;
       _newBest = newBest;
@@ -429,6 +472,10 @@ class _GameHostState extends State<GameHost> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  Analytics.track('game_result_action', {
+                    'game': widget.gameId,
+                    'action': 'play_again',
+                  });
                   final topic = _topic;
                   if (topic != null) _start(topic);
                 },
@@ -452,7 +499,13 @@ class _GameHostState extends State<GameHost> {
             ),
             const SizedBox(height: 4),
             TextButton(
-              onPressed: () => setState(() => _phase = _Phase.pickingTopic),
+              onPressed: () {
+                Analytics.track('game_result_action', {
+                  'game': widget.gameId,
+                  'action': 'change_topic',
+                });
+                setState(() => _phase = _Phase.pickingTopic);
+              },
               child: Text(
                 'Change topic',
                 style: AppTextStyles.poppins(
@@ -463,7 +516,13 @@ class _GameHostState extends State<GameHost> {
               ),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                Analytics.track('game_result_action', {
+                  'game': widget.gameId,
+                  'action': 'done',
+                });
+                Navigator.of(context).pop();
+              },
               child: Text(
                 'Done',
                 style: AppTextStyles.poppins(

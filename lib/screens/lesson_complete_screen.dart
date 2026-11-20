@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import '../services/analytics.dart';
 import '../theme/app_tokens.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
@@ -61,6 +62,16 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
     _confettiLeft.dispose();
     _confettiRight.dispose();
     super.dispose();
+  }
+
+  void _trackAction(String action) {
+    Analytics.track('lesson_complete_action', {
+      'action': action,
+      'topic': widget.title,
+      'topic_path': widget.topicFilePath,
+      'score': widget.score,
+      'total': widget.totalQuestions,
+    });
   }
 
   @override
@@ -206,7 +217,10 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(),
+                          onPressed: () {
+                            _trackAction('continue');
+                            Navigator.of(context).pop();
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
@@ -229,13 +243,14 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
                       const SizedBox(height: 8),
                       TextButton(
                         onPressed: () {
+                          _trackAction('practice_again');
                           Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => QuizScreen(
-                                    topicFilePath: widget.topicFilePath,
-                                    title: widget.title,
-                                  ),
+                            screenRoute(
+                              'quiz',
+                              (context) => QuizScreen(
+                                topicFilePath: widget.topicFilePath,
+                                title: widget.title,
+                              ),
                             ),
                           );
                         },

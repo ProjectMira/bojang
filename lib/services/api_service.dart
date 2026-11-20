@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'analytics.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -42,6 +43,9 @@ class ApiService {
       }
     } catch (e) {
       print('Auth token refresh skipped: $e');
+      Analytics.track('auth_token_refresh_failed', {
+        'error': e.toString().substring(0, e.toString().length.clamp(0, 200)),
+      });
     }
   }
 
@@ -453,6 +457,17 @@ class ApiService {
     }
   }
 
+  // Every non-2xx answer and network failure reaches PostHog as api_error.
+  void _reportApiError(String method, String endpoint, {int? status, Object? error}) {
+    final text = error?.toString();
+    Analytics.track('api_error', {
+      'method': method,
+      'endpoint': endpoint.split('?').first,
+      'status': status,
+      'error': text == null ? null : text.substring(0, text.length.clamp(0, 200)),
+    });
+  }
+
   // Generic GET request with error handling
   Future<Map<String, dynamic>?> _get(
     String endpoint, {
@@ -468,9 +483,11 @@ class ApiService {
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
+      _reportApiError('GET', endpoint, status: response.statusCode);
       return null;
     } catch (e) {
       print('GET $endpoint error: $e');
+      _reportApiError('GET', endpoint, error: e);
       return null;
     }
   }
@@ -488,9 +505,11 @@ class ApiService {
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(jsonDecode(response.body));
       }
+      _reportApiError('GET', endpoint, status: response.statusCode);
       return null;
     } catch (e) {
       print('GET $endpoint error: $e');
+      _reportApiError('GET', endpoint, error: e);
       return null;
     }
   }
@@ -511,9 +530,11 @@ class ApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return jsonDecode(response.body);
       }
+      _reportApiError('POST', endpoint, status: response.statusCode);
       return null;
     } catch (e) {
       print('POST $endpoint error: $e');
+      _reportApiError('POST', endpoint, error: e);
       return null;
     }
   }
@@ -532,9 +553,11 @@ class ApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return jsonDecode(response.body);
       }
+      _reportApiError('PATCH', endpoint, status: response.statusCode);
       return null;
     } catch (e) {
       print('PATCH $endpoint error: $e');
+      _reportApiError('PATCH', endpoint, error: e);
       return null;
     }
   }
@@ -546,9 +569,11 @@ class ApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return jsonDecode(response.body);
       }
+      _reportApiError('DELETE', endpoint, status: response.statusCode);
       return null;
     } catch (e) {
       print('DELETE $endpoint error: $e');
+      _reportApiError('DELETE', endpoint, error: e);
       return null;
     }
   }

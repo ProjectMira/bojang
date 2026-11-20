@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/analytics.dart';
 import '../services/notification_service.dart';
 import '../widgets/content_width.dart';
 
@@ -50,6 +51,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     setState(() {
       _notificationsEnabled = value;
     });
+    Analytics.track('notifications_toggled', {'enabled': value});
+    Analytics.setPersonProperties({'notifications_enabled': value});
 
     if (value) {
       await _notificationService.scheduleDailyNotification(_selectedTime);
@@ -75,6 +78,16 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     if (picked != null && picked != _selectedTime) {
       setState(() {
         _selectedTime = picked;
+      });
+      Analytics.track('reminder_time_changed', {
+        'hour': picked.hour,
+        'minute': picked.minute,
+        'notifications_enabled': _notificationsEnabled,
+      });
+      Analytics.setPersonProperties({
+        'reminder_time':
+            '${picked.hour.toString().padLeft(2, '0')}:'
+            '${picked.minute.toString().padLeft(2, '0')}',
       });
       
       await _saveSettings();

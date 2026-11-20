@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'analytics.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../widgets/achievement_dialog.dart';
@@ -85,6 +86,7 @@ class ProgressService extends ChangeNotifier {
       _accuracy = (_totalCorrectAnswers / _totalQuizzesTaken) * 100;
     }
 
+    _syncPersonProperties();
     notifyListeners();
   }
 
@@ -138,8 +140,23 @@ class ProgressService extends ChangeNotifier {
     _totalQuizzesTaken += totalQuestions;
     _totalCorrectAnswers += score;
     _accuracy = (_totalCorrectAnswers / _totalQuizzesTaken) * 100;
+    final previousLevel = _currentLevel;
+    final previousStreak = _currentStreak;
     _xp += score * 10;
     _currentLevel = _levelFromXp(_xp);
+    if (score > 0) {
+      Analytics.track('xp_gained', {
+        'amount': score * 10,
+        'xp': _xp,
+        'category': category,
+      });
+    }
+    if (_currentLevel > previousLevel) {
+      Analytics.track('level_up', {
+        'level': _currentLevel,
+        'previous_level': previousLevel,
+      });
+    }
 
     // Update category progress
     final categoryKey = category.toLowerCase().replaceAll(' ', '_');
@@ -165,8 +182,26 @@ class ProgressService extends ChangeNotifier {
       }
     }
 
+    if (_currentStreak != previousStreak) {
+      Analytics.track(
+        _currentStreak > previousStreak ? 'streak_extended' : 'streak_reset',
+        {
+          'current_streak': _currentStreak,
+          'longest_streak': _longestStreak,
+          'previous_streak': previousStreak,
+        },
+      );
+    }
+
     // Check for new achievements and show them
     final newAchievements = _checkAchievements();
+    for (final id in newAchievements) {
+      Analytics.track('achievement_unlocked', {
+        'achievement': id,
+        'title': getAchievementTitle(id),
+      });
+    }
+    _syncPersonProperties();
 
     // Save all data
     await _saveProgressData(prefs);
@@ -180,6 +215,20 @@ class ProgressService extends ChangeNotifier {
         });
       }
     }
+  }
+
+  void _syncPersonProperties() {
+    Analytics.setPersonProperties({
+      'xp': _xp,
+      'level': _currentLevel,
+      'current_streak': _currentStreak,
+      'longest_streak': _longestStreak,
+      'completed_levels': _completedLevelsCount,
+      'accuracy': double.parse(_accuracy.toStringAsFixed(1)),
+      'achievements_unlocked': _unlockedAchievements.length,
+      'questions_answered': _totalQuizzesTaken,
+      'league': _league,
+    });
   }
 
   List<String> _checkAchievements() {

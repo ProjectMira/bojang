@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'dart:io';
 import '../utils/yak_lines.dart';
+import 'analytics.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -48,7 +49,9 @@ class NotificationService {
               AndroidFlutterLocalNotificationsPlugin>();
 
       // Request notification permission for Android 13+
-      await androidImplementation?.requestNotificationsPermission();
+      final granted =
+          await androidImplementation?.requestNotificationsPermission();
+      Analytics.track('notification_permission_result', {'granted': granted});
       
       // Request exact alarm permission for scheduling
       await androidImplementation?.requestExactAlarmsPermission();
@@ -57,11 +60,12 @@ class NotificationService {
           flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>();
 
-      await iOSImplementation?.requestPermissions(
+      final granted = await iOSImplementation?.requestPermissions(
         alert: true,
         badge: true,
         sound: true,
       );
+      Analytics.track('notification_permission_result', {'granted': granted});
     }
   }
 

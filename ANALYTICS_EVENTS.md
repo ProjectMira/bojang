@@ -1,0 +1,97 @@
+# Bojang analytics events (PostHog)
+
+PostHog project: "Default project" (id 754455, US Cloud). Code: `lib/services/analytics.dart`.
+
+- Release builds send events. Debug builds and tests send nothing unless they are run with
+  `--dart-define=POSTHOG_IN_DEBUG=true`.
+- Calls are fire-and-forget (`Analytics.track(name, {...})`). They never throw, and null property
+  values are dropped.
+- Naming: `object_action`, snake_case. Properties are snake_case as well.
+- Every event also carries the super properties `app_version`, `app_build` and `platform`.
+
+## Automatic
+
+- **`Application Opened` / `Application Backgrounded` / `Application Installed` / `Application Updated`**
+  (SDK lifecycle): sessions, retention, installs and upgrades.
+- **`$screen`**: every pushed page. The observer reads the name from `screenRoute('name', ...)` or
+  `RouteSettings(name:)`. Main tabs are sent by hand as `$screen` with `tab_*` names.
+- **`$exception`**: Flutter framework errors, uncaught Dart and isolate errors, and native
+  crashes (error tracking).
+- **Session replay**: screen recordings of sessions, with text visible. The auth form fields are
+  masked with `PostHogMaskWidget`. Replay must also be switched on in the PostHog project settings.
+
+## Identity
+
+- **`identify(uid)`**: on restored sign-in, anonymous session, email, Google and Apple sign-in.
+  - The distinct id is the backend user id (or the Firebase uid as a fallback).
+  - Person properties: `email`, `name`, `auth_provider`, `is_anonymous`.
+  - `first_seen_version` is set once.
+- **`reset()`**: on sign-out and account deletion.
+- **Person properties** (set after each lesson or game, and on load): `xp`, `level`,
+  `current_streak`, `longest_streak`, `completed_levels`, `accuracy`, `dark_mode`, `language`,
+  `voice`, `lesson_style`, `sound_effects`, `daily_target`, `weekly_goal`,
+  `notifications_enabled`, `reminder_time`.
+
+## Events
+
+| Event | Where | Properties |
+|---|---|---|
+| `app_launched` | splash | `restored_session` (bool), `auth_provider`, `is_anonymous` |
+| `anonymous_session_started` | auth service | `success`, `error` |
+| `sign_in_opened` | profile | `source` |
+| `auth_screen_viewed` | auth screen | `source` (profile/settings/splash) |
+| `auth_mode_switched` | auth screen | `mode` (sign_in/sign_up) |
+| `sign_in_started` | auth screen | `method` (email/google/apple), `mode` |
+| `sign_in_succeeded` | auth screen | `method`, `mode`, `linked_anonymous` |
+| `sign_in_failed` | auth screen | `method`, `mode`, `error` |
+| `sign_in_cancelled` | auth screen | `method` |
+| `password_reset_requested` | auth screen | `success`, `error` |
+| `auth_skipped` | auth screen | |
+| `account_linked` | firebase_account_link | `provider`, `outcome` (linked/switched_to_existing/signed_in) |
+| `signed_out` | profile | |
+| `account_deletion_started` / `account_deletion_cancelled` / `account_deleted` / `account_deletion_failed` | settings | `step` |
+| `tab_selected` | main nav | `tab` (home/streak/games/profile), `from_tab` |
+| `home_shortcut_tapped` | home | `shortcut` (see_all_categories/topic/memory_match/hero/streak/share), `topic`, `position` |
+| `app_shared` | home | |
+| `levels_loaded` | level selection | `level_count`, `source` (api/bundled), `error` |
+| `topic_selected` | level selection | `topic`, `topic_path`, `level`, `word_count`, `progress`, `completed` |
+| `topic_locked_tapped` | level selection | `topic`, `required_xp`, `xp` |
+| `lesson_style_selected` | style sheet | `style`, `previous_style`, `source` (quiz/settings) |
+| `lesson_started` | quiz | `topic`, `topic_path`, `style`, `question_count`, `remote_session` (bool), `source` |
+| `lesson_load_failed` | quiz | `topic`, `error` |
+| `question_answered` | quiz | `topic`, `question_index`, `question_type`, `correct`, `combo`, `tibetan`, `english`, `style` |
+| `lesson_quit` | quiz | `topic`, `question_index`, `question_count`, `score` |
+| `lesson_completed` | quiz | `topic`, `topic_path`, `style`, `score`, `total`, `accuracy`, `xp_earned`, `streak`, `duration_s` |
+| `lesson_progress_submitted` | quiz | `success` |
+| `lesson_complete_action` | lesson complete | `action` (continue/practice_again) |
+| `game_selected` | games tab | `game`, `skill` |
+| `game_topic_selected` | game host | `game`, `topic`, `random` |
+| `game_started` | game host / memory / speed | `game`, `topic`, `word_count` |
+| `game_not_enough_words` | game host | `game`, `topic`, `usable`, `min_words` |
+| `game_completed` | game host / memory / speed | `game`, `topic`, `correct`, `total`, `moves`, `best`, `new_best`, `duration_s` |
+| `game_result_action` | game host / memory | `game`, `action` (play_again/change_topic/done) |
+| `game_answered` | speed quiz | `game`, `correct`, `question_type`, `seconds_left` |
+| `game_quit` | game host / memory / speed | `game`, `topic` |
+| `pronunciation_played` | speaker button | `source` (tap/auto), `voice` |
+| `pronunciation_failed` | player | `reason` (missing/offline/error), `error` |
+| `xp_gained` | progress | `amount`, `xp`, `category` |
+| `level_up` | progress | `level`, `previous_level` |
+| `streak_extended` / `streak_reset` | progress | `current_streak`, `longest_streak` |
+| `achievement_unlocked` | progress | `achievement`, `title` |
+| `progress_reset` | settings / profile | `source` |
+| `streak_practice_tapped` | streak screen | `practiced_today` |
+| `setting_changed` | settings / theme service | `setting`, `value` |
+| `notifications_toggled` | notification settings | `enabled` |
+| `reminder_time_changed` | notification settings | `hour`, `minute` |
+| `notification_permission_result` | notification service | `granted` |
+| `player_name_changed` | profile | |
+| `progress_exported` | settings | `success`, `reason` |
+| `achievements_viewed` | settings | |
+| `rate_app_tapped` / `about_opened` / `privacy_opened` / `made_by_opened` | settings / profile | |
+| `api_error` | api service | `endpoint`, `method`, `status`, `error` |
+| `auth_token_refresh_failed` | api service | `error` |
+
+## Not tracked on purpose
+
+- Passwords and typed text.
+- Full answer option lists.

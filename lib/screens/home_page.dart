@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/level_models.dart';
+import '../services/analytics.dart';
 import '../services/api_service.dart';
 import '../services/levels_repository.dart';
 import '../services/progress_service.dart';
@@ -91,6 +92,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Future<void> _shareApp() async {
+    Analytics.track('home_shortcut_tapped', {'shortcut': 'share'});
+    Analytics.track('app_shared', {'channel': 'website_link'});
     final uri = Uri.parse('https://www.bojang.in');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -132,14 +135,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       SectionHeader(
                         title: 'Categories',
                         actionLabel: 'See all',
-                        onAction:
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => const LevelSelectionScreen(),
-                              ),
+                        onAction: () {
+                          Analytics.track('home_shortcut_tapped', {
+                            'shortcut': 'see_all_categories',
+                          });
+                          Navigator.push(
+                            context,
+                            screenRoute(
+                              'level_selection',
+                              (context) => const LevelSelectionScreen(),
                             ),
+                          );
+                        },
                       ),
 
                       const SizedBox(height: AppSpacing.md),
@@ -200,7 +207,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final hasLessons = progressService.completedLevelsCount > 0;
 
     return StatStrip(
-      onTap: widget.onSeeStreak,
+      onTap:
+          widget.onSeeStreak == null
+              ? null
+              : () {
+                Analytics.track('home_shortcut_tapped', {'shortcut': 'streak'});
+                widget.onSeeStreak!();
+              },
       items: [
         StatStripItem(
           icon: Icons.local_fire_department,
@@ -253,14 +266,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     : 'Lesson',
             color: topicColors[i % topicColors.length],
             onTap: () {
+              Analytics.track('home_shortcut_tapped', {
+                'shortcut': 'topic',
+                'topic': sublevel.name,
+                'topic_path': sublevel.path,
+                'position': i,
+              });
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => QuizScreen(
-                        topicFilePath: sublevel.path,
-                        title: sublevel.name,
-                      ),
+                screenRoute(
+                  'quiz',
+                  (context) => QuizScreen(
+                    topicFilePath: sublevel.path,
+                    title: sublevel.name,
+                  ),
                 ),
               );
             },
@@ -277,9 +296,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         color: AppColors.purple,
         leading: _buildMemoryCardFan(context),
         onTap: () {
+          Analytics.track('home_shortcut_tapped', {'shortcut': 'memory_match'});
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const MemoryMatchGame()),
+            screenRoute('memory_match', (context) => const MemoryMatchGame()),
           );
         },
       ),
@@ -392,10 +412,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: InkWell(
                 borderRadius: BorderRadius.circular(AppRadius.hero),
                 onTap: () {
+                  Analytics.track('home_shortcut_tapped', {'shortcut': 'hero'});
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const LevelSelectionScreen(),
+                    screenRoute(
+                      'level_selection',
+                      (context) => const LevelSelectionScreen(),
                     ),
                   );
                 },

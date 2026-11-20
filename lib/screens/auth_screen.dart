@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
+import '../services/analytics.dart';
 import '../services/app_config.dart';
 import '../services/google_auth_service.dart';
 import '../widgets/apple_sign_in_button.dart';
@@ -69,6 +71,23 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
     _animationController.forward();
     _googleAuthService.initialize();
+    Analytics.track('auth_screen_viewed', {
+      'mode': _mode,
+      'email_enabled': AppConfig.emailSignInEnabled,
+      'google_enabled': AppConfig.googleSignInEnabled,
+      'apple_enabled': AppConfig.appleSignInEnabled,
+    });
+  }
+
+  String get _mode => _isCreatingAccount ? 'sign_up' : 'sign_in';
+
+  // A short, non-identifying label for a failure: Firebase's error code when
+  // there is one, otherwise the error text cut to 200 characters.
+  static String _errorCode(Object? error) {
+    if (error == null) return 'unknown';
+    if (error is firebase_auth.FirebaseAuthException) return error.code;
+    final text = error.toString().replaceAll('\n', ' ').trim();
+    return text.length > 200 ? text.substring(0, 200) : text;
   }
 
   @override
@@ -85,6 +104,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     FocusScope.of(context).unfocus();
     setState(() => _loadingMethod = _SignInMethod.email);
+    final mode = _mode;
+    Analytics.track('sign_in_started', {'method': 'email', 'mode': mode});
 
     try {
       final user =
@@ -98,14 +119,28 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                 email: _emailController.text,
                 password: _passwordController.text,
               );
+      if (user != null) {
+        Analytics.track('sign_in_succeeded', {'method': 'email', 'mode': mode});
+      } else {
+        Analytics.track('sign_in_failed', {
+          'method': 'email',
+          'mode': mode,
+          'error': 'no_user',
+        });
+      }
       if (user != null && mounted) {
         _showSnackBar('Welcome ${user.displayName}!', isSuccess: true);
         await Future.delayed(const Duration(milliseconds: 500));
-        _navigateToMainScreen();
+        _navigateToMainScreen(reason: 'signed_in');
       } else if (mounted) {
         setState(() => _emailError = _emailErrorMessage(null));
       }
     } catch (e) {
+      Analytics.track('sign_in_failed', {
+        'method': 'email',
+        'mode': mode,
+        'error': _errorCode(e),
+      });
       if (mounted) setState(() => _emailError = _emailErrorMessage(e));
     } finally {
       if (mounted) setState(() => _loadingMethod = null);
@@ -122,6 +157,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     }
     try {
       await _googleAuthService.sendPasswordResetEmail(email);
+      Analytics.track('password_reset_requested', {'success': true});
       if (mounted) {
         setState(() => _emailError = null);
         _showSnackBar(
@@ -130,6 +166,10 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         );
       }
     } catch (e) {
+      Analytics.track('password_reset_requested', {
+        'success': false,
+        'error': _errorCode(e),
+      });
       if (mounted) setState(() => _emailError = _emailErrorMessage(e));
     }
   }
@@ -165,18 +205,28 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
   Future<void> _handleAppleSignIn() async {
     setState(() => _loadingMethod = _SignInMethod.apple);
+    Analytics.track('sign_in_started', {'method': 'apple', 'mode': _mode});
 
     try {
       final user = await _googleAuthService.signInWithApple();
+      Analytics.track(
+        user != null ? 'sign_in_succeeded' : 'sign_in_cancelled',
+        {'method': 'apple', 'mode': _mode},
+      );
       if (user != null && mounted) {
         _showSnackBar('Welcome ${user.displayName}!', isSuccess: true);
         await Future.delayed(
           const Duration(milliseconds: 500),
         ); // Brief delay to show success
-        _navigateToMainScreen();
+        _navigateToMainScreen(reason: 'signed_in');
       }
       // null means the user dismissed Apple's sheet: no message.
     } catch (e) {
+      Analytics.track('sign_in_failed', {
+        'method': 'apple',
+        'mode': _mode,
+        'error': _errorCode(e),
+      });
       if (mounted) _showSignInIssueDialog('Apple', detail: _errorDetail(e));
     } finally {
       if (mounted) setState(() => _loadingMethod = null);
@@ -185,18 +235,28 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
   Future<void> _handleGoogleSignIn() async {
     setState(() => _loadingMethod = _SignInMethod.google);
+    Analytics.track('sign_in_started', {'method': 'google', 'mode': _mode});
 
     try {
       final user = await _googleAuthService.signInWithGoogle();
+      Analytics.track(
+        user != null ? 'sign_in_succeeded' : 'sign_in_cancelled',
+        {'method': 'google', 'mode': _mode},
+      );
       if (user != null && mounted) {
         _showSnackBar('Welcome ${user.displayName}!', isSuccess: true);
         await Future.delayed(
           const Duration(milliseconds: 500),
         ); // Brief delay to show success
-        _navigateToMainScreen();
+        _navigateToMainScreen(reason: 'signed_in');
       }
       // null means the user cancelled Google sign-in: no message.
     } catch (e) {
+      Analytics.track('sign_in_failed', {
+        'method': 'google',
+        'mode': _mode,
+        'error': _errorCode(e),
+      });
       if (mounted) _showSignInIssueDialog('Google', detail: _errorDetail(e));
     } finally {
       if (mounted) setState(() => _loadingMethod = null);
@@ -260,10 +320,11 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _navigateToMainScreen() {
+  void _navigateToMainScreen({String reason = 'skipped'}) {
+    if (reason == 'skipped') Analytics.track('auth_skipped', {'mode': _mode});
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        settings: const RouteSettings(name: '/main'),
+        settings: const RouteSettings(name: 'main'),
         builder: (context) => const MainNavigationScreen(),
       ),
     );
@@ -416,7 +477,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
   Widget _buildEmailForm() {
     final isEmailLoading = _loadingMethod == _SignInMethod.email;
-    return AutofillGroup(
+    // Masked in session replay: names, emails and passwords stay private.
+    return PostHogMaskWidget(
+      child: AutofillGroup(
       child: Form(
         key: _formKey,
         child: Column(
@@ -546,10 +609,13 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               onPressed:
                   _isLoading
                       ? null
-                      : () => setState(() {
-                        _isCreatingAccount = !_isCreatingAccount;
-                        _emailError = null;
-                      }),
+                      : () {
+                        setState(() {
+                          _isCreatingAccount = !_isCreatingAccount;
+                          _emailError = null;
+                        });
+                        Analytics.track('auth_mode_switched', {'mode': _mode});
+                      },
               child: Text(
                 _isCreatingAccount
                     ? 'Already have an account? Sign in'
@@ -559,6 +625,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -581,7 +648,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
   Widget _buildSkipButton() {
     return TextButton(
-      onPressed: _navigateToMainScreen,
+      onPressed: () => _navigateToMainScreen(),
       child: Text(
         'Continue without account',
         style: GoogleFonts.poppins(

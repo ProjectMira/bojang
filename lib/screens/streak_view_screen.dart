@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../services/analytics.dart';
 import '../services/progress_service.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
@@ -467,10 +468,14 @@ class StreakViewScreen extends StatelessWidget {
   Widget _buildPracticeButton(BuildContext context, bool practicedToday) {
     return ElevatedButton.icon(
       onPressed: () {
+        Analytics.track('streak_practice_tapped', {
+          'practiced_today': practicedToday,
+        });
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const LevelSelectionScreen(),
+          screenRoute(
+            'level_selection',
+            (context) => const LevelSelectionScreen(),
           ),
         );
       },
