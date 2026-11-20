@@ -56,16 +56,12 @@ Config > Parameters, then Publish changes.
   `monitor` (default: verify and count, never block), `enforce` (401 without a valid token),
   `off`. Counts per server instance: `GET /admin/app-check/stats` (admin token).
 
-Console (App Check was opened on 2026-11-21; `com.bojang.app` already shows App Attest as
-registered, but the app uses DeviceCheck, so DeviceCheck must be added):
-1. Apple Developer > Keys > create a key with **DeviceCheck** enabled (the APNs key below can
-   have both services), download the `.p8`.
-2. Firebase > App Check > Apps > `com.bojang.app` > ⋮ > edit providers > DeviceCheck > upload
-   the `.p8` and enter its Key ID.
-3. Watch `/admin/app-check/stats` for a week after the build ships. When `valid_share` is close
+Console: done 2026-11-21. `com.bojang.app` has DeviceCheck (key `3BMNZ7JP4R`, token TTL 1 h)
+and App Attest registered.
+1. Watch `/admin/app-check/stats` for a week after the build ships. When `valid_share` is close
    to 1 for current app versions, set `APP_CHECK_MODE=enforce` on Cloud Run. Older app versions
    send no token and are refused from then on, so enforce only once few people still use them.
-4. Optional, also after that: enforce App Check for Firebase Authentication in the console.
+2. Optional, also after that: enforce App Check for Firebase Authentication in the console.
 
 ## Push notifications (Firebase Cloud Messaging)
 
@@ -92,12 +88,12 @@ registered, but the app uses DeviceCheck, so DeviceCheck must be added):
     To rotate: add a new secret version, redeploy, then
     `gcloud scheduler jobs update http bojang-streak-reminders --location=us-central1 --update-headers=X-Cron-Secret=<new>`.
 
-Console:
-1. Apple Developer > Keys > create a key with **Apple Push Notifications service (APNs)**,
-   download the `.p8` (the DeviceCheck key above can be the same key).
-2. Firebase > Project settings > Cloud Messaging > Apple app configuration > APNs
-   authentication key > upload the `.p8` with its Key ID and Team ID `W66Z24ZPWQ`.
-3. Done: `CRON_SECRET` and the hourly Cloud Scheduler job (see above).
+Console: done 2026-11-21.
+- Apple key "Bojang Push and DeviceCheck", Key ID `3BMNZ7JP4R`: APNs (Sandbox & Production,
+  team scoped) + DeviceCheck. Apple keeps no copy of the `.p8`; Tashi holds the only one.
+- Uploaded as the **production** APNs auth key for `com.bojang.app`. The development slot is
+  empty; upload the same `.p8` there to get pushes on debug builds run from Xcode.
+- `CRON_SECRET` and the hourly Cloud Scheduler job (see above).
 
 ## App Store privacy label
 
