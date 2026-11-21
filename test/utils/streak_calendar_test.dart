@@ -20,12 +20,12 @@ void main() {
       );
     });
 
-    test('missed past days after the first practice are frozen', () {
-      expect(calendar.stateOf(DateTime(2026, 11, 5)), StreakDayState.frozen);
-      expect(calendar.stateOf(DateTime(2026, 11, 20)), StreakDayState.frozen);
+    test('missed past days after the first practice are missed', () {
+      expect(calendar.stateOf(DateTime(2026, 11, 5)), StreakDayState.missed);
+      expect(calendar.stateOf(DateTime(2026, 11, 20)), StreakDayState.missed);
     });
 
-    test('days before the first practice are not frozen', () {
+    test('days before the first practice are not counted as missed', () {
       expect(
         calendar.stateOf(DateTime(2026, 11, 2)),
         StreakDayState.beforeStart,
@@ -48,7 +48,7 @@ void main() {
       expect(calendar.stateOf(DateTime(2026, 11, 22)), StreakDayState.future);
     });
 
-    test('a learner who never practiced has no frozen days', () {
+    test('a learner who never practiced has no missed days', () {
       final empty = StreakCalendar(const [], now: now);
       expect(
         empty.stateOf(DateTime(2026, 11, 20)),
@@ -73,12 +73,16 @@ void main() {
       DateTime(2026, 11, 4),
     ], now: now);
 
-    test('November: 2 practiced, 18 frozen up to yesterday', () {
+    test('November: 2 practiced, 18 missed up to yesterday', () {
       final nov = DateTime(2026, 11);
       expect(calendar.countIn(nov, StreakDayState.practiced), 2);
       // Nov 1-20 is 20 past days, minus the 2 practiced and nothing before
       // the start (the first practice was in October) = 18.
-      expect(calendar.countIn(nov, StreakDayState.frozen), 18);
+      expect(calendar.countIn(nov, StreakDayState.missed), 18);
+    });
+
+    test('the lifetime total counts every practiced day once', () {
+      expect(calendar.totalPracticedDays, 3);
     });
 
     test('the first month is the month of the first practice', () {

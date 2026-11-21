@@ -23,7 +23,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('shows flames for practiced days and ice for missed ones', (
+  testWidgets('shows flames for practiced days and plain missed days', (
     tester,
   ) async {
     await pumpCalendar(tester, [
@@ -33,7 +33,7 @@ void main() {
 
     expect(find.text('November 2026'), findsOneWidget);
     expect(find.bySemanticsLabel('November 18, practiced'), findsOneWidget);
-    expect(find.bySemanticsLabel('November 20, missed'), findsOneWidget);
+    expect(find.bySemanticsLabel('November 20, not practiced'), findsOneWidget);
     expect(
       find.bySemanticsLabel('November 21, today, not practiced yet'),
       findsOneWidget,
@@ -42,9 +42,11 @@ void main() {
       find.bySemanticsLabel('November 17, before you started'),
       findsOneWidget,
     );
-    // Summary tiles: 2 practiced, 1 frozen (the 20th).
-    expect(find.text('Days practiced'), findsOneWidget);
-    expect(find.text('Day frozen'), findsOneWidget);
+    // Summary tiles: 2 days this month, 2 in total.
+    expect(find.text('Days this month'), findsOneWidget);
+    expect(find.text('Days in total'), findsOneWidget);
+    // No ice anywhere: a missed day is not marked as a failure.
+    expect(find.byIcon(Icons.ac_unit), findsNothing);
   });
 
   testWidgets('can page back to earlier months but not past the start', (
@@ -56,7 +58,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('October 2026'), findsOneWidget);
     expect(find.bySemanticsLabel('October 30, practiced'), findsOneWidget);
-    expect(find.bySemanticsLabel('October 31, missed'), findsOneWidget);
+    expect(find.bySemanticsLabel('October 31, not practiced'), findsOneWidget);
 
     // October is the first month: going back further does nothing.
     await tester.tap(find.byTooltip('Previous month'));

@@ -11,7 +11,8 @@ import '../widgets/streak_day_bubble.dart';
 
 /// A month calendar of the learner's practice, after Duolingo's streak
 /// calendar: practiced days show a flame and runs of them are joined by a
-/// band; missed days after the first practice show as frozen.
+/// band. Missed days stay plain (just the number): research on streaks finds
+/// a highlighted break discourages learners more than no record at all.
 class StreakCalendarScreen extends StatefulWidget {
   const StreakCalendarScreen({super.key, this.now});
 
@@ -154,7 +155,7 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
     Color subtleColor,
   ) {
     final practiced = calendar.countIn(_month, StreakDayState.practiced);
-    final frozen = calendar.countIn(_month, StreakDayState.frozen);
+    final total = calendar.totalPracticedDays;
 
     Widget tile(Widget icon, int value, String label, Color tint) {
       return Expanded(
@@ -192,15 +193,19 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
         tile(
           const Text('🔥', style: TextStyle(fontSize: 26)),
           practiced,
-          practiced == 1 ? 'Day practiced' : 'Days practiced',
+          practiced == 1 ? 'Day this month' : 'Days this month',
           StreakColors.fire,
         ),
         const SizedBox(width: 12),
         tile(
-          const Icon(Icons.ac_unit, size: 26, color: StreakColors.ice),
-          frozen,
-          frozen == 1 ? 'Day frozen' : 'Days frozen',
-          StreakColors.ice,
+          const Icon(
+            Icons.emoji_events_rounded,
+            size: 26,
+            color: StreakColors.fireDeep,
+          ),
+          total,
+          total == 1 ? 'Day in total' : 'Days in total',
+          StreakColors.fireDeep,
         ),
       ],
     );
@@ -346,16 +351,14 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
               ),
             ),
             const SizedBox(height: 2),
-            if (practiced || state == StreakDayState.frozen)
+            // A flame hides the number, so it goes underneath.
+            if (practiced)
               Text(
                 '${day.day}',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
-                  color:
-                      practiced
-                          ? StreakColors.fireDeep
-                          : StreakColors.ice,
+                  color: StreakColors.fireDeep,
                 ),
               ),
           ],
@@ -368,8 +371,8 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
     switch (state) {
       case StreakDayState.practiced:
         return 'practiced';
-      case StreakDayState.frozen:
-        return 'missed';
+      case StreakDayState.missed:
+        return 'not practiced';
       case StreakDayState.open:
         return 'today, not practiced yet';
       case StreakDayState.future:
@@ -399,7 +402,6 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
         runSpacing: 10,
         children: [
           item(StreakDayState.practiced, 'Practiced'),
-          item(StreakDayState.frozen, 'Missed (frozen)'),
           item(StreakDayState.open, 'Today', today: true),
         ],
       ),

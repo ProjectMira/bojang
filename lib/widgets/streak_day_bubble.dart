@@ -8,15 +8,12 @@ class StreakColors {
 
   static const fire = Color(0xFFFF9600);
   static const fireDeep = Color(0xFFFF5722);
-  static const ice = Color(0xFF1CB0F6);
-  static const iceFill = Color(0xFFDDF4FF);
-  static const iceBorder = Color(0xFF84D8FF);
-  static const iceFillDark = Color(0xFF15384A);
 }
 
-/// One day as a circle: a flame if practiced, ice if missed, an orange ring
-/// for today while it's still open, and plain otherwise. [label] (usually
-/// the day number) is shown inside open, future and pre-start days.
+/// One day as a circle: a flame if practiced, an orange ring for today while
+/// it's still open, and plain otherwise. Missed days are deliberately plain,
+/// not marked as failures. [label] (usually the day number) is shown inside
+/// every day that isn't practiced.
 class StreakDayBubble extends StatelessWidget {
   const StreakDayBubble({
     super.key,
@@ -35,7 +32,9 @@ class StreakDayBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final plainFill = isDark ? Colors.white10 : Colors.grey.shade100;
-    final plainText = isDark ? Colors.grey.shade500 : Colors.grey.shade500;
+    // Past days read a little stronger than days still to come.
+    final pastText = isDark ? Colors.grey.shade400 : Colors.grey.shade700;
+    final plainText = isDark ? Colors.grey.shade600 : Colors.grey.shade400;
 
     BoxDecoration decoration;
     Widget? child;
@@ -50,13 +49,7 @@ class StreakDayBubble extends StatelessWidget {
           ),
         );
         child = Text('🔥', style: TextStyle(fontSize: size * 0.46, height: 1));
-      case StreakDayState.frozen:
-        decoration = BoxDecoration(
-          shape: BoxShape.circle,
-          color: isDark ? StreakColors.iceFillDark : StreakColors.iceFill,
-          border: Border.all(color: StreakColors.iceBorder, width: 1.5),
-        );
-        child = Icon(Icons.ac_unit, size: size * 0.5, color: StreakColors.ice);
+      case StreakDayState.missed:
       case StreakDayState.open:
       case StreakDayState.future:
       case StreakDayState.beforeStart:
@@ -75,7 +68,12 @@ class StreakDayBubble extends StatelessWidget {
                   style: TextStyle(
                     fontSize: size * 0.36,
                     fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
-                    color: isToday ? StreakColors.fire : plainText,
+                    color:
+                        isToday
+                            ? StreakColors.fire
+                            : state == StreakDayState.missed
+                            ? pastText
+                            : plainText,
                   ),
                 );
     }

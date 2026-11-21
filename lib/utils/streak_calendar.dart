@@ -3,10 +3,12 @@ enum StreakDayState {
   /// The learner practiced that day: shown with a flame.
   practiced,
 
-  /// A past day after the learner started, with no practice: shown frozen.
-  frozen,
+  /// A past day after the learner started, with no practice. Shown quietly
+  /// (just the day number): a highlighted break demotivates more than no
+  /// record at all. Ice is kept for days a streak freeze protects.
+  missed,
 
-  /// Today, not practiced yet: still open, so not frozen.
+  /// Today, not practiced yet: still open, so not missed.
   open,
 
   /// A day that hasn't happened yet.
@@ -43,7 +45,7 @@ class StreakCalendar {
     if (d == today) return StreakDayState.open;
     final first = firstDay;
     if (first == null || d.isBefore(first)) return StreakDayState.beforeStart;
-    return StreakDayState.frozen;
+    return StreakDayState.missed;
   }
 
   /// The earliest month worth showing: the month of the first practice, or
@@ -74,6 +76,9 @@ class StreakCalendar {
     }
     return cells;
   }
+
+  /// Every day the learner has ever practiced.
+  int get totalPracticedDays => practicedDays.length;
 
   int countIn(DateTime month, StreakDayState state) {
     var n = 0;
