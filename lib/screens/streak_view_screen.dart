@@ -5,7 +5,10 @@ import '../services/analytics.dart';
 import '../services/progress_service.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
+import '../utils/streak_calendar.dart';
+import '../widgets/streak_day_bubble.dart';
 import 'level_selection_screen.dart';
+import 'streak_calendar_screen.dart';
 import '../widgets/content_width.dart';
 
 class StreakViewScreen extends StatelessWidget {
@@ -27,6 +30,14 @@ class StreakViewScreen extends StatelessWidget {
       if (streak < milestone) return milestone;
     }
     return ((streak ~/ 100) + 1) * 100;
+  }
+
+  void _openCalendar(BuildContext context, String source) {
+    Analytics.track('streak_calendar_opened', {'source': source});
+    Navigator.push(
+      context,
+      screenRoute('streak_calendar', (context) => const StreakCalendarScreen()),
+    );
   }
 
   @override
@@ -83,6 +94,7 @@ class StreakViewScreen extends StatelessWidget {
                         'days',
                         Icons.calendar_month,
                         Colors.green,
+                        onTap: () => _openCalendar(context, 'total_practice'),
                       ),
                     ),
                   ],
@@ -206,9 +218,10 @@ class StreakViewScreen extends StatelessWidget {
     Color titleColor,
   ) {
     final today = DateTime.now();
+    final calendar = StreakCalendar(progress.playDates, now: today);
     const dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
-    return Container(
+    final card = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
@@ -224,13 +237,31 @@ class StreakViewScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'This Week',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: titleColor,
-            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+          Row(
+            children: [
+              Text(
+                'This Week',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: titleColor,
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              ),
+              const Spacer(),
+              Text(
+                'See calendar',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: StreakColors.fire,
+                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: StreakColors.fire,
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Row(
@@ -240,12 +271,8 @@ class StreakViewScreen extends StatelessWidget {
               final day = today.subtract(
                 Duration(days: today.weekday - 1 - index),
               );
-              final practiced = _practicedOn(progress, day);
-              final isToday =
-                  day.year == today.year &&
-                  day.month == today.month &&
-                  day.day == today.day;
-              final isFuture = day.isAfter(today);
+              final state = calendar.stateOf(day);
+              final isToday = StreakCalendar.dayKey(day) == calendar.today;
 
               return Column(
                 children: [
@@ -264,46 +291,24 @@ class StreakViewScreen extends StatelessWidget {
                     ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                   ),
                   const SizedBox(height: 6),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color:
-                          practiced
-                              ? Colors.orange
-                              : isDark
-                              ? Colors.white10
-                              : Colors.grey.shade100,
-                      shape: BoxShape.circle,
-                      border:
-                          isToday
-                              ? Border.all(color: Colors.orange, width: 2)
-                              : null,
-                    ),
-                    child: Center(
-                      child:
-                          practiced
-                              ? const Text(
-                                '🔥',
-                                style: TextStyle(fontSize: 16),
-                              )
-                              : isFuture
-                              ? null
-                              : Icon(
-                                Icons.remove,
-                                size: 16,
-                                color:
-                                    isDark
-                                        ? Colors.grey.shade600
-                                        : Colors.grey.shade400,
-                              ),
-                    ),
-                  ),
+                  StreakDayBubble(state: state, size: 36, isToday: isToday),
                 ],
               );
             }),
           ),
         ],
+      ),
+    );
+    return Semantics(
+      button: true,
+      hint: 'Opens the streak calendar',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _openCalendar(context, 'this_week'),
+          child: card,
+        ),
       ),
     );
   }
@@ -314,10 +319,11 @@ class StreakViewScreen extends StatelessWidget {
     String value,
     String unit,
     IconData icon,
-    Color color,
-  ) {
+    Color color, {
+    VoidCallback? onTap,
+  }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
+    final card = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
@@ -332,7 +338,18 @@ class StreakViewScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 28),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 28),
+              if (onTap != null)
+                Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(
             value,
@@ -351,6 +368,19 @@ class StreakViewScreen extends StatelessWidget {
             ).copyWith(fontFamilyFallback: const ['Jomolhari']),
           ),
         ],
+      ),
+    );
+    if (onTap == null) return card;
+    return Semantics(
+      button: true,
+      hint: 'Opens the streak calendar',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: card,
+        ),
       ),
     );
   }
