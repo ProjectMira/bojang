@@ -6,6 +6,7 @@ import '../services/progress_service.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
 import '../utils/streak_calendar.dart';
+import '../utils/streak_rules.dart';
 import '../widgets/streak_day_bubble.dart';
 import 'level_selection_screen.dart';
 import 'streak_calendar_screen.dart';
@@ -101,6 +102,8 @@ class StreakViewScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _buildMilestoneCard(context, progress, isDark, titleColor),
+                const SizedBox(height: 16),
+                _buildFreezeCard(context, progress, isDark, titleColor),
                 const SizedBox(height: 16),
                 _buildMotivationCard(context, progress, practicedToday, isDark),
                 const SizedBox(height: 24),
@@ -218,7 +221,11 @@ class StreakViewScreen extends StatelessWidget {
     Color titleColor,
   ) {
     final today = DateTime.now();
-    final calendar = StreakCalendar(progress.playDates, now: today);
+    final calendar = StreakCalendar(
+      progress.playDates,
+      frozenDates: progress.frozenDates,
+      now: today,
+    );
     const dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
     final card = Container(
@@ -392,7 +399,10 @@ class StreakViewScreen extends StatelessWidget {
     Color titleColor,
   ) {
     final streak = progress.currentStreak;
-    final milestone = _nextMilestone(streak);
+    // A goal the learner committed to comes first; then the next milestone.
+    final goal = progress.streakGoal;
+    final hasGoal = goal > streak;
+    final milestone = hasGoal ? goal : _nextMilestone(streak);
     final fraction = (streak / milestone).clamp(0.0, 1.0);
 
     return Container(
@@ -416,7 +426,7 @@ class StreakViewScreen extends StatelessWidget {
               const Text('🎯', style: TextStyle(fontSize: 20)),
               const SizedBox(width: 8),
               Text(
-                'Next Milestone',
+                hasGoal ? 'Your Goal' : 'Next Milestone',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -449,6 +459,8 @@ class StreakViewScreen extends StatelessWidget {
           Text(
             streak == 0
                 ? 'Complete a lesson today to start your streak.'
+                : hasGoal
+                ? 'You committed to $goal days. ${goal - streak} to go!'
                 : 'Keep practicing daily to reach $milestone days!',
             style: GoogleFonts.poppins(
               fontSize: 12,
@@ -456,6 +468,77 @@ class StreakViewScreen extends StatelessWidget {
             ).copyWith(fontFamilyFallback: const ['Jomolhari']),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFreezeCard(
+    BuildContext context,
+    ProgressService progress,
+    bool isDark,
+    Color titleColor,
+  ) {
+    final held = progress.streakFreezes;
+    final streak = progress.currentStreak;
+    final toNext =
+        StreakRules.freezeEveryDays - (streak % StreakRules.freezeEveryDays);
+    final full = held >= StreakRules.maxFreezes;
+
+    return Semantics(
+      label:
+          'Streak freezes: $held of ${StreakRules.maxFreezes}. '
+          'Earned every ${StreakRules.freezeEveryDays} days of streak, '
+          'used automatically if you miss a day.',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? StreakColors.iceFillDark : StreakColors.iceFill,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: StreakColors.iceBorder),
+        ),
+        child: Row(
+          children: [
+            for (var i = 0; i < StreakRules.maxFreezes; i++)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Opacity(
+                  opacity: i < held ? 1 : 0.3,
+                  child: const StreakDayBubble(
+                    state: StreakDayState.frozen,
+                    size: 34,
+                  ),
+                ),
+              ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Streak freezes: $held/${StreakRules.maxFreezes}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: titleColor,
+                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    full
+                        ? 'Fully stocked. A freeze is used automatically if you miss a day.'
+                        : 'Earn one every ${StreakRules.freezeEveryDays} days of streak '
+                            '($toNext to go). Used automatically if you miss a day.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

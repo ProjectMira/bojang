@@ -8,11 +8,16 @@ class StreakColors {
 
   static const fire = Color(0xFFFF9600);
   static const fireDeep = Color(0xFFFF5722);
+  static const ice = Color(0xFF1CB0F6);
+  static const iceFill = Color(0xFFDDF4FF);
+  static const iceBorder = Color(0xFF84D8FF);
+  static const iceFillDark = Color(0xFF15384A);
 }
 
-/// One day as a circle: a flame if practiced, an orange ring for today while
-/// it's still open, and plain otherwise. Missed days are deliberately plain,
-/// not marked as failures. [label] (usually the day number) is shown inside
+/// One day as a circle: a flame if practiced, ice if a streak freeze
+/// protected it, an orange ring for today while it's still open, and plain
+/// otherwise. Unprotected missed days are deliberately plain, not marked as
+/// failures. [label] (usually the day number) is shown inside
 /// every day that isn't practiced.
 class StreakDayBubble extends StatelessWidget {
   const StreakDayBubble({
@@ -49,6 +54,13 @@ class StreakDayBubble extends StatelessWidget {
           ),
         );
         child = Text('🔥', style: TextStyle(fontSize: size * 0.46, height: 1));
+      case StreakDayState.frozen:
+        decoration = BoxDecoration(
+          shape: BoxShape.circle,
+          color: isDark ? StreakColors.iceFillDark : StreakColors.iceFill,
+          border: Border.all(color: StreakColors.iceBorder, width: 1.5),
+        );
+        child = Icon(Icons.ac_unit, size: size * 0.5, color: StreakColors.ice);
       case StreakDayState.missed:
       case StreakDayState.open:
       case StreakDayState.future:

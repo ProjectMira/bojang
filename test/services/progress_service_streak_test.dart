@@ -274,4 +274,119 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getStringList('pending_activity_dates'), isNull);
   });
+
+  group('streak freezes and celebrations', () {
+    Future<ProgressService> build(
+      Map<String, Object> prefs, {
+      Map<String, dynamic>? reply,
+    }) async {
+      SharedPreferences.setMockInitialValues(prefs);
+      final service = ProgressService(
+        isSignedIn: () => reply != null,
+        recordActivity: (_) async => reply,
+      );
+      await pumpEventQueue();
+      return service;
+    }
+
+    String daysAgo(int n) {
+      final now = DateTime.now();
+      return DateTime(now.year, now.month, now.day - n, 12).toIso8601String();
+    }
+
+    DateTime dayAgo(int n) {
+      final now = DateTime.now();
+      return DateTime(now.year, now.month, now.day - n);
+    }
+
+    test('a held freeze keeps the streak over a missed day', () async {
+      final service = await build({
+        'current_streak': 4,
+        'last_play_date': daysAgo(2),
+        'streak_freezes': 1,
+      });
+      await service.updateQuizResults('topic', 5, 5);
+      expect(service.currentStreak, 5);
+      expect(service.streakFreezes, 0);
+      expect(service.frozenDates, [dayAgo(1)]);
+      final c = service.takeStreakCelebration()!;
+      expect([c.streak, c.freezesUsed], [5, 1]);
+      // Taken once only.
+      expect(service.takeStreakCelebration(), isNull);
+    });
+
+    test('without a freeze a missed day restarts the streak', () async {
+      final service = await build({
+        'current_streak': 4,
+        'last_play_date': daysAgo(2),
+      });
+      await service.updateQuizResults('topic', 5, 5);
+      expect(service.currentStreak, 1);
+      expect(service.frozenDates, isEmpty);
+    });
+
+    test('the 7th day earns a freeze and is a milestone', () async {
+      final service = await build({
+        'current_streak': 6,
+        'last_play_date': daysAgo(1),
+        'streak_goal': 7,
+      });
+      await service.updateQuizResults('topic', 5, 5);
+      expect(service.streakFreezes, 1);
+      final c = service.takeStreakCelebration()!;
+      expect(c.freezeEarned, isTrue);
+      expect(c.isMilestone, isTrue);
+      expect(c.goalReached, isTrue);
+    });
+
+    test('a second lesson the same day queues no celebration', () async {
+      final service = await build({});
+      await service.updateQuizResults('topic', 5, 5);
+      expect(service.takeStreakCelebration(), isNotNull);
+      await service.updateQuizResults('topic', 5, 5);
+      expect(service.takeStreakCelebration(), isNull);
+    });
+
+    test('server freezes and frozen dates are applied', () async {
+      final service = await build(
+        {},
+        reply: {
+          'streak': 9,
+          'streak_extended': true,
+          'streak_freezes': 2,
+          'frozen_dates': ['2026-10-03'],
+        },
+      );
+      await service.updateQuizResults('topic', 5, 5);
+      await pumpEventQueue();
+      expect(service.streakFreezes, 2);
+      expect(service.frozenDates, [DateTime(2026, 10, 3)]);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getStringList('frozen_dates'), ['2026-10-03']);
+    });
+
+    test('stats freezes are read from the streak block', () async {
+      final service = await build({});
+      await service.updateFromServer({
+        'xp': {'total': 10},
+        'streak': {
+          'current': 0,
+          'multiplier': 1.0,
+          'freezes': 1,
+          'frozen_dates': ['2026-11-01', 'not a date'],
+        },
+        'league': {'current': 'Bronze'},
+      });
+      expect(service.streakFreezes, 1);
+      expect(service.frozenDates, [DateTime(2026, 11, 1)]);
+    });
+
+    test('the goal is saved', () async {
+      final service = await build({});
+      await service.setStreakGoal(14);
+      expect(service.streakGoal, 14);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getInt('streak_goal'), 14);
+    });
+  });
 }

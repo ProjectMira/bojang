@@ -9,6 +9,7 @@ import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/yak_mascot.dart';
 import 'quiz_screen.dart';
+import 'streak_celebration_screen.dart';
 import '../widgets/content_width.dart';
 
 /// Full-screen celebration shown after finishing a lesson. Replaces the old
@@ -56,9 +57,12 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
       _confettiLeft.play();
       _confettiRight.play();
     }
-    // After the first finished lesson, ask once to share approximate
-    // location (once the celebration has had a moment).
-    Future<void>.delayed(const Duration(milliseconds: 1800), () {
+    // The first lesson of the day extended the streak: celebrate it once
+    // this screen has had a moment. After the first finished lesson, ask
+    // once to share approximate location, after any streak celebration.
+    Future<void>.delayed(const Duration(milliseconds: 1400), () async {
+      if (!mounted) return;
+      await StreakCelebrationScreen.maybeShow(context);
       if (mounted) LocationService.instance.maybePromptAfterLesson(context);
     });
   }

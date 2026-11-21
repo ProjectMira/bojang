@@ -14,6 +14,7 @@ import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
 import '../widgets/yak_says.dart';
 import '../widgets/content_width.dart';
+import 'streak_celebration_screen.dart';
 
 /// Quick-fire quiz: answer as many questions as possible in 60 seconds.
 class SpeedQuizScreen extends StatefulWidget {
@@ -205,7 +206,9 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
       Provider.of<ProgressService>(
         context,
         listen: false,
-      ).updateQuizResults('speed quiz', _correct, _answered);
+      ).updateQuizResults('speed quiz', _correct, _answered).then((_) {
+        if (mounted) StreakCelebrationScreen.maybeShow(context);
+      });
     }
     setState(() {
       _phase = _QuizPhase.finished;

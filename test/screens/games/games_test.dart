@@ -438,6 +438,13 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getInt('game_best_test_game'), 3);
 
+      // The day's first practice opens the streak celebration on top.
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text('Your streak has started!'), findsOneWidget);
+      await tester.ensureVisible(find.text('Not now'));
+      await tester.tap(find.text('Not now'));
+      await tester.pump(const Duration(milliseconds: 400));
+
       // Matching the best again is not a new best.
       await tester.tap(find.text('Play again'));
       await tester.pump(const Duration(milliseconds: 100));

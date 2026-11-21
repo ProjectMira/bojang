@@ -15,6 +15,7 @@ import '../../utils/yak_lines.dart';
 import '../../widgets/app_text_style.dart';
 import '../../widgets/yak_mascot.dart';
 import '../../widgets/yak_says.dart';
+import '../streak_celebration_screen.dart';
 import 'game_widgets.dart';
 import '../../widgets/content_width.dart';
 
@@ -235,6 +236,8 @@ class _GameHostState extends State<GameHost> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(_bestKey, result.correct);
     }
+    // Last, so nothing above waits on the learner closing it.
+    if (mounted) await StreakCelebrationScreen.maybeShow(context);
   }
 
   @override

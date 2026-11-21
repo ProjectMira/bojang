@@ -45,8 +45,8 @@ void main() {
     // Summary tiles: 2 days this month, 2 in total.
     expect(find.text('Days this month'), findsOneWidget);
     expect(find.text('Days in total'), findsOneWidget);
-    // No ice anywhere: a missed day is not marked as a failure.
-    expect(find.byIcon(Icons.ac_unit), findsNothing);
+    // Ice only in the legend: a missed day without a freeze is not ice.
+    expect(find.byIcon(Icons.ac_unit), findsOneWidget);
   });
 
   testWidgets('can page back to earlier months but not past the start', (

@@ -112,4 +112,25 @@ void main() {
       expect(StreakCalendar.daysInMonth(DateTime(2026, 12)), 31);
     });
   });
+
+  group('StreakCalendar frozen days', () {
+    test('a freeze-protected missed day is frozen, others missed', () {
+      final calendar = StreakCalendar(
+        [DateTime(2026, 11, 3), DateTime(2026, 11, 5)],
+        frozenDates: [DateTime(2026, 11, 4)],
+        now: now,
+      );
+      expect(calendar.stateOf(DateTime(2026, 11, 4)), StreakDayState.frozen);
+      expect(calendar.stateOf(DateTime(2026, 11, 6)), StreakDayState.missed);
+    });
+
+    test('practice beats a stale frozen mark', () {
+      final calendar = StreakCalendar(
+        [DateTime(2026, 11, 4)],
+        frozenDates: [DateTime(2026, 11, 4)],
+        now: now,
+      );
+      expect(calendar.stateOf(DateTime(2026, 11, 4)), StreakDayState.practiced);
+    });
+  });
 }

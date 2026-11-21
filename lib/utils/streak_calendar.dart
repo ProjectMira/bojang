@@ -3,6 +3,9 @@ enum StreakDayState {
   /// The learner practiced that day: shown with a flame.
   practiced,
 
+  /// A missed day a streak freeze protected: shown as ice, as in Duolingo.
+  frozen,
+
   /// A past day after the learner started, with no practice. Shown quietly
   /// (just the day number): a highlighted break demotivates more than no
   /// record at all. Ice is kept for days a streak freeze protects.
@@ -21,11 +24,16 @@ enum StreakDayState {
 /// Turns the device's practice history into calendar states, independent of
 /// any widget so it can be unit-tested. Days are local calendar days.
 class StreakCalendar {
-  StreakCalendar(Iterable<DateTime> playDates, {DateTime? now})
-    : practicedDays = {for (final d in playDates) dayKey(d)},
-      today = dayKey(now ?? DateTime.now());
+  StreakCalendar(
+    Iterable<DateTime> playDates, {
+    Iterable<DateTime> frozenDates = const [],
+    DateTime? now,
+  }) : practicedDays = {for (final d in playDates) dayKey(d)},
+       frozenDays = {for (final d in frozenDates) dayKey(d)},
+       today = dayKey(now ?? DateTime.now());
 
   final Set<DateTime> practicedDays;
+  final Set<DateTime> frozenDays;
   final DateTime today;
 
   static DateTime dayKey(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -43,6 +51,7 @@ class StreakCalendar {
     if (practicedDays.contains(d)) return StreakDayState.practiced;
     if (d.isAfter(today)) return StreakDayState.future;
     if (d == today) return StreakDayState.open;
+    if (frozenDays.contains(d)) return StreakDayState.frozen;
     final first = firstDay;
     if (first == null || d.isBefore(first)) return StreakDayState.beforeStart;
     return StreakDayState.missed;

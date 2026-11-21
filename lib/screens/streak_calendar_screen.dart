@@ -11,8 +11,9 @@ import '../widgets/streak_day_bubble.dart';
 
 /// A month calendar of the learner's practice, after Duolingo's streak
 /// calendar: practiced days show a flame and runs of them are joined by a
-/// band. Missed days stay plain (just the number): research on streaks finds
-/// a highlighted break discourages learners more than no record at all.
+/// band. Days a streak freeze protected show as ice. Other missed days stay
+/// plain (just the number): research on streaks finds a highlighted break
+/// discourages learners more than no record at all.
 class StreakCalendarScreen extends StatefulWidget {
   const StreakCalendarScreen({super.key, this.now});
 
@@ -60,7 +61,11 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
 
     return Consumer<ProgressService>(
       builder: (context, progress, _) {
-        final calendar = StreakCalendar(progress.playDates, now: widget.now);
+        final calendar = StreakCalendar(
+          progress.playDates,
+          frozenDates: progress.frozenDates,
+          now: widget.now,
+        );
         final canGoBack = _month.isAfter(calendar.firstMonth);
         final canGoForward = _month.isBefore(calendar.currentMonth);
 
@@ -351,14 +356,14 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
               ),
             ),
             const SizedBox(height: 2),
-            // A flame hides the number, so it goes underneath.
-            if (practiced)
+            // A flame or ice hides the number, so it goes underneath.
+            if (practiced || state == StreakDayState.frozen)
               Text(
                 '${day.day}',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
-                  color: StreakColors.fireDeep,
+                  color: practiced ? StreakColors.fireDeep : StreakColors.ice,
                 ),
               ),
           ],
@@ -371,6 +376,8 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
     switch (state) {
       case StreakDayState.practiced:
         return 'practiced';
+      case StreakDayState.frozen:
+        return 'protected by a streak freeze';
       case StreakDayState.missed:
         return 'not practiced';
       case StreakDayState.open:
@@ -402,6 +409,7 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
         runSpacing: 10,
         children: [
           item(StreakDayState.practiced, 'Practiced'),
+          item(StreakDayState.frozen, 'Streak freeze'),
           item(StreakDayState.open, 'Today', today: true),
         ],
       ),

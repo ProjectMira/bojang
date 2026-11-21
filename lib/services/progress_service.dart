@@ -3,7 +3,28 @@ import 'analytics.dart';
 import 'api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../utils/streak_rules.dart';
 import '../widgets/achievement_dialog.dart';
+
+/// What to celebrate after the first practice of a day extended the streak.
+class StreakCelebration {
+  const StreakCelebration({
+    required this.streak,
+    required this.goal,
+    this.freezeEarned = false,
+    this.freezesUsed = 0,
+  });
+
+  final int streak;
+
+  /// The learner's streak goal when this happened (0 if none set yet).
+  final int goal;
+  final bool freezeEarned;
+  final int freezesUsed;
+
+  bool get isMilestone => StreakRules.isMilestone(streak);
+  bool get goalReached => goal > 0 && streak == goal;
+}
 
 class ProgressService extends ChangeNotifier {
   // Streak tracking
@@ -11,6 +32,10 @@ class ProgressService extends ChangeNotifier {
   int _longestStreak = 0;
   DateTime? _lastPlayDate;
   List<DateTime> _playDates = [];
+  int _streakFreezes = 0;
+  List<DateTime> _frozenDates = [];
+  int _streakGoal = 0;
+  StreakCelebration? _pendingCelebration;
 
   // Progress tracking
   Map<String, double> _categoryProgress = {};
@@ -32,6 +57,33 @@ class ProgressService extends ChangeNotifier {
   int get longestStreak => _longestStreak;
   DateTime? get lastPlayDate => _lastPlayDate;
   List<DateTime> get playDates => _playDates;
+
+  /// Streak freezes held (0-2): earned every 7 days, used on a missed day.
+  int get streakFreezes => _streakFreezes;
+
+  /// Days a streak freeze protected; the calendar shows them as ice.
+  List<DateTime> get frozenDates => _frozenDates;
+
+  /// The streak length the learner committed to (0 if none yet).
+  int get streakGoal => _streakGoal;
+
+  /// The celebration waiting to be shown, cleared once taken.
+  StreakCelebration? takeStreakCelebration() {
+    final c = _pendingCelebration;
+    _pendingCelebration = null;
+    return c;
+  }
+
+  Future<void> setStreakGoal(int days) async {
+    _streakGoal = days;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('streak_goal', days);
+    Analytics.track('streak_goal_set', {
+      'goal': days,
+      'current_streak': _currentStreak,
+    });
+    notifyListeners();
+  }
   Map<String, double> get categoryProgress => _categoryProgress;
   Map<String, int> get categoryScores => _categoryScores;
   List<String> get unlockedAchievements => _unlockedAchievements;
@@ -71,6 +123,9 @@ class ProgressService extends ChangeNotifier {
     // Load play dates
     final playDateStrings = prefs.getStringList('play_dates') ?? [];
     _playDates = playDateStrings.map((date) => DateTime.parse(date)).toList();
+    _streakFreezes = prefs.getInt('streak_freezes') ?? 0;
+    _frozenDates = _parseDays(prefs.getStringList('frozen_dates'));
+    _streakGoal = prefs.getInt('streak_goal') ?? 0;
 
     // Load progress data
     final categoryProgressString = prefs.getString('category_progress') ?? '{}';
@@ -116,6 +171,7 @@ class ProgressService extends ChangeNotifier {
       _xp = xpInfo?['total'] as int? ?? _xp;
       final serverStreak = streakInfo?['current'] as int?;
       if (serverStreak != null) _currentStreak = _mergedStreak(serverStreak);
+      if (streakInfo != null) _applyServerFreezes(streakInfo);
       _league = (leagueInfo?['current'] ?? _league).toString();
       _completedLevelsCount =
           levelsInfo?['count'] as int? ?? _completedLevelsCount;
@@ -133,11 +189,48 @@ class ProgressService extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('xp', _xp);
     await prefs.setInt('current_streak', _currentStreak);
+    await _saveFreezes(prefs);
     await prefs.setString('league', _league);
     if (_rank != null) await prefs.setInt('rank', _rank!);
     await prefs.setInt('completed_levels_count', _completedLevelsCount);
     await prefs.setInt('current_level', _currentLevel);
     notifyListeners();
+  }
+
+  static List<DateTime> _parseDays(Iterable<dynamic>? values) {
+    final days = <DateTime>{};
+    for (final v in values ?? const []) {
+      final parsed = DateTime.tryParse(v.toString());
+      if (parsed != null) {
+        days.add(DateTime(parsed.year, parsed.month, parsed.day));
+      }
+    }
+    return days.toList()..sort();
+  }
+
+  /// Takes freezes from a server response (`streak_freezes`/`frozen_dates`
+  /// on activity and lesson responses, `freezes`/`frozen_dates` in stats).
+  void _applyServerFreezes(Map<String, dynamic> data) {
+    final freezes = data['streak_freezes'] ?? data['freezes'];
+    if (freezes is int) {
+      _streakFreezes = freezes.clamp(0, StreakRules.maxFreezes);
+    }
+    final frozen = data['frozen_dates'];
+    if (frozen is List) {
+      // Keep days frozen on this device that the server hasn't seen yet.
+      _frozenDates = _parseDays([
+        ...frozen,
+        ..._frozenDates.map(localDateString),
+      ]);
+    }
+  }
+
+  Future<void> _saveFreezes(SharedPreferences prefs) async {
+    await prefs.setInt('streak_freezes', _streakFreezes);
+    await prefs.setStringList(
+      'frozen_dates',
+      _frozenDates.map(localDateString).toList(),
+    );
   }
 
   Future<void> updateQuizResults(
@@ -180,10 +273,30 @@ class ProgressService extends ChangeNotifier {
     final todayKey = DateTime(today.year, today.month, today.day);
 
     if (_lastPlayDate == null || !_isSameDay(_lastPlayDate!, today)) {
-      if (_lastPlayDate != null && isConsecutiveDay(_lastPlayDate!, today)) {
-        _currentStreak++;
-      } else if (_lastPlayDate == null || !_isSameDay(_lastPlayDate!, today)) {
-        _currentStreak = 1;
+      final update = StreakRules.apply(
+        streak: _currentStreak,
+        lastActive: _lastPlayDate,
+        freezes: _streakFreezes,
+        today: today,
+      );
+      _currentStreak = update.streak;
+      _streakFreezes = update.freezes;
+      if (update.frozenDays.isNotEmpty) {
+        _frozenDates = _parseDays([
+          ..._frozenDates.map(localDateString),
+          ...update.frozenDays.map(localDateString),
+        ]);
+        Analytics.track('streak_freeze_used', {
+          'days': update.frozenDays.length,
+          'current_streak': _currentStreak,
+          'freezes_left': _streakFreezes,
+        });
+      }
+      if (update.freezeEarned) {
+        Analytics.track('streak_freeze_earned', {
+          'current_streak': _currentStreak,
+          'freezes': _streakFreezes,
+        });
       }
 
       _lastPlayDate = today;
@@ -192,6 +305,12 @@ class ProgressService extends ChangeNotifier {
       if (_currentStreak > _longestStreak) {
         _longestStreak = _currentStreak;
       }
+      _pendingCelebration = StreakCelebration(
+        streak: _currentStreak,
+        goal: _streakGoal,
+        freezeEarned: update.freezeEarned,
+        freezesUsed: update.frozenDays.length,
+      );
     }
 
     if (_currentStreak != previousStreak) {
@@ -223,8 +342,12 @@ class ProgressService extends ChangeNotifier {
     _reportActivity(localDateString(today));
 
     // Show achievement dialogs if context is provided
-    if (context != null && newAchievements.isNotEmpty) {
-      for (final achievementId in newAchievements) {
+    // Streak achievements are still unlocked, but the streak celebration
+    // shows the moment, so they don't get a second pop-up.
+    final dialogAchievements =
+        newAchievements.where((id) => !id.startsWith('streak_')).toList();
+    if (context != null && dialogAchievements.isNotEmpty) {
+      for (final achievementId in dialogAchievements) {
         Future.delayed(const Duration(milliseconds: 500), () {
           _showAchievementDialog(context, achievementId);
         });
@@ -298,6 +421,7 @@ class ProgressService extends ChangeNotifier {
     final playDateStrings =
         _playDates.map((date) => date.toIso8601String()).toList();
     await prefs.setStringList('play_dates', playDateStrings);
+    await _saveFreezes(prefs);
 
     await prefs.setString('category_progress', json.encode(_categoryProgress));
     await prefs.setString('category_scores', json.encode(_categoryScores));
@@ -318,6 +442,10 @@ class ProgressService extends ChangeNotifier {
     _longestStreak = 0;
     _lastPlayDate = null;
     _playDates = [];
+    _streakFreezes = 0;
+    _frozenDates = [];
+    _streakGoal = 0;
+    _pendingCelebration = null;
     _categoryProgress = {};
     _categoryScores = {};
     _unlockedAchievements = [];
@@ -334,6 +462,9 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('longest_streak');
     await prefs.remove('last_play_date');
     await prefs.remove('play_dates');
+    await prefs.remove('streak_freezes');
+    await prefs.remove('frozen_dates');
+    await prefs.remove('streak_goal');
     await prefs.remove('category_progress');
     await prefs.remove('category_scores');
     await prefs.remove('unlocked_achievements');
@@ -459,8 +590,10 @@ class ProgressService extends ChangeNotifier {
     if (serverStreak is int) {
       _currentStreak = _mergedStreak(serverStreak);
       await prefs.setInt('current_streak', _currentStreak);
-      notifyListeners();
     }
+    _applyServerFreezes(response);
+    await _saveFreezes(prefs);
+    notifyListeners();
     return true;
   }
 
