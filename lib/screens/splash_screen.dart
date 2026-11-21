@@ -15,16 +15,28 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  /// The splash never stays longer than this (including the fade out), even
+  /// on a first open where creating the anonymous account waits on the
+  /// network. Sign-in that is still running carries on in the background.
+  static const maxSplash = Duration(milliseconds: 2700);
+
+  /// Long enough to see the yak, short enough not to feel like a wait.
+  static const minSplash = Duration(milliseconds: 1200);
+
+  static const fadeOut = Duration(milliseconds: 300);
+
   late AnimationController _controller;
   late Animation<double> _animation;
   final GoogleAuthService _googleAuthService = GoogleAuthService();
   final ApiService _apiService = ApiService();
+  final Stopwatch _shown = Stopwatch()..start();
+  bool _left = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
@@ -35,65 +47,78 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    // Navigate to appropriate screen after animation
-    _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _checkAuthenticationStatus();
-      }
-    });
+    // Sign-in starts at once, alongside the animation, instead of after it.
+    _start();
   }
 
-  Future<void> _checkAuthenticationStatus() async {
-    await _googleAuthService.initialize();
-    await _apiService.initialize();
-
-    // Try to sign in silently with Google
-    final user = await _googleAuthService.signInSilently();
-
-    // No sign-in wall: learners who have not created an account get an
-    // anonymous one so their progress still syncs. If that cannot happen
-    // (offline), progress stays on the device and the app works the same.
-    var anonymous = false;
-    if (user == null) {
-      anonymous = await _googleAuthService.ensureAnonymousSession().timeout(
-        const Duration(seconds: 6),
-        onTimeout: () => false,
-      );
-    }
-    Analytics.track('app_launched', {
-      'restored_session': user != null,
-      'auth_provider': user?.authProvider.name,
-      'is_anonymous': user == null ? anonymous : null,
+  Future<void> _start() async {
+    final startup = _checkAuthenticationStatus();
+    // Leave as soon as sign-in is done (but not before minSplash), and never
+    // later than maxSplash.
+    await Future.any([
+      Future.wait([startup, Future<void>.delayed(minSplash)]),
+      Future<void>.delayed(maxSplash),
+    ]);
+    Analytics.track('splash_finished', {
+      'ms': _shown.elapsedMilliseconds,
+      'startup_done': _startupDone,
     });
+    _leave();
+  }
 
-    // Small delay for better UX
-    await Future.delayed(const Duration(milliseconds: 500));
+  bool _startupDone = false;
 
-    if (mounted) {
-      // Everyone starts learning right away; signing in is offered from the
-      // Profile tab.
-      const Widget nextScreen = MainNavigationScreen();
+  Future<void> _checkAuthenticationStatus() async {
+    try {
+      await _googleAuthService.initialize();
+      await _apiService.initialize();
 
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          settings: const RouteSettings(name: 'main'),
-          pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: Tween<double>(
-                begin: 0.0,
-                end: 1.0,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeInOut,
-              )),
-              child: child,
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 800),
-        ),
-      );
+      // Try to sign in silently with Google
+      final user = await _googleAuthService.signInSilently();
+
+      // No sign-in wall: learners who have not created an account get an
+      // anonymous one so their progress still syncs. If that cannot happen
+      // (offline), progress stays on the device and the app works the same.
+      var anonymous = false;
+      if (user == null) {
+        anonymous = await _googleAuthService.ensureAnonymousSession().timeout(
+          const Duration(seconds: 6),
+          onTimeout: () => false,
+        );
+      }
+      Analytics.track('app_launched', {
+        'restored_session': user != null,
+        'auth_provider': user?.authProvider.name,
+        'is_anonymous': user == null ? anonymous : null,
+      });
+    } catch (e) {
+      // Startup must never trap the learner on the splash.
+      debugPrint('Startup sign-in failed: $e');
+    } finally {
+      _startupDone = true;
     }
+  }
+
+  void _leave() {
+    if (_left || !mounted) return;
+    _left = true;
+    // Everyone starts learning right away; signing in is offered from the
+    // Profile tab.
+    const Widget nextScreen = MainNavigationScreen();
+
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        settings: const RouteSettings(name: 'main'),
+        pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            child: child,
+          );
+        },
+        transitionDuration: fadeOut,
+      ),
+    );
   }
 
   @override
