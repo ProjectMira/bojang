@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../services/analytics.dart';
+import '../services/notification_primer.dart';
 import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
 import '../theme/motion.dart';
@@ -54,6 +55,7 @@ class StreakCelebrationScreen extends StatefulWidget {
                 FadeTransition(opacity: animation, child: child),
       ),
     );
+    if (context.mounted) await NotificationPrimer.instance.afterStreakCelebration(context, celebration);
     return true;
   }
 

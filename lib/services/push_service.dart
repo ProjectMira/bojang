@@ -36,8 +36,10 @@ class PushService {
 
   bool get _available => !kIsWeb && Firebase.apps.isNotEmpty;
 
-  /// Call after runApp: iOS shows the notification permission prompt if the
-  /// learner has not answered it yet.
+  /// Call after runApp. It does not ask for notification permission: that
+  /// happens at a moment that matters (NotificationPrimer, after the first
+  /// streak or freeze) or from the Settings switches ([requestPermission]).
+  /// The token is registered either way, so pushes work once allowed.
   Future<void> init() async {
     if (_started || !_available) return;
     _started = true;
@@ -49,9 +51,10 @@ class PushService {
         badge: true,
         sound: true,
       );
-      final settings = await messaging.requestPermission();
+      final settings = await messaging.getNotificationSettings();
       Analytics.track('push_permission', {
         'status': settings.authorizationStatus.name,
+        'source': 'launch',
       });
 
       FirebaseMessaging.onMessage.listen(_onForeground);
@@ -71,6 +74,38 @@ class PushService {
 
   /// Re-sends the device settings (after the reminder switch changes).
   Future<void> syncSettings() => _register(force: true);
+
+  /// The OS notification permission, without asking. Null when push is
+  /// unavailable (web, no Firebase) or the platform call fails.
+  Future<AuthorizationStatus?> permissionStatus() async {
+    if (!_available) return null;
+    try {
+      final settings = await FirebaseMessaging.instance.getNotificationSettings();
+      return settings.authorizationStatus;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Shows the OS permission prompt if it can still be shown (iOS and
+  /// Android 13+), then re-registers the token. [source] says which moment
+  /// asked (primer_streak, primer_freeze, settings). Returns whether
+  /// notifications are allowed afterwards.
+  Future<bool> requestPermission({required String source}) async {
+    if (!_available) return false;
+    try {
+      final settings = await FirebaseMessaging.instance.requestPermission();
+      final status = settings.authorizationStatus;
+      Analytics.track('push_permission', {'status': status.name, 'source': source});
+      final allowed = status == AuthorizationStatus.authorized ||
+          status == AuthorizationStatus.provisional;
+      if (allowed) unawaited(_register(force: true));
+      return allowed;
+    } catch (e) {
+      debugPrint('Push permission request failed: $e');
+      return false;
+    }
+  }
 
   Future<void> _register({String? token, bool force = false}) async {
     if (!_available) return;
@@ -118,6 +153,7 @@ class PushService {
     Analytics.track('push_received', {
       'campaign': message.data['campaign'],
       'screen': message.data['screen'],
+      'line_id': message.data['line_id'],
       'foreground': true,
     });
     // iOS shows the banner itself (presentation options above); Android
@@ -129,11 +165,26 @@ class PushService {
   }
 
   void _onOpened(RemoteMessage message) {
-    final screen = message.data['screen'];
+    final data = message.data;
+    final screen = data['screen'];
     Analytics.track('push_opened', {
-      'campaign': message.data['campaign'],
+      'campaign': data['campaign'],
       'screen': screen,
     });
+    // Streak pushes carry the copy line they used, so PostHog can compare
+    // open rates per line (backend logs each send as server_push_sent).
+    Analytics.track('notification_opened', {
+      'campaign': data['campaign'],
+      'kind': data['kind'],
+      'state': data['state'],
+      'line_id': data['line_id'],
+      'notification_id': data['notification_id'],
+    });
+    // Tells the backend this push was opened, so no streak saver follows.
+    final id = data['notification_id'];
+    if (id != null && id.isNotEmpty) {
+      unawaited(ApiService().reportPushOpened(id, lineId: data['line_id']));
+    }
     if (screen != null && screen.isNotEmpty) requestedScreen.value = screen;
   }
 }

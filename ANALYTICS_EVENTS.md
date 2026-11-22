@@ -149,17 +149,20 @@ deletes its rows.
 | `setting_changed` | settings / theme service | `setting`, `value` |
 | `notifications_toggled` | notification settings | `enabled` |
 | `reminder_time_changed` | notification settings | `hour`, `minute` |
-| `notification_permission_result` | notification service | `granted` |
+| `notification_permission_result` | notification service (Settings reminder switches; never at launch) | `granted` |
 | `player_name_changed` | profile | |
 | `progress_exported` | settings | `success`, `reason` |
 | `achievements_viewed` | settings | |
 | `rate_app_tapped` / `about_opened` / `privacy_opened` / `made_by_opened` | settings / profile | |
 | `api_error` | api service | `endpoint`, `method`, `status`, `error` |
-| `push_permission` | push service | `status` (authorized/denied/provisional/notDetermined) |
+| `push_permission` | push service | `status` (authorized/denied/provisional/notDetermined), `source` (`launch`: read without asking; `primer_streak` / `primer_freeze`: OS prompt after the primer; `settings`) |
 | `push_token_registered` | push service | `refresh` |
 | `push_token_unavailable` | push service | `reason` |
-| `push_received` | push service (app open) | `campaign`, `screen`, `foreground` |
+| `push_received` | push service (app open) | `campaign`, `screen`, `line_id`, `foreground` |
 | `push_opened` | push service | `campaign`, `screen` |
+| `notification_opened` | push service (any push tapped) | `campaign` (`streak_at_risk`, `streak_saver`, or an admin campaign), `kind` (`reminder`/`streak_saver`), `state` (`not_started`/`evening`/`late`/`frozen`), `line_id` (copy line, e.g. `ev_03`), `notification_id`. Compare open rates per `line_id` against the backend's `server_push_sent` |
+| `notification_primer_shown` | notification primer (after the streak celebration) | `moment` (`streak`/`freeze`), `ask` (1-3; at most 3 asks, 3+ days apart, only while the OS prompt can still be shown) |
+| `notification_primer_answered` | notification primer | `moment`, `ask`, `choice` (`turn_on`/`maybe_later`) |
 | `location_prompt_shown` / `location_prompt_answered` | lesson complete (first lesson, once) | `source`, `share` |
 | `location_sharing_changed` | location service | `enabled`, `permission`, `source` (settings/lesson_complete) |
 | `location_shared` | location service (at most daily) | `approx_lat`, `approx_lon` (rounded to 0.1°, ~10 km), `accuracy_km`, `country`, `country_code`, `region`, `city`; also set as `location_*` person properties |
@@ -226,3 +229,10 @@ Every answer of a graded lesson is also a row in the backend's
 `exercise_responses` table (not an event): exercise id and type, word
 (lexeme) id, answer, correct, the app's own verdict, `graded_by`
 (`server`/`client`), attempt, role, label and response time.
+
+`server_push_sent` (`notification_id`, `kind` reminder/streak_saver, `state`,
+`line_id`, `streak`, `devices`, `delivered`, `ttl_s` seconds until the
+learner's local midnight, when the push expires): one per automated streak
+push from `POST /jobs/streak-reminders`. The same sends are in the
+`push_notifications` table with `opened_at`, set by the app's
+`POST /notifications/opened`.

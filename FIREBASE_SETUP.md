@@ -79,7 +79,33 @@ and App Attest registered.
     `"all": true`, optional `"data": {"screen": "home", "campaign": "name"}` and `"dry_run"`.
   - `POST /jobs/streak-reminders`: the streak-at-risk push, run hourly. It checks the
     `X-Cron-Secret` header against `CRON_SECRET`. `STREAK_REMINDER_HOUR` (default 20) is the
-    learner's local hour.
+    learner's local hour. One streak saver follows at `STREAK_SAVER_HOUR` (default reminder + 2)
+    only if the reminder was not opened (`POST /notifications/opened`) and the learner still has
+    not practised. At most 2 a day; each push expires at the learner's local midnight (FCM `ttl`,
+    APNs `apns-expiration`), and the saver replaces the reminder (tag / `apns-collapse-id`
+    `bojang_streak`). Every send is logged in `push_notifications` and as `server_push_sent`.
+  - Push copy: Remote Config **server** template (Remote Config > Server tab, not the client
+    template), read with `firebase_admin.remote_config`. Defaults are in
+    `functions/services/notification_copy.py`, used for any parameter that is missing or invalid.
+    The backend service account needs Remote Config read access (Firebase Remote Config Viewer).
+
+    | Server parameter | Value |
+    |---|---|
+    | `notif_copy_not_started` | JSON list of `{"id", "title", "body"}`, first push before 16:00 local |
+    | `notif_copy_evening` | same, first push 16:00-22:00 |
+    | `notif_copy_late` | same, the streak saver (and a first push after 22:00) |
+    | `notif_copy_frozen` | same, first push when a freeze covered yesterday |
+    | `notif_streak_saver_enabled` | `false` stops the streak saver |
+
+    `{streak}` and `{next}` in a line become the streak length and the next day. The app logs
+    `notification_opened` with `line_id` to PostHog, so open rates can be compared per line;
+    give a rewritten line a new id. A percent condition on `randomization_id` (the learner's
+    Firebase uid) splits learners between pools.
+- Permission: the app does not ask at launch. `NotificationPrimer`
+  (`lib/services/notification_primer.dart`) shows a soft pre-prompt ("Turn on reminders" /
+  "Maybe later") after the streak celebration of a lesson that starts or extends the streak or
+  used a freeze; at most 3 times, 3+ days apart, and only while the OS prompt can still appear.
+  The Settings reminder switches also ask.
   - Set up on 2026-11-21: secret `CRON_SECRET` in Secret Manager (project `bojang-backend`,
     readable by `1042932678350-compute@developer.gserviceaccount.com`), passed to the function by
     `SecretParam("CRON_SECRET")` in `functions/main.py`. Do not set it on the Cloud Run service
