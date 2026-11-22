@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_tokens.dart';
 import '../utils/streak_calendar.dart';
 
 /// Colors shared by the streak week row and the streak calendar.
 class StreakColors {
   StreakColors._();
 
-  static const fire = Color(0xFFFF9600);
-  static const fireDeep = Color(0xFFFF5722);
-  static const ice = Color(0xFF1CB0F6);
-  static const iceFill = Color(0xFFDDF4FF);
-  static const iceBorder = Color(0xFF84D8FF);
-  static const iceFillDark = Color(0xFF15384A);
+  static const fire = AppColors.orange;
+  static const fireDeep = AppColors.red;
+  static const ice = AppColors.primary;
+  static const iceFill = AppColors.primaryTint;
+  static const iceBorder = AppColors.primaryBorder;
+  static const iceFillDark = AppColors.primaryNightTint;
 }
 
 /// One day as a circle: a flame if practiced, ice if a streak freeze

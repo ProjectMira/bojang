@@ -135,7 +135,7 @@ class StreakViewScreen extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFFF9600), Color(0xFFFF5722)],
+          colors: [StreakColors.fire, StreakColors.fireDeep],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [

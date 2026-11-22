@@ -7,6 +7,7 @@ import '../models/lesson_style.dart';
 import '../models/romanisation.dart';
 import 'analytics.dart';
 import 'pronunciation_player.dart';
+import '../theme/app_tokens.dart';
 
 class ThemeService extends ChangeNotifier {
   // Sliders call their setter on every drag tick; only the value the learner
@@ -198,7 +199,7 @@ class ThemeService extends ChangeNotifier {
   
   ThemeData get lightTheme => ThemeData(
     primarySwatch: Colors.blue,
-    primaryColor: const Color(0xFF2C97DD),
+    primaryColor: AppColors.primary,
     scaffoldBackgroundColor: const Color(0xFFF5F7FA),
     brightness: Brightness.light,
     useMaterial3: true,
@@ -206,17 +207,17 @@ class ThemeService extends ChangeNotifier {
       headlineLarge: GoogleFonts.poppins(
         fontSize: 32,
         fontWeight: FontWeight.w700,
-        color: const Color(0xFF2C97DD),
+        color: AppColors.primary,
       ).copyWith(fontFamilyFallback: const ['Jomolhari']),
       headlineMedium: GoogleFonts.poppins(
         fontSize: 24,
         fontWeight: FontWeight.w700,
-        color: const Color(0xFF2C97DD),
+        color: AppColors.primary,
       ).copyWith(fontFamilyFallback: const ['Jomolhari']),
       headlineSmall: GoogleFonts.poppins(
         fontSize: 20,
         fontWeight: FontWeight.w700,
-        color: const Color(0xFF2C97DD),
+        color: AppColors.primary,
       ).copyWith(fontFamilyFallback: const ['Jomolhari']),
       bodyLarge: GoogleFonts.poppins(
         fontSize: 16,
@@ -230,7 +231,7 @@ class ThemeService extends ChangeNotifier {
       ).copyWith(fontFamilyFallback: const ['Jomolhari']),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: const Color(0xFF2C97DD),
+      backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
@@ -247,7 +248,7 @@ class ThemeService extends ChangeNotifier {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF2C97DD),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -261,7 +262,7 @@ class ThemeService extends ChangeNotifier {
   
   ThemeData get darkTheme => ThemeData(
     primarySwatch: Colors.blue,
-    primaryColor: const Color(0xFF2C97DD),
+    primaryColor: AppColors.primary,
     scaffoldBackgroundColor: const Color(0xFF1A1A1A),
     brightness: Brightness.dark,
     useMaterial3: true,
@@ -269,17 +270,17 @@ class ThemeService extends ChangeNotifier {
       headlineLarge: GoogleFonts.poppins(
         fontSize: 32,
         fontWeight: FontWeight.w700,
-        color: const Color(0xFF2C97DD),
+        color: AppColors.primary,
       ).copyWith(fontFamilyFallback: const ['Jomolhari']),
       headlineMedium: GoogleFonts.poppins(
         fontSize: 24,
         fontWeight: FontWeight.w700,
-        color: const Color(0xFF2C97DD),
+        color: AppColors.primary,
       ).copyWith(fontFamilyFallback: const ['Jomolhari']),
       headlineSmall: GoogleFonts.poppins(
         fontSize: 20,
         fontWeight: FontWeight.w700,
-        color: const Color(0xFF2C97DD),
+        color: AppColors.primary,
       ).copyWith(fontFamilyFallback: const ['Jomolhari']),
       bodyLarge: GoogleFonts.poppins(
         fontSize: 16,
@@ -293,7 +294,7 @@ class ThemeService extends ChangeNotifier {
       ).copyWith(fontFamilyFallback: const ['Jomolhari']),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: const Color(0xFF2C97DD),
+      backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
@@ -310,7 +311,7 @@ class ThemeService extends ChangeNotifier {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF2C97DD),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
