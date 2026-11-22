@@ -11,9 +11,11 @@ import '../widgets/streak_day_bubble.dart';
 
 /// A month calendar of the learner's practice, after Duolingo's streak
 /// calendar: practiced days show a flame and runs of them are joined by a
-/// band. Days a streak freeze protected show as ice. Other missed days stay
-/// plain (just the number): research on streaks finds a highlighted break
-/// discourages learners more than no record at all.
+/// band, gold for a perfect week (7 days in a row with no freeze). Days a
+/// streak freeze protected show as ice, and days an Earn Back repaired show
+/// a mended flame inside the band. Other missed days stay plain (just the
+/// number): research on streaks finds a highlighted break discourages
+/// learners more than no record at all.
 class StreakCalendarScreen extends StatefulWidget {
   const StreakCalendarScreen({super.key, this.now});
 
@@ -64,6 +66,7 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
         final calendar = StreakCalendar(
           progress.playDates,
           frozenDates: progress.frozenDates,
+          earnedBackDates: progress.earnedBackDates,
           now: widget.now,
         );
         final canGoBack = _month.isAfter(calendar.firstMonth);
@@ -304,21 +307,30 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
     final state = calendar.stateOf(day);
     final isToday = StreakCalendar.dayKey(day) == calendar.today;
     final practiced = state == StreakDayState.practiced;
+    final inStreak = practiced || state == StreakDayState.earnedBack;
 
-    // Join runs of practiced days within a week row with a band.
-    bool practicedAt(int i) =>
+    // Join runs of streak days within a week row with a band; a day Earn
+    // Back repaired keeps the run joined, as if it never broke.
+    bool inStreakAt(int i) =>
         i >= 0 &&
         i < cells.length &&
         cells[i] != null &&
-        calendar.isPracticed(cells[i]!);
-    final joinLeft = practiced && col > 0 && practicedAt(index - 1);
-    final joinRight = practiced && col < 6 && practicedAt(index + 1);
-    // Full-height and solid, so a run of days reads as one pill.
-    const bandColor = StreakColors.fire;
+        calendar.isInStreak(cells[i]!);
+    bool perfectAt(int i) =>
+        i >= 0 && i < cells.length && cells[i] != null && calendar.isPerfect(cells[i]!);
+    final joinLeft = inStreak && col > 0 && inStreakAt(index - 1);
+    final joinRight = inStreak && col < 6 && inStreakAt(index + 1);
+    // Full-height and solid, so a run of days reads as one pill. A perfect
+    // week's run is gold.
+    final perfect = calendar.isPerfect(day);
+    Color band(bool neighbourPerfect) =>
+        perfect && neighbourPerfect ? StreakColors.perfect : StreakColors.fire;
     final bandHeight = bubble;
 
     return Semantics(
-      label: '${DateFormat.MMMMd().format(day)}, ${_describe(state)}',
+      label:
+          '${DateFormat.MMMMd().format(day)}, ${_describe(state)}'
+          '${perfect ? ', part of a perfect week' : ''}',
       excludeSemantics: true,
       child: SizedBox(
         width: width,
@@ -337,14 +349,24 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
                       left: 0,
                       right: width / 2,
                       height: bandHeight,
-                      child: ColoredBox(color: bandColor),
+                      child: ColoredBox(color: band(perfectAt(index - 1))),
                     ),
                   if (joinRight)
                     Positioned(
                       left: width / 2,
                       right: 0,
                       height: bandHeight,
-                      child: ColoredBox(color: bandColor),
+                      child: ColoredBox(color: band(perfectAt(index + 1))),
+                    ),
+                  if (perfect)
+                    // A gold ring marks each day of a perfect week.
+                    Container(
+                      width: bubble + 4,
+                      height: bubble + 4,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: StreakColors.perfect,
+                      ),
                     ),
                   StreakDayBubble(
                     state: state,
@@ -357,13 +379,18 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
             ),
             const SizedBox(height: 2),
             // A flame or ice hides the number, so it goes underneath.
-            if (practiced || state == StreakDayState.frozen)
+            if (inStreak || state == StreakDayState.frozen)
               Text(
                 '${day.day}',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
-                  color: practiced ? StreakColors.fireDeep : StreakColors.ice,
+                  color:
+                      perfect
+                          ? StreakColors.perfectDeep
+                          : inStreak
+                          ? StreakColors.fireDeep
+                          : StreakColors.ice,
                 ),
               ),
           ],
@@ -378,6 +405,8 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
         return 'practiced';
       case StreakDayState.frozen:
         return 'protected by a streak freeze';
+      case StreakDayState.earnedBack:
+        return 'missed, then earned back';
       case StreakDayState.missed:
         return 'not practiced';
       case StreakDayState.open:
@@ -401,6 +430,26 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
       );
     }
 
+    final perfectBand = Semantics(
+      label: 'Gold band: a perfect week, 7 days in a row with no freeze',
+      excludeSemantics: true,
+      child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 40,
+          height: 16,
+          decoration: BoxDecoration(
+            color: StreakColors.perfect,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text('Perfect week', style: _poppins(12, FontWeight.w500, textColor)),
+      ],
+    ),
+    );
+
     return _card(
       context,
       child: Wrap(
@@ -410,7 +459,9 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
         children: [
           item(StreakDayState.practiced, 'Practiced'),
           item(StreakDayState.frozen, 'Streak freeze'),
+          item(StreakDayState.earnedBack, 'Earned back'),
           item(StreakDayState.open, 'Today', today: true),
+          perfectBand,
         ],
       ),
     );

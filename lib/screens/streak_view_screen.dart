@@ -7,7 +7,9 @@ import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
 import '../utils/streak_calendar.dart';
 import '../utils/streak_rules.dart';
+import '../widgets/earn_back_card.dart';
 import '../widgets/streak_day_bubble.dart';
+import '../widgets/streak_flame.dart';
 import 'level_selection_screen.dart';
 import 'streak_calendar_screen.dart';
 import '../widgets/content_width.dart';
@@ -72,6 +74,10 @@ class StreakViewScreen extends StatelessWidget {
               children: [
                 _buildStreakHero(progress, practicedToday),
                 const SizedBox(height: 16),
+                if (progress.earnBack != null) ...[
+                  _buildEarnBack(context, progress.earnBack!),
+                  const SizedBox(height: 16),
+                ],
                 _buildWeekRow(context, progress, isDark, titleColor),
                 const SizedBox(height: 16),
                 Row(
@@ -171,7 +177,10 @@ class StreakViewScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text('🔥', style: TextStyle(fontSize: 40)),
+              StreakFlame(
+                tier: StreakRules.tierFor(progress.currentStreak),
+                size: 52,
+              ),
               const SizedBox(width: 6),
               Text(
                 '${progress.currentStreak}',
@@ -214,6 +223,29 @@ class StreakViewScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildEarnBack(BuildContext context, EarnBack earnBack) {
+    final now = DateTime.now();
+    return EarnBackCard(
+      earnBack: earnBack,
+      today: now,
+      onStart: () {
+        Analytics.track('earn_back_card_tapped', {
+          'source': 'streak',
+          'streak': earnBack.streak,
+          'sessions_done': earnBack.sessionsDone,
+          'days_left': earnBack.daysLeft(now),
+        });
+        Navigator.push(
+          context,
+          screenRoute(
+            'level_selection',
+            (context) => const LevelSelectionScreen(),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildWeekRow(
     BuildContext context,
     ProgressService progress,
@@ -224,6 +256,7 @@ class StreakViewScreen extends StatelessWidget {
     final calendar = StreakCalendar(
       progress.playDates,
       frozenDates: progress.frozenDates,
+      earnedBackDates: progress.earnedBackDates,
       now: today,
     );
     const dayLetters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -404,6 +437,7 @@ class StreakViewScreen extends StatelessWidget {
     final hasGoal = goal > streak;
     final milestone = hasGoal ? goal : _nextMilestone(streak);
     final fraction = (streak / milestone).clamp(0.0, 1.0);
+    final nextTierAt = StreakRules.nextTierAt(streak);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -467,6 +501,33 @@ class StreakViewScreen extends StatelessWidget {
               color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
             ).copyWith(fontFamilyFallback: const ['Jomolhari']),
           ),
+          if (nextTierAt != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                StreakFlame(
+                  tier: StreakRules.tierFor(nextTierAt),
+                  size: 26,
+                  dimmed: true,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    nextTierAt - streak == 1
+                        ? 'Tomorrow your flame grows into a '
+                            '${StreakRules.tierFor(nextTierAt).label}.'
+                        : 'Your flame grows into a '
+                            '${StreakRules.tierFor(nextTierAt).label} at $nextTierAt days.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
+                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

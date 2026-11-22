@@ -133,4 +133,58 @@ void main() {
       expect(calendar.stateOf(DateTime(2026, 11, 4)), StreakDayState.practiced);
     });
   });
+
+  group('StreakCalendar Earn Back and perfect weeks', () {
+    List<DateTime> days(int from, int to) => [
+      for (var d = from; d <= to; d++) DateTime(2026, 11, d),
+    ];
+
+    test('a repaired day is earned back and stays in the streak', () {
+      final calendar = StreakCalendar(
+        [DateTime(2026, 11, 3), DateTime(2026, 11, 5)],
+        earnedBackDates: [DateTime(2026, 11, 4)],
+        now: now,
+      );
+      expect(
+        calendar.stateOf(DateTime(2026, 11, 4)),
+        StreakDayState.earnedBack,
+      );
+      expect(calendar.isInStreak(DateTime(2026, 11, 4)), isTrue);
+      expect(calendar.isPracticed(DateTime(2026, 11, 4)), isFalse);
+    });
+
+    test('7 practiced days in a row are a perfect week', () {
+      final calendar = StreakCalendar(days(2, 8), now: now);
+      expect(calendar.isPerfect(DateTime(2026, 11, 2)), isTrue);
+      expect(calendar.isPerfect(DateTime(2026, 11, 8, 20)), isTrue);
+      expect(calendar.perfectWeeks, 1);
+    });
+
+    test('6 days are not, and a frozen day breaks the run', () {
+      expect(StreakCalendar(days(2, 7), now: now).perfectDays, isEmpty);
+      final withFreeze = StreakCalendar(
+        [...days(2, 5), ...days(7, 10)],
+        frozenDates: [DateTime(2026, 11, 6)],
+        now: now,
+      );
+      expect(withFreeze.perfectDays, isEmpty);
+    });
+
+    test('an earned-back day breaks a perfect week too', () {
+      final calendar = StreakCalendar(
+        [...days(1, 4), ...days(6, 9)],
+        earnedBackDates: [DateTime(2026, 11, 5)],
+        now: now,
+      );
+      expect(calendar.perfectDays, isEmpty);
+    });
+
+    test('runs count once per 7 days and cross months', () {
+      final calendar = StreakCalendar([
+        for (var i = 0; i < 15; i++) DateTime(2026, 10, 25 + i),
+      ], now: now);
+      expect(calendar.perfectWeeks, 2);
+      expect(calendar.isPerfect(DateTime(2026, 11, 8)), isTrue);
+    });
+  });
 }

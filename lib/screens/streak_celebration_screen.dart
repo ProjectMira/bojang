@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../services/analytics.dart';
@@ -10,11 +11,16 @@ import '../utils/streak_calendar.dart';
 import '../utils/streak_rules.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/content_width.dart';
+import '../widgets/earn_back_card.dart';
 import '../widgets/streak_day_bubble.dart';
+import '../widgets/streak_flame.dart';
 
 /// Shown after the first practice of each day, after Duolingo's streak
 /// screen: the new streak count, the week, and — when it applies — a
-/// milestone, a freeze earned or used, and a streak goal to commit to.
+/// milestone, a freeze earned or used, a streak goal to commit to, the
+/// flame growing a tier (or a tease the day before), Earn Back progress,
+/// and a restored streak (which can also come on a second lesson the same
+/// day).
 ///
 /// Duolingo measured the streak animation and milestone celebrations at
 /// +1.7% day-7 retention, and asking new learners to commit to a streak goal
@@ -59,6 +65,7 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
   late final ConfettiController _confetti;
   late int _goalChoice;
   bool _goalSaved = false;
+  bool _started = false;
 
   StreakCelebration get c => widget.celebration;
 
@@ -76,9 +83,8 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
     _pop = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
-    )..forward();
+    );
     _confetti = ConfettiController(duration: const Duration(milliseconds: 2000));
-    if (c.isMilestone || c.goalReached) _confetti.play();
     Analytics.track('streak_celebration_shown', {
       'streak': c.streak,
       'milestone': c.isMilestone,
@@ -86,7 +92,38 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
       'goal_reached': c.goalReached,
       'freeze_earned': c.freezeEarned,
       'freezes_used': c.freezesUsed,
+      'tier': c.tier.name,
+      'tier_up': c.tierUp,
+      'restored': c.restored,
+      if (c.earnBack != null) 'earn_back_sessions': c.earnBack!.sessionsDone,
     });
+    if (c.tierUp) {
+      Analytics.track('streak_tier_reached', {
+        'streak': c.streak,
+        'tier': c.tier.name,
+      });
+    } else if (c.tierTomorrow != null && !c.restored) {
+      Analytics.track('streak_tier_teased', {
+        'streak': c.streak,
+        'tier': c.tierTomorrow!.name,
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    // Reduce Motion: the flame is simply there, and no confetti falls.
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      _pop.value = 1;
+      return;
+    }
+    _pop.forward();
+    if (c.isMilestone || c.goalReached || c.tierUp || c.restored) {
+      _confetti.play();
+    }
   }
 
   @override
@@ -97,6 +134,7 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
   }
 
   String get _headline {
+    if (c.restored) return 'Streak restored!';
     if (c.goalReached) return 'Goal reached!';
     if (c.isMilestone) return '${c.streak}-day milestone!';
     if (c.streak == 1) return 'Your streak has started!';
@@ -172,12 +210,24 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'One lesson a day keeps your streak going.',
+                      c.restored
+                          ? 'You earned it back. Your streak carries on as if it never broke.'
+                          : c.tierUp
+                          ? 'Your flame grew into a ${c.tier.label}.'
+                          : 'One lesson a day keeps your streak going.',
                       textAlign: TextAlign.center,
                       style: AppTextStyles.poppins(fontSize: 15, color: subtle),
                     ),
                     const SizedBox(height: 20),
                     _week(isDark),
+                    if (c.earnBack != null && !c.restored) ...[
+                      const SizedBox(height: 16),
+                      _earnBackNote(c.earnBack!, ink, subtle, isDark),
+                    ],
+                    if (!c.tierUp && !c.restored && c.tierTomorrow != null) ...[
+                      const SizedBox(height: 16),
+                      _tease(c.tierTomorrow!, ink, isDark),
+                    ],
                     if (c.freezesUsed > 0) ...[
                       const SizedBox(height: 16),
                       _note(
@@ -272,9 +322,77 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
 
   Widget _flame() {
     final scale = CurvedAnimation(parent: _pop, curve: Curves.elasticOut);
+    final previous = StreakRules.tierFor(c.previousStreak ?? c.streak - 1);
     return ScaleTransition(
       scale: scale,
-      child: const Text('🔥', style: TextStyle(fontSize: 96, height: 1.1)),
+      child: StreakFlame(
+        tier: c.tier,
+        size: 112,
+        from: c.tierUp ? previous : null,
+      ),
+    );
+  }
+
+  Widget _earnBackNote(EarnBack e, Color ink, Color subtle, bool isDark) {
+    final today = widget.now ?? DateTime.now();
+    final left = e.sessionsNeeded - e.sessionsDone;
+    final byDay = DateFormat.EEEE().format(e.expires);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF3A2A1A) : const Color(0xFFFFF3E0),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: StreakColors.fire.withValues(alpha: 0.55)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.replay_rounded, color: StreakColors.fireDeep, size: 26),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Earn back your ${e.streak}-day streak',
+                  style: AppTextStyles.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: ink,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${EarnBackCard.progressLine(e, today)}. '
+                  '${left == 1 ? 'One more lesson' : '$left more lessons'} '
+                  'by $byDay brings it back.',
+                  style: AppTextStyles.poppins(fontSize: 13, color: subtle),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// The day before the flame grows: a dim preview of tomorrow's flame.
+  Widget _tease(FlameTier next, Color ink, bool isDark) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        StreakFlame(tier: next, size: 34, dimmed: true),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            'Come back tomorrow and your flame grows into a ${next.label}.',
+            style: AppTextStyles.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: ink,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -284,6 +402,7 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
     final calendar = StreakCalendar(
       progress.playDates,
       frozenDates: progress.frozenDates,
+      earnedBackDates: progress.earnedBackDates,
       now: today,
     );
     const letters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -357,7 +476,7 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
     final options =
         reached
             ? [offered, if (StreakRules.nextGoal(offered) != null) StreakRules.nextGoal(offered)!]
-            : const [7, 14, 30];
+            : const [7, 14, 30, 50];
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

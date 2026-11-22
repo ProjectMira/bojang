@@ -13,6 +13,9 @@ class StreakCelebration {
     required this.goal,
     this.freezeEarned = false,
     this.freezesUsed = 0,
+    this.previousStreak,
+    this.restored = false,
+    this.earnBack,
   });
 
   final int streak;
@@ -22,8 +25,26 @@ class StreakCelebration {
   final bool freezeEarned;
   final int freezesUsed;
 
+  /// The streak before this practice (defaults to one less).
+  final int? previousStreak;
+
+  /// Earn Back finished: the broken streak is back.
+  final bool restored;
+
+  /// An Earn Back still open after this practice (its progress to show).
+  final EarnBack? earnBack;
+
   bool get isMilestone => StreakRules.isMilestone(streak);
   bool get goalReached => goal > 0 && streak == goal;
+
+  FlameTier get tier => StreakRules.tierFor(streak);
+
+  /// The flame grew a tier with this practice.
+  bool get tierUp =>
+      tier.index > StreakRules.tierFor(previousStreak ?? streak - 1).index;
+
+  /// The tier the flame reaches if the learner comes back tomorrow.
+  FlameTier? get tierTomorrow => StreakRules.tierTomorrow(streak);
 }
 
 class ProgressService extends ChangeNotifier {
@@ -36,6 +57,8 @@ class ProgressService extends ChangeNotifier {
   List<DateTime> _frozenDates = [];
   int _streakGoal = 0;
   StreakCelebration? _pendingCelebration;
+  EarnBack? _earnBack;
+  List<DateTime> _earnedBackDates = [];
 
   // Progress tracking
   Map<String, double> _categoryProgress = {};
@@ -66,6 +89,21 @@ class ProgressService extends ChangeNotifier {
 
   /// The streak length the learner committed to (0 if none yet).
   int get streakGoal => _streakGoal;
+
+  /// The Earn Back to show today, if a broken streak can still come back:
+  /// the open window, or one owed to a break nothing has counted yet.
+  EarnBack? earnBackOn(DateTime today) => StreakRules.earnBackStatus(
+    streak: _currentStreak,
+    lastActive: _lastPlayDate,
+    freezes: _streakFreezes,
+    stored: _earnBack,
+    today: today,
+  );
+
+  EarnBack? get earnBack => earnBackOn(DateTime.now());
+
+  /// Missed days an Earn Back repaired; the calendar shows them mended.
+  List<DateTime> get earnedBackDates => _earnedBackDates;
 
   /// The celebration waiting to be shown, cleared once taken.
   StreakCelebration? takeStreakCelebration() {
@@ -126,6 +164,8 @@ class ProgressService extends ChangeNotifier {
     _streakFreezes = prefs.getInt('streak_freezes') ?? 0;
     _frozenDates = _parseDays(prefs.getStringList('frozen_dates'));
     _streakGoal = prefs.getInt('streak_goal') ?? 0;
+    _earnBack = _decodeEarnBack(prefs.getString('earn_back'));
+    _earnedBackDates = _parseDays(prefs.getStringList('earned_back_dates'));
 
     // Load progress data
     final categoryProgressString = prefs.getString('category_progress') ?? '{}';
@@ -171,7 +211,10 @@ class ProgressService extends ChangeNotifier {
       _xp = xpInfo?['total'] as int? ?? _xp;
       final serverStreak = streakInfo?['current'] as int?;
       if (serverStreak != null) _currentStreak = _mergedStreak(serverStreak);
-      if (streakInfo != null) _applyServerFreezes(streakInfo);
+      if (streakInfo != null) {
+        _applyServerFreezes(streakInfo);
+        _applyServerEarnBack(streakInfo);
+      }
       _league = (leagueInfo?['current'] ?? _league).toString();
       _completedLevelsCount =
           levelsInfo?['count'] as int? ?? _completedLevelsCount;
@@ -231,6 +274,53 @@ class ProgressService extends ChangeNotifier {
       'frozen_dates',
       _frozenDates.map(localDateString).toList(),
     );
+    final earnBack = _earnBack;
+    if (earnBack == null) {
+      await prefs.remove('earn_back');
+    } else {
+      await prefs.setString('earn_back', json.encode(earnBack.toJson()));
+    }
+    await prefs.setStringList(
+      'earned_back_dates',
+      _earnedBackDates.map(localDateString).toList(),
+    );
+  }
+
+  static EarnBack? _decodeEarnBack(String? stored) {
+    if (stored == null) return null;
+    try {
+      return EarnBack.fromJson(json.decode(stored));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Takes Earn Back from a server response (`earn_back` and
+  /// `earned_back_dates`, on activity and lesson responses and in stats).
+  void _applyServerEarnBack(Map<String, dynamic> data) {
+    if (data.containsKey('earn_back')) {
+      final server = EarnBack.fromJson(data['earn_back']);
+      final local = _earnBack;
+      if (server != null &&
+          local != null &&
+          server.sameWindow(local) &&
+          local.sessionsDone > server.sessionsDone) {
+        // This device counted a session the server hasn't seen yet.
+        _earnBack = local;
+      } else {
+        _earnBack =
+            server == null || local == null || !server.sameWindow(local)
+                ? server
+                : server.copyWith(openedOn: local.openedOn);
+      }
+    }
+    final repaired = data['earned_back_dates'];
+    if (repaired is List) {
+      _earnedBackDates = _parseDays([
+        ...repaired,
+        ..._earnedBackDates.map(localDateString),
+      ]);
+    }
   }
 
   Future<void> updateQuizResults(
@@ -272,13 +362,18 @@ class ProgressService extends ChangeNotifier {
     final today = DateTime.now();
     final todayKey = DateTime(today.year, today.month, today.day);
 
-    if (_lastPlayDate == null || !_isSameDay(_lastPlayDate!, today)) {
-      final update = StreakRules.apply(
-        streak: _currentStreak,
-        lastActive: _lastPlayDate,
-        freezes: _streakFreezes,
-        today: today,
-      );
+    // Every finished session counts toward an open Earn Back, so the rule
+    // runs each time; on a day already practiced it only moves Earn Back.
+    final newDay = _lastPlayDate == null || !_isSameDay(_lastPlayDate!, today);
+    final update = StreakRules.apply(
+      streak: _currentStreak,
+      lastActive: _lastPlayDate,
+      freezes: _streakFreezes,
+      today: today,
+      earnBack: earnBackOn(today),
+      session: true,
+    );
+    if (newDay) {
       _currentStreak = update.streak;
       _streakFreezes = update.freezes;
       if (update.frozenDays.isNotEmpty) {
@@ -310,8 +405,12 @@ class ProgressService extends ChangeNotifier {
         goal: _streakGoal,
         freezeEarned: update.freezeEarned,
         freezesUsed: update.frozenDays.length,
+        previousStreak: update.streakRestored ? previousStreak : null,
+        restored: update.streakRestored,
+        earnBack: update.earnBack,
       );
     }
+    _applyEarnBack(update, today, newDay: newDay, previousStreak: previousStreak);
 
     if (_currentStreak != previousStreak) {
       Analytics.track(
@@ -352,6 +451,60 @@ class ProgressService extends ChangeNotifier {
           _showAchievementDialog(context, achievementId);
         });
       }
+    }
+  }
+
+  /// Keeps the Earn Back from [update]: its progress, and on a restore the
+  /// streak, the repaired days and a celebration (a restore on a day already
+  /// practiced queues one too, since it changes the streak).
+  void _applyEarnBack(
+    StreakUpdate update,
+    DateTime today, {
+    required bool newDay,
+    required int previousStreak,
+  }) {
+    final before = _earnBack;
+    _earnBack = update.earnBack;
+    final after = update.earnBack;
+    if (after != null &&
+        after.sessionsDone == 1 &&
+        (before == null || before.sessionsDone == 0)) {
+      Analytics.track('earn_back_started', {
+        'streak': after.streak,
+        'days_left': after.daysLeft(today),
+        'sessions_needed': after.sessionsNeeded,
+      });
+    } else if (after == null &&
+        before != null &&
+        !update.streakRestored &&
+        !before.isOpenOn(today)) {
+      Analytics.track('earn_back_expired', {
+        'streak': before.streak,
+        'sessions_done': before.sessionsDone,
+      });
+    }
+    if (!update.streakRestored) return;
+
+    _earnedBackDates = _parseDays([
+      ..._earnedBackDates.map(localDateString),
+      ...update.earnedBackDays.map(localDateString),
+    ]);
+    Analytics.track('earn_back_completed', {
+      'streak': update.streak,
+      'previous_streak': previousStreak,
+      'repaired_days': update.earnedBackDays.length,
+    });
+    if (!newDay) {
+      _currentStreak = update.streak;
+      _streakFreezes = update.freezes;
+      if (_currentStreak > _longestStreak) _longestStreak = _currentStreak;
+      _pendingCelebration = StreakCelebration(
+        streak: _currentStreak,
+        goal: _streakGoal,
+        freezeEarned: update.freezeEarned,
+        previousStreak: previousStreak,
+        restored: true,
+      );
     }
   }
 
@@ -446,6 +599,8 @@ class ProgressService extends ChangeNotifier {
     _frozenDates = [];
     _streakGoal = 0;
     _pendingCelebration = null;
+    _earnBack = null;
+    _earnedBackDates = [];
     _categoryProgress = {};
     _categoryScores = {};
     _unlockedAchievements = [];
@@ -465,6 +620,8 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('streak_freezes');
     await prefs.remove('frozen_dates');
     await prefs.remove('streak_goal');
+    await prefs.remove('earn_back');
+    await prefs.remove('earned_back_dates');
     await prefs.remove('category_progress');
     await prefs.remove('category_scores');
     await prefs.remove('unlocked_achievements');
@@ -565,13 +722,15 @@ class ProgressService extends ChangeNotifier {
   }
 
   /// Sends [dates] oldest first, stopping at the first failure, so the server
-  /// sees day N before day N+1. Only acknowledged days leave the list.
+  /// sees day N before day N+1. Only acknowledged days leave the list. A day
+  /// can appear once per session: the streak counts it once, and Earn Back
+  /// counts every session.
   Future<void> _sendPending(
     SharedPreferences prefs,
     Iterable<String> dates,
   ) async {
     // YYYY-MM-DD sorts chronologically as text.
-    final remaining = dates.toSet().toList()..sort();
+    final remaining = dates.toList()..sort();
     while (remaining.isNotEmpty && await _sendOne(prefs, remaining.first)) {
       remaining.removeAt(0);
     }
@@ -592,6 +751,7 @@ class ProgressService extends ChangeNotifier {
       await prefs.setInt('current_streak', _currentStreak);
     }
     _applyServerFreezes(response);
+    _applyServerEarnBack(response);
     await _saveFreezes(prefs);
     notifyListeners();
     return true;

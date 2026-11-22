@@ -389,4 +389,150 @@ void main() {
       expect(prefs.getInt('streak_goal'), 14);
     });
   });
+
+  group('Earn Back', () {
+    Future<ProgressService> build(
+      Map<String, Object> prefs, {
+      Map<String, dynamic>? Function(String date)? reply,
+      List<String>? sent,
+    }) async {
+      SharedPreferences.setMockInitialValues(prefs);
+      final service = ProgressService(
+        isSignedIn: () => reply != null,
+        recordActivity: (date) async {
+          sent?.add(date);
+          return reply?.call(date);
+        },
+      );
+      await pumpEventQueue();
+      return service;
+    }
+
+    String daysAgo(int n) {
+      final now = DateTime.now();
+      return DateTime(now.year, now.month, now.day - n, 12).toIso8601String();
+    }
+
+    DateTime dayAgo(int n) {
+      final now = DateTime.now();
+      return DateTime(now.year, now.month, now.day - n);
+    }
+
+    test('a broken streak is offered before any lesson', () async {
+      final service = await build({
+        'current_streak': 12,
+        'last_play_date': daysAgo(2),
+      });
+      final e = service.earnBack!;
+      expect([e.streak, e.sessionsDone, e.daysLeft(DateTime.now())], [12, 0, 3]);
+    });
+
+    test('two lessons bring it back, with a celebration', () async {
+      final service = await build({
+        'current_streak': 12,
+        'last_play_date': daysAgo(2),
+        'play_dates': [dayAgo(2).toIso8601String()],
+      });
+      await service.updateQuizResults('topic', 5, 5);
+      expect(service.currentStreak, 1);
+      expect(service.earnBack!.sessionsDone, 1);
+      final first = service.takeStreakCelebration()!;
+      expect([first.streak, first.restored, first.earnBack!.sessionsDone], [
+        1,
+        false,
+        1,
+      ]);
+
+      await service.updateQuizResults('topic', 5, 5);
+      expect(service.currentStreak, 13);
+      expect(service.longestStreak, 13);
+      expect(service.earnBack, isNull);
+      expect(service.earnedBackDates, [dayAgo(1)]);
+      final restored = service.takeStreakCelebration()!;
+      expect([restored.streak, restored.restored], [13, true]);
+
+      // Kept across launches.
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('earn_back'), isNull);
+      expect(prefs.getStringList('earned_back_dates'), [
+        ProgressService.localDateString(dayAgo(1)),
+      ]);
+    });
+
+    test('progress is saved and read back', () async {
+      final service = await build({
+        'current_streak': 12,
+        'last_play_date': daysAgo(2),
+      });
+      await service.updateQuizResults('topic', 5, 5);
+      final prefs = await SharedPreferences.getInstance();
+      final reloaded = ProgressService(
+        isSignedIn: () => false,
+        recordActivity: (_) async => null,
+      );
+      await pumpEventQueue();
+      expect(prefs.getString('earn_back'), isNotNull);
+      expect(reloaded.earnBack!.sessionsDone, 1);
+      expect(service.earnBack!.sessionsDone, 1);
+    });
+
+    test('the server window from stats is used', () async {
+      final service = await build({});
+      final now = DateTime.now();
+      await service.updateFromServer({
+        'xp': {'total': 10},
+        'streak': {
+          'current': 0,
+          'multiplier': 1.0,
+          'earn_back': {
+            'active': true,
+            'sessions_done': 1,
+            'sessions_needed': 2,
+            'expires_at': ProgressService.localDateString(
+              DateTime(now.year, now.month, now.day + 1),
+            ),
+            'days_left': 2,
+            'streak': 20,
+            'broke_after': ProgressService.localDateString(dayAgo(3)),
+          },
+          'earned_back_dates': ['2026-10-02'],
+        },
+        'league': {'current': 'Bronze'},
+      });
+      expect([service.earnBack!.streak, service.earnBack!.sessionsDone], [20, 1]);
+      expect(service.earnedBackDates, [DateTime(2026, 10, 2)]);
+
+      await service.updateFromServer({
+        'streak': {
+          'current': 21,
+          'multiplier': 1.0,
+          'earn_back': {'active': false},
+        },
+      });
+      expect(service.earnBack, isNull);
+    });
+
+    test('each lesson goes to the server, even on the same day', () async {
+      final sent = <String>[];
+      final service = await build({}, reply: (_) => null, sent: sent);
+      await service.updateQuizResults('topic', 5, 5);
+      await service.updateQuizResults('topic', 5, 5);
+      await pumpEventQueue();
+      final prefs = await SharedPreferences.getInstance();
+      final today = ProgressService.localDateString(DateTime.now());
+      // Both kept: the streak counts the day once, Earn Back each lesson.
+      expect(prefs.getStringList('pending_activity_dates'), [today, today]);
+    });
+
+    test('reset clears Earn Back', () async {
+      final service = await build({
+        'current_streak': 12,
+        'last_play_date': daysAgo(2),
+        'earned_back_dates': ['2026-10-02'],
+      });
+      await service.resetProgress();
+      expect(service.earnBack, isNull);
+      expect(service.earnedBackDates, isEmpty);
+    });
+  });
 }
