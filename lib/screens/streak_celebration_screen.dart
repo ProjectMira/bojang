@@ -9,7 +9,7 @@ import '../services/progress_service.dart';
 import '../utils/streak_calendar.dart';
 import '../utils/streak_rules.dart';
 import '../widgets/app_text_style.dart';
-import '../widgets/content_width.dart';
+import '../widgets/session_end_scaffold.dart';
 import '../widgets/streak_day_bubble.dart';
 
 /// Shown after the first practice of each day, after Duolingo's streak
@@ -28,12 +28,12 @@ class StreakCelebrationScreen extends StatefulWidget {
   final DateTime? now;
 
   /// Shows the waiting celebration, if the last practice extended the
-  /// streak. Completes when the learner closes it.
-  static Future<void> maybeShow(BuildContext context) async {
+  /// streak. Completes when the learner closes it, with whether it showed.
+  static Future<bool> maybeShow(BuildContext context) async {
     final celebration =
         Provider.of<ProgressService>(context, listen: false)
             .takeStreakCelebration();
-    if (celebration == null || !context.mounted) return;
+    if (celebration == null || !context.mounted) return false;
     await Navigator.of(context).push(
       PageRouteBuilder<void>(
         settings: const RouteSettings(name: 'streak_celebration'),
@@ -46,6 +46,7 @@ class StreakCelebrationScreen extends StatefulWidget {
                 FadeTransition(opacity: animation, child: child),
       ),
     );
+    return true;
   }
 
   @override
@@ -127,15 +128,35 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
     final subtle = isDark ? Colors.grey.shade400 : Colors.grey.shade700;
     final offered = _offeredGoal;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            ContentWidth(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                child: Column(
+    // Same layout as every session-end screen: Continue stays in place.
+    return SessionEndScaffold(
+      primaryColor: StreakColors.fire,
+      primaryLabel: offered != null ? 'Commit to my goal' : 'Continue',
+      onPrimary:
+          () => _close(action: offered != null ? 'commit' : 'continue'),
+      secondaryLabel: offered != null ? 'Not now' : null,
+      onSecondary: () => _close(action: 'not_now'),
+      overlays: [
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confetti,
+            blastDirection: math.pi / 2,
+            emissionFrequency: 0.08,
+            numberOfParticles: 14,
+            maxBlastForce: 20,
+            minBlastForce: 8,
+            gravity: 0.25,
+            colors: const [
+              StreakColors.fire,
+              StreakColors.fireDeep,
+              Colors.amber,
+              StreakColors.ice,
+            ],
+          ),
+        ),
+      ],
+      body: Column(
                   children: [
                     _flame(),
                     const SizedBox(height: 8),
@@ -208,64 +229,7 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
                       const SizedBox(height: 16),
                       _goalProgress(ink, subtle),
                     ],
-                    const SizedBox(height: 28),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: StreakColors.fire,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        onPressed:
-                            () => _close(
-                              action: offered != null ? 'commit' : 'continue',
-                            ),
-                        child: Text(
-                          offered != null ? 'Commit to my goal' : 'Continue',
-                          style: AppTextStyles.poppins(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (offered != null)
-                      TextButton(
-                        onPressed: () => _close(action: 'not_now'),
-                        child: Text(
-                          'Not now',
-                          style: AppTextStyles.poppins(fontSize: 15, color: subtle),
-                        ),
-                      ),
                   ],
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.topCenter,
-              child: ConfettiWidget(
-                confettiController: _confetti,
-                blastDirection: math.pi / 2,
-                emissionFrequency: 0.08,
-                numberOfParticles: 14,
-                maxBlastForce: 20,
-                minBlastForce: 8,
-                gravity: 0.25,
-                colors: const [
-                  StreakColors.fire,
-                  StreakColors.fireDeep,
-                  Colors.amber,
-                  StreakColors.ice,
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

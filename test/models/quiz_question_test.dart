@@ -274,6 +274,40 @@ void main() {
       );
     });
   });
+
+  group('server ids for grading', () {
+    final payload = {
+      'type': 'multiple_choice',
+      'exercise_id': 'ex-9',
+      'tibetan_word': 'ཀ',
+      'skill': 'script',
+      'label': 'weak',
+      'correct_answer_id': 'w-ka',
+      'options': [
+        {'id': 'w-kha', 'text': 'kha', 'tibetan': 'ཁ'},
+        {'id': 'w-ka', 'text': 'ka', 'tibetan': 'ཀ', 'is_correct': true},
+      ],
+    };
+
+    test('exercise id, option ids and label are read', () {
+      final q = QuizQuestion.fromApiExercise(payload);
+      expect(q.exerciseId, 'ex-9');
+      expect(q.optionIds, ['w-kha', 'w-ka']);
+      expect(q.label, 'weak');
+      expect(q.answerIdFor(1), 'w-ka');
+    });
+
+    test('derived question kinds keep them', () {
+      final q = QuizQuestion.fromApiExercise(payload);
+      final reverse = q.asReadingReverse()!;
+      expect(reverse.exerciseId, 'ex-9');
+      expect(reverse.answerIdFor(reverse.correctAnswerIndex), 'w-ka');
+      expect(q.withLabel('hard').label, 'hard');
+      expect(q.withLabel('hard').type, q.type);
+    });
+
+    test('the quiz screen asks the server only for types it renders', () {
+      expect(QuizQuestion.renderableTypes, ['multiple_choice', 'picture_choice']);
+    });
+  });
 }
-
-
