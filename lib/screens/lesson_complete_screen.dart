@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../services/analytics.dart';
 import '../services/location_service.dart';
 import '../theme/app_tokens.dart';
+import '../theme/motion.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/yak_mascot.dart';
@@ -53,7 +54,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
     _confettiRight = ConfettiController(
       duration: const Duration(milliseconds: 2500),
     );
-    if (_isSuccess) {
+    if (_isSuccess && Motion.read(context).allowsCelebration) {
       _confettiLeft.play();
       _confettiRight.play();
     }

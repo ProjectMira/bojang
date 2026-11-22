@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../services/analytics.dart';
 import '../services/progress_service.dart';
+import '../theme/motion.dart';
 import '../utils/streak_calendar.dart';
 import '../utils/streak_rules.dart';
 import '../widgets/app_text_style.dart';
@@ -76,9 +77,12 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
     _pop = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
-    )..forward();
+    )..forward(from: Motion.read(context).animates ? 0 : 1);
     _confetti = ConfettiController(duration: const Duration(milliseconds: 2000));
-    if (c.isMilestone || c.goalReached) _confetti.play();
+    if ((c.isMilestone || c.goalReached) &&
+        Motion.read(context).allowsCelebration) {
+      _confetti.play();
+    }
     Analytics.track('streak_celebration_shown', {
       'streak': c.streak,
       'milestone': c.isMilestone,

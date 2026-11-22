@@ -9,6 +9,7 @@ import '../services/pronunciation_player.dart';
 import '../services/progress_service.dart';
 import '../services/api_service.dart';
 import '../services/google_auth_service.dart';
+import '../widgets/animations_picker.dart';
 import '../widgets/lesson_style_sheet.dart';
 import '../widgets/reading_voice_pickers.dart';
 import 'notification_settings_screen.dart';
@@ -76,6 +77,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onChanged: (value) => themeService.toggleTheme(),
                     activeColor: Theme.of(context).primaryColor,
                   ),
+                ),
+
+                const SizedBox(height: 12),
+
+                _buildSettingsCard(
+                  title: 'Animations',
+                  subtitle: animationsSubtitle(context, themeService),
+                  icon: Icons.animation,
+                  onTap: () => showAnimationsPicker(context),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 ),
 
                 const SizedBox(height: 12),

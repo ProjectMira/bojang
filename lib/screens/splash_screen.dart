@@ -6,6 +6,7 @@ import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
 import 'main_navigation_screen.dart';
 import '../services/analytics.dart';
+import '../theme/app_tokens.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -130,7 +131,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF2C97DD), // New blue background
+      backgroundColor: AppColors.primary,
       body: Center(
         child: FadeTransition(
           opacity: _animation,

@@ -14,6 +14,9 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_tokens.dart';
+import '../theme/motion.dart';
+
 /// What the yak is feeling. Pick by moment, not by screen.
 enum YakMood {
   /// Resting state: gentle smile, idle blink.
@@ -292,7 +295,7 @@ class _YakMascotState extends State<YakMascot> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    _reduceMotion = !Motion.of(context).allowsLoops;
     _syncLoop();
   }
 
@@ -370,7 +373,7 @@ class _YakColors {
   static const mouth = Color(0xFF4A1F1C);
   static const tongue = Color(0xFFF28B82);
   static const blush = Color(0xFFF2857A);
-  static const gold = Color(0xFFFFC800);
+  static const gold = AppColors.gold;
   static const tear = Color(0xFF5BC0F8);
   static const zzz = Color(0xFF7F8C9B);
   static const heart = Color(0xFFFF4B6E);
