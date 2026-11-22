@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../services/analytics.dart';
 import '../services/push_service.dart';
 import '../theme/app_tokens.dart';
+import '../theme/motion.dart';
 import 'home_page.dart';
 import 'streak_view_screen.dart';
 import 'extra_games_screen.dart';
@@ -123,9 +124,8 @@ class _FloatingTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = AppTokens.isDark(context);
-    final reduceMotion = MediaQuery.of(context).disableAnimations;
     final duration =
-        reduceMotion ? Duration.zero : const Duration(milliseconds: 280);
+        Motion.of(context).scale(const Duration(milliseconds: 280));
     final selected = tabs[currentIndex];
     final glass =
         isDark

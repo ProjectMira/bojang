@@ -15,6 +15,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 
 import '../theme/app_tokens.dart';
+import '../theme/motion.dart';
 
 /// What the yak is feeling. Pick by moment, not by screen.
 enum YakMood {
@@ -294,7 +295,7 @@ class _YakMascotState extends State<YakMascot> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    _reduceMotion = !Motion.of(context).allowsLoops;
     _syncLoop();
   }
 
