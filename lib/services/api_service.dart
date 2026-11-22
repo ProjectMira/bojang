@@ -186,8 +186,13 @@ class ApiService {
     return _get('auth/me');
   }
 
+  /// Progress stats. The device's local day lets the server count Earn
+  /// Back's days left by the learner's calendar, not UTC.
   Future<Map<String, dynamic>?> getUserProgress() async {
-    return _get('progress/stats');
+    final now = DateTime.now();
+    String two(int n) => n.toString().padLeft(2, '0');
+    final localDate = '${now.year.toString().padLeft(4, '0')}-${two(now.month)}-${two(now.day)}';
+    return _get('progress/stats', queryParameters: {'local_date': localDate});
   }
 
   Future<Map<String, dynamic>?> syncUser({

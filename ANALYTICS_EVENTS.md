@@ -139,6 +139,13 @@ deletes its rows.
 | `achievement_unlocked` | progress | `achievement`, `title` |
 | `progress_reset` | settings / profile | `source` |
 | `streak_practice_tapped` | streak screen | `practiced_today` |
+| `streak_celebration_shown` | streak celebration | `streak`, `milestone`, `goal`, `goal_reached`, `freeze_earned`, `freezes_used`, `tier` (spark/flame/blaze/bonfire/golden), `tier_up`, `restored`, `earn_back_sessions` |
+| `streak_tier_reached` | streak celebration | `streak`, `tier` (the flame grew at 7/14/30/50 days) |
+| `streak_tier_teased` | streak celebration | `streak`, `tier` (the day before a tier: "tomorrow your flame grows") |
+| `earn_back_started` | progress | `streak` (the broken streak), `days_left`, `sessions_needed` — first lesson counted in an Earn Back window |
+| `earn_back_completed` | progress | `streak` (restored), `previous_streak`, `repaired_days` |
+| `earn_back_expired` | progress | `streak`, `sessions_done` — the window ran out before enough lessons |
+| `earn_back_card_tapped` | home / streak screen | `source` (home/streak), `streak`, `sessions_done`, `days_left` |
 | `setting_changed` | settings / theme service | `setting`, `value` |
 | `notifications_toggled` | notification settings | `enabled` |
 | `reminder_time_changed` | notification settings | `hour`, `minute` |
@@ -211,7 +218,9 @@ and unsent batches: `server_session_issued` (`session_id`, `level_id`,
 (`session_id`, `level_id`, `correct_answers`, `total_questions`,
 `time_taken_seconds`, `xp_earned`, `level_completed`, `graded`, and when the
 app sent answers: `server_graded`, `client_trusted`, `grading_mismatches`,
-`unknown_answers`, `recycled`, `fixed`, `adaptive_correct`).
+`unknown_answers`, `recycled`, `fixed`, `adaptive_correct`),
+`server_earn_back_started` (`streak`, `expires_at`, `sessions_done`) and
+`server_earn_back_completed` (`streak`, `repaired_days`).
 
 Every answer of a graded lesson is also a row in the backend's
 `exercise_responses` table (not an event): exercise id and type, word

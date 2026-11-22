@@ -6,6 +6,9 @@ enum StreakDayState {
   /// A missed day a streak freeze protected: shown as ice, as in Duolingo.
   frozen,
 
+  /// A missed day an Earn Back repaired: the streak runs through it.
+  earnedBack,
+
   /// A past day after the learner started, with no practice. Shown quietly
   /// (just the day number): a highlighted break demotivates more than no
   /// record at all. Ice is kept for days a streak freeze protects.
@@ -27,14 +30,20 @@ class StreakCalendar {
   StreakCalendar(
     Iterable<DateTime> playDates, {
     Iterable<DateTime> frozenDates = const [],
+    Iterable<DateTime> earnedBackDates = const [],
     DateTime? now,
   }) : practicedDays = {for (final d in playDates) dayKey(d)},
        frozenDays = {for (final d in frozenDates) dayKey(d)},
+       earnedBackDays = {for (final d in earnedBackDates) dayKey(d)},
        today = dayKey(now ?? DateTime.now());
 
   final Set<DateTime> practicedDays;
   final Set<DateTime> frozenDays;
+  final Set<DateTime> earnedBackDays;
   final DateTime today;
+
+  /// A perfect week: this many practiced days in a row, no freeze used.
+  static const perfectRun = 7;
 
   static DateTime dayKey(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -52,9 +61,59 @@ class StreakCalendar {
     if (d.isAfter(today)) return StreakDayState.future;
     if (d == today) return StreakDayState.open;
     if (frozenDays.contains(d)) return StreakDayState.frozen;
+    if (earnedBackDays.contains(d)) return StreakDayState.earnedBack;
     final first = firstDay;
     if (first == null || d.isBefore(first)) return StreakDayState.beforeStart;
     return StreakDayState.missed;
+  }
+
+  /// Days inside a run of at least [perfectRun] practiced days in a row.
+  /// A frozen, earned-back or missed day ends a run, so a perfect week never
+  /// used a freeze.
+  late final Set<DateTime> perfectDays = () {
+    final sorted = practicedDays.toList()..sort();
+    final perfect = <DateTime>{};
+    var run = <DateTime>[];
+    void close() {
+      if (run.length >= perfectRun) perfect.addAll(run);
+    }
+
+    for (final d in sorted) {
+      if (run.isNotEmpty &&
+          DateTime(run.last.year, run.last.month, run.last.day + 1) != d) {
+        close();
+        run = [];
+      }
+      run.add(d);
+    }
+    close();
+    return perfect;
+  }();
+
+  bool isPerfect(DateTime day) => perfectDays.contains(dayKey(day));
+
+  /// Days the streak runs through: practiced, or repaired by Earn Back.
+  bool isInStreak(DateTime day) {
+    final d = dayKey(day);
+    return practicedDays.contains(d) || earnedBackDays.contains(d);
+  }
+
+  /// Whole perfect weeks so far: each run counts once per 7 days.
+  int get perfectWeeks {
+    final sorted = practicedDays.toList()..sort();
+    var weeks = 0, run = 0;
+    DateTime? prev;
+    for (final d in sorted) {
+      final next =
+          prev != null && DateTime(prev.year, prev.month, prev.day + 1) == d;
+      if (!next) {
+        weeks += run ~/ perfectRun;
+        run = 0;
+      }
+      run++;
+      prev = d;
+    }
+    return weeks + run ~/ perfectRun;
   }
 
   /// The earliest month worth showing: the month of the first practice, or

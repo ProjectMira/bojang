@@ -12,6 +12,7 @@ import '../utils/yak_lines.dart';
 import '../widgets/announcement_banner.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/cultural_tip_card.dart';
+import '../widgets/earn_back_card.dart';
 import '../widgets/section_header.dart';
 import '../widgets/shortcut_card.dart';
 import '../widgets/stat_strip.dart';
@@ -140,6 +141,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                       _buildStatsStrip(context, progressService),
 
+                      _buildEarnBack(context, progressService),
+
                       const SizedBox(height: AppSpacing.section),
 
                       SectionHeader(
@@ -250,6 +253,37 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           color: AppColors.green,
         ),
       ],
+    );
+  }
+
+  /// While a broken streak can still be earned back: days left and lessons
+  /// done, one tap from a lesson.
+  Widget _buildEarnBack(BuildContext context, ProgressService progress) {
+    final now = DateTime.now();
+    final earnBack = progress.earnBackOn(now);
+    if (earnBack == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      child: EarnBackCard(
+        earnBack: earnBack,
+        today: now,
+        compact: true,
+        onStart: () {
+          Analytics.track('earn_back_card_tapped', {
+            'source': 'home',
+            'streak': earnBack.streak,
+            'sessions_done': earnBack.sessionsDone,
+            'days_left': earnBack.daysLeft(now),
+          });
+          Navigator.push(
+            context,
+            screenRoute(
+              'level_selection',
+              (context) => const LevelSelectionScreen(),
+            ),
+          );
+        },
+      ),
     );
   }
 

@@ -13,6 +13,14 @@ class StreakColors {
   static const iceFill = AppColors.primaryTint;
   static const iceBorder = AppColors.primaryBorder;
   static const iceFillDark = AppColors.primaryNightTint;
+
+  /// A perfect week's band: gold, a step past the plain fire band.
+  static const perfect = AppColors.gold;
+  static const perfectDeep = AppColors.goldLip;
+
+  /// A day Earn Back repaired: a warm fill with a fire outline.
+  static const mendFill = AppColors.orangeTint;
+  static const mendFillDark = AppColors.orangeNightTint;
 }
 
 /// One day as a circle: a flame if practiced, ice if a streak freeze
@@ -62,6 +70,17 @@ class StreakDayBubble extends StatelessWidget {
           border: Border.all(color: StreakColors.iceBorder, width: 1.5),
         );
         child = Icon(Icons.ac_unit, size: size * 0.5, color: StreakColors.ice);
+      case StreakDayState.earnedBack:
+        decoration = BoxDecoration(
+          shape: BoxShape.circle,
+          color: isDark ? StreakColors.mendFillDark : StreakColors.mendFill,
+          border: Border.all(color: StreakColors.fire, width: 1.5),
+        );
+        child = Icon(
+          Icons.local_fire_department_outlined,
+          size: size * 0.52,
+          color: StreakColors.fireDeep,
+        );
       case StreakDayState.missed:
       case StreakDayState.open:
       case StreakDayState.future:
