@@ -284,7 +284,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 'topic_path': sublevel.path,
                 'position': i,
               });
-              openTopic(context, sublevel);
+              openTopic(context, sublevel, source: 'home_shortcut');
             },
           ),
         );

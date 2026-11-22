@@ -35,11 +35,16 @@ class QuizScreen extends StatefulWidget {
   /// preference, [ThemeService.lessonStyle].
   final LessonStyle? style;
 
+  /// Where the lesson was opened from (home_shortcut, topic_list,
+  /// lesson_intro, lesson_complete...), for analytics.
+  final String? source;
+
   const QuizScreen({
     super.key,
     required this.topicFilePath,
     this.title,
     this.style,
+    this.source,
   });
 
   @override
@@ -74,6 +79,9 @@ class _QuizScreenState extends State<QuizScreen>
   DateTime _startedAt = DateTime.now();
   int _questionCount = 0;
   bool _completed = false;
+  // When the question on screen appeared, for answer response times.
+  DateTime _questionShownAt = DateTime.now();
+  int _answeredCount = 0;
 
   String get _topicName =>
       widget.title ?? _getDisplayNameFromFilePath(widget.topicFilePath);
@@ -81,6 +89,10 @@ class _QuizScreenState extends State<QuizScreen>
   void _trackQuit() {
     if (_completed || _questionCount == 0) return;
     Analytics.track('lesson_quit', {
+      'reason': 'back',
+      'answered': _answeredCount,
+      'question_s': DateTime.now().difference(_questionShownAt).inSeconds,
+      'source': widget.source,
       'topic': _topicName,
       'topic_path': widget.topicFilePath,
       'question_index': currentQuestionIndex,
@@ -111,7 +123,9 @@ class _QuizScreenState extends State<QuizScreen>
     questionsFuture.then(
       (questions) {
         _questionCount = questions.length;
+        _questionShownAt = DateTime.now();
         Analytics.track('lesson_started', {
+          'source': widget.source ?? 'unknown',
           'topic': _topicName,
           'topic_path': widget.topicFilePath,
           'style': _style.name,
@@ -340,10 +354,19 @@ class _QuizScreenState extends State<QuizScreen>
       'question_type': answered.type,
       'correct': isCorrect,
       'combo': isCorrect ? _combo + 1 : 0,
-      'tibetan': answered.tibetanText,
+      'tibetan': answered.wordTibetan,
       'english': answered.englishGloss,
+      'chosen': answered.options[answerIndex],
+      'correct_answer': answered.options[answered.correctAnswerIndex],
+      'response_ms': DateTime.now().difference(_questionShownAt).inMilliseconds,
+      'skill': answered.isScript ? 'script' : 'vocabulary',
+      'has_audio': answered.audioUrl != null || answered.audioUrls.isNotEmpty,
+      'voice': themeService.pronunciationVoice,
+      'reading_help': themeService.transliterationMode.name,
       'style': _style.name,
+      'source': widget.source,
     });
+    _answeredCount++;
 
     // Picture questions have Tibetan options, so their word is only spoken
     // once answered (earlier would give the answer away). It follows the
@@ -399,6 +422,7 @@ class _QuizScreenState extends State<QuizScreen>
           selectedAnswerIndex = null;
           showFeedback = false;
         });
+        _questionShownAt = DateTime.now();
         if (_scrollController.hasClients) _scrollController.jumpTo(0);
         _animationController.reset();
         _animationController.forward();

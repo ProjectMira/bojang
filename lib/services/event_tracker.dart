@@ -84,6 +84,9 @@ class EventTracker with WidgetsBindingObserver {
   /// Called with each new session id (Analytics links it into PostHog).
   void Function(String sessionId)? onSessionStarted;
 
+  /// Called with the new screen name whenever the screen on display changes.
+  void Function(String screen)? onScreenChanged;
+
   // ---------------------------------------------------------------------------
   // Lifecycle
   // ---------------------------------------------------------------------------
@@ -276,6 +279,7 @@ class EventTracker with WidgetsBindingObserver {
     }
     _screen = name;
     CrashReporting.setKey('screen', name);
+    onScreenChanged?.call(name);
     _screenSince = _pausedAt == null ? now : null;
     _screenAccum = Duration.zero;
     _sessionScreens++;

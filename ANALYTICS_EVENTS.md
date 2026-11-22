@@ -101,10 +101,14 @@ deletes its rows.
 | `topic_selected` | level selection | `topic`, `topic_path`, `level`, `word_count`, `progress`, `completed` |
 | `topic_locked_tapped` | level selection | `topic`, `required_xp`, `xp` |
 | `lesson_style_selected` | style sheet | `style`, `previous_style`, `source` (quiz/settings) |
-| `lesson_started` | quiz | `topic`, `topic_path`, `style`, `question_count`, `remote_session` (bool), `source` |
+| `lesson_started` | quiz | `topic`, `topic_path`, `style`, `question_count`, `remote_session` (bool), `source` (`home_shortcut`, `topic_list`, `lesson_intro`, `lesson_complete_retry`) |
 | `lesson_load_failed` | quiz | `topic`, `error` |
-| `question_answered` | quiz | `topic`, `question_index`, `question_type`, `correct`, `combo`, `tibetan`, `english`, `style` |
-| `lesson_quit` | quiz | `topic`, `question_index`, `question_count`, `score` |
+| `question_answered` | quiz | `topic`, `question_index`, `question_type`, `correct`, `combo`, `tibetan`, `english`, `chosen`, `correct_answer`, `response_ms`, `skill` (`script`/`vocabulary`), `has_audio`, `voice`, `reading_help`, `style`, `source` |
+| `lesson_quit` | quiz | `topic`, `question_index`, `question_count`, `score`, `reason` (`back`), `answered`, `question_s` (time on the open question), `source` |
+| `lesson_intro_opened` | Basics lesson cards | `level`, `source` |
+| `lesson_intro_practice` | Basics lesson cards | `level`, `items`, `heard` (cards tapped), `duration_s` |
+| `voice_picked` | voice picker | `voice`, `source` (`settings`, `quiz`, `game`, `lesson_intro`, `chip`) |
+| `memory_board_resized` | Memory Match | `pairs` (cards per board ÷ 2; more on iPad) |
 | `lesson_completed` | quiz | `topic`, `topic_path`, `style`, `score`, `total`, `accuracy`, `xp_earned`, `streak`, `duration_s` |
 | `lesson_progress_submitted` | quiz | `success` |
 | `lesson_complete_action` | lesson complete | `action` (continue/practice_again) |
@@ -159,3 +163,18 @@ so every later PostHog event carries them (see FIREBASE_SETUP.md).
 - Anything outside the app: contacts, photos, location, clipboard, other apps, the advertising ID
   (IDFA/AAID) or device fingerprints. Collecting these would need new permission prompts, App
   Tracking Transparency and new App Store privacy label entries.
+
+## Super properties
+
+Every PostHog event also carries `current_screen` (the screen on display,
+from the tracker), `voice`, `lesson_style` and `bojang_session_id`.
+`setting_changed` covers `transliteration` (`phonetics`, `wylie`, `both`, `off`).
+
+## Server-side events (app_events, platform `server`)
+
+Written by the backend itself, so the log is complete for old app versions
+and unsent batches: `server_session_issued` (`session_id`, `level_id`,
+`requested_types`, `exercise_types`, `total_questions`),
+`server_lesson_cards` (`level_id`, `items`), `server_lesson_completed`
+(`session_id`, `level_id`, `correct_answers`, `total_questions`,
+`time_taken_seconds`, `xp_earned`, `level_completed`).

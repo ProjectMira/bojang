@@ -77,6 +77,9 @@ class Analytics {
   static Future<void> _startTracker() async {
     final tracker = EventTracker.instance;
     tracker.onSessionStarted = (id) => register('bojang_session_id', id);
+    // Every PostHog event (autocaptured rage clicks included) carries the
+    // screen it happened on.
+    tracker.onScreenChanged = (screen) => register('current_screen', screen);
     await tracker.start();
   }
 

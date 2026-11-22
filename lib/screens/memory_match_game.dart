@@ -10,6 +10,7 @@ import '../utils/topic_visuals.dart';
 import '../widgets/yak_mascot.dart';
 import '../widgets/yak_says.dart';
 import '../widgets/content_width.dart';
+import '../utils/memory_board_layout.dart';
 
 class MemoryMatchGame extends StatefulWidget {
   const MemoryMatchGame({super.key});
@@ -33,7 +34,9 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
   /// All fetched pairs for the game; played in boards of [_pairsPerBoard].
   List<Map<String, dynamic>> _allPairs = [];
   int _boardStart = 0;
-  static const int _pairsPerBoard = 2;
+  // 2 on phones; tablets fit more (see MemoryBoardLayout), set from the
+  // board's real size the first time it is laid out.
+  int _pairsPerBoard = MemoryBoardLayout.phonePairs;
 
   List<MemoryCard> _cards = [];
   int? _firstCardIndex;
@@ -121,7 +124,10 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
 
     List<Map<String, dynamic>>? apiCards;
     if (topicId != null) {
-      apiCards = await ApiService().getMemoryMatchCards(levelId: topicId);
+      apiCards = await ApiService().getMemoryMatchCards(
+        levelId: topicId,
+        maxPairs: Breakpoints.isTablet(context) ? 16 : 8,
+      );
     }
     if (!mounted) return;
 
@@ -468,7 +474,9 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
         ),
         const SizedBox(height: 4),
         Text(
-          'Match photos with their Tibetan words, four cards at a time.',
+          Breakpoints.isTablet(context)
+              ? 'Match photos with their Tibetan words, a full board at a time.'
+              : 'Match photos with their Tibetan words, four cards at a time.',
           style: GoogleFonts.poppins(
             fontSize: 14,
             color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -526,11 +534,13 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              // Fixed-height rows: more columns on an iPad instead of
+              // stretching two columns into tall empty cards.
+              maxCrossAxisExtent: 300,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 2.4,
+              mainAxisExtent: 76,
             ),
             itemCount: _topics.length,
             itemBuilder: (context, index) {
@@ -605,6 +615,25 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
     );
   }
 
+  /// Resizes the board to what fits in [area] (more pairs on an iPad, or
+  /// after rotating), but only while the current board is untouched.
+  void _fitBoardTo(Size area) {
+    final pairs = MemoryBoardLayout.pairsFor(
+      area,
+      isTablet: Breakpoints.isTablet(context),
+    );
+    if (pairs == _pairsPerBoard) return;
+    final untouched =
+        _boardMatches == 0 && _cards.every((c) => !c.isFlipped && !c.isMatched);
+    if (!untouched) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || pairs == _pairsPerBoard) return;
+      Analytics.track('memory_board_resized', {'pairs': pairs});
+      _pairsPerBoard = pairs;
+      _loadBoard();
+    });
+  }
+
   Widget _buildGame() {
     return Column(
       children: [
@@ -631,21 +660,29 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
           ),
         ),
 
-        // Game Grid: one board of four cards (two photos + two words).
+        // Game grid: four cards on a phone; on a tablet as many as fit at
+        // a comfortable size (MemoryBoardLayout).
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.85,
-              ),
-              itemCount: _cards.length,
-              itemBuilder: (context, index) {
-                return _buildCard(_cards[index], index);
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final area = constraints.biggest;
+                _fitBoardTo(area);
+                final grid = MemoryBoardLayout.gridFor(_cards.length, area);
+                return GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: grid?.columns ?? 2,
+                    crossAxisSpacing: MemoryBoardLayout.spacing,
+                    mainAxisSpacing: MemoryBoardLayout.spacing,
+                    childAspectRatio: grid?.aspectRatio ?? 0.85,
+                  ),
+                  itemCount: _cards.length,
+                  itemBuilder: (context, index) {
+                    return _buildCard(_cards[index], index);
+                  },
+                );
               },
             ),
           ),
@@ -749,6 +786,11 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
   }
 
   Widget _cardText(MemoryCard card) {
+    // Bigger text on the bigger iPad cards.
+    return _cardTextAt(card, Breakpoints.isTablet(context) ? 1.6 : 1.0);
+  }
+
+  Widget _cardTextAt(MemoryCard card, double scale) {
     return Padding(
       padding: const EdgeInsets.all(4),
       child: Column(
@@ -760,7 +802,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
-              fontSize: card.type == CardType.tibetan ? 24 : 15,
+              fontSize: (card.type == CardType.tibetan ? 24 : 15) * scale,
               fontWeight: FontWeight.bold,
               color:
                   card.isMatched
@@ -779,9 +821,9 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
-                  fontSize: 11,
+                  fontSize: 11 * scale,
                   fontStyle: FontStyle.italic,
-                  color: Colors.grey.shade500,
+                  color: Colors.grey.shade600,
                 ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               ),
             ),

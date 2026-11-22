@@ -18,7 +18,7 @@ import 'quiz_screen.dart';
 
 /// Opens a topic: Basics lessons show their teaching cards first, every
 /// other topic goes straight into the quiz.
-void openTopic(BuildContext context, Sublevel sublevel) {
+void openTopic(BuildContext context, Sublevel sublevel, {String source = 'topic'}) {
   final levelId = sublevel.levelId;
   if (sublevel.hasLesson && levelId != null) {
     Navigator.push(
@@ -29,6 +29,7 @@ void openTopic(BuildContext context, Sublevel sublevel) {
           levelId: levelId,
           title: sublevel.name,
           topicPath: sublevel.path,
+          source: source,
         ),
       ),
     );
@@ -38,7 +39,11 @@ void openTopic(BuildContext context, Sublevel sublevel) {
     context,
     screenRoute(
       'quiz',
-      (context) => QuizScreen(topicFilePath: sublevel.path, title: sublevel.name),
+      (context) => QuizScreen(
+        topicFilePath: sublevel.path,
+        title: sublevel.name,
+        source: source,
+      ),
     ),
   );
 }
@@ -49,12 +54,14 @@ class LessonIntroScreen extends StatefulWidget {
   final String levelId;
   final String title;
   final String topicPath;
+  final String source;
 
   const LessonIntroScreen({
     super.key,
     required this.levelId,
     required this.title,
     required this.topicPath,
+    this.source = 'topic',
   });
 
   @override
@@ -70,6 +77,10 @@ class _LessonIntroScreenState extends State<LessonIntroScreen> {
   void initState() {
     super.initState();
     _lesson = _load();
+    Analytics.track('lesson_intro_opened', {
+      'level': widget.levelId,
+      'source': widget.source,
+    });
   }
 
   Future<LessonContent?> _load() async {
@@ -112,8 +123,11 @@ class _LessonIntroScreenState extends State<LessonIntroScreen> {
       context,
       screenRoute(
         'quiz',
-        (context) =>
-            QuizScreen(topicFilePath: widget.topicPath, title: widget.title),
+        (context) => QuizScreen(
+          topicFilePath: widget.topicPath,
+          title: widget.title,
+          source: 'lesson_intro',
+        ),
       ),
     );
   }

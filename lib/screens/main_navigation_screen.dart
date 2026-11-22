@@ -1,4 +1,7 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/analytics.dart';
 import '../services/push_service.dart';
 import '../theme/app_tokens.dart';
@@ -64,61 +67,157 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const ProfileScreen(),
   ];
 
+  static const List<_TabSpec> _tabs = [
+    _TabSpec('Home', Icons.home_rounded, Icons.home_outlined, AppColors.primary),
+    _TabSpec(
+      'Streak',
+      Icons.local_fire_department_rounded,
+      Icons.local_fire_department_outlined,
+      AppColors.orange,
+    ),
+    _TabSpec('Games', Icons.sports_esports_rounded, Icons.sports_esports_outlined, AppColors.purple),
+    _TabSpec('Profile', Icons.person_rounded, Icons.person_outline_rounded, AppColors.green),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(index: _currentIndex, children: _screens),
+      // A floating capsule over the page background, like the iOS tab bar.
+      // The body stays above it (no extendBody), so no screen's last row
+      // hides underneath.
+      bottomNavigationBar: _FloatingTabBar(
+        tabs: _tabs,
+        currentIndex: _currentIndex,
+        onSelect: (index) {
+          if (index != _currentIndex) HapticFeedback.selectionClick();
+          _selectTab(index);
+        },
+      ),
+    );
+  }
+}
+
+class _TabSpec {
+  final String label;
+  final IconData selectedIcon;
+  final IconData icon;
+  final Color color;
+
+  const _TabSpec(this.label, this.selectedIcon, this.icon, this.color);
+}
+
+class _FloatingTabBar extends StatelessWidget {
+  final List<_TabSpec> tabs;
+  final int currentIndex;
+  final ValueChanged<int> onSelect;
+
+  const _FloatingTabBar({
+    required this.tabs,
+    required this.currentIndex,
+    required this.onSelect,
+  });
+
+  static const double _height = 64;
+
   @override
   Widget build(BuildContext context) {
     final isDark = AppTokens.isDark(context);
-    return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppTokens.surface(context),
-          boxShadow: AppTokens.shadow(context),
-          border:
-              isDark
-                  ? Border(
-                    top: BorderSide(color: AppTokens.cardBorder(context)),
-                  )
-                  : null,
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            // Capped so the four tabs stay within thumb reach of each other
-            // on an iPad rather than spreading across the whole width.
-            child: Center(
-              // heightFactor keeps the bar its own height: a bare Center
-              // here would grow to fill the screen.
-              heightFactor: 1,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 520),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildNavItem(
-                      icon: Icons.home_filled,
-                      label: 'Home',
-                      index: 0,
-                      color: AppColors.primary,
-                    ),
-                    _buildNavItem(
-                      icon: Icons.local_fire_department,
-                      label: 'Streak',
-                      index: 1,
-                      color: AppColors.orange,
-                    ),
-                    _buildNavItem(
-                      icon: Icons.games,
-                      label: 'Games',
-                      index: 2,
-                      color: AppColors.purple,
-                    ),
-                    _buildNavItem(
-                      icon: Icons.person,
-                      label: 'Profile',
-                      index: 3,
-                      color: AppColors.green,
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
+    final duration =
+        reduceMotion ? Duration.zero : const Duration(milliseconds: 280);
+    final selected = tabs[currentIndex];
+    final glass =
+        isDark
+            ? AppColors.surfaceDark.withValues(alpha: 0.82)
+            : Colors.white.withValues(alpha: 0.86);
+
+    return ColoredBox(
+      color: AppTokens.background(context),
+      child: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 6, 20, 4),
+          child: Center(
+            heightFactor: 1,
+            // Thumb-sized on an iPad instead of spanning the whole width.
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(_height / 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
                     ),
                   ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(_height / 2),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                    child: Container(
+                      height: _height,
+                      decoration: BoxDecoration(
+                        color: glass,
+                        borderRadius: BorderRadius.circular(_height / 2),
+                        border: Border.all(
+                          color:
+                              isDark
+                                  ? Colors.white.withValues(alpha: 0.10)
+                                  : Colors.black.withValues(alpha: 0.05),
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(6),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final slot = constraints.maxWidth / tabs.length;
+                          return Stack(
+                            children: [
+                              // The selection pill slides between tabs.
+                              AnimatedPositioned(
+                                duration: duration,
+                                curve: Curves.easeOutCubic,
+                                left: slot * currentIndex,
+                                top: 0,
+                                bottom: 0,
+                                width: slot,
+                                child: AnimatedContainer(
+                                  duration: duration,
+                                  decoration: BoxDecoration(
+                                    color: AppTokens.tint(
+                                      selected.color,
+                                      context,
+                                      opacity: isDark ? 0.28 : 0.14,
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      (_height - 12) / 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  for (var i = 0; i < tabs.length; i++)
+                                    Expanded(
+                                      child: _TabButton(
+                                        spec: tabs[i],
+                                        selected: i == currentIndex,
+                                        duration: duration,
+                                        onTap: () => onSelect(i),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -127,58 +226,68 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
     );
   }
+}
 
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required int index,
-    required Color color,
-  }) {
-    final isSelected = _currentIndex == index;
-    final inactiveColor = AppTokens.inkSoft(context);
+class _TabButton extends StatelessWidget {
+  final _TabSpec spec;
+  final bool selected;
+  final Duration duration;
+  final VoidCallback onTap;
 
-    return GestureDetector(
-      onTap: () => _selectTab(index),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color:
-              isSelected ? AppTokens.tint(color, context) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
+  const _TabButton({
+    required this.spec,
+    required this.selected,
+    required this.duration,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Inactive tabs use full ink (not the soft token) so labels pass 4.5:1.
+    final inactive = AppTokens.ink(context).withValues(alpha: 0.72);
+    final color = selected ? _deep(spec.color, context) : inactive;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: '${spec.label} tab',
+      excludeSemantics: true,
+      child: InkResponse(
+        onTap: onTap,
+        radius: 36,
+        highlightShape: BoxShape.rectangle,
+        borderRadius: BorderRadius.circular(26),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color:
-                    isSelected
-                        ? AppTokens.tint(color, context, opacity: 0.22)
-                        : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-              ),
+            AnimatedScale(
+              duration: duration,
+              scale: selected ? 1.08 : 1.0,
               child: Icon(
-                icon,
-                color: isSelected ? color : inactiveColor,
+                selected ? spec.selectedIcon : spec.icon,
+                color: color,
                 size: 24,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
+            const SizedBox(height: 2),
+            AnimatedDefaultTextStyle(
+              duration: duration,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? color : inactiveColor,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: color,
               ),
+              child: Text(spec.label, maxLines: 1),
             ),
           ],
         ),
       ),
     );
+  }
+
+  /// The tab colour darkened enough to read on the light glass.
+  static Color _deep(Color color, BuildContext context) {
+    if (AppTokens.isDark(context)) return color;
+    final hsl = HSLColor.fromColor(color);
+    return hsl.withLightness((hsl.lightness * 0.72).clamp(0.0, 1.0)).toColor();
   }
 }

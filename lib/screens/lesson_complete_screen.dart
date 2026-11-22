@@ -260,6 +260,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
                               (context) => QuizScreen(
                                 topicFilePath: widget.topicFilePath,
                                 title: widget.title,
+                                source: 'lesson_complete_retry',
                               ),
                             ),
                           );

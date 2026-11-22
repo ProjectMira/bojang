@@ -31,6 +31,7 @@ class MatchPairsScreen extends StatelessWidget {
 
 class MatchPairsGame extends StatefulWidget {
   static const int pairsPerBoard = 5;
+  static const int tabletPairsPerBoard = 7;
   static const int maxBoards = 2;
 
   final GameRound round;
@@ -68,7 +69,13 @@ class _MatchPairsGameState extends State<MatchPairsGame> {
   void initState() {
     super.initState();
     final words = widget.round.words;
-    const size = MatchPairsGame.pairsPerBoard;
+    // Taller boards on a tablet (7 pairs) when the round has the words.
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    final shortest = (view.physicalSize / view.devicePixelRatio).shortestSide;
+    final size =
+        shortest >= 600 && words.length >= MatchPairsGame.tabletPairsPerBoard
+            ? MatchPairsGame.tabletPairsPerBoard
+            : MatchPairsGame.pairsPerBoard;
     final boardCount = min(MatchPairsGame.maxBoards, words.length ~/ size);
     _boards = [
       for (var i = 0; i < boardCount; i++)

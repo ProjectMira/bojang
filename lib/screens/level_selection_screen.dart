@@ -325,7 +325,7 @@ class _TopicCardState extends State<_TopicCard> {
               'progress': widget.progress,
               'completed': isCompleted,
             });
-            openTopic(context, widget.sublevel);
+            openTopic(context, widget.sublevel, source: 'topic_list');
           },
           onHighlightChanged: (value) => setState(() => _pressed = value),
           child: AnimatedScale(

@@ -303,8 +303,11 @@ class ApiService {
 
   /// Fetch Tibetan-English word pairs for the memory match game.
   /// Returns a list of cards: {id, tibetan, english, phonetic}.
+  /// Up to [maxPairs] distinct cards, merged from the session's memory_match
+  /// exercises (each carries up to 8). Bigger boards (iPad) ask for more.
   Future<List<Map<String, dynamic>>?> getMemoryMatchCards({
     required String levelId,
+    int maxPairs = 8,
   }) async {
     try {
       final session = await getLearningSession(
@@ -316,15 +319,22 @@ class ApiService {
       final exercises = List<Map<String, dynamic>>.from(
         session['exercises'] as List<dynamic>? ?? [],
       );
+      final merged = <Map<String, dynamic>>[];
+      final seen = <String>{};
       for (final exercise in exercises) {
         final type = exercise['type'] ?? exercise['exercise_type'];
         if (type != 'memory_match') continue;
         final cards = List<Map<String, dynamic>>.from(
           exercise['cards'] as List<dynamic>? ?? [],
         );
-        if (cards.isNotEmpty) return cards;
+        for (final card in cards) {
+          final key = (card['id'] ?? card['tibetan'] ?? '').toString();
+          if (key.isEmpty || !seen.add(key)) continue;
+          merged.add(card);
+          if (merged.length >= maxPairs) return merged;
+        }
       }
-      return null;
+      return merged.isEmpty ? null : merged;
     } catch (e) {
       print('Get memory match cards error: $e');
       return null;
