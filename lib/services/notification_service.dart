@@ -22,11 +22,13 @@ class NotificationService {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
+    // No permission prompt at launch: NotificationPrimer asks after the
+    // first streak or freeze, and the reminder switch in Settings asks too.
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
     const InitializationSettings initializationSettings = InitializationSettings(
@@ -46,11 +48,12 @@ class NotificationService {
           ?.createNotificationChannel(_announcements);
     }
 
-    // Request permissions for Android 13+ and iOS
-    await _requestPermissions();
   }
 
-  Future<void> _requestPermissions() async {
+  /// Shows the OS notification permission prompt (Android 13+ and iOS) if
+  /// the learner has not answered it. Call it only from a moment the learner
+  /// chose: the Settings reminder switch, or NotificationPrimer.
+  Future<void> requestPermissions({bool exactAlarms = false}) async {
     if (Platform.isAndroid) {
       final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
           flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
@@ -60,9 +63,12 @@ class NotificationService {
       final granted =
           await androidImplementation?.requestNotificationsPermission();
       Analytics.track('notification_permission_result', {'granted': granted});
-      
-      // Request exact alarm permission for scheduling
-      await androidImplementation?.requestExactAlarmsPermission();
+
+      // The daily reminder is an exact alarm (Android 14 opens a settings
+      // page for this), so only ask when that reminder is switched on.
+      if (exactAlarms) {
+        await androidImplementation?.requestExactAlarmsPermission();
+      }
     } else if (Platform.isIOS) {
       final IOSFlutterLocalNotificationsPlugin? iOSImplementation =
           flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<

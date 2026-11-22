@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/analytics.dart';
+import '../services/notification_primer.dart';
 import '../services/progress_service.dart';
 import '../utils/streak_calendar.dart';
 import '../utils/streak_rules.dart';
@@ -46,6 +47,7 @@ class StreakCelebrationScreen extends StatefulWidget {
                 FadeTransition(opacity: animation, child: child),
       ),
     );
+    if (context.mounted) await NotificationPrimer.instance.afterStreakCelebration(context, celebration);
   }
 
   @override

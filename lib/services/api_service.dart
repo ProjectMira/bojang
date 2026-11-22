@@ -637,6 +637,16 @@ class ApiService {
     return response?['registered'] == true;
   }
 
+  /// Reports that the learner opened an automated push (PushService), so
+  /// the backend does not send that evening's streak saver.
+  Future<bool> reportPushOpened(String notificationId, {String? lineId}) async {
+    final response = await _post('/notifications/opened', {
+      'notification_id': notificationId,
+      if (lineId != null) 'line_id': lineId,
+    });
+    return response?['recorded'] == true;
+  }
+
   Uri _uri(String endpoint, [Map<String, String>? queryParameters]) {
     final cleanBase =
         baseUrl.endsWith('/')

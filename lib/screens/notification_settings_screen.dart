@@ -58,6 +58,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     Analytics.setPersonProperties({'notifications_enabled': value});
 
     if (value) {
+      // The app no longer asks at launch: switching a reminder on asks.
+      await _askPermission(exactAlarms: true);
       await _notificationService.scheduleDailyNotification(_selectedTime);
     } else {
       await _notificationService.cancelAllNotifications();
@@ -72,9 +74,19 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       'setting': 'streak_reminders',
       'value': value,
     });
+    if (value) await _askPermission();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(PushService.streakRemindersKey, value);
     await PushService.instance.syncSettings();
+  }
+
+  Future<void> _askPermission({bool exactAlarms = false}) async {
+    if (kIsWeb) return;
+    try {
+      await _notificationService.requestPermissions(exactAlarms: exactAlarms);
+    } catch (e) {
+      debugPrint('Notification permission request failed: $e');
+    }
   }
 
   Future<void> _selectTime() async {
