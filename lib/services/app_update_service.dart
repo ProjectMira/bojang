@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math' as math;
@@ -7,7 +8,9 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/server_config.dart';
 import 'app_config.dart';
+import 'feature_flags.dart';
 
 /// The newest release of the app in the App Store, as the iTunes lookup API
 /// reports it.
@@ -62,18 +65,54 @@ class StoreRelease {
   }
 }
 
+/// Why the update wall is up.
+enum UpdateReason {
+  /// The App Store has a newer version than the one installed (iOS).
+  storeRelease,
+
+  /// The build is below the server's `min_supported_build` (any platform).
+  belowMinimumBuild,
+}
+
 /// A store release newer than the installed app. The learner has to install
 /// it before they can keep using the app.
 class RequiredUpdate {
   const RequiredUpdate({
     required this.installedVersion,
-    required this.storeVersion,
-    required this.appStoreId,
+    this.storeVersion = '',
+    this.appStoreId,
+    this.packageName,
+    this.storeUrl,
+    this.title,
+    this.message,
+    this.reason = UpdateReason.storeRelease,
   });
 
   final String installedVersion;
+
+  /// The store's version when known (the App Store lookup); empty when the
+  /// wall comes from the server minimum alone.
   final String storeVersion;
-  final int appStoreId;
+
+  /// App Store id (iOS); null on Android.
+  final int? appStoreId;
+
+  /// Android application id, for the Play Store links.
+  final String? packageName;
+
+  /// https store page from the server config, tried last.
+  final String? storeUrl;
+
+  /// Server copy for the wall; null keeps the screen's own words.
+  final String? title;
+  final String? message;
+
+  final UpdateReason reason;
+
+  bool get isAndroid => appStoreId == null && packageName != null;
+
+  /// "App Store" or "Play Store", for the wall's copy.
+  String get storeName => isAndroid ? 'Play Store' : 'App Store';
 
   /// Opens the product page straight in the App Store app.
   Uri get appStoreUri =>
@@ -82,27 +121,60 @@ class RequiredUpdate {
   /// Same page on the web, for when the App Store app is missing (the
   /// simulator) or will not open. On a device iOS hands it to the App Store.
   Uri get webUri => Uri.parse('https://apps.apple.com/app/id$appStoreId');
+
+  /// Links to try in order: the store app first, then the web page.
+  List<Uri> get storeUris => [
+    if (appStoreId != null) ...[appStoreUri, webUri],
+    if (isAndroid) ...[
+      Uri.parse('market://details?id=$packageName'),
+      Uri.parse('https://play.google.com/store/apps/details?id=$packageName'),
+    ],
+    if (storeUrl != null) Uri.parse(storeUrl!),
+  ];
 }
 
-/// Decides whether the installed app is older than the App Store release.
+/// Decides whether the installed app must be updated before it can be used.
 ///
-/// iOS only: the Play Store has no public lookup, so elsewhere [check] always
-/// answers "no update needed".
+/// Two sources, either one raises the wall:
+/// - the server config's `min_supported_build` for this platform (iOS and
+///   Android), from [FeatureFlags]: cached across launches, so going
+///   offline does not get around it;
+/// - iOS only: the App Store has a newer version than the one installed
+///   (the Play Store has no public lookup).
+///
+/// Both fail open: no answer and nothing cached means no wall.
 class AppUpdateService {
   AppUpdateService({
     http.Client? client,
     Future<PackageInfo> Function()? packageInfo,
     String Function()? osVersion,
     bool? isIOS,
+    bool? isAndroid,
+    Future<ServerConfig?> Function()? serverConfig,
   }) : _client = client ?? http.Client(),
        _packageInfo = packageInfo ?? PackageInfo.fromPlatform,
        _osVersion = osVersion ?? (() => Platform.operatingSystemVersion),
-       _isIOS = isIOS ?? AppConfig.isIOS;
+       _isIOS = isIOS ?? AppConfig.isIOS,
+       _isAndroid =
+           isAndroid ??
+           (!kIsWeb && defaultTargetPlatform == TargetPlatform.android),
+       _serverConfig = serverConfig ?? _latestServerConfig;
 
   final http.Client _client;
   final Future<PackageInfo> Function() _packageInfo;
   final String Function() _osVersion;
   final bool _isIOS;
+  final bool _isAndroid;
+  final Future<ServerConfig?> Function() _serverConfig;
+
+  static Future<ServerConfig?> _latestServerConfig() async {
+    final flags = FeatureFlags.instance;
+    unawaited(flags.refresh());
+    return flags.latest();
+  }
+
+  /// `ios`, `android`, or null where there is no wall.
+  String? get _platform => _isIOS ? 'ios' : (_isAndroid ? 'android' : null);
 
   static const Duration lookupTimeout = Duration(seconds: 8);
 
@@ -117,9 +189,13 @@ class AppUpdateService {
   /// never locks anyone out. A release that needs a newer iOS than the device
   /// runs is ignored, because the App Store would not offer it.
   Future<RequiredUpdate?> check() async {
-    if (!_isIOS) return null;
+    final platform = _platform;
+    if (platform == null) return null;
     try {
       final info = await _packageInfo();
+      final belowMinimum = await _serverMinimum(info, platform);
+      if (belowMinimum != null) return belowMinimum;
+      if (!_isIOS) return null;
       final release = await _currentRelease(info.packageName);
       if (release == null) return null;
       return _evaluate(info.version, release);
@@ -127,6 +203,44 @@ class AppUpdateService {
       debugPrint('App update check skipped: $e');
       return null;
     }
+  }
+
+  /// The wall from the server's `min_supported_build`, or null. A failure
+  /// here never blocks (fail open).
+  Future<RequiredUpdate?> _serverMinimum(
+    PackageInfo info,
+    String platform,
+  ) async {
+    final ServerConfig? config;
+    try {
+      config = await _serverConfig();
+    } catch (e) {
+      debugPrint('Server minimum build check skipped: $e');
+      return null;
+    }
+    if (config == null ||
+        !config.requiresUpdate(
+          platform: platform,
+          installedBuild: info.buildNumber,
+        )) {
+      return null;
+    }
+    int? appStoreId;
+    if (_isIOS) {
+      try {
+        appStoreId =
+            _cachedRelease(await SharedPreferences.getInstance())?.appStoreId;
+      } catch (_) {}
+    }
+    return RequiredUpdate(
+      installedVersion: info.version,
+      appStoreId: appStoreId,
+      packageName: _isIOS ? null : info.packageName,
+      storeUrl: config.storeUrls[platform],
+      title: config.updateTitle,
+      message: config.updateMessage,
+      reason: UpdateReason.belowMinimumBuild,
+    );
   }
 
   Future<StoreRelease?> _currentRelease(String bundleId) async {

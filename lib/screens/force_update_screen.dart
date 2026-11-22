@@ -42,14 +42,16 @@ class ForceUpdateScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.xxl),
                     Text(
-                      'Time to update',
+                      update.title ?? 'Time to update',
                       textAlign: TextAlign.center,
                       style: AppTextStyles.display(context),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
-                      'A new version of Bojang is in the App Store. Update '
-                      'to keep learning. Your progress stays with you.',
+                      update.message ??
+                          'A new version of Bojang is in the '
+                              '${update.storeName}. Update to keep learning. '
+                              'Your progress stays with you.',
                       textAlign: TextAlign.center,
                       style: AppTextStyles.body(
                         context,
@@ -67,8 +69,10 @@ class ForceUpdateScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppRadius.chip),
                       ),
                       child: Text(
-                        'Version ${update.storeVersion}  ·  '
-                        'you have ${update.installedVersion}',
+                        update.storeVersion.isEmpty
+                            ? 'You have version ${update.installedVersion}'
+                            : 'Version ${update.storeVersion}  ·  '
+                                'you have ${update.installedVersion}',
                         textAlign: TextAlign.center,
                         style: AppTextStyles.caption(
                           context,

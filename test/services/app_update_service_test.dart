@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:bojang/models/server_config.dart';
 import 'package:bojang/services/app_update_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -195,5 +196,139 @@ void main() {
         expect(prefs.getString(AppUpdateService.cacheKey), isNull);
       },
     );
+  });
+
+  group('server minimum build', () {
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    PackageInfo installed({String version = '2.14.0', String build = '22'}) =>
+        PackageInfo(
+          appName: 'Bojang',
+          packageName: 'com.projectmira.bojang',
+          version: version,
+          buildNumber: build,
+        );
+
+    ServerConfig minimum({
+      int ios = 0,
+      int android = 0,
+    }) => ServerConfig.fromJson({
+      'min_supported_build': {'ios': ios, 'android': android},
+      'update': {
+        'message': 'This version stopped working. Please update.',
+        'store_url': {
+          'android':
+              'https://play.google.com/store/apps/details?id=com.projectmira.bojang',
+        },
+      },
+    });
+
+    AppUpdateService service({
+      required ServerConfig? config,
+      String build = '22',
+      bool isIOS = false,
+      bool isAndroid = true,
+      http.Client? client,
+    }) => AppUpdateService(
+      client: client ?? MockClient((_) async => http.Response('{}', 404)),
+      packageInfo: () async => installed(build: build),
+      osVersion: () => 'Version 18.4 (Build 22E238)',
+      isIOS: isIOS,
+      isAndroid: isAndroid,
+      serverConfig: () async => config,
+    );
+
+    test('walls an Android build below the minimum', () async {
+      final update =
+          await service(config: minimum(android: 30), build: '29').check();
+      expect(update, isNotNull);
+      expect(update!.reason, UpdateReason.belowMinimumBuild);
+      expect(update.storeName, 'Play Store');
+      expect(update.storeVersion, isEmpty);
+      expect(update.message, 'This version stopped working. Please update.');
+      expect(
+        update.storeUris.first.toString(),
+        'market://details?id=com.projectmira.bojang',
+      );
+      expect(update.storeUris.map((u) => u.scheme), contains('https'));
+    });
+
+    test('lets the minimum build and newer ones in', () async {
+      expect(
+        await service(config: minimum(android: 30), build: '30').check(),
+        isNull,
+      );
+      expect(
+        await service(config: minimum(android: 30), build: '31').check(),
+        isNull,
+      );
+    });
+
+    test('uses the minimum of its own platform', () async {
+      expect(
+        await service(config: minimum(ios: 99), build: '22').check(),
+        isNull,
+      );
+      final ios =
+          await service(
+            config: minimum(ios: 63),
+            build: '62',
+            isIOS: true,
+            isAndroid: false,
+          ).check();
+      expect(ios?.reason, UpdateReason.belowMinimumBuild);
+      expect(ios?.storeName, 'App Store');
+    });
+
+    test('the server wall comes before the App Store lookup on iOS', () async {
+      var asked = false;
+      final update =
+          await service(
+            config: minimum(ios: 63),
+            build: '62',
+            isIOS: true,
+            isAndroid: false,
+            client: MockClient((_) async {
+              asked = true;
+              return http.Response('{}', 200);
+            }),
+          ).check();
+      expect(update?.reason, UpdateReason.belowMinimumBuild);
+      expect(asked, isFalse);
+    });
+
+    test('fails open without a config, or when it cannot be read', () async {
+      expect(await service(config: null, build: '1').check(), isNull);
+      expect(
+        await service(config: ServerConfig.failOpen, build: '1').check(),
+        isNull,
+      );
+      final broken = AppUpdateService(
+        client: MockClient((_) async => http.Response('{}', 404)),
+        packageInfo: () async => installed(build: '1'),
+        isIOS: false,
+        isAndroid: true,
+        serverConfig: () async => throw StateError('no config'),
+      );
+      expect(await broken.check(), isNull);
+    });
+
+    test('a non-numeric build number never walls', () async {
+      expect(
+        await service(config: minimum(android: 30), build: '').check(),
+        isNull,
+      );
+    });
+
+    test('no wall on platforms other than iOS and Android', () async {
+      expect(
+        await service(
+          config: minimum(ios: 99, android: 99),
+          build: '1',
+          isAndroid: false,
+        ).check(),
+        isNull,
+      );
+    });
   });
 }

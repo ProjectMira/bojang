@@ -8,6 +8,7 @@ import 'package:posthog_flutter/posthog_flutter.dart';
 import 'services/analytics.dart';
 import 'services/app_check_service.dart';
 import 'services/crash_reporting.dart';
+import 'services/feature_flags.dart';
 import 'services/location_service.dart';
 import 'services/push_service.dart';
 import 'services/remote_settings.dart';
@@ -38,6 +39,11 @@ void main() async {
   await AppCheckService.init();
   // Crashlytics' error handlers before Analytics, so PostHog's wrap them.
   await CrashReporting.init(collect: true);
+
+  // Server config (/v1/config): the cached one now, revalidated in the
+  // background. Before Analytics, so its event blocklist and sampling cover
+  // the first events too. Also feeds kill switches and the update wall.
+  await FeatureFlags.instance.init();
 
   // Analytics first, so sign-in restored during start-up is attributed.
   // It also applies the "Share usage analytics" switch to Crashlytics.
