@@ -1,4 +1,5 @@
 import 'package:bojang/theme/app_tokens.dart';
+import 'package:bojang/widgets/streak_day_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -87,6 +88,54 @@ void main() {
       expect(AppPalette.yellow.onFace, AppColors.inkLight);
       expect(
         contrast(AppColors.inkLight, AppColors.gold),
+        greaterThanOrEqualTo(4.5),
+      );
+    });
+
+    test('chip text on a tinted chip reaches 4.5:1 in both themes', () {
+      // AppTokens.tint: the face at 10% (light) or 22% (dark) opacity over
+      // the page or a card.
+      Color chip(AppHue hue, Color under, double alpha) =>
+          Color.alphaBlend(hue.face.withValues(alpha: alpha), under);
+      for (final hue in accents) {
+        for (final under in [AppColors.backgroundLight, AppColors.surfaceLight]) {
+          expect(
+            contrast(hue.textOnTint, chip(hue, under, 0.10)),
+            greaterThanOrEqualTo(4.5),
+            reason: '${hue.name} light',
+          );
+          expect(
+            contrast(hue.textOnTint, hue.tint),
+            greaterThanOrEqualTo(4.5),
+            reason: '${hue.name} on tint',
+          );
+        }
+        for (final under in [AppColors.backgroundDark, AppColors.surfaceDark]) {
+          expect(
+            contrast(hue.night, chip(hue, under, 0.22)),
+            greaterThanOrEqualTo(4.5),
+            reason: '${hue.name} dark',
+          );
+        }
+      }
+    });
+
+    test('gold text takes dark ink on light fills', () {
+      expect(AppPalette.ofFace(AppColors.gold), AppPalette.yellow);
+      expect(AppPalette.yellow.textOnTint, AppColors.inkLight);
+      expect(AppPalette.ofFace(AppColors.primary)!.textOnTint, AppColors.primaryDeep);
+      expect(AppPalette.ofFace(const Color(0xFF123456)), isNull);
+      // The face alone fails: this is what the "+20 XP" chip used to do.
+      expect(
+        contrast(AppColors.gold, AppColors.goldTint),
+        lessThan(4.5),
+      );
+      expect(
+        contrast(StreakColors.perfectText(false), AppColors.backgroundLight),
+        greaterThanOrEqualTo(4.5),
+      );
+      expect(
+        contrast(StreakColors.perfectText(true), AppColors.backgroundDark),
         greaterThanOrEqualTo(4.5),
       );
     });

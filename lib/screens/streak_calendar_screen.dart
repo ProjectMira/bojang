@@ -387,7 +387,9 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
                   fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
                   color:
                       perfect
-                          ? StreakColors.perfectDeep
+                          ? StreakColors.perfectText(
+                            Theme.of(context).brightness == Brightness.dark,
+                          )
                           : inStreak
                           ? StreakColors.fireDeep
                           : StreakColors.ice,

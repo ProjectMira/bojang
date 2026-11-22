@@ -11,6 +11,7 @@ import '../services/analytics.dart';
 import '../services/api_service.dart';
 import '../services/notification_primer.dart';
 import '../services/progress_service.dart';
+import '../theme/app_tokens.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
 import '../widgets/yak_says.dart';
@@ -328,7 +329,8 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Colors.amber.shade700,
+                  // Amber on the page was about 2:1; the trophy keeps the gold.
+                  color: AppTokens.textOnTint(AppColors.gold, context),
                 ).copyWith(fontFamilyFallback: const ['Jomolhari']),
               ),
             const SizedBox(height: 32),

@@ -116,6 +116,11 @@ class AppHue {
     required this.nightTint,
     this.onFace = Colors.white,
   });
+
+  /// Text on [tint], or on a chip filled with [face] at low opacity
+  /// ([AppTokens.tint]), in light mode: the lip, or dark ink for hues that
+  /// take dark labels (yellow's lip is too light to read on its tint).
+  Color get textOnTint => onFace == Colors.white ? lip : onFace;
 }
 
 /// The palette as hues, for code that wants the structured steps.
@@ -188,6 +193,14 @@ class AppPalette {
     nightTint: AppColors.purpleNightTint,
   );
 
+  /// The accent hue whose face is [face], or null for any other colour.
+  static AppHue? ofFace(Color face) {
+    for (final hue in all) {
+      if (hue != white && hue.face == face) return hue;
+    }
+    return null;
+  }
+
   /// The five flags in their traditional order, then the derived roles.
   static const List<AppHue> all = [
     blue,
@@ -235,6 +248,16 @@ class AppTokens {
   /// Tint a brand/accent color for chip and card backgrounds.
   static Color tint(Color color, BuildContext context, {double? opacity}) {
     return color.withOpacity(opacity ?? (isDark(context) ? 0.22 : 0.10));
+  }
+
+  /// Text on a chip filled with [tint] of [accent]: [AppHue.textOnTint] in
+  /// light mode, the night accent in dark mode; 4.5:1 or more either way.
+  /// The face itself is not enough (gold on its tint is about 1.7:1).
+  /// A colour outside the palette comes back unchanged.
+  static Color textOnTint(Color accent, BuildContext context) {
+    final hue = AppPalette.ofFace(accent);
+    if (hue == null) return accent;
+    return isDark(context) ? hue.night : hue.textOnTint;
   }
 
   /// [hue]'s accent for text and icons: the face on light surfaces, the

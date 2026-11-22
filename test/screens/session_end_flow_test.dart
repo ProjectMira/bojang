@@ -1,6 +1,7 @@
 import 'package:bojang/screens/lesson_complete_screen.dart';
 import 'package:bojang/services/notification_primer.dart';
 import 'package:bojang/services/progress_service.dart';
+import 'package:bojang/theme/app_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -214,6 +215,9 @@ void main() {
     await pumpResult(tester, lessonsCompleted: 7, practisedToday: false);
     expect(find.text('ལེགས་སོ། Excellent!'), findsOneWidget);
     expect(find.text('7 lessons!'), findsNothing);
+    // "+40 XP" sits on a light gold chip: dark ink, not gold (1.7:1).
+    final xp = tester.widget<Text>(find.text('+40 XP'));
+    expect(xp.style?.color, AppColors.inkLight);
   });
 
   testWidgets('the layout holds on an iPad in dark mode', (tester) async {

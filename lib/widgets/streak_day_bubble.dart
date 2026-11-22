@@ -16,7 +16,11 @@ class StreakColors {
 
   /// A perfect week's band: gold, a step past the plain fire band.
   static const perfect = AppColors.gold;
-  static const perfectDeep = AppColors.goldLip;
+
+  /// A perfect-week day's number under its bubble. Gold text is too light
+  /// on a light page, so it takes the yellow hue's dark ink there.
+  static Color perfectText(bool isDark) =>
+      isDark ? AppColors.goldNight : AppPalette.yellow.textOnTint;
 
   /// A day Earn Back repaired: a warm fill with a fire outline.
   static const mendFill = AppColors.orangeTint;

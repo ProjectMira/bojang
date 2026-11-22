@@ -391,7 +391,8 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
             style: AppTextStyles.poppins(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: color,
+              // Not the accent itself: gold on its tint is about 1.7:1.
+              color: AppTokens.textOnTint(color, context),
             ),
           ),
         ],

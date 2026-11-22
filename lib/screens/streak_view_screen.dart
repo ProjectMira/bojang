@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/analytics.dart';
 import '../services/progress_service.dart';
+import '../theme/app_tokens.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
 import '../utils/streak_calendar.dart';
@@ -613,16 +614,19 @@ class StreakViewScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? Colors.amber.withOpacity(0.12) : Colors.amber.shade50,
+        color: isDark ? AppColors.goldNightTint : AppColors.goldTint,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color:
-              isDark ? Colors.amber.withOpacity(0.3) : Colors.amber.shade200,
+          color: AppColors.gold.withValues(alpha: isDark ? 0.3 : 0.45),
         ),
       ),
       child: Row(
         children: [
-          Icon(Icons.auto_awesome, color: Colors.amber.shade700, size: 28),
+          Icon(
+            Icons.auto_awesome,
+            color: isDark ? AppColors.goldNight : AppColors.goldLip,
+            size: 28,
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
@@ -630,7 +634,8 @@ class StreakViewScreen extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                // Amber text on the amber tint was about 2.6:1.
+                color: AppTokens.textOnTint(AppColors.gold, context),
               ).copyWith(fontFamilyFallback: const ['Jomolhari']),
             ),
           ),
