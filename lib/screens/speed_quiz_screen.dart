@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/quiz_question.dart';
 import '../services/analytics.dart';
 import '../services/api_service.dart';
+import '../services/notification_primer.dart';
 import '../services/progress_service.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/yak_mascot.dart';
@@ -206,8 +207,16 @@ class _SpeedQuizScreenState extends State<SpeedQuizScreen> {
       Provider.of<ProgressService>(
         context,
         listen: false,
-      ).updateQuizResults('speed quiz', _correct, _answered).then((_) {
-        if (mounted) StreakCelebrationScreen.maybeShow(context);
+      ).updateQuizResults('speed quiz', _correct, _answered).then((_) async {
+        if (!mounted) return;
+        // The primer is the speed quiz's only ask.
+        final streak = await StreakCelebrationScreen.showWaiting(context);
+        if (streak != null && mounted) {
+          await NotificationPrimer.instance.afterStreakCelebration(
+            context,
+            streak,
+          );
+        }
       });
     }
     setState(() {

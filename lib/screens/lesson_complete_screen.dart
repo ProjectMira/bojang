@@ -4,6 +4,8 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import '../services/analytics.dart';
 import '../services/location_service.dart';
+import '../services/notification_primer.dart';
+import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
 import '../theme/motion.dart';
 import '../utils/session_end_sequence.dart';
@@ -18,7 +20,19 @@ import '../widgets/content_width.dart';
 
 /// One request the session end may make. Returns whether it showed; the
 /// session end makes at most one per lesson, the first that shows.
-typedef SessionEndAsk = Future<bool> Function(BuildContext context);
+typedef SessionEndAsk =
+    Future<bool> Function(BuildContext context, SessionEndInfo end);
+
+/// What the earlier steps of this session end showed, for the asks.
+class SessionEndInfo {
+  const SessionEndInfo({this.streak, this.lessonsCompleted = 0});
+
+  /// The streak celebration shown in this session end, if any.
+  final StreakCelebration? streak;
+
+  /// Lessons finished on this device, this one included (0 if unknown).
+  final int lessonsCompleted;
+}
 
 /// The result screen after a lesson, and the first step of the session end
 /// (see [SessionEndSequence]): result → streak (first practice of the day)
@@ -56,8 +70,21 @@ class LessonCompleteScreen extends StatefulWidget {
 
   /// The asks, in priority order. Add new ones here, not as extra
   /// pop-ups elsewhere, so a lesson never ends with more than one.
+  ///
+  /// 1. The notification primer, at a streak moment (started, extended or
+  ///    saved by a freeze): at most 3 asks, 3+ days apart.
+  /// 2. Location, once, from the first lesson on; it waits for a session
+  ///    end the primer does not take.
   static final List<SessionEndAsk> asks = [
-    (context) => LocationService.instance.maybePromptAfterLesson(context),
+    (context, end) async {
+      final streak = end.streak;
+      if (streak == null) return false;
+      return NotificationPrimer.instance.afterStreakCelebration(
+        context,
+        streak,
+      );
+    },
+    (context, end) => LocationService.instance.maybePromptAfterLesson(context),
   ];
 
   @override
@@ -123,16 +150,19 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
     _leaving = true;
     _trackAction('continue');
     final shown = <String>[SessionEndStep.result.name];
-    if (await StreakCelebrationScreen.maybeShow(context)) {
-      shown.add(SessionEndStep.streak.name);
-    }
+    final streak = await StreakCelebrationScreen.showWaiting(context);
+    if (streak != null) shown.add(SessionEndStep.streak.name);
     if (mounted && SessionEndSequence.showsGoal(widget.lessonsCompleted)) {
       await LessonGoalScreen.show(context, widget.lessonsCompleted);
       shown.add(SessionEndStep.goal.name);
     }
+    final end = SessionEndInfo(
+      streak: streak,
+      lessonsCompleted: widget.lessonsCompleted,
+    );
     for (final ask in LessonCompleteScreen.asks) {
       if (!mounted) break;
-      if (await ask(context)) {
+      if (await ask(context, end)) {
         shown.add(SessionEndStep.ask.name);
         break;
       }

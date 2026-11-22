@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/game_word.dart';
 import '../../services/analytics.dart';
 import '../../services/game_words_repository.dart';
+import '../../services/notification_primer.dart';
 import '../../services/pronunciation_player.dart';
 import '../../services/progress_service.dart';
 import '../../theme/app_tokens.dart';
@@ -236,8 +237,13 @@ class _GameHostState extends State<GameHost> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(_bestKey, result.correct);
     }
-    // Last, so nothing above waits on the learner closing it.
-    if (mounted) await StreakCelebrationScreen.maybeShow(context);
+    // Last, so nothing above waits on the learner closing it. The primer is
+    // a game's only ask, so it follows the celebration directly.
+    if (!mounted) return;
+    final streak = await StreakCelebrationScreen.showWaiting(context);
+    if (streak != null && mounted) {
+      await NotificationPrimer.instance.afterStreakCelebration(context, streak);
+    }
   }
 
   @override

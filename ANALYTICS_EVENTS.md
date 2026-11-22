@@ -161,7 +161,7 @@ deletes its rows.
 | `push_received` | push service (app open) | `campaign`, `screen`, `line_id`, `foreground` |
 | `push_opened` | push service | `campaign`, `screen` |
 | `notification_opened` | push service (any push tapped) | `campaign` (`streak_at_risk`, `streak_saver`, or an admin campaign), `kind` (`reminder`/`streak_saver`), `state` (`not_started`/`evening`/`late`/`frozen`), `line_id` (copy line, e.g. `ev_03`), `notification_id`. Compare open rates per `line_id` against the backend's `server_push_sent` |
-| `notification_primer_shown` | notification primer (after the streak celebration) | `moment` (`streak`/`freeze`), `ask` (1-3; at most 3 asks, 3+ days apart, only while the OS prompt can still be shown) |
+| `notification_primer_shown` | notification primer (the first session-end ask, after the streak celebration; games and speed quiz call it directly) | `moment` (`streak`/`freeze`), `ask` (1-3; at most 3 asks, 3+ days apart, only while the OS prompt can still be shown) |
 | `notification_primer_answered` | notification primer | `moment`, `ask`, `choice` (`turn_on`/`maybe_later`) |
 | `location_prompt_shown` / `location_prompt_answered` | lesson complete (first lesson, once) | `source`, `share` |
 | `location_sharing_changed` | location service | `enabled`, `permission`, `source` (settings/lesson_complete) |

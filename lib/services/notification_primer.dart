@@ -59,8 +59,10 @@ class PrimerPolicy {
 /// the streak, or that used a freeze. A soft pre-prompt comes first ("Turn
 /// on reminders" / "Maybe later"); only "Turn on" shows the OS prompt.
 ///
-/// One call site: [StreakCelebrationScreen.maybeShow] calls
-/// [afterStreakCelebration] once the celebration is closed.
+/// It is the first of the session end's asks (`LessonCompleteScreen.asks`),
+/// ahead of the location prompt, so a lesson never ends with both. Games
+/// and the speed quiz, which have no other ask, call
+/// [afterStreakCelebration] once their streak celebration is closed.
 class NotificationPrimer {
   NotificationPrimer({
     Future<bool> Function()? canPrompt,

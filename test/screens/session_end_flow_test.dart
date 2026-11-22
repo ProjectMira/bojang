@@ -1,4 +1,5 @@
 import 'package:bojang/screens/lesson_complete_screen.dart';
+import 'package:bojang/services/notification_primer.dart';
 import 'package:bojang/services/progress_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,13 +9,37 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// The session end runs result → streak (first practice of the day) → goal
 /// → at most one ask, with Continue in the same place on every screen.
 void main() {
+  final now = DateTime(2026, 11, 22, 19);
+  late List<String> permissionRequests;
+
+  /// The primer as the session end sees it, without Firebase: [canPrompt]
+  /// stands in for the OS permission state.
+  void installPrimer({required bool canPrompt}) {
+    NotificationPrimer.instance = NotificationPrimer(
+      canPrompt: () async => canPrompt,
+      requestPermission: (source) async {
+        permissionRequests.add(source);
+        return true;
+      },
+      clock: () => now,
+    );
+  }
+
+  setUp(() {
+    permissionRequests = [];
+    // Tests that don't care about notifications: permission already decided.
+    installPrimer(canPrompt: false);
+  });
+  tearDown(() => NotificationPrimer.instance = NotificationPrimer());
+
   Future<ProgressService> pumpResult(
     WidgetTester tester, {
     required int lessonsCompleted,
     required bool practisedToday,
     bool dark = false,
+    Map<String, Object> prefs = const {},
   }) async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues(prefs);
     final progress = ProgressService(
       isSignedIn: () => false,
       recordActivity: (_) async => null,
@@ -89,6 +114,82 @@ void main() {
     await tester.tap(find.text('Not now'));
     await settle(tester);
     expect(find.text('open'), findsOneWidget);
+  });
+
+  testWidgets('a streak moment asks for notifications, and only that', (
+    tester,
+  ) async {
+    installPrimer(canPrompt: true);
+    await pumpResult(tester, lessonsCompleted: 1, practisedToday: true);
+
+    await tester.tap(primary('Continue'));
+    await settle(tester);
+    expect(find.text('Your streak has started!'), findsOneWidget);
+    await tester.tap(find.text('Not now'));
+    await settle(tester);
+
+    // The primer takes the one ask slot, ahead of location.
+    expect(find.text('Want a nudge from Norbu?'), findsOneWidget);
+    expect(find.text('Where are you learning from?'), findsNothing);
+    await tester.tap(find.text('Maybe later'));
+    await settle(tester);
+
+    expect(find.text('Where are you learning from?'), findsNothing);
+    expect(find.text('open'), findsOneWidget);
+    expect(permissionRequests, isEmpty);
+    final saved = await SharedPreferences.getInstance();
+    expect(saved.getInt(NotificationPrimer.asksKey), 1);
+    // Location was not used up: it can still ask at a later session end.
+    expect(saved.getBool('location_prompted'), isNot(true));
+  });
+
+  testWidgets('"Turn on reminders" goes to the OS prompt, then nothing else', (
+    tester,
+  ) async {
+    installPrimer(canPrompt: true);
+    await pumpResult(tester, lessonsCompleted: 3, practisedToday: true);
+    await tester.tap(primary('Continue'));
+    await settle(tester);
+    await tester.tap(find.text('Not now'));
+    await settle(tester);
+    await tester.tap(find.text('Turn on reminders'));
+    await settle(tester);
+    expect(permissionRequests, ['primer_streak']);
+    expect(find.text('Where are you learning from?'), findsNothing);
+    expect(find.text('open'), findsOneWidget);
+  });
+
+  testWidgets('primer asked 3 days ago or less: location takes the slot', (
+    tester,
+  ) async {
+    installPrimer(canPrompt: true);
+    await pumpResult(
+      tester,
+      lessonsCompleted: 3,
+      practisedToday: true,
+      prefs: {
+        NotificationPrimer.asksKey: 1,
+        NotificationPrimer.lastAskKey:
+            now.subtract(const Duration(days: 2)).millisecondsSinceEpoch,
+      },
+    );
+    await tester.tap(primary('Continue'));
+    await settle(tester);
+    await tester.tap(find.text('Not now'));
+    await settle(tester);
+    expect(find.text('Want a nudge from Norbu?'), findsNothing);
+    expect(find.text('Where are you learning from?'), findsOneWidget);
+  });
+
+  testWidgets('no streak moment, no primer: the next ask shows', (
+    tester,
+  ) async {
+    installPrimer(canPrompt: true);
+    await pumpResult(tester, lessonsCompleted: 7, practisedToday: false);
+    await tester.tap(primary('Continue'));
+    await settle(tester);
+    expect(find.text('Want a nudge from Norbu?'), findsNothing);
+    expect(find.text('Where are you learning from?'), findsOneWidget);
   });
 
   testWidgets('a lesson milestone adds the goal step, no streak twice a day', (

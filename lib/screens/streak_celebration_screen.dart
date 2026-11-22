@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../services/analytics.dart';
-import '../services/notification_primer.dart';
 import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
 import '../theme/motion.dart';
@@ -38,11 +37,18 @@ class StreakCelebrationScreen extends StatefulWidget {
 
   /// Shows the waiting celebration, if the last practice extended the
   /// streak. Completes when the learner closes it, with whether it showed.
-  static Future<bool> maybeShow(BuildContext context) async {
+  static Future<bool> maybeShow(BuildContext context) async =>
+      await showWaiting(context) != null;
+
+  /// Like [maybeShow], but completes with the celebration that showed (null
+  /// if none), so the session end's ask can follow up on it. Asks nothing
+  /// itself: requests such as the notification primer belong in
+  /// `LessonCompleteScreen.asks`, so they never stack.
+  static Future<StreakCelebration?> showWaiting(BuildContext context) async {
     final celebration =
         Provider.of<ProgressService>(context, listen: false)
             .takeStreakCelebration();
-    if (celebration == null || !context.mounted) return false;
+    if (celebration == null || !context.mounted) return null;
     await Navigator.of(context).push(
       PageRouteBuilder<void>(
         settings: const RouteSettings(name: 'streak_celebration'),
@@ -55,8 +61,7 @@ class StreakCelebrationScreen extends StatefulWidget {
                 FadeTransition(opacity: animation, child: child),
       ),
     );
-    if (context.mounted) await NotificationPrimer.instance.afterStreakCelebration(context, celebration);
-    return true;
+    return celebration;
   }
 
   @override
