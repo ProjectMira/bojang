@@ -18,6 +18,13 @@ Events go to two places:
   values are dropped.
 - Naming: `object_action`, snake_case. Properties are snake_case as well.
 - Every event also carries the super properties `app_version`, `app_build` and `platform`.
+- The server config (`GET /v1/config`, `lib/services/feature_flags.dart`) can drop events without a
+  release: `analytics.blocklist` names events that are never sent, and `analytics.sampling` maps an
+  event to the share of app sessions that send it (0.0 to 1.0). Sampling is decided per app session
+  (hash of `bojang_session_id` and the event name), so a sampled-in session sends every occurrence
+  and funnels stay whole; multiply counts by 1/rate. Both apply to PostHog and to the backend events,
+  taps and scrolls included. `experiment_exposed` is never sampled. Change them with
+  `PATCH /admin/config` (backend `functions/api/routes/config.py`).
 
 ## Automatic
 
@@ -149,11 +156,31 @@ deletes its rows.
 | `remote_config_activated` | remote settings | every `exp_*` parameter and its value |
 | `announcement_viewed` / `announcement_tapped` / `announcement_dismissed` | home banner | `announcement`, `url` |
 | `auth_token_refresh_failed` | api service | `error` |
-| `force_update_shown` | update gate (iOS) | `installed_version`, `store_version` |
-| `force_update_tapped` | update gate (iOS) | `installed_version`, `store_version`, `opened` (bool: App Store or web page opened) |
+| `force_update_shown` | update gate (iOS, Android) | `installed_version`, `store_version` (empty for a server wall), `reason` (`storeRelease`: newer App Store version; `belowMinimumBuild`: below `/v1/config` `min_supported_build`) |
+| `force_update_tapped` | update gate (iOS, Android) | `installed_version`, `store_version`, `reason`, `opened` (bool: store app or web page opened) |
+| `experiment_exposed` | `Experiments.exposed` / `ExperimentExposure` (any screen) | `experiment` (`exp_*` key or PostHog flag), `arm`, `surface` (where it was shown), `source` (`remote_config`/`posthog`) |
 
-Experiments: Remote Config parameters named `exp_*` are also registered as super properties,
-so every later PostHog event carries them (see FIREBASE_SETUP.md).
+## Experiments: assignment is not exposure
+
+- **Assignment** is which arm a learner is in. Remote Config parameters named `exp_*` (set with a
+  "user in random percentile" condition) are registered as super properties, so every later PostHog
+  event carries them, and `remote_config_activated` lists them (see FIREBASE_SETUP.md). Reading an
+  arm with `Experiments.arm(...)`, or `Experiments.posthogArm(...)` without `exposed: true`, logs
+  nothing.
+- **Exposure** is the learner actually seeing the arm. Log it only where the UI shows the part that
+  differs between arms: wrap that widget in `ExperimentExposure(experiment:, arm:, surface:)`, or call
+  `Experiments.exposed(experiment, arm, surface: ...)` at the moment it is shown. Never log exposure
+  at start-up, on assignment, in a service, or for a screen the learner did not open.
+- `experiment_exposed` goes out once per experiment and arm per app session (deduplicated in the app),
+  is never sampled, and is sent for control too: the control arm needs exposures to compare against.
+- For PostHog flags, `Experiments.posthogArm(flag, exposed: true)` also sends PostHog's own
+  `$feature_flag_called`, which PostHog experiments use as their exposure; read the flag with
+  `exposed: false` anywhere it is not on screen.
+- Analyse an experiment on exposed learners only: start the funnel or trend at `experiment_exposed`
+  filtered by `experiment`, and break down by `arm`.
+- Rules that change XP or rewards are not Remote Config experiments: the backend grants XP and
+  freezes, so such an experiment must be assigned and applied there. `/v1/config` reports the values
+  in `rewards` (read-only) and has a `flags` map for server-owned switches.
 
 ## Not tracked on purpose
 
