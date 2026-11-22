@@ -281,6 +281,7 @@ class ApiService {
     required String levelId,
     int numQuestions = 10,
     List<String>? exerciseTypes,
+    List<String>? supportedTypes,
   }) async {
     return _get(
       'learn/session/$levelId',
@@ -288,6 +289,10 @@ class ApiService {
         'num_questions': numQuestions.toString(),
         if (exerciseTypes != null && exerciseTypes.isNotEmpty)
           'exercise_types': exerciseTypes.join(','),
+        // Every type this build can render: the server builds only these,
+        // and adds bonus `adaptive_exercises` and per-exercise labels.
+        if (supportedTypes != null && supportedTypes.isNotEmpty)
+          'supported_types': supportedTypes.join(','),
       },
     );
   }

@@ -11,8 +11,9 @@ import 'package:bojang/screens/quiz_screen.dart';
 import 'package:bojang/services/progress_service.dart';
 import 'package:bojang/services/theme_service.dart';
 
-/// Covers the one-attempt-per-question rule: a wrong answer is recorded and
-/// the lesson moves on, so a finished lesson can score below 100%.
+/// Covers the one-scored-attempt rule: a wrong answer is recorded and the
+/// lesson moves on, so a finished lesson can score below 100%; the missed
+/// word comes back once at the end without changing the score.
 ///
 /// Lives apart from quiz_screen_test.dart because the tests there install
 /// asset mocks that never release, and leave the audioplayers plugin in a
@@ -145,6 +146,17 @@ void main() {
     await tester.ensureVisible(find.text('ga'));
     await tester.pump();
     await tester.tap(find.text('ga'));
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // The missed word comes back once at the end, marked as a mistake to fix.
+    expect(find.text('ཀ'), findsOneWidget);
+    expect(find.text('Fix this mistake'), findsOneWidget);
+    expect(find.text('1 to fix'), findsOneWidget);
+    await tester.ensureVisible(find.text('ka'));
+    await tester.pump();
+    await tester.tap(find.text('ka'));
 
     // Completion is async: the feedback delay, then the progress save and its
     // 600ms achievement window, then the route transition. Pump through them
@@ -158,8 +170,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byType(LessonCompleteScreen), findsOneWidget);
+    // Fixing the word doesn't change the score: its first attempt counts.
     expect(find.textContaining('You scored 1 of 2'), findsOneWidget);
-    expect(find.text('Keep practicing!'), findsOneWidget);
-    expect(find.text('1/2'), findsOneWidget);
+    expect(find.text('You fixed every mistake.'), findsOneWidget);
   });
 }

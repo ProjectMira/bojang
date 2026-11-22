@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import '../models/lesson_queue.dart';
 import '../models/lesson_style.dart';
 import '../models/quiz_question.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,12 +9,14 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 import '../services/analytics.dart';
 import '../services/api_service.dart';
+import '../services/lesson_milestones.dart';
 import '../services/progress_service.dart';
 import '../services/pronunciation_player.dart';
 import '../services/theme_service.dart';
 import '../theme/app_tokens.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/answer_feedback_banner.dart';
+import '../widgets/exercise_label_pill.dart';
 import '../widgets/yak_mascot.dart';
 import '../widgets/yak_says.dart';
 import '../widgets/lesson_style_sheet.dart';
@@ -53,12 +56,15 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen>
     with SingleTickerProviderStateMixin {
-  late Future<List<QuizQuestion>> questionsFuture;
-  int currentQuestionIndex = 0;
+  late Future<LessonQueue> questionsFuture;
+  // The lesson's questions in order: the core, bonus questions when the
+  // learner is doing well, then each missed word once more.
+  LessonQueue? _lesson;
+  int get currentQuestionIndex => _lesson?.index ?? 0;
   int? selectedAnswerIndex;
   bool showFeedback = false;
   bool lastAnswerCorrect = true;
-  int score = 0;
+  int get score => _lesson?.correct ?? 0;
   // Right answers in a row; the yak calls out runs of them.
   int _combo = 0;
   late AnimationController _animationController;
@@ -117,19 +123,28 @@ class _QuizScreenState extends State<QuizScreen>
   }
 
   void _startLoading() {
-    questionsFuture = _loadQuestions();
+    _lesson = null;
+    late final Future<LessonQueue> load;
+    load = _loadQuestions().then((lesson) {
+      // A restart (new lesson style) may finish first; keep only the latest.
+      if (identical(questionsFuture, load)) _lesson = lesson;
+      return lesson;
+    });
+    questionsFuture = load;
     _startedAt = DateTime.now();
     _questionCount = 0;
     questionsFuture.then(
-      (questions) {
-        _questionCount = questions.length;
+      (lesson) {
+        _questionCount = lesson.coreCount;
         _questionShownAt = DateTime.now();
         Analytics.track('lesson_started', {
           'source': widget.source ?? 'unknown',
           'topic': _topicName,
           'topic_path': widget.topicFilePath,
           'style': _style.name,
-          'question_count': questions.length,
+          'question_count': lesson.coreCount,
+          'bonus_available': lesson.allQuestions.length - lesson.coreCount,
+          'labels': _labelCounts(lesson),
           'remote_session': _remoteSessionId != null,
         });
       },
@@ -147,11 +162,20 @@ class _QuizScreenState extends State<QuizScreen>
     final voice =
         Provider.of<ThemeService>(context, listen: false).pronunciationVoice;
     questionsFuture.then(
-      (questions) => PronunciationPlayer.instance.prefetch(
-        questions.map((q) => q.audioFor(voice)),
+      (lesson) => PronunciationPlayer.instance.prefetch(
+        lesson.allQuestions.map((q) => q.audioFor(voice)),
       ),
       onError: (Object _) {},
     );
+  }
+
+  static Map<String, int> _labelCounts(LessonQueue lesson) {
+    final counts = <String, int>{};
+    for (final q in lesson.allQuestions) {
+      final label = q.label;
+      if (label != null) counts[label] = (counts[label] ?? 0) + 1;
+    }
+    return counts;
   }
 
   /// Lets the learner switch lesson style from inside a lesson. The choice
@@ -168,10 +192,8 @@ class _QuizScreenState extends State<QuizScreen>
     PronunciationPlayer.instance.stop();
     setState(() {
       _style = picked;
-      currentQuestionIndex = 0;
       selectedAnswerIndex = null;
       showFeedback = false;
-      score = 0;
       _combo = 0;
       _autoPlayedIndex = null;
       _generation++;
@@ -179,7 +201,26 @@ class _QuizScreenState extends State<QuizScreen>
     });
   }
 
-  Future<List<QuizQuestion>> _loadQuestions() async {
+  /// Parses server exercises this screen can render, skipping bad ones.
+  static List<QuizQuestion> _parseExercises(Object? raw) {
+    final questions = <QuizQuestion>[];
+    for (final exercise in List<Map<String, dynamic>>.from(
+      raw as List<dynamic>? ?? const [],
+    )) {
+      // Safe fallback: the server builds only `supported_types`, but an
+      // older server ignores that list, so other types are still dropped.
+      final type = exercise['type'] ?? exercise['exercise_type'];
+      if (!QuizQuestion.renderableTypes.contains(type)) continue;
+      try {
+        questions.add(QuizQuestion.fromApiExercise(exercise));
+      } catch (e) {
+        debugPrint('Skipping invalid remote exercise: $e');
+      }
+    }
+    return questions;
+  }
+
+  Future<LessonQueue> _loadQuestions() async {
     try {
       debugPrint('Loading quiz from: ${widget.topicFilePath}');
 
@@ -190,6 +231,7 @@ class _QuizScreenState extends State<QuizScreen>
           levelId: levelId,
           numQuestions: 10,
           exerciseTypes: _style.exerciseTypes,
+          supportedTypes: QuizQuestion.renderableTypes,
         );
         if (session == null) {
           throw FormatException(
@@ -197,35 +239,18 @@ class _QuizScreenState extends State<QuizScreen>
           );
         }
         _remoteSessionId = session['session_id'] as String?;
-        final allExercises = List<Map<String, dynamic>>.from(
-          session['exercises'] as List<dynamic>? ?? [],
-        );
-        // Only choice-style exercises are supported in the quiz screen.
-        // memory_match and translation_match use different data shapes.
-        // picture_choice sessions may contain multiple_choice fallbacks
-        // for words that have no illustration yet.
-        const supportedTypes = {'multiple_choice', 'picture_choice'};
-        final exercises =
-            allExercises
-                .where(
-                  (e) =>
-                      supportedTypes.contains(e['type']) ||
-                      supportedTypes.contains(e['exercise_type']),
-                )
-                .toList();
-        final questions = <QuizQuestion>[];
-        for (final exercise in exercises) {
-          try {
-            questions.add(QuizQuestion.fromApiExercise(exercise));
-          } catch (e) {
-            debugPrint('Skipping invalid remote exercise: $e');
-          }
-        }
-
+        // picture_choice sessions may contain multiple_choice fallbacks for
+        // words that have no illustration yet.
+        final questions = _parseExercises(session['exercises']);
         if (questions.isEmpty) {
           throw FormatException('No exercises found for this lesson yet.');
         }
-        return _style.arrange(questions);
+        // Harder bonus questions, asked only when the learner does well.
+        final bonus = [
+          for (final q in _parseExercises(session['adaptive_exercises']))
+            LessonQueue.harder(q.withLabel('hard')),
+        ];
+        return LessonQueue(_style.arrange(questions), bonus: bonus);
       }
 
       // Try to load the JSON file
@@ -282,7 +307,7 @@ class _QuizScreenState extends State<QuizScreen>
 
       // Shuffle the questions for variety
       // questions.shuffle();
-      return questions;
+      return LessonQueue(questions);
     } catch (e) {
       debugPrint('Error loading questions from ${widget.topicFilePath}: $e');
       rethrow;
@@ -326,9 +351,13 @@ class _QuizScreenState extends State<QuizScreen>
     });
   }
 
-  void _handleAnswer(int answerIndex, List<QuizQuestion> questions) async {
-    final isCorrect =
-        answerIndex == questions[currentQuestionIndex].correctAnswerIndex;
+  void _handleAnswer(int answerIndex, LessonQueue lesson) async {
+    if (showFeedback || lesson.answeredCurrent) return;
+    final item = lesson.current;
+    final isCorrect = answerIndex == item.question.correctAnswerIndex;
+    final responseMs =
+        DateTime.now().difference(_questionShownAt).inMilliseconds;
+    lesson.answer(optionIndex: answerIndex, correct: isCorrect, ms: responseMs);
     final audioPath = isCorrect ? 'audio/correct.mp3' : 'audio/incorrect.mp3';
 
     final themeService = Provider.of<ThemeService>(context, listen: false);
@@ -345,12 +374,12 @@ class _QuizScreenState extends State<QuizScreen>
 
     if (isCorrect) HapticFeedback.lightImpact();
 
-    final answered = questions[currentQuestionIndex];
+    final answered = item.question;
     Analytics.track('question_answered', {
       'topic': _topicName,
       'topic_path': widget.topicFilePath,
       'question_index': currentQuestionIndex,
-      'question_count': questions.length,
+      'question_count': lesson.length,
       'question_type': answered.type,
       'correct': isCorrect,
       'combo': isCorrect ? _combo + 1 : 0,
@@ -358,7 +387,11 @@ class _QuizScreenState extends State<QuizScreen>
       'english': answered.englishGloss,
       'chosen': answered.options[answerIndex],
       'correct_answer': answered.options[answered.correctAnswerIndex],
-      'response_ms': DateTime.now().difference(_questionShownAt).inMilliseconds,
+      'response_ms': responseMs,
+      'role': item.role.name,
+      'attempt': item.attempt,
+      'label': item.label?.id,
+      'to_fix': lesson.toFix,
       'skill': answered.isScript ? 'script' : 'vocabulary',
       'has_audio': answered.audioUrl != null || answered.audioUrls.isNotEmpty,
       'voice': themeService.pronunciationVoice,
@@ -371,15 +404,14 @@ class _QuizScreenState extends State<QuizScreen>
     // Picture questions have Tibetan options, so their word is only spoken
     // once answered (earlier would give the answer away). It follows the
     // chime, which is ducked so the word stays clear.
-    final question = questions[currentQuestionIndex];
+    final question = answered;
     final revealUrl = question.audioFor(themeService.pronunciationVoice);
     final revealAudio = question.hasTibetanOptions && revealUrl != null;
     if (revealAudio && themeService.soundEffectsEnabled) {
       final revealGeneration = _generation;
       Future.delayed(const Duration(milliseconds: 600), () async {
         if (!mounted || revealGeneration != _generation) return;
-        if (currentQuestionIndex >= questions.length) return;
-        if (questions[currentQuestionIndex] != question) return;
+        if (!identical(lesson.current, item)) return;
         try {
           await _audioPlayer.setVolume(themeService.soundEffectsVolume * 0.3);
         } catch (_) {}
@@ -394,7 +426,6 @@ class _QuizScreenState extends State<QuizScreen>
       selectedAnswerIndex = answerIndex;
       showFeedback = true;
       lastAnswerCorrect = isCorrect;
-      if (isCorrect) score++;
       _combo = isCorrect ? _combo + 1 : 0;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -406,9 +437,10 @@ class _QuizScreenState extends State<QuizScreen>
       );
     });
 
-    // One attempt per question: a wrong answer is recorded and the quiz moves
-    // on, so the final score reflects what the learner actually knew. The
-    // delay is time to read the feedback and see the right answer revealed.
+    // One scored attempt per question: a wrong answer is recorded and the
+    // quiz moves on, so the score reflects what the learner knew. The word
+    // comes back once at the end to fix. The delay is time to read the
+    // feedback and see the right answer revealed.
     final feedbackTime =
         revealAudio
             ? const Duration(milliseconds: 2800)
@@ -416,29 +448,43 @@ class _QuizScreenState extends State<QuizScreen>
     final generation = _generation;
     Future.delayed(feedbackTime, () {
       if (!mounted || generation != _generation) return;
-      if (currentQuestionIndex < questions.length - 1) {
+      if (!lesson.isDone) {
+        late int bonusAdded;
         setState(() {
-          currentQuestionIndex++;
+          bonusAdded = lesson.advance();
           selectedAnswerIndex = null;
           showFeedback = false;
         });
+        if (bonusAdded > 0) {
+          Analytics.track('lesson_bonus_added', {
+            'topic': _topicName,
+            'count': bonusAdded,
+            'first_try_accuracy': (lesson.coreAccuracy * 100).round(),
+          });
+        }
         _questionShownAt = DateTime.now();
         if (_scrollController.hasClients) _scrollController.jumpTo(0);
         _animationController.reset();
         _animationController.forward();
       } else {
-        _goToCompletion(questions.length);
+        _goToCompletion(lesson.total);
       }
     });
   }
 
   Future<void> _goToCompletion(int totalQuestions) async {
+    final lesson = _lesson!;
     _completed = true;
     final category = _getCategoryFromFilePath(widget.topicFilePath);
     final progressService = Provider.of<ProgressService>(
       context,
       listen: false,
     );
+
+    // Before updateQuizResults, which its first-run estimate reads.
+    final lessonsCompleted =
+        await LessonMilestones.instance.recordLessonFinished();
+    if (!mounted) return;
 
     await progressService.updateQuizResults(
       category,
@@ -459,7 +505,7 @@ class _QuizScreenState extends State<QuizScreen>
     if (!mounted) return;
 
     final xpEarned = score * 10;
-    final accuracy = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0.0;
+    final accuracy = lesson.accuracy;
 
     Analytics.track('lesson_completed', {
       'topic': _topicName,
@@ -473,6 +519,10 @@ class _QuizScreenState extends State<QuizScreen>
       'streak': progressService.currentStreak,
       'duration_s': DateTime.now().difference(_startedAt).inSeconds,
       'remote_session': _remoteSessionId != null,
+      'recycled': lesson.recycled,
+      'fixed': lesson.fixed,
+      'bonus_shown': lesson.bonusShown,
+      'bonus_correct': lesson.bonusCorrect,
     });
 
     Navigator.of(context).popUntil((route) => route is! DialogRoute);
@@ -489,6 +539,9 @@ class _QuizScreenState extends State<QuizScreen>
               streak: progressService.currentStreak,
               topicFilePath: widget.topicFilePath,
               title: widget.title,
+              fixed: lesson.fixed,
+              recycled: lesson.recycled,
+              lessonsCompleted: lessonsCompleted,
             ),
         transitionsBuilder:
             (context, animation, secondaryAnimation, child) =>
@@ -511,18 +564,24 @@ class _QuizScreenState extends State<QuizScreen>
       listen: false,
     ).flushPendingActivity();
     final xpEarned = score * 10;
+    final answers = _lesson?.answers ?? const <LessonAnswer>[];
     final success = await ApiService().submitProgressCompletion({
       'session_id': _remoteSessionId,
       'level_id': _remoteLevelId,
       'xp_earned': xpEarned,
+      // The server grades `answers`; the counts are for servers that
+      // predate grading, and follow the same rule.
       'correct_answers': score,
       'total_questions': totalQuestions,
       'time_taken_seconds': 0,
       'local_date': ProgressService.localDateString(DateTime.now()),
+      if (answers.isNotEmpty && answers.every((a) => a.exerciseId != null))
+        'answers': [for (final a in answers) a.toJson()],
     });
     Analytics.track('lesson_progress_submitted', {
       'success': success,
       'topic_path': widget.topicFilePath,
+      'answers': answers.length,
     });
     if (!success) return;
 
@@ -573,7 +632,7 @@ class _QuizScreenState extends State<QuizScreen>
             ),
         ],
       ),
-      body: ContentWidth(maxWidth: ContentWidth.reading, child: FutureBuilder<List<QuizQuestion>>(
+      body: ContentWidth(maxWidth: ContentWidth.reading, child: FutureBuilder<LessonQueue>(
         future: questionsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -591,8 +650,8 @@ class _QuizScreenState extends State<QuizScreen>
             );
           }
 
-          final questions = snapshot.data ?? [];
-          if (questions.isEmpty) {
+          final lesson = snapshot.data;
+          if (lesson == null || lesson.isEmpty) {
             return YakNotice(
               mood: YakMood.thinking,
               title: 'Nothing here yet',
@@ -602,12 +661,13 @@ class _QuizScreenState extends State<QuizScreen>
             );
           }
 
-          final question = questions[currentQuestionIndex];
+          final item = lesson.current;
+          final question = item.question;
           _autoPlayPrompt(question);
 
           return Stack(
             children: [
-              _buildQuizBody(context, question, questions),
+              _buildQuizBody(context, item, lesson),
               AnswerFeedbackBanner(
                 visible: showFeedback,
                 isCorrect: lastAnswerCorrect,
@@ -634,9 +694,11 @@ class _QuizScreenState extends State<QuizScreen>
 
   Widget _buildQuizBody(
     BuildContext context,
-    QuizQuestion question,
-    List<QuizQuestion> questions,
+    LessonItem item,
+    LessonQueue lesson,
   ) {
+    final question = item.question;
+    final label = item.label;
     return Column(
       children: [
         // Progress and Score
@@ -646,7 +708,7 @@ class _QuizScreenState extends State<QuizScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Question ${currentQuestionIndex + 1} of ${questions.length}',
+                'Question ${currentQuestionIndex + 1} of ${lesson.length}',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -685,7 +747,7 @@ class _QuizScreenState extends State<QuizScreen>
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: LinearProgressIndicator(
-                  value: (currentQuestionIndex + 1) / questions.length,
+                  value: (currentQuestionIndex + 1) / lesson.length,
                   backgroundColor:
                       Theme.of(context).brightness == Brightness.dark
                           ? Colors.grey.shade700
@@ -700,8 +762,12 @@ class _QuizScreenState extends State<QuizScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Goal gradient: what is left to fix, not only a bar.
+                  if (lesson.toFix > 0)
+                    _ToFixChip(count: lesson.toFix)
+                  else
                   Text(
-                    '${((currentQuestionIndex + 1) / questions.length * 100).toInt()}% Complete',
+                    '${((currentQuestionIndex + 1) / lesson.length * 100).toInt()}% Complete',
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       color:
@@ -743,6 +809,10 @@ class _QuizScreenState extends State<QuizScreen>
                       padding: const EdgeInsets.all(24.0),
                       child: Column(
                         children: [
+                          if (label != null) ...[
+                            ExerciseLabelPill(label: label),
+                            const SizedBox(height: 10),
+                          ],
                           Text(
                             _instructionFor(question),
                             textAlign: TextAlign.center,
@@ -791,7 +861,7 @@ class _QuizScreenState extends State<QuizScreen>
                             onTap:
                                 showFeedback
                                     ? null
-                                    : () => _handleAnswer(index, questions),
+                                    : () => _handleAnswer(index, lesson),
                             borderRadius: BorderRadius.circular(15),
                             child: Container(
                               decoration: BoxDecoration(
@@ -885,12 +955,9 @@ class _QuizScreenState extends State<QuizScreen>
     );
   }
 
-  /// Share of the questions answered so far that were right. The question
-  /// on screen only counts once it has been answered.
-  int _accuracySoFar() {
-    final answered = currentQuestionIndex + (showFeedback ? 1 : 0);
-    return answered == 0 ? 0 : (score / answered * 100).round();
-  }
+  /// Share of the questions answered so far that were right, counted as the
+  /// server counts it (first attempts; bonus questions only when right).
+  int _accuracySoFar() => (_lesson?.accuracy ?? 0).round();
 
   String _instructionFor(QuizQuestion question) => switch (question.type) {
     QuizQuestion.pictureChoice => 'Which word matches the picture?',
@@ -1085,5 +1152,35 @@ class _QuizScreenState extends State<QuizScreen>
     }
 
     return filename.toLowerCase().replaceAll('_', ' ');
+  }
+}
+
+/// "2 to fix": missed words still to come back in this lesson.
+class _ToFixChip extends StatelessWidget {
+  const _ToFixChip({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '$count ${count == 1 ? 'word' : 'words'} to fix',
+      excludeSemantics: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.refresh, size: 14, color: AppColors.red),
+          const SizedBox(width: 4),
+          Text(
+            '$count to fix',
+            style: AppTextStyles.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppTokens.ink(context),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

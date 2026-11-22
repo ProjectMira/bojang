@@ -38,13 +38,14 @@ class LocationService {
   }
 
   /// Shows the explanation once, after the learner's first finished lesson.
-  Future<void> maybePromptAfterLesson(BuildContext context) async {
-    if (kIsWeb || Analytics.optedOut) return;
+  /// Returns whether it showed (the session end makes one ask at most).
+  Future<bool> maybePromptAfterLesson(BuildContext context) async {
+    if (kIsWeb || Analytics.optedOut) return false;
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (prefs.getBool(_promptedKey) ?? false) return;
+      if (prefs.getBool(_promptedKey) ?? false) return false;
       await prefs.setBool(_promptedKey, true);
-      if (!context.mounted) return;
+      if (!context.mounted) return false;
       Analytics.track('location_prompt_shown', {'source': 'lesson_complete'});
       final share = await showDialog<bool>(
         context: context,
@@ -70,8 +71,10 @@ class LocationService {
       );
       Analytics.track('location_prompt_answered', {'share': share == true});
       if (share == true) await setSharing(true, source: 'lesson_complete');
+      return true;
     } catch (e) {
       debugPrint('Location prompt failed: $e');
+      return false;
     }
   }
 

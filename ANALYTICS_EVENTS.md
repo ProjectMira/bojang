@@ -108,17 +108,21 @@ deletes its rows.
 | `topic_selected` | level selection | `topic`, `topic_path`, `level`, `word_count`, `progress`, `completed` |
 | `topic_locked_tapped` | level selection | `topic`, `required_xp`, `xp` |
 | `lesson_style_selected` | style sheet | `style`, `previous_style`, `source` (quiz/settings) |
-| `lesson_started` | quiz | `topic`, `topic_path`, `style`, `question_count`, `remote_session` (bool), `source` (`home_shortcut`, `topic_list`, `lesson_intro`, `lesson_complete_retry`) |
+| `lesson_started` | quiz | `topic`, `topic_path`, `style`, `question_count` (core questions), `bonus_available` (harder bonus questions the server sent), `labels` (count per server label: new/mistake/weak/hard), `remote_session` (bool), `source` (`home_shortcut`, `topic_list`, `lesson_intro`, `lesson_complete_retry`) |
 | `lesson_load_failed` | quiz | `topic`, `error` |
-| `question_answered` | quiz | `topic`, `question_index`, `question_type`, `correct`, `combo`, `tibetan`, `english`, `chosen`, `correct_answer`, `response_ms`, `skill` (`script`/`vocabulary`), `has_audio`, `voice`, `reading_help`, `style`, `source` |
+| `question_answered` | quiz | `topic`, `question_index`, `question_count` (grows when a word is missed or bonus questions join), `question_type`, `correct`, `combo`, `tibetan`, `english`, `chosen`, `correct_answer`, `response_ms`, `skill` (`script`/`vocabulary`), `has_audio`, `voice`, `reading_help`, `style`, `source`, `role` (`core`/`bonus`/`retry`), `attempt` (1, or 2 for a missed word asked again), `label` (`new`/`mistake`/`weak`/`hard`), `to_fix` (missed words still to come) |
+| `lesson_bonus_added` | quiz | `topic`, `count` (1 or 2 harder questions), `first_try_accuracy` (0-100; 80+ earns 1, 90+ earns 2) |
 | `lesson_quit` | quiz | `topic`, `question_index`, `question_count`, `score`, `reason` (`back`), `answered`, `question_s` (time on the open question), `source` |
 | `lesson_intro_opened` | Basics lesson cards | `level`, `source` |
 | `lesson_intro_practice` | Basics lesson cards | `level`, `items`, `heard` (cards tapped), `duration_s` |
 | `voice_picked` | voice picker | `voice`, `source` (`settings`, `quiz`, `game`, `lesson_intro`, `chip`) |
 | `memory_board_resized` | Memory Match | `pairs` (cards per board ÷ 2; more on iPad) |
-| `lesson_completed` | quiz | `topic`, `topic_path`, `style`, `score`, `total`, `accuracy`, `xp_earned`, `streak`, `duration_s` |
-| `lesson_progress_submitted` | quiz | `success` |
+| `lesson_completed` | quiz | `topic`, `topic_path`, `style`, `score`, `total`, `accuracy`, `xp_earned`, `streak`, `duration_s`, `recycled` (missed words asked again), `fixed` (of those, right the second time), `bonus_shown`, `bonus_correct` |
+| `lesson_progress_submitted` | quiz | `success`, `answers` (attempts sent for server grading) |
+| `lesson_result_shown` | lesson complete | `topic`, `celebration` (`big` for the first lesson and lesson milestones, `normal`, `quiet` below 70%), `lessons_completed`, `accuracy`, `recycled`, `fixed` |
 | `lesson_complete_action` | lesson complete | `action` (continue/practice_again) |
+| `lesson_goal_closed` | lesson goal (after a lessons-finished milestone) | `lessons_completed`, `next_goal` |
+| `session_end_completed` | lesson complete | `steps` (in order, from `result`, `streak`, `goal`, `ask`), `celebration`, `lessons_completed` |
 | `game_selected` | games tab | `game`, `skill` |
 | `game_topic_selected` | game host | `game`, `topic`, `random` |
 | `game_started` | game host / memory / speed | `game`, `topic`, `word_count` |
@@ -201,7 +205,15 @@ from the tracker), `voice`, `lesson_style` and `bojang_session_id`.
 
 Written by the backend itself, so the log is complete for old app versions
 and unsent batches: `server_session_issued` (`session_id`, `level_id`,
-`requested_types`, `exercise_types`, `total_questions`),
+`requested_types`, `supported_types`, `exercise_types`, `total_questions`,
+`adaptive`, `labels`),
 `server_lesson_cards` (`level_id`, `items`), `server_lesson_completed`
 (`session_id`, `level_id`, `correct_answers`, `total_questions`,
-`time_taken_seconds`, `xp_earned`, `level_completed`).
+`time_taken_seconds`, `xp_earned`, `level_completed`, `graded`, and when the
+app sent answers: `server_graded`, `client_trusted`, `grading_mismatches`,
+`unknown_answers`, `recycled`, `fixed`, `adaptive_correct`).
+
+Every answer of a graded lesson is also a row in the backend's
+`exercise_responses` table (not an event): exercise id and type, word
+(lexeme) id, answer, correct, the app's own verdict, `graded_by`
+(`server`/`client`), attempt, role, label and response time.

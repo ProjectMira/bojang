@@ -34,6 +34,18 @@ class QuizQuestion {
   final List<String?> optionTibetan;
   final List<Romanisation> optionRomanisations;
 
+  /// The server's id for this exercise, sent back with the answer so the
+  /// server can grade it. Null for bundled offline lessons.
+  final String? exerciseId;
+
+  /// The server's id of each option, in [options] order; the chosen one is
+  /// the answer sent to the server. Empty for bundled lessons.
+  final List<String> optionIds;
+
+  /// Why the exercise is here, as the server labelled it: `new`, `mistake`
+  /// (answered wrong last time), `weak` or `hard`. Null for plain review.
+  final String? label;
+
   /// Tibetan prompt, English options. The prompt is spoken when it appears.
   static const String multipleChoice = 'multiple_choice';
 
@@ -61,7 +73,25 @@ class QuizQuestion {
     this.isScript = false,
     this.optionTibetan = const [],
     this.optionRomanisations = const [],
+    this.exerciseId,
+    this.optionIds = const [],
+    this.label,
   });
+
+  /// The server id of option [index], or its text when the payload had no
+  /// ids (the server accepts either).
+  String answerIdFor(int index) {
+    final id = index < optionIds.length ? optionIds[index] : '';
+    return id.isNotEmpty ? id : options[index];
+  }
+
+  /// Server exercise types the quiz screen can render; sent as
+  /// `supported_types` so the server builds only these.
+  static const List<String> renderableTypes = [multipleChoice, pictureChoice];
+
+  /// The same question with a different [label].
+  QuizQuestion withLabel(String? newLabel) =>
+      _copyWithType(type ?? multipleChoice, label: newLabel, keepType: true);
 
   /// The question's Tibetan word: the correct option when the options are
   /// Tibetan (picture payloads carry no `tibetan_word`), else the prompt.
@@ -124,6 +154,9 @@ class QuizQuestion {
       isScript: true,
       optionTibetan: optionTibetan,
       optionRomanisations: optionRomanisations,
+      exerciseId: exerciseId,
+      optionIds: optionIds,
+      label: label,
     );
   }
 
@@ -136,12 +169,17 @@ class QuizQuestion {
     return _copyWithType(reverseChoice, keepImage: false);
   }
 
-  QuizQuestion _copyWithType(String newType, {bool keepImage = true}) {
+  QuizQuestion _copyWithType(
+    String newType, {
+    bool keepImage = true,
+    bool keepType = false,
+    String? label,
+  }) {
     return QuizQuestion(
       tibetanText: tibetanText,
       options: options,
       correctAnswerIndex: correctAnswerIndex,
-      type: newType,
+      type: keepType ? type : newType,
       imageUrl: keepImage ? imageUrl : null,
       englishGloss: englishGloss,
       audioUrl: audioUrl,
@@ -150,6 +188,9 @@ class QuizQuestion {
       isScript: isScript,
       optionTibetan: optionTibetan,
       optionRomanisations: optionRomanisations,
+      exerciseId: exerciseId,
+      optionIds: optionIds,
+      label: label ?? this.label,
     );
   }
 
@@ -227,6 +268,11 @@ class QuizQuestion {
       optionRomanisations: [
         for (final option in validOptions) Romanisation.fromJson(option),
       ],
+      exerciseId: _nonEmpty(json['exercise_id']),
+      optionIds: [
+        for (final option in validOptions) option['id']?.toString() ?? '',
+      ],
+      label: _nonEmpty(json['label']),
     );
   }
 
