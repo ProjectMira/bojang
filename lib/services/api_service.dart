@@ -637,6 +637,30 @@ class ApiService {
     return response?['registered'] == true;
   }
 
+  /// Request for callers that need the status and headers themselves (ETag
+  /// revalidation of /v1/config, 409 version conflicts on /v1/kv). Sends the
+  /// usual auth and App Check headers. Never throws: null when offline or
+  /// timed out. Does not report api_error; the caller decides.
+  Future<http.Response?> rawRequest(
+    String method,
+    String endpoint, {
+    Map<String, String> headers = const {},
+    Object? body,
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    await _refreshAuthToken();
+    try {
+      final request = http.Request(method, _uri(endpoint))
+        ..headers.addAll(_headers)
+        ..headers.addAll(headers);
+      if (body != null) request.body = jsonEncode(body);
+      final streamed = await _client.send(request).timeout(timeout);
+      return await http.Response.fromStream(streamed).timeout(timeout);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Uri _uri(String endpoint, [Map<String, String>? queryParameters]) {
     final cleanBase =
         baseUrl.endsWith('/')

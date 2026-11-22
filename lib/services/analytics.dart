@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/event_policy.dart';
 import 'crash_reporting.dart';
 import 'event_tracker.dart';
 
@@ -51,6 +52,18 @@ class Analytics {
 
   static bool get _buildSends => !kDebugMode || _sendInDebug;
 
+  /// Blocklist and sampling from the server config (FeatureFlags).
+  static EventPolicy _policy = EventPolicy.allowAll;
+
+  /// Applied by FeatureFlags whenever the server config changes.
+  static void setEventPolicy(EventPolicy policy) => _policy = policy;
+
+  /// Whether [event] is sent in this app session, by the server's
+  /// blocklist and sampling. Covers PostHog and the backend events
+  /// (taps and scrolls included, through the tracker's filter).
+  static bool allowsEvent(String event) =>
+      _policy.allows(event, EventTracker.instance.sessionId);
+
   /// Tracks the screen on display for the backend events (route pushes,
   /// pops, dialogs). Add next to [observer] in navigatorObservers.
   static NavigatorObserver get screenObserver =>
@@ -76,6 +89,7 @@ class Analytics {
 
   static Future<void> _startTracker() async {
     final tracker = EventTracker.instance;
+    tracker.filter = allowsEvent;
     tracker.onSessionStarted = (id) => register('bojang_session_id', id);
     // Every PostHog event (autocaptured rage clicks included) carries the
     // screen it happened on.
@@ -154,6 +168,7 @@ class Analytics {
 
   /// Records an event. Null property values are dropped.
   static void track(String event, [Map<String, Object?> properties = const {}]) {
+    if (!allowsEvent(event)) return;
     EventTracker.instance.record(event, properties: properties);
     if (!_enabled) return;
     final props = <String, Object>{
@@ -167,6 +182,7 @@ class Analytics {
 
   /// Manually records a screen view, for tabs and sheets that are not routes.
   static void screen(String name, [Map<String, Object?> properties = const {}]) {
+    if (!allowsEvent(r'$screen')) return;
     EventTracker.instance.manualScreen(name, properties);
     if (!_enabled) return;
     final props = <String, Object>{

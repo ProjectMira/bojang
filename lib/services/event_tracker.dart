@@ -55,6 +55,10 @@ class EventTracker with WidgetsBindingObserver {
   bool captureTaps = true;
   bool uploadsEnabled = true;
 
+  /// Server config blocklist and sampling (Analytics.allowsEvent): events
+  /// it refuses are not recorded.
+  bool Function(String event)? filter;
+
   /// Debug builds print each event (`[event] tap @tab_home {...}`).
   bool logEvents = const bool.fromEnvironment('LOG_EVENTS');
 
@@ -246,6 +250,8 @@ class EventTracker with WidgetsBindingObserver {
   }) {
     if (!_enabled) return;
     if (event == 'tap' || event == 'long_press') _sessionTaps++;
+    // Taps still count towards the session summary when not recorded.
+    if (filter != null && !filter!(event)) return;
     if (kDebugMode && logEvents) {
       debugPrint('[event] $event @${screen ?? _screen} $properties');
     }

@@ -5,8 +5,9 @@ import '../screens/force_update_screen.dart';
 import '../services/analytics.dart';
 import '../services/app_update_service.dart';
 
-/// Covers the whole app with [ForceUpdateScreen] while the App Store has a
-/// newer version than the one installed.
+/// Covers the whole app with [ForceUpdateScreen] while an update is required:
+/// the App Store has a newer version (iOS), or the build is below the server
+/// config's minimum (iOS and Android).
 ///
 /// It sits above the navigator (via `MaterialApp.builder`), so no route,
 /// dialog or start-up redirect can escape it. The app underneath keeps its
@@ -72,10 +73,13 @@ class _UpdateGateState extends State<UpdateGate> with WidgetsBindingObserver {
       final update = await _service.check();
       _lastCheck = DateTime.now();
       if (!mounted) return;
-      if (update != null && _update?.storeVersion != update.storeVersion) {
+      if (update != null &&
+          (_update?.storeVersion != update.storeVersion ||
+              _update?.reason != update.reason)) {
         Analytics.track('force_update_shown', {
           'installed_version': update.installedVersion,
           'store_version': update.storeVersion,
+          'reason': update.reason.name,
         });
       }
       setState(() => _update = update);
@@ -91,7 +95,7 @@ class _UpdateGateState extends State<UpdateGate> with WidgetsBindingObserver {
         widget.openUrl ??
         (Uri uri) => launchUrl(uri, mode: LaunchMode.externalApplication);
     var opened = false;
-    for (final uri in [update.appStoreUri, update.webUri]) {
+    for (final uri in update.storeUris) {
       try {
         if (await open(uri)) {
           opened = true;
@@ -104,6 +108,7 @@ class _UpdateGateState extends State<UpdateGate> with WidgetsBindingObserver {
     Analytics.track('force_update_tapped', {
       'installed_version': update.installedVersion,
       'store_version': update.storeVersion,
+      'reason': update.reason.name,
       'opened': opened,
     });
   }
