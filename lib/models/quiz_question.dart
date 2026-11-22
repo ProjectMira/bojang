@@ -1,3 +1,6 @@
+import '../services/pronunciation_voices.dart';
+import 'romanisation.dart';
+
 class QuizQuestion {
   final String tibetanText;
   final List<String> options;
@@ -18,6 +21,18 @@ class QuizQuestion {
 
   /// The same pronunciation per TTS voice (e.g. lhasa_female, kham_male).
   final Map<String, String> audioUrls;
+
+  /// Phonetics and Wylie of the question's Tibetan word.
+  final Romanisation romanisation;
+
+  /// True for Basics script questions (letters, syllables): the options are
+  /// readings, so romanisation would give the answer away before answering.
+  final bool isScript;
+
+  /// Per option, in [options] order: the option's word in Tibetan and its
+  /// romanisation. Empty when the payload did not include them.
+  final List<String?> optionTibetan;
+  final List<Romanisation> optionRomanisations;
 
   /// Tibetan prompt, English options. The prompt is spoken when it appears.
   static const String multipleChoice = 'multiple_choice';
@@ -42,10 +57,40 @@ class QuizQuestion {
     this.englishGloss,
     this.audioUrl,
     this.audioUrls = const {},
+    this.romanisation = Romanisation.none,
+    this.isScript = false,
+    this.optionTibetan = const [],
+    this.optionRomanisations = const [],
   });
 
-  /// Recording in [voice], falling back to the default voice.
-  String? audioFor(String voice) => audioUrls[voice] ?? audioUrl;
+  /// The question's Tibetan word: the correct option when the options are
+  /// Tibetan (picture payloads carry no `tibetan_word`), else the prompt.
+  String get wordTibetan =>
+      hasTibetanOptions &&
+              correctAnswerIndex >= 0 &&
+              correctAnswerIndex < options.length
+          ? options[correctAnswerIndex]
+          : tibetanText;
+
+  /// Romanisation of option [index] when the options are Tibetan.
+  Romanisation optionRomanisation(int index) =>
+      hasTibetanOptions && index < optionRomanisations.length
+          ? optionRomanisations[index]
+          : Romanisation.none;
+
+  /// Whether romanisation may show now: always for vocabulary, and for
+  /// script questions only once answered.
+  bool showsRomanisation({required bool answered}) => answered || !isScript;
+
+  /// Recording in [voice], falling back to another voice of the same
+  /// dialect, then the default voice (see [PronunciationVoices.pick]).
+  String? audioFor(String voice) =>
+      PronunciationVoices.pick(audioUrls, voice, fallbackUrl: audioUrl);
+
+  /// The voice [audioFor] actually uses, or null for the plain default
+  /// `audio_url` (or no recording).
+  String? voiceFor(String voice) =>
+      PronunciationVoices.resolve(audioUrls, voice);
 
   /// True when the options are Tibetan words, so the word's recording must
   /// wait until the learner has answered (earlier would give it away).
@@ -58,6 +103,28 @@ class QuizQuestion {
   QuizQuestion? asListening() {
     if (type != multipleChoice || !_hasAudio) return null;
     return _copyWithType(listening);
+  }
+
+  /// A script question turned around: the reading is shown ("kha") and the
+  /// learner picks the Tibetan letter or word. Null unless this is a script
+  /// [multipleChoice] question whose options all carry their Tibetan.
+  QuizQuestion? asReadingReverse() {
+    if (type != multipleChoice || !isScript) return null;
+    if (optionTibetan.length != options.length) return null;
+    if (optionTibetan.any((t) => t == null || t.isEmpty)) return null;
+    return QuizQuestion(
+      tibetanText: tibetanText,
+      options: [for (final t in optionTibetan) t!],
+      correctAnswerIndex: correctAnswerIndex,
+      type: reverseChoice,
+      englishGloss: options[correctAnswerIndex],
+      audioUrl: audioUrl,
+      audioUrls: audioUrls,
+      romanisation: romanisation,
+      isScript: true,
+      optionTibetan: optionTibetan,
+      optionRomanisations: optionRomanisations,
+    );
   }
 
   /// This question asked from English: "how do you say X?" with the same
@@ -79,6 +146,10 @@ class QuizQuestion {
       englishGloss: englishGloss,
       audioUrl: audioUrl,
       audioUrls: audioUrls,
+      romanisation: romanisation,
+      isScript: isScript,
+      optionTibetan: optionTibetan,
+      optionRomanisations: optionRomanisations,
     );
   }
 
@@ -148,6 +219,14 @@ class QuizQuestion {
       englishGloss: isPicture ? json['english_word']?.toString() : null,
       audioUrl: _nonEmpty(json['audio_url']),
       audioUrls: _voiceUrls(json['audio_urls']),
+      romanisation: Romanisation.fromJson(json),
+      isScript: json['skill']?.toString() == 'script',
+      optionTibetan: [
+        for (final option in validOptions) _nonEmpty(option['tibetan']),
+      ],
+      optionRomanisations: [
+        for (final option in validOptions) Romanisation.fromJson(option),
+      ],
     );
   }
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../models/romanisation.dart';
 import '../theme/app_tokens.dart';
 import '../utils/yak_lines.dart';
 import 'app_text_style.dart';
+import 'romanisation_text.dart';
 import 'yak_mascot.dart';
 
 /// Non-blocking bottom banner shown after answering a quiz question.
@@ -23,6 +25,11 @@ class AnswerFeedbackBanner extends StatelessWidget {
   /// stable for one question and varies across the lesson.
   final int seed;
 
+  /// The question's Tibetan word and how it reads, repeated here so every
+  /// answer ends with the word, its sound and (when set) its Wylie.
+  final String? tibetan;
+  final Romanisation romanisation;
+
   const AnswerFeedbackBanner({
     super.key,
     required this.visible,
@@ -30,6 +37,8 @@ class AnswerFeedbackBanner extends StatelessWidget {
     this.correctAnswerText,
     this.combo = 1,
     this.seed = 0,
+    this.tibetan,
+    this.romanisation = Romanisation.none,
   });
 
   @override
@@ -143,9 +152,34 @@ class AnswerFeedbackBanner extends StatelessWidget {
                           'Answer: $correctAnswerText',
                           style: AppTextStyles.poppins(
                             fontSize: 14,
-                            color: AppTokens.inkSoft(context),
+                            color: AppTokens.ink(context),
                           ),
                         ),
+                      // Only while shown: the hidden banner stays built
+                      // (off screen) and must not repeat the next word.
+                      if (visible && tibetan != null && tibetan!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 10,
+                          children: [
+                            Text(
+                              tibetan!,
+                              style: AppTextStyles.poppins(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w600,
+                                color: AppTokens.ink(context),
+                              ),
+                            ),
+                            RomanisationText(
+                              romanisation,
+                              fontSize: 15,
+                              textAlign: TextAlign.start,
+                              alignment: CrossAxisAlignment.start,
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),

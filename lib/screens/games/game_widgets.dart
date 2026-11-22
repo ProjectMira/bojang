@@ -6,6 +6,7 @@ import '../../services/pronunciation_player.dart';
 import '../../services/theme_service.dart';
 import '../../theme/app_tokens.dart';
 import '../../widgets/app_text_style.dart';
+import '../../widgets/reading_voice_pickers.dart';
 import '../../widgets/speaker_button.dart';
 
 /// What a finished round reports back to its [GameHost].
@@ -69,13 +70,31 @@ class WordSpeaker extends StatelessWidget {
   final GameWord word;
   final double size;
 
-  const WordSpeaker({super.key, required this.word, this.size = 28});
+  /// Also show the voice chip, so the dialect can be changed in the game.
+  final bool showVoice;
+
+  const WordSpeaker({
+    super.key,
+    required this.word,
+    this.size = 28,
+    this.showVoice = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final url = word.audioFor(context.watch<ThemeService>().pronunciationVoice);
     if (url == null) return const SizedBox.shrink();
-    return SpeakerButton(url: url, size: size);
+    final speaker = SpeakerButton(url: url, size: size);
+    if (!showVoice) return speaker;
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 10,
+      children: [
+        speaker,
+        VoiceChip(audioUrls: word.audioUrls, source: 'game'),
+      ],
+    );
   }
 }
 

@@ -9,7 +9,7 @@ import '../utils/topic_visuals.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/yak_says.dart';
-import 'quiz_screen.dart';
+import 'lesson_intro_screen.dart';
 import '../widgets/content_width.dart';
 
 const List<IconData> _kSectionIcons = [
@@ -325,16 +325,7 @@ class _TopicCardState extends State<_TopicCard> {
               'progress': widget.progress,
               'completed': isCompleted,
             });
-            Navigator.push(
-              context,
-              screenRoute(
-                'quiz',
-                (context) => QuizScreen(
-                  topicFilePath: widget.sublevel.path,
-                  title: widget.sublevel.name,
-                ),
-              ),
-            );
+            openTopic(context, widget.sublevel);
           },
           onHighlightChanged: (value) => setState(() => _pressed = value),
           child: AnimatedScale(

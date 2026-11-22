@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../models/game_word.dart';
 import '../../services/theme_service.dart';
 import '../../theme/app_tokens.dart';
+import '../../widgets/romanisation_text.dart';
 import '../../widgets/app_text_style.dart';
 import 'game_host.dart';
 import 'game_widgets.dart';
@@ -192,7 +193,7 @@ class _FlashcardsGameState extends State<FlashcardsGame> {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                WordSpeaker(word: card, size: 26),
+                                WordSpeaker(word: card, size: 26, showVoice: true),
                                 const SizedBox(height: 16),
                                 if (_flipped) ...[
                                   Text(
@@ -204,16 +205,10 @@ class _FlashcardsGameState extends State<FlashcardsGame> {
                                       color: AppColors.primary,
                                     ),
                                   ),
-                                  if (card.phonetic.isNotEmpty)
-                                    Text(
-                                      card.phonetic,
-                                      textAlign: TextAlign.center,
-                                      style: AppTextStyles.poppins(
-                                        fontSize: 15,
-                                        fontStyle: FontStyle.italic,
-                                        color: AppTokens.inkSoft(context),
-                                      ),
-                                    ),
+                                  RomanisationText(
+                                    card.romanisation,
+                                    fontSize: 16,
+                                  ),
                                 ] else
                                   Text(
                                     'Tap to see the meaning',

@@ -18,7 +18,7 @@ import '../widgets/stat_strip.dart';
 import '../widgets/yak_says.dart';
 import 'level_selection_screen.dart';
 import 'memory_match_game.dart';
-import 'quiz_screen.dart';
+import 'lesson_intro_screen.dart';
 import '../widgets/content_width.dart';
 
 class HomePage extends StatefulWidget {
@@ -271,7 +271,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             emoji: topicEmoji(sublevel.name),
             title: sublevel.name,
             subtitle:
-                sublevel.wordCount > 0
+                sublevel.hasLesson
+                    ? 'Basics lesson'
+                    : sublevel.wordCount > 0
                     ? '${sublevel.wordCount} words'
                     : 'Lesson',
             color: topicColors[i % topicColors.length],
@@ -282,16 +284,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 'topic_path': sublevel.path,
                 'position': i,
               });
-              Navigator.push(
-                context,
-                screenRoute(
-                  'quiz',
-                  (context) => QuizScreen(
-                    topicFilePath: sublevel.path,
-                    title: sublevel.name,
-                  ),
-                ),
-              );
+              openTopic(context, sublevel);
             },
           ),
         );

@@ -292,6 +292,11 @@ class ApiService {
     );
   }
 
+  /// Teaching notes and items for a level (`GET /learn/levels/{id}/lesson`).
+  Future<Map<String, dynamic>?> getLevelLesson(String levelId) async {
+    return _get('learn/levels/${Uri.encodeComponent(levelId)}/lesson');
+  }
+
   Future<List<Map<String, dynamic>>?> getGames(String levelId) async {
     return null;
   }

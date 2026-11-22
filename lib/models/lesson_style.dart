@@ -71,10 +71,15 @@ enum LessonStyle {
             final reverse = pictureQuestions % 3 == 0 ? q.asReverse() : null;
             arranged.add(reverse ?? q);
           } else {
-            // Every second word question becomes a listening question.
+            // Every second word question becomes a listening question. In
+            // script lessons every third shows the reading and asks for the
+            // letter instead.
             wordQuestions++;
-            final listening = wordQuestions.isEven ? q.asListening() : null;
-            arranged.add(listening ?? q);
+            final reading =
+                q.isScript && wordQuestions % 3 == 0 ? q.asReadingReverse() : null;
+            final listening =
+                reading == null && wordQuestions.isEven ? q.asListening() : null;
+            arranged.add(reading ?? listening ?? q);
           }
         }
         return arranged;

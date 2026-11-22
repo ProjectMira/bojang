@@ -18,8 +18,11 @@ import '../widgets/yak_mascot.dart';
 import '../widgets/yak_says.dart';
 import '../widgets/lesson_style_sheet.dart';
 import '../widgets/speaker_button.dart';
+import '../widgets/reading_voice_pickers.dart';
+import '../widgets/romanisation_text.dart';
 import 'lesson_complete_screen.dart';
 import '../widgets/content_width.dart';
+import '../widgets/app_text_style.dart';
 
 class QuizScreen extends StatefulWidget {
   final String topicFilePath;
@@ -55,6 +58,9 @@ class _QuizScreenState extends State<QuizScreen>
   int _combo = 0;
   late AnimationController _animationController;
   final AudioPlayer _audioPlayer = AudioPlayer();
+  // Scrolls the options up while the feedback banner covers the bottom of
+  // the screen, so the last option (maybe the right answer) stays visible.
+  final ScrollController _scrollController = ScrollController();
   String? _remoteSessionId;
   String? _remoteLevelId;
   // Question index whose pronunciation already auto-played, so rebuilds
@@ -273,6 +279,7 @@ class _QuizScreenState extends State<QuizScreen>
   void dispose() {
     _animationController.dispose();
     _audioPlayer.dispose();
+    _scrollController.dispose();
     PronunciationPlayer.instance.stop();
     super.dispose();
   }
@@ -367,6 +374,14 @@ class _QuizScreenState extends State<QuizScreen>
       if (isCorrect) score++;
       _combo = isCorrect ? _combo + 1 : 0;
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    });
 
     // One attempt per question: a wrong answer is recorded and the quiz moves
     // on, so the final score reflects what the learner actually knew. The
@@ -384,6 +399,7 @@ class _QuizScreenState extends State<QuizScreen>
           selectedAnswerIndex = null;
           showFeedback = false;
         });
+        if (_scrollController.hasClients) _scrollController.jumpTo(0);
         _animationController.reset();
         _animationController.forward();
       } else {
@@ -573,12 +589,16 @@ class _QuizScreenState extends State<QuizScreen>
                 isCorrect: lastAnswerCorrect,
                 combo: _combo,
                 seed: currentQuestionIndex,
+                // Tibetan answers are shown on the word line below instead.
                 correctAnswerText:
-                    question.correctAnswerIndex >= 0 &&
+                    !question.hasTibetanOptions &&
+                            question.correctAnswerIndex >= 0 &&
                             question.correctAnswerIndex <
                                 question.options.length
                         ? question.options[question.correctAnswerIndex]
                         : null,
+                tibetan: question.wordTibetan,
+                romanisation: question.romanisation,
               ),
             ],
           );
@@ -682,9 +702,11 @@ class _QuizScreenState extends State<QuizScreen>
         // Question Card
         Expanded(
           child: SingleChildScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              // Room under the options for the feedback banner.
+              padding: EdgeInsets.fromLTRB(16, 16, 16, showFeedback ? 180 : 16),
               child: Column(
                 children: [
                   Card(
@@ -790,20 +812,36 @@ class _QuizScreenState extends State<QuizScreen>
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
-                                    child: Text(
-                                      question.options[index],
-                                      style: GoogleFonts.poppins(
-                                        // Tibetan script needs more size
-                                        // than Latin to read comfortably.
-                                        fontSize:
-                                            question.hasTibetanOptions
-                                                ? 24
-                                                : 18,
-                                      ).copyWith(
-                                        fontFamilyFallback: const [
-                                          'Jomolhari',
-                                        ],
-                                      ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          question.options[index],
+                                          style: GoogleFonts.poppins(
+                                            // Tibetan script needs more size
+                                            // than Latin to read comfortably.
+                                            fontSize:
+                                                question.hasTibetanOptions
+                                                    ? 24
+                                                    : 18,
+                                          ).copyWith(
+                                            fontFamilyFallback: const [
+                                              'Jomolhari',
+                                            ],
+                                          ),
+                                        ),
+                                        if (question.showsRomanisation(
+                                          answered: showFeedback,
+                                        ))
+                                          RomanisationText(
+                                            question.optionRomanisation(index),
+                                            fontSize: 14,
+                                            textAlign: TextAlign.start,
+                                            alignment:
+                                                CrossAxisAlignment.start,
+                                          ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -833,9 +871,42 @@ class _QuizScreenState extends State<QuizScreen>
   String _instructionFor(QuizQuestion question) => switch (question.type) {
     QuizQuestion.pictureChoice => 'Which word matches the picture?',
     QuizQuestion.listening => 'What do you hear?',
+    QuizQuestion.reverseChoice when question.isScript =>
+      'Which one reads like this?',
     QuizQuestion.reverseChoice => 'How do you say this in Tibetan?',
+    _ when question.isScript => 'How do you read this?',
     _ => 'What does this mean?',
   };
+
+  /// Speaker button for the question's word plus the voice chip that changes
+  /// its dialect.
+  Widget _audioRow(QuizQuestion question, String audio, {double size = 28}) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 12,
+      runSpacing: 8,
+      children: [
+        SpeakerButton(url: audio, size: size),
+        VoiceChip(audioUrls: question.audioUrls, source: 'quiz'),
+      ],
+    );
+  }
+
+  /// The word's phonetics/Wylie; for script questions held back (keeping
+  /// its space) until the learner answers.
+  Widget _romanisationOf(QuizQuestion question) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Visibility(
+        visible: question.showsRomanisation(answered: showFeedback),
+        maintainSize: true,
+        maintainAnimation: true,
+        maintainState: true,
+        child: RomanisationText(question.romanisation, fontSize: 20),
+      ),
+    );
+  }
 
   /// The part of the question card under the instruction line: a picture,
   /// a speaker, an English word or a Tibetan word, by question kind.
@@ -844,7 +915,7 @@ class _QuizScreenState extends State<QuizScreen>
 
     if (question.type == QuizQuestion.listening && audio != null) {
       return [
-        SpeakerButton(url: audio, size: 56),
+        _audioRow(question, audio, size: 56),
         const SizedBox(height: 12),
         // The written word stays hidden until answered, so the question is
         // answered by ear.
@@ -853,10 +924,15 @@ class _QuizScreenState extends State<QuizScreen>
           maintainSize: true,
           maintainAnimation: true,
           maintainState: true,
-          child: Text(
-            question.tibetanText,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+          child: Column(
+            children: [
+              Text(
+                question.tibetanText,
+                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              RomanisationText(question.romanisation, fontSize: 18),
+            ],
           ),
         ),
       ];
@@ -875,7 +951,7 @@ class _QuizScreenState extends State<QuizScreen>
         ),
         if (showFeedback && audio != null) ...[
           const SizedBox(height: 12),
-          SpeakerButton(url: audio),
+          _audioRow(question, audio),
         ],
       ];
     }
@@ -912,20 +988,27 @@ class _QuizScreenState extends State<QuizScreen>
         ),
         if (showFeedback && audio != null) ...[
           const SizedBox(height: 8),
-          SpeakerButton(url: audio),
+          _audioRow(question, audio),
         ],
       ];
     }
 
     return [
+      // Tibetan is the hero of the card: larger than the English around it.
       Text(
         question.tibetanText,
-        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        style: AppTextStyles.poppins(
+          fontSize: Breakpoints.isTablet(context) ? 60 : 52,
+          fontWeight: FontWeight.w600,
+          height: 1.3,
+          color: AppTokens.ink(context),
+        ),
         textAlign: TextAlign.center,
       ),
+      _romanisationOf(question),
       if (audio != null) ...[
         const SizedBox(height: 12),
-        SpeakerButton(url: audio),
+        _audioRow(question, audio),
       ],
     ];
   }

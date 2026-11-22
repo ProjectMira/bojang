@@ -7,6 +7,7 @@ import '../../models/game_word.dart';
 import '../../services/sound_effects.dart';
 import '../../services/theme_service.dart';
 import '../../theme/app_tokens.dart';
+import '../../widgets/romanisation_text.dart';
 import '../../widgets/app_text_style.dart';
 import 'game_host.dart';
 import 'game_widgets.dart';
@@ -163,8 +164,9 @@ class _TrueFalseGameState extends State<TrueFalseGame> {
                         ),
                       ),
                     ),
+                    RomanisationText(_target.romanisation, fontSize: 16),
                     const SizedBox(height: 10),
-                    WordSpeaker(word: _target, size: 24),
+                    WordSpeaker(word: _target, size: 24, showVoice: true),
                     const SizedBox(height: 14),
                     Text(
                       'means',

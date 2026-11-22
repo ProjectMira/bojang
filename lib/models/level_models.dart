@@ -15,6 +15,9 @@ class Sublevel {
   /// picture quiz mode can be offered.
   final bool hasImages;
 
+  /// True for Basics lessons, which open teaching cards before practice.
+  final bool hasLesson;
+
   Sublevel({
     required this.level,
     required this.name,
@@ -25,7 +28,12 @@ class Sublevel {
     this.wordCount = -1,
     this.sentenceCount = -1,
     this.hasImages = false,
+    this.hasLesson = false,
   });
+
+  /// Backend level id for API topics (`api://level/<id>`), else null.
+  String? get levelId =>
+      path.startsWith('api://level/') ? path.substring('api://level/'.length) : null;
 
   bool get hasContent => wordCount != 0 || sentenceCount != 0;
 
@@ -52,6 +60,7 @@ class Sublevel {
       wordCount: json['word_count'] as int? ?? -1,
       sentenceCount: json['sentence_count'] as int? ?? -1,
       hasImages: json['has_images'] as bool? ?? false,
+      hasLesson: json['has_lesson'] as bool? ?? false,
     );
   }
 }
@@ -77,6 +86,7 @@ class Level {
 
   static List<Level> fromApiLevels(List<Map<String, dynamic>> apiLevels) {
     final grouped = <String, List<Map<String, dynamic>>>{};
+    final unitTitles = <String, String>{};
     for (final item in apiLevels) {
       // Skip topics with no content yet — sessions for them would fall back
       // to unrelated words.
@@ -85,6 +95,8 @@ class Level {
       if (wordCount == 0 && sentenceCount == 0) continue;
       final unit = (item['unit'] ?? 'Learning Path').toString();
       grouped.putIfAbsent(unit, () => []).add(item);
+      final unitTitle = item['unit_title']?.toString().trim() ?? '';
+      if (unitTitle.isNotEmpty) unitTitles.putIfAbsent(unit, () => unitTitle);
     }
 
     var index = 1;
@@ -94,7 +106,12 @@ class Level {
         final bOrder = b['order'] as int? ?? 0;
         return aOrder.compareTo(bOrder);
       });
-      final title = _formatUnitName(entry.key);
+      // The vocabulary unit's stored title is "Vocabulary Categories"; the
+      // app has always called it "Vocabulary".
+      final title =
+          entry.key == 'vocab-categories'
+              ? _formatUnitName(entry.key)
+              : unitTitles[entry.key] ?? _formatUnitName(entry.key);
       return Level(
         level: index++,
         title: title,

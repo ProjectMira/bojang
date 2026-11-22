@@ -10,6 +10,7 @@ import '../services/progress_service.dart';
 import '../services/api_service.dart';
 import '../services/google_auth_service.dart';
 import '../widgets/lesson_style_sheet.dart';
+import '../widgets/reading_voice_pickers.dart';
 import 'notification_settings_screen.dart';
 import 'auth_screen.dart';
 import '../widgets/content_width.dart';
@@ -99,6 +100,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       '${themeService.lessonStyle.title} · ${themeService.lessonStyle.subtitle}',
                   icon: lessonStyleIcon(themeService.lessonStyle),
                   onTap: () => showLessonStylePicker(context),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                ),
+
+                const SizedBox(height: 12),
+
+                _buildSettingsCard(
+                  title: 'Reading Help',
+                  subtitle:
+                      '${themeService.transliterationMode.title} · ${themeService.transliterationMode.subtitle}',
+                  icon: Icons.translate,
+                  onTap: () => showTransliterationPicker(context),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 ),
 
@@ -476,21 +488,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 16),
                   const Text('Pronunciation Voice'),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: themeService.pronunciationVoice,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      alignment: Alignment.centerLeft,
                     ),
-                    items: [
-                      for (final entry in PronunciationVoices.labels.entries)
-                        DropdownMenuItem(value: entry.key, child: Text(entry.value)),
-                    ],
-                    onChanged: (val) {
-                      if (val != null) {
-                        themeService.setPronunciationVoice(val);
-                      }
-                    },
+                    icon: const Icon(Icons.record_voice_over),
+                    label: Text(
+                      PronunciationVoices.labels[themeService.pronunciationVoice] ??
+                          themeService.pronunciationVoice,
+                    ),
+                    onPressed: () => showVoicePicker(context),
                   ),
                 ],
               ),

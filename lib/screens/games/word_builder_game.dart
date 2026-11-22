@@ -7,6 +7,7 @@ import '../../models/game_word.dart';
 import '../../services/sound_effects.dart';
 import '../../services/theme_service.dart';
 import '../../theme/app_tokens.dart';
+import '../../widgets/romanisation_text.dart';
 import '../../widgets/app_text_style.dart';
 import 'game_host.dart';
 import 'game_widgets.dart';
@@ -224,16 +225,7 @@ class _WordBuilderGameState extends State<WordBuilderGame> {
                     color: AppTokens.ink(context),
                   ),
                 ),
-                if (_target.phonetic.isNotEmpty)
-                  Text(
-                    _target.phonetic,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.poppins(
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
-                      color: AppTokens.inkSoft(context),
-                    ),
-                  ),
+                RomanisationText(_target.romanisation, fontSize: 15),
                 const SizedBox(height: 20),
                 Wrap(
                   alignment: WrapAlignment.center,

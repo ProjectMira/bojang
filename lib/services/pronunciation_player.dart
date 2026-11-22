@@ -3,24 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'analytics.dart';
 
+export 'pronunciation_voices.dart';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-
-/// TTS voices the backend publishes per word (`audio_urls` keys).
-class PronunciationVoices {
-  PronunciationVoices._();
-
-  static const String defaultVoice = 'lhasa_female';
-
-  /// Voice id -> label shown in Settings, in display order.
-  static const Map<String, String> labels = {
-    'lhasa_female': 'Lhasa · female',
-    'kham_male': 'Kham · male',
-  };
-}
 
 /// Plays word pronunciation recordings (Monlam TTS MP3s served from the
 /// backend's `audio_url`).

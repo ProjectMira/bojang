@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
 import '../services/analytics.dart';
 import '../services/api_service.dart';
+import 'package:provider/provider.dart';
+import '../services/pronunciation_player.dart';
+import '../services/theme_service.dart';
 import '../utils/topic_visuals.dart';
 import '../widgets/yak_mascot.dart';
 import '../widgets/yak_says.dart';
@@ -68,6 +71,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
 
   @override
   void dispose() {
+    PronunciationPlayer.instance.stop();
     if (_phase == _GamePhase.playing && !_roundFinished) {
       Analytics.track('game_quit', {
         'game': 'memory_match',
@@ -190,6 +194,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
       final phonetic = (pair['phonetic'] ?? '').toString();
       final imageUrl = pair['image_url']?.toString();
       final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+      final rawUrls = pair['audio_urls'];
       cards.add(
         MemoryCard(
           id: pairId * 2,
@@ -197,6 +202,16 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
           subtitle: '',
           type: CardType.tibetan,
           pairId: pairId,
+          audioUrls: {
+            if (rawUrls is Map)
+              for (final entry in rawUrls.entries)
+                if (entry.value != null && '${entry.value}'.isNotEmpty)
+                  '${entry.key}': '${entry.value}',
+          },
+          audioUrl:
+              (pair['audio_url']?.toString().isNotEmpty ?? false)
+                  ? pair['audio_url'].toString()
+                  : null,
         ),
       );
       cards.add(
@@ -223,6 +238,22 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
     });
   }
 
+  /// A flipped Tibetan card says its word in the learner's voice.
+  void _speak(MemoryCard card) {
+    if (card.type != CardType.tibetan) return;
+    final theme = context.read<ThemeService>();
+    final url = PronunciationVoices.pick(
+      card.audioUrls,
+      theme.pronunciationVoice,
+      fallbackUrl: card.audioUrl,
+    );
+    PronunciationPlayer.instance.play(
+      url,
+      volume: theme.pronunciationVolume,
+      source: 'memory_match',
+    );
+  }
+
   void _onCardTapped(int index) {
     if (!_canFlip || _cards[index].isFlipped || _cards[index].isMatched) {
       return;
@@ -231,6 +262,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
     setState(() {
       _cards[index].isFlipped = true;
     });
+    _speak(_cards[index]);
 
     if (_firstCardIndex == null) {
       _firstCardIndex = index;
@@ -813,6 +845,10 @@ class MemoryCard {
   final CardType type;
   final String? imageUrl;
   final int pairId;
+
+  /// Pronunciation of a Tibetan card: per voice, and the default voice.
+  final Map<String, String> audioUrls;
+  final String? audioUrl;
   bool isFlipped;
   bool isMatched;
 
@@ -823,6 +859,8 @@ class MemoryCard {
     required this.type,
     required this.pairId,
     this.imageUrl,
+    this.audioUrls = const {},
+    this.audioUrl,
     this.isFlipped = false,
     this.isMatched = false,
   });

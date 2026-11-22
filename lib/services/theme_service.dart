@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../models/lesson_style.dart';
+import '../models/romanisation.dart';
 import 'analytics.dart';
 import 'pronunciation_player.dart';
 
@@ -32,6 +33,7 @@ class ThemeService extends ChangeNotifier {
       'language': _currentLanguage,
       'lesson_style': _lessonStyle.name,
       'voice': _pronunciationVoice,
+      'transliteration': _transliterationMode.name,
       'sound_effects': _soundEffectsEnabled,
       'daily_target': _dailyQuizTarget,
       'weekly_goal': _weeklyGoal,
@@ -51,6 +53,7 @@ class ThemeService extends ChangeNotifier {
   static const String _dailyQuizTargetKey = 'daily_quiz_target';
   static const String _weeklyGoalKey = 'weekly_goal';
   static const String _lessonStyleKey = 'lesson_style';
+  static const String _transliterationModeKey = 'transliteration_mode';
 
   bool _isDarkMode = false;
   String _currentLanguage = 'English';
@@ -63,6 +66,7 @@ class ThemeService extends ChangeNotifier {
   int _dailyQuizTarget = 1;
   int _weeklyGoal = 5;
   LessonStyle _lessonStyle = LessonStyle.mixed;
+  TransliterationMode _transliterationMode = TransliterationMode.defaultMode;
 
   bool get isDarkMode => _isDarkMode;
   String get currentLanguage => _currentLanguage;
@@ -75,6 +79,7 @@ class ThemeService extends ChangeNotifier {
   int get dailyQuizTarget => _dailyQuizTarget;
   int get weeklyGoal => _weeklyGoal;
   LessonStyle get lessonStyle => _lessonStyle;
+  TransliterationMode get transliterationMode => _transliterationMode;
   
   ThemeService() {
     _loadThemePreference();
@@ -95,6 +100,9 @@ class ThemeService extends ChangeNotifier {
     _dailyQuizTarget = prefs.getInt(_dailyQuizTargetKey) ?? 1;
     _weeklyGoal = prefs.getInt(_weeklyGoalKey) ?? 5;
     _lessonStyle = LessonStyle.fromId(prefs.getString(_lessonStyleKey));
+    _transliterationMode = TransliterationMode.fromId(
+      prefs.getString(_transliterationModeKey),
+    );
     _reportLoadedSettings();
     notifyListeners();
   }
@@ -121,6 +129,14 @@ class ThemeService extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_lessonStyleKey, value.name);
+  }
+
+  Future<void> setTransliterationMode(TransliterationMode value) async {
+    _transliterationMode = value;
+    _reportSetting('transliteration', value.name);
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_transliterationModeKey, value.name);
   }
 
   Future<void> setSoundEffectsEnabled(bool value) async {

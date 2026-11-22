@@ -1,3 +1,6 @@
+import '../services/pronunciation_voices.dart';
+import 'romanisation.dart';
+
 /// One vocabulary word as the games use it: the Tibetan, its meaning, and
 /// whatever picture and recordings the backend has for it.
 class GameWord {
@@ -5,6 +8,7 @@ class GameWord {
   final String tibetan;
   final String english;
   final String phonetic;
+  final String wylie;
   final String? imageUrl;
   final String? audioUrl;
 
@@ -16,16 +20,27 @@ class GameWord {
     required this.tibetan,
     required this.english,
     this.phonetic = '',
+    this.wylie = '',
     this.imageUrl,
     this.audioUrl,
     this.audioUrls = const {},
   });
 
+  Romanisation get romanisation =>
+      Romanisation(phonetic: phonetic, wylie: wylie);
+
   bool get hasImage => imageUrl != null;
   bool get hasAudio => audioUrl != null || audioUrls.isNotEmpty;
 
-  /// Recording in [voice], falling back to the default voice.
-  String? audioFor(String voice) => audioUrls[voice] ?? audioUrl;
+  /// Recording in [voice], falling back to another voice of the same
+  /// dialect, then the default voice (see [PronunciationVoices.pick]).
+  String? audioFor(String voice) =>
+      PronunciationVoices.pick(audioUrls, voice, fallbackUrl: audioUrl);
+
+  /// The voice [audioFor] actually uses, or null for the plain default
+  /// `audio_url` (or no recording).
+  String? voiceFor(String voice) =>
+      PronunciationVoices.resolve(audioUrls, voice);
 
   /// The word's syllables: Tibetan separates them with a tsheg (་) and ends
   /// a word with a shad (།). `ཆུ་ག་གོན།` is `[ཆུ, ག, གོན]`.
@@ -58,6 +73,7 @@ class GameWord {
       tibetan: tibetan,
       english: english,
       phonetic: _text(json['phonetic']) ?? '',
+      wylie: _text(json['wylie']) ?? '',
       imageUrl: _text(json['image_url']),
       audioUrl: _text(json['audio_url']),
       audioUrls: urls,

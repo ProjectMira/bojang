@@ -7,6 +7,7 @@ import '../../models/game_word.dart';
 import '../../services/sound_effects.dart';
 import '../../services/theme_service.dart';
 import '../../theme/app_tokens.dart';
+import '../../widgets/romanisation_text.dart';
 import '../../widgets/app_text_style.dart';
 import 'game_host.dart';
 import 'game_widgets.dart';
@@ -240,17 +241,23 @@ class _PromptWord extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          word.tibetan,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.poppins(
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-            color: AppTokens.ink(context),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              word.tibetan,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.poppins(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: AppTokens.ink(context),
+              ),
+            ),
           ),
-        ),
+          RomanisationText(word.romanisation, fontSize: 15),
+        ],
       ),
     );
   }
