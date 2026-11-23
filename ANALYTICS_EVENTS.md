@@ -101,7 +101,7 @@ deletes its rows.
 | `account_linked` | firebase_account_link | `provider`, `outcome` (linked/switched_to_existing/signed_in) |
 | `signed_out` | profile | |
 | `account_deletion_started` / `account_deletion_cancelled` / `account_deleted` / `account_deletion_failed` | settings | `step` |
-| `tab_selected` | main nav | `tab` (home/streak/games/profile), `from_tab` |
+| `tab_selected` | main nav | `tab` (home/practice/games/profile; `streak` before the Practice tab replaced it), `from_tab`, `via` |
 | `home_shortcut_tapped` | home | `shortcut` (see_all_categories/topic/memory_match/hero/streak/share), `topic`, `position` |
 | `app_shared` | home | |
 | `levels_loaded` | level selection | `level_count`, `source` (api/bundled), `error` |
@@ -173,6 +173,16 @@ deletes its rows.
 | `force_update_shown` | update gate (iOS, Android) | `installed_version`, `store_version` (empty for a server wall), `reason` (`storeRelease`: newer App Store version; `belowMinimumBuild`: below `/v1/config` `min_supported_build`) |
 | `force_update_tapped` | update gate (iOS, Android) | `installed_version`, `store_version`, `reason`, `opened` (bool: store app or web page opened) |
 | `experiment_exposed` | `Experiments.exposed` / `ExperimentExposure` (any screen) | `experiment` (`exp_*` key or PostHog flag), `arm`, `surface` (where it was shown), `source` (`remote_config`/`posthog`) |
+| `path_loaded` | home (learning path) | `units`, `active_node_id`, `daily_sessions`, `daily_goal` |
+| `path_step_started` | home / learn path | `node_id` (`lesson:<level>`, `practice:<unit>`, `unit_review:<unit>`, `alphabet_gate:script`, ...), `type`, `state` (active/unlocked/passed), `unit`, `session` (1-based), `total_sessions`, `source` (home_path/learn_path) |
+| `path_locked_tapped` | home / learn path | `node_id`, `type`, `active_node_id`, `source` |
+| `path_gate_skipped` | reading-check placeholder | `source` |
+| `learn_mode_switched` | learn screen | `mode` (path/topics) |
+| `streak_sheet_opened` | home top bar flame, classic stats strip | `source` (home_top_bar/home_stats) |
+| `streak_details_opened` | streak sheet | `source` |
+| `daily_goal_tapped` | home top bar | `sessions`, `goal` |
+| `review_loaded` | Practice tab | `words`, `mistakes`, `weak`, `offline` |
+| `review_started` | Practice tab | `words`, `source` |
 
 ## Experiments: assignment is not exposure
 
@@ -224,6 +234,12 @@ app sent answers: `server_graded`, `client_trusted`, `grading_mismatches`,
 `unknown_answers`, `recycled`, `fixed`, `adaptive_correct`),
 `server_earn_back_started` (`streak`, `expires_at`, `sessions_done`) and
 `server_earn_back_completed` (`streak`, `repaired_days`).
+`server_session_issued` sessions from `/learn/session` now carry the path
+node in `learning_sessions.path_node_id`. `server_review_session_issued`
+(`session_id`, `node_id` null for the Practice tab, `words`, `flagged`) and
+`server_path_node_completed` (`node_id`, `counted`, `state`,
+`finished_sessions`) cover review sessions and routed path nodes
+(alphabet, reading check, dialogue).
 
 Every answer of a graded lesson is also a row in the backend's
 `exercise_responses` table (not an event): exercise id and type, word

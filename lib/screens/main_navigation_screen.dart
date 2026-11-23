@@ -7,6 +7,7 @@ import '../services/push_service.dart';
 import '../theme/app_tokens.dart';
 import '../theme/motion.dart';
 import 'home_page.dart';
+import 'practice_screen.dart';
 import 'streak_view_screen.dart';
 import 'extra_games_screen.dart';
 import 'profile_screen.dart';
@@ -21,7 +22,11 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  static const _tabNames = ['home', 'streak', 'games', 'profile'];
+  // The Streak tab became Practice (plan item #18); the streak lives in
+  // Home's top bar now.
+  static const _tabNames = ['home', 'practice', 'games', 'profile'];
+
+  final GlobalKey<PracticeScreenState> _practiceKey = GlobalKey();
 
   @override
   void initState() {
@@ -43,6 +48,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final screen = PushService.requestedScreen.value;
     if (screen == null || !mounted) return;
     PushService.requestedScreen.value = null;
+    if (screen == 'streak') {
+      // Streak pushes used to open the Streak tab.
+      _selectTab(0, via: 'push');
+      Navigator.of(context).push(
+        screenRoute('streak', (_) => const StreakViewScreen()),
+      );
+      return;
+    }
     final index = _tabNames.indexOf(screen);
     if (index >= 0) _selectTab(index, via: 'push');
   }
@@ -56,14 +69,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       });
       Analytics.screen('tab_${_tabNames[index]}');
     }
+    final changed = index != _currentIndex;
     setState(() => _currentIndex = index);
+    // New mistakes from lessons since the tab was last shown.
+    if (changed && _tabNames[index] == 'practice') {
+      _practiceKey.currentState?.reload();
+    }
   }
 
-  void _goToStreak() => _selectTab(1, via: 'home_streak_card');
-
-  List<Widget> get _screens => [
-    HomePage(onSeeStreak: _goToStreak),
-    const StreakViewScreen(),
+  late final List<Widget> _screens = [
+    const HomePage(),
+    PracticeScreen(key: _practiceKey),
     const ExtraGamesScreen(),
     const ProfileScreen(),
   ];
@@ -71,9 +87,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   static const List<_TabSpec> _tabs = [
     _TabSpec('Home', Icons.home_rounded, Icons.home_outlined, AppColors.primary),
     _TabSpec(
-      'Streak',
-      Icons.local_fire_department_rounded,
-      Icons.local_fire_department_outlined,
+      'Practice',
+      Icons.fitness_center_rounded,
+      Icons.fitness_center_outlined,
       AppColors.orange,
     ),
     _TabSpec('Games', Icons.sports_esports_rounded, Icons.sports_esports_outlined, AppColors.purple),

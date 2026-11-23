@@ -4,15 +4,22 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:bojang/screens/main_navigation_screen.dart';
+import 'package:bojang/services/learning_path_repository.dart';
 import 'package:bojang/services/google_auth_service.dart';
 import 'package:bojang/services/progress_service.dart';
 import 'package:bojang/services/theme_service.dart';
 
-/// Smoke test: the four main tabs render without throwing.
+/// Smoke test: the four main tabs (Home, Practice, Games, Profile) render
+/// without throwing.
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    // Offline: no path, no review words.
+    LearningPathRepository.fetchPath = () async => null;
+    LearningPathRepository.fetchReview = () async => null;
   });
+
+  tearDown(LearningPathRepository.debugReset);
 
   Future<void> pumpApp(WidgetTester tester) async {
     await tester.pumpWidget(
@@ -29,23 +36,44 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
   }
 
-  testWidgets('home tab shows the lesson hero as primary CTA', (tester) async {
+  testWidgets('home tab without a path shows the top bar and lesson hero', (tester) async {
     await pumpApp(tester);
 
     expect(find.text('Start a Lesson'), findsOneWidget);
-    expect(find.text('Ready for Tibetan?'), findsOneWidget);
+    // The top bar: streak, daily goal ring, voice chip.
+    expect(find.bySemanticsLabel(RegExp('day streak')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Daily goal')), findsOneWidget);
     expect(find.text('Cultural Tip'), findsOneWidget);
   });
 
-  testWidgets('streak tab renders habit view', (tester) async {
+  testWidgets('practice tab replaces the streak tab', (tester) async {
     await pumpApp(tester);
-    // 'Streak' also appears in the home stats row; the nav item renders last.
-    await tester.tap(find.text('Streak').last);
+    expect(find.text('Streak'), findsNWidgets(1)); // the home stats row only
+    await tester.tap(find.text('Practice'));
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.text('This Week'), findsOneWidget);
-    expect(find.text('Next Milestone'), findsOneWidget);
-    expect(find.text('Practice Now'), findsOneWidget);
+    // Offline and signed out: the review explains itself and offers a retry.
+    expect(find.text('Review needs an account'), findsOneWidget);
+    expect(find.text('Retry'), findsOneWidget);
+  });
+
+  testWidgets('practice tab shows the words to review', (tester) async {
+    LearningPathRepository.fetchReview = () async => {
+      'word_count': 2,
+      'mistake_count': 1,
+      'weak_count': 1,
+      'words': [
+        {'lexeme_id': 'w1', 'tibetan': 'ཁ་ལག', 'english': 'food', 'label': 'mistake'},
+        {'lexeme_id': 'w2', 'tibetan': 'ཆུ', 'english': 'water', 'label': 'weak'},
+      ],
+    };
+    await pumpApp(tester);
+    await tester.tap(find.text('Practice'));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('2 words to review'), findsOneWidget);
+    expect(find.text('Start review'), findsOneWidget);
+    expect(find.text('food'), findsOneWidget);
   });
 
   testWidgets('games tab lists only playable games', (tester) async {

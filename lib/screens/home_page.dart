@@ -1,30 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../models/learning_path.dart';
 import '../models/level_models.dart';
 import '../services/analytics.dart';
 import '../services/api_service.dart';
+import '../services/feature_flags.dart';
+import '../services/learning_path_repository.dart';
 import '../services/levels_repository.dart';
 import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
+import '../theme/motion.dart';
 import '../utils/topic_visuals.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/announcement_banner.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/cultural_tip_card.dart';
 import '../widgets/earn_back_card.dart';
+import '../widgets/home_top_bar.dart';
+import '../widgets/learning_path_view.dart';
 import '../widgets/section_header.dart';
 import '../widgets/shortcut_card.dart';
 import '../widgets/stat_strip.dart';
 import '../widgets/yak_says.dart';
 import 'level_selection_screen.dart';
+import 'path_navigation.dart';
 import 'memory_match_game.dart';
 import 'lesson_intro_screen.dart';
 import '../widgets/content_width.dart';
 
+/// Home: the status bar (streak, daily goal, voice) and the learning path
+/// (GET /learn/path). With the `learning_path_enabled` flag off, or before
+/// any path has ever loaded, it shows the classic topic shortcuts instead.
 class HomePage extends StatefulWidget {
-  /// Switches the bottom nav to the Streak tab. Provided by
-  /// [MainNavigationScreen]; left null when HomePage is used standalone.
+  /// Opens the streak screen from the stats strip of the classic Home.
+  /// Left null to open the streak sheet.
   final VoidCallback? onSeeStreak;
 
   const HomePage({super.key, this.onSeeStreak});
@@ -40,6 +50,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   List<Level> _levels = [];
   bool _levelsLoading = true;
 
+  LearningPath? _path;
+  bool _pathEnabled = LearningPathRepository.enabled;
+  final GlobalKey _activeKey = GlobalKey();
+  bool _scrolledToActive = false;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +69,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     _animationController.forward();
     _loadShortcutTopics();
+    _loadPath();
+    FeatureFlags.instance.changes.addListener(_onFlagsChanged);
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _refreshServerProgress(),
     );
@@ -75,6 +92,72 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         listen: false,
       ).updateFromServer(stats);
     }
+  }
+
+  void _onFlagsChanged() {
+    final enabled = LearningPathRepository.enabled;
+    if (enabled == _pathEnabled || !mounted) return;
+    setState(() => _pathEnabled = enabled);
+    if (enabled) _loadPath();
+  }
+
+  Future<void> _loadPath() async {
+    if (!_pathEnabled) return;
+    final path = await LearningPathRepository.load();
+    if (!mounted) return;
+    setState(() => _path = path);
+    if (path != null) {
+      Analytics.track('path_loaded', {
+        'units': path.units.length,
+        'active_node_id': path.activeNodeId,
+        'daily_sessions': path.daily?.sessions,
+        'daily_goal': path.daily?.goal,
+      });
+      _scrollToActiveOnce();
+    }
+  }
+
+  void _scrollToActiveOnce() {
+    if (_scrolledToActive) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target = _activeKey.currentContext;
+      if (target == null || !mounted) return;
+      _scrolledToActive = true;
+      Scrollable.ensureVisible(
+        target,
+        alignment: 0.35,
+        duration: Motion.read(context).scale(const Duration(milliseconds: 450)),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  Future<void> _openNode(PathNode node) async {
+    final path = _path;
+    await openPathNode(
+      context,
+      node,
+      source: 'home_path',
+      unit: path?.unitOf(node),
+    );
+    if (!mounted) return;
+    await _loadPath();
+    await _refreshServerProgress();
+  }
+
+  void _showLocked(PathNode node) {
+    final path = _path;
+    if (path == null) return;
+    showLockedNode(
+      context,
+      path,
+      node,
+      source: 'home_path',
+      onGoToActive: () {
+        final active = path.activeNode;
+        if (active != null) _openNode(active);
+      },
+    );
   }
 
   Future<void> _loadShortcutTopics() async {
@@ -111,6 +194,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    FeatureFlags.instance.changes.removeListener(_onFlagsChanged);
     _animationController.dispose();
     super.dispose();
   }
@@ -119,71 +203,89 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Consumer<ProgressService>(
       builder: (context, progressService, child) {
+        final path = _pathEnabled ? _path : null;
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: ContentWidth(
+            // iPad: the path is a centred column, not the full width.
+            maxWidth: path != null ? 640 : ContentWidth.standard,
             child: SafeArea(
               child: FadeTransition(
                 opacity: _fadeAnimation,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.gutter,
-                    vertical: AppSpacing.lg,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(context, progressService),
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await _loadPath();
+                    await _refreshServerProgress();
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.gutter,
+                      vertical: AppSpacing.lg,
+                    ),
+                    child:
+                        path != null
+                            ? _buildPathHome(context, progressService, path)
+                            : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                HomeTopBar(daily: _path?.daily),
 
-                      const SizedBox(height: AppSpacing.xl),
+                                const SizedBox(height: AppSpacing.lg),
 
-                      const AnnouncementBanner(),
+                                _buildHeader(context, progressService),
 
-                      _buildStatsStrip(context, progressService),
+                                const SizedBox(height: AppSpacing.xl),
 
-                      _buildEarnBack(context, progressService),
+                                const AnnouncementBanner(),
 
-                      const SizedBox(height: AppSpacing.section),
+                                _buildStatsStrip(context, progressService),
 
-                      SectionHeader(
-                        title: 'Categories',
-                        actionLabel: 'See all',
-                        onAction: () {
-                          Analytics.track('home_shortcut_tapped', {
-                            'shortcut': 'see_all_categories',
-                          });
-                          Navigator.push(
-                            context,
-                            screenRoute(
-                              'level_selection',
-                              (context) => const LevelSelectionScreen(),
+                                _buildEarnBack(context, progressService),
+
+                                const SizedBox(height: AppSpacing.section),
+
+                                SectionHeader(
+                                  title: 'Categories',
+                                  actionLabel: 'See all',
+                                  onAction: () {
+                                    Analytics.track('home_shortcut_tapped', {
+                                      'shortcut': 'see_all_categories',
+                                    });
+                                    Navigator.push(
+                                      context,
+                                      screenRoute(
+                                        'level_selection',
+                                        (context) =>
+                                            const LevelSelectionScreen(),
+                                      ),
+                                    );
+                                  },
+                                ),
+
+                                const SizedBox(height: AppSpacing.md),
+
+                                _buildShortcutGrid(context),
+
+                                const SizedBox(height: AppSpacing.section),
+
+                                _buildStartLessonHero(context, progressService),
+
+                                const SizedBox(height: AppSpacing.section),
+
+                                const SectionHeader(title: 'Cultural Tip'),
+
+                                const SizedBox(height: AppSpacing.md),
+
+                                _buildCulturalTip(),
+
+                                const SizedBox(height: AppSpacing.section),
+
+                                _buildShareButton(context),
+
+                                const SizedBox(height: AppSpacing.lg),
+                              ],
                             ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: AppSpacing.md),
-
-                      _buildShortcutGrid(context),
-
-                      const SizedBox(height: AppSpacing.section),
-
-                      _buildStartLessonHero(context, progressService),
-
-                      const SizedBox(height: AppSpacing.section),
-
-                      const SectionHeader(title: 'Cultural Tip'),
-
-                      const SizedBox(height: AppSpacing.md),
-
-                      _buildCulturalTip(),
-
-                      const SizedBox(height: AppSpacing.section),
-
-                      _buildShareButton(context),
-
-                      const SizedBox(height: AppSpacing.lg),
-                    ],
                   ),
                 ),
               ),
@@ -191,6 +293,49 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
         );
       },
+    );
+  }
+
+  /// Home with the learning path: status bar, notices, then the path.
+  Widget _buildPathHome(
+    BuildContext context,
+    ProgressService progressService,
+    LearningPath path,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        HomeTopBar(daily: path.daily),
+        const SizedBox(height: AppSpacing.lg),
+        const AnnouncementBanner(),
+        _buildEarnBack(context, progressService),
+        const SizedBox(height: AppSpacing.lg),
+        LearningPathView(
+          path: path,
+          activeKey: _activeKey,
+          onOpen: _openNode,
+          onLocked: _showLocked,
+        ),
+        Center(
+          child: TextButton.icon(
+            onPressed: () {
+              Analytics.track('home_shortcut_tapped', {
+                'shortcut': 'all_topics',
+              });
+              Navigator.push(
+                context,
+                screenRoute(
+                  'level_selection',
+                  (context) => const LevelSelectionScreen(initialTopics: true),
+                ),
+              );
+            },
+            icon: const Icon(Icons.grid_view_rounded),
+            label: const Text('Browse all topics'),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+      ],
     );
   }
 
@@ -220,13 +365,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final hasLessons = progressService.completedLevelsCount > 0;
 
     return StatStrip(
-      onTap:
-          widget.onSeeStreak == null
-              ? null
-              : () {
-                Analytics.track('home_shortcut_tapped', {'shortcut': 'streak'});
-                widget.onSeeStreak!();
-              },
+      onTap: () {
+        Analytics.track('home_shortcut_tapped', {'shortcut': 'streak'});
+        final open = widget.onSeeStreak;
+        open != null ? open() : showStreakSheet(context, source: 'home_stats');
+      },
       items: [
         StatStripItem(
           icon: Icons.local_fire_department,

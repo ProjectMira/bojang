@@ -475,6 +475,56 @@ class ApiService {
   }
 
   // =====================================================
+  // LEARNING PATH AND REVIEW (plan items #5, #18)
+  // =====================================================
+
+  /// `GET /learn/path`: units -> nodes with state and session ring, plus
+  /// today's sessions toward the daily goal.
+  Future<Map<String, dynamic>?> getLearningPath() async {
+    final offset = DateTime.now().timeZoneOffset.inMinutes;
+    return _get(
+      'learn/path',
+      queryParameters: {'tz_offset_minutes': offset.toString()},
+    );
+  }
+
+  /// `GET /learn/review`: the learner's mistake and weak words.
+  Future<Map<String, dynamic>?> getReviewSummary() async {
+    return _get('learn/review');
+  }
+
+  /// `GET /learn/review/session`: a lesson session from the review words,
+  /// or from a practice / unit review node's unit with [nodeId].
+  Future<Map<String, dynamic>?> getReviewSession({
+    String? nodeId,
+    int numQuestions = 10,
+    List<String>? supportedTypes,
+  }) async {
+    return _get(
+      'learn/review/session',
+      queryParameters: {
+        'num_questions': numQuestions.toString(),
+        if (nodeId != null) 'node_id': nodeId,
+        if (supportedTypes != null && supportedTypes.isNotEmpty)
+          'supported_types': supportedTypes.join(','),
+      },
+    );
+  }
+
+  /// `POST /learn/path/nodes/{id}/complete`: one session of a routed node
+  /// (alphabet, reading check, dialogue). Returns the updated node.
+  Future<Map<String, dynamic>?> completePathNode(
+    String nodeId, {
+    int? correct,
+    int? total,
+  }) async {
+    return _post('learn/path/nodes/${Uri.encodeComponent(nodeId)}/complete', {
+      if (correct != null) 'correct': correct,
+      if (total != null) 'total': total,
+    });
+  }
+
+  // =====================================================
   // UTILITY METHODS
   // =====================================================
 
