@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'screens/dialogue_player_screen.dart';
 import 'screens/path_navigation.dart';
 import 'screens/splash_screen.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
@@ -87,7 +88,7 @@ Route<dynamic>? appOnGenerateRoute(RouteSettings settings) {
   if (scriptBuilder != null) {
     return MaterialPageRoute(builder: scriptBuilder, settings: settings);
   }
-  return null;
+  return DialoguePlayerScreen.onGenerateRoute(settings);
 }
 
 class MyApp extends StatelessWidget {
@@ -111,8 +112,8 @@ class MyApp extends StatelessWidget {
             themeMode:
                 themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             home: const SplashScreen(),
-            // One route chain: learning-path node routes, then the script
-            // course.
+            // One route chain: learning-path node routes, the script course
+            // and /dialogue/<id>.
             onGenerateRoute: appOnGenerateRoute,
             // Above the navigator, so an out-of-date install cannot get
             // past the update notice by any route, and every tap, swipe and
