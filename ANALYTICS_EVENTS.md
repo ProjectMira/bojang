@@ -163,6 +163,21 @@ deletes its rows.
 | `notification_opened` | push service (any push tapped) | `campaign` (`streak_at_risk`, `streak_saver`, or an admin campaign), `kind` (`reminder`/`streak_saver`), `state` (`not_started`/`evening`/`late`/`frozen`/`earn_back`), `line_id` (copy line, e.g. `ev_03`), `notification_id`. Compare open rates per `line_id` against the backend's `server_push_sent` |
 | `notification_primer_shown` | notification primer (the first session-end ask, after the streak celebration; games and speed quiz call it directly) | `moment` (`streak`/`freeze`), `ask` (1-3; at most 3 asks, 3+ days apart, only while the OS prompt can still be shown) |
 | `notification_primer_answered` | notification primer | `moment`, `ask`, `choice` (`turn_on`/`maybe_later`) |
+| `onboarding_started` | onboarding (new installs only; kill switch `onboarding`) | — |
+| `onboarding_step_viewed` | onboarding, each step shown (funnel and drop-off) | `step` (`hello`/`motivation`/`knowledge`/`voice`/`goal`/`notifications`), `index`, `count`, `ms` since start |
+| `onboarding_answered` | onboarding, one-tap answer | `step`, `answer` (motivation `heritage`/`buddhist`/`travel`/`curious`; knowledge `none`/`speak_some`/`can_read`/`conversational`; voice id; goal lessons a day 1/2/3/5; notifications `turn_on`/`maybe_later`; hello `start`) |
+| `onboarding_back` | onboarding, Back (button or system back) | `step` left, `index`, `count`, `ms` |
+| `onboarding_skipped` | onboarding, Skip (leaves for Home with defaults) | `step`, `index`, `count`, `ms` |
+| `onboarding_backgrounded` | onboarding, app left the foreground mid-flow (drop-off) | `step`, `index`, `count`, `ms` |
+| `onboarding_restarted` | splash, a previous onboarding was left unfinished and starts again | `last_step` |
+| `onboarding_completed` / `onboarding_exited` | onboarding finished / skipped | `motivation`, `prior_knowledge`, `voice`, `daily_goal`, `start_level` (placement), `start_level_found`, `last_step`, `ms` |
+| `onboarding_first_lesson_opened` | onboarding, straight into the placed lesson | `start_level` |
+| `save_progress_shown` | session-end ask #2 "Save your progress" (anonymous learners; max 3, 4+ days apart; kill switch `account_linking`) | `moment` (`firstLesson`/`streak`/`later`), `ask`, `lessons_completed`, `streak` |
+| `save_progress_answered` | save progress sheet | `moment`, `ask`, `choice` (`save`/`not_now`) |
+| `save_progress_result` | after the account screen closes | `moment`, `ask`, `saved` |
+| `reading_help_new_words_only_changed` | Settings > Reading help switch, or the wean-off sheet | `enabled`, `source` (`settings`/`wean_off`) |
+| `reading_help_wean_off_shown` | session-end ask (last), once ever, after 20 right in a row with reading help shown | `run`, `mode`, `new_words_only` |
+| `reading_help_wean_off_answered` | wean-off sheet | `choice` (`off`/`new_words`/`keep`) |
 | `location_prompt_shown` / `location_prompt_answered` | lesson complete (first lesson, once) | `source`, `share` |
 | `location_sharing_changed` | location service | `enabled`, `permission`, `source` (settings/lesson_complete) |
 | `location_shared` | location service (at most daily) | `approx_lat`, `approx_lon` (rounded to 0.1°, ~10 km), `accuracy_km`, `country`, `country_code`, `region`, `city`; also set as `location_*` person properties |

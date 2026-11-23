@@ -12,9 +12,21 @@ import 'main_navigation_screen.dart';
 import '../widgets/content_width.dart';
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key, this.authService});
+  const AuthScreen({
+    super.key,
+    this.authService,
+    this.returnWhenDone = false,
+    this.startCreatingAccount = false,
+  });
 
   final GoogleAuthService? authService;
+
+  /// Opened on top of the app (the "save your progress" ask): pop back with
+  /// true when signed in, false when skipped, instead of opening Home.
+  final bool returnWhenDone;
+
+  /// Opens on the create-account form rather than sign-in.
+  final bool startCreatingAccount;
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -47,6 +59,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _isCreatingAccount = widget.startCreatingAccount;
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -322,6 +335,10 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
   void _navigateToMainScreen({String reason = 'skipped'}) {
     if (reason == 'skipped') Analytics.track('auth_skipped', {'mode': _mode});
+    if (widget.returnWhenDone) {
+      Navigator.of(context).pop(reason == 'signed_in');
+      return;
+    }
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         settings: const RouteSettings(name: 'main'),
