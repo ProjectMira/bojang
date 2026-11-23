@@ -902,7 +902,8 @@ class _ChoiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onTap != null;
-    final accent = AppTokens.accent(hue, context);
+    // On its own tint the face can be too light (yellow): use the text step.
+    final accent = AppTokens.isDark(context) ? hue.night : hue.textOnTint;
     final blue = AppTokens.accent(AppPalette.blue, context);
     return Semantics(
       button: true,
