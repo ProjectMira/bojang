@@ -6,7 +6,11 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  Future<void> pumpCalendar(WidgetTester tester, List<String> playDates) async {
+  Future<void> pumpCalendar(
+    WidgetTester tester,
+    List<String> playDates, {
+    bool showAppBar = true,
+  }) async {
     SharedPreferences.setMockInitialValues({'play_dates': playDates});
     final progress = ProgressService(
       isSignedIn: () => false,
@@ -16,7 +20,10 @@ void main() {
       ChangeNotifierProvider.value(
         value: progress,
         child: MaterialApp(
-          home: StreakCalendarScreen(now: DateTime(2026, 11, 21, 15)),
+          home: StreakCalendarScreen(
+            now: DateTime(2026, 11, 21, 15),
+            showAppBar: showAppBar,
+          ),
         ),
       ),
     );
@@ -68,5 +75,17 @@ void main() {
     await tester.tap(find.byTooltip('Next month'));
     await tester.pumpAndSettle();
     expect(find.text('November 2026'), findsOneWidget);
+  });
+
+  testWidgets('embedded in the streak sheet it shows no header of its own', (
+    tester,
+  ) async {
+    await pumpCalendar(tester, const [], showAppBar: false);
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.text('Streak Calendar'), findsNothing);
+    expect(find.text('November 2026'), findsOneWidget);
+
+    await pumpCalendar(tester, const []);
+    expect(find.text('Streak Calendar'), findsOneWidget);
   });
 }

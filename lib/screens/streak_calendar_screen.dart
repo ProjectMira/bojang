@@ -17,10 +17,14 @@ import '../widgets/streak_day_bubble.dart';
 /// number): research on streaks finds a highlighted break discourages
 /// learners more than no record at all.
 class StreakCalendarScreen extends StatefulWidget {
-  const StreakCalendarScreen({super.key, this.now});
+  const StreakCalendarScreen({super.key, this.now, this.showAppBar = true});
 
   /// Overrides "today" in tests.
   final DateTime? now;
+
+  /// False when embedded under another header (the Home top bar's streak
+  /// sheet), so only one header shows.
+  final bool showAppBar;
 
   @override
   State<StreakCalendarScreen> createState() => _StreakCalendarScreenState();
@@ -74,18 +78,21 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
 
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: AppBar(
-            title: Text(
-              'Streak Calendar',
-              style: GoogleFonts.poppins(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-            ),
-            backgroundColor: Theme.of(context).primaryColor,
-            foregroundColor: Colors.white,
-            elevation: 0,
-          ),
+          appBar:
+              widget.showAppBar
+                  ? AppBar(
+                    title: Text(
+                      'Streak Calendar',
+                      style: GoogleFonts.poppins(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+                    ),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                  )
+                  : null,
           body: ContentWidth(
             maxWidth: ContentWidth.reading,
             child: GestureDetector(
@@ -100,7 +107,13 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _summary(context, calendar, isDark, titleColor, subtleColor),
+                    _summary(
+                      context,
+                      calendar,
+                      isDark,
+                      titleColor,
+                      subtleColor,
+                    ),
                     const SizedBox(height: 16),
                     _card(
                       context,
@@ -182,7 +195,10 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('$value', style: _poppins(22, FontWeight.bold, titleColor)),
+                    Text(
+                      '$value',
+                      style: _poppins(22, FontWeight.bold, titleColor),
+                    ),
                     Text(
                       label,
                       style: _poppins(12, FontWeight.w500, subtleColor),
@@ -317,7 +333,10 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
         cells[i] != null &&
         calendar.isInStreak(cells[i]!);
     bool perfectAt(int i) =>
-        i >= 0 && i < cells.length && cells[i] != null && calendar.isPerfect(cells[i]!);
+        i >= 0 &&
+        i < cells.length &&
+        cells[i] != null &&
+        calendar.isPerfect(cells[i]!);
     final joinLeft = inStreak && col > 0 && inStreakAt(index - 1);
     final joinRight = inStreak && col < 6 && inStreakAt(index + 1);
     // Full-height and solid, so a run of days reads as one pill. A perfect
@@ -436,20 +455,20 @@ class _StreakCalendarScreenState extends State<StreakCalendarScreen> {
       label: 'Gold band: a perfect week, 7 days in a row with no freeze',
       excludeSemantics: true,
       child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 40,
-          height: 16,
-          decoration: BoxDecoration(
-            color: StreakColors.perfect,
-            borderRadius: BorderRadius.circular(8),
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 16,
+            decoration: BoxDecoration(
+              color: StreakColors.perfect,
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ),
-        const SizedBox(width: 6),
-        Text('Perfect week', style: _poppins(12, FontWeight.w500, textColor)),
-      ],
-    ),
+          const SizedBox(width: 6),
+          Text('Perfect week', style: _poppins(12, FontWeight.w500, textColor)),
+        ],
+      ),
     );
 
     return _card(

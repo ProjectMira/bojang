@@ -234,7 +234,8 @@ Future<void> showStreakSheet(BuildContext context, {required String source}) {
                 borderRadius: BorderRadius.vertical(
                   top: Radius.circular(AppRadius.hero),
                 ),
-                child: StreakCalendarScreen(),
+                // The sheet has its own header row above.
+                child: StreakCalendarScreen(showAppBar: false),
               ),
             ),
           ],
