@@ -204,7 +204,6 @@ deletes its rows.
 | `path_loaded` | home (learning path) | `units`, `active_node_id`, `daily_sessions`, `daily_goal` |
 | `path_step_started` | home / learn path | `node_id` (`lesson:<level>`, `practice:<unit>`, `unit_review:<unit>`, `alphabet_gate:script`, ...), `type`, `state` (active/unlocked/passed), `unit`, `session` (1-based), `total_sessions`, `source` (home_path/learn_path) |
 | `path_locked_tapped` | home / learn path | `node_id`, `type`, `active_node_id`, `source` |
-| `path_gate_skipped` | reading-check placeholder | `source` |
 | `learn_mode_switched` | learn screen | `mode` (path/topics) |
 | `streak_sheet_opened` | home top bar flame, classic stats strip | `source` (home_top_bar/home_stats) |
 | `streak_details_opened` | streak sheet | `source` |

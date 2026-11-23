@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:bojang/screens/home_page.dart';
+import 'package:bojang/screens/path_navigation.dart';
+import 'package:bojang/screens/script/script_course_screen.dart';
+import 'package:bojang/screens/script/script_gate_screen.dart';
 import 'package:bojang/services/learning_path_repository.dart';
 import 'package:bojang/services/progress_service.dart';
 import 'package:bojang/services/theme_service.dart';
@@ -96,5 +99,20 @@ void main() {
     await pumpHome(tester, const Size(390, 844));
     expect(find.byType(LearningPathView), findsNothing);
     expect(find.text('Start a Lesson'), findsOneWidget);
+  });
+
+  testWidgets('script nodes open the real script course screens', (tester) async {
+    late BuildContext context;
+    await tester.pumpWidget(Builder(builder: (c) {
+      context = c;
+      return const SizedBox();
+    }));
+    expect(PathRoutes.builders[PathRoutes.script]!(context), isA<ScriptCourseScreen>());
+    expect(PathRoutes.builders[PathRoutes.scriptGate]!(context), isA<ScriptGateScreen>());
+    expect(
+      PathRoutes.onGenerateRoute(const RouteSettings(name: '/script/gate')),
+      isA<MaterialPageRoute<dynamic>>(),
+    );
+    expect(PathRoutes.onGenerateRoute(const RouteSettings(name: '/nope')), isNull);
   });
 }

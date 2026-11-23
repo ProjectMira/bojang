@@ -3,43 +3,27 @@ import 'package:flutter/material.dart';
 import '../models/learning_path.dart';
 import '../models/level_models.dart';
 import '../services/analytics.dart';
-import '../services/user_kv.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/content_width.dart';
-import '../widgets/yak_says.dart';
-import '../widgets/yak_mascot.dart';
 import 'lesson_intro_screen.dart';
 import 'quiz_screen.dart';
+import 'script/script_course_screen.dart';
+import 'script/script_gate_screen.dart';
+import 'script/script_routes.dart';
 
-/// Named routes that learning-path nodes open (`route` in GET /learn/path).
-///
-/// `/script` and `/script/gate` belong to the script course
-/// (`lib/screens/script/`: `ScriptCourseScreen`, `ScriptGateScreen`). Until
-/// those are merged they open [PathPlaceholderScreen]; the merge replaces
-/// the two builders below.
+/// Named routes that learning-path nodes open (`route` in GET /learn/path):
+/// `/script` (the `alphabet` node) and `/script/gate` (the reading check)
+/// open the script course screens in `lib/screens/script/`.
 class PathRoutes {
   PathRoutes._();
 
-  static const String script = '/script';
-  static const String scriptGate = '/script/gate';
+  static const String script = ScriptRoutes.course;
+  static const String scriptGate = ScriptRoutes.gate;
 
   static final Map<String, WidgetBuilder> builders = {
-    script:
-        (_) => const PathPlaceholderScreen(
-          title: 'Reading Tibetan',
-          body:
-              'The script course is on its way. For now, the Basics lessons '
-              'teach the letters.',
-        ),
-    scriptGate:
-        (_) => const PathPlaceholderScreen(
-          title: 'Reading check',
-          body:
-              'A short check that you can read Tibetan letters is coming soon. '
-              'You can skip it for now if you already read Tibetan.',
-          offersGateSkip: true,
-        ),
+    script: (_) => const ScriptCourseScreen(source: 'path'),
+    scriptGate: (_) => const ScriptGateScreen(source: 'path'),
   };
 
   /// For `MaterialApp.onGenerateRoute`.
@@ -204,66 +188,4 @@ Future<void> showLockedNode(
           ),
         ),
   );
-}
-
-/// Stand-in for a path screen another part of the app will provide.
-class PathPlaceholderScreen extends StatelessWidget {
-  const PathPlaceholderScreen({
-    super.key,
-    required this.title,
-    required this.body,
-    this.offersGateSkip = false,
-  });
-
-  final String title;
-  final String body;
-
-  /// The reading-check stand-in lets a reader skip the gate.
-  final bool offersGateSkip;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTokens.background(context),
-      appBar: AppBar(
-        title: Text(title, style: AppTextStyles.title(context)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: AppTokens.ink(context),
-        systemOverlayStyle: AppTokens.statusBar(context),
-      ),
-      body: ContentWidth(
-        maxWidth: ContentWidth.reading,
-        child: YakNotice(
-          title: title,
-          body: body,
-          mood: YakMood.happy,
-          actionLabel:
-              offersGateSkip ? 'I already read Tibetan' : 'Back to the path',
-          onAction: () async {
-            if (offersGateSkip) {
-              await skipReadingGate();
-            }
-            if (context.mounted) Navigator.of(context).pop();
-          },
-        ),
-      ),
-    );
-  }
-}
-
-/// Skips the reading check (user_kv `script/gate_skipped` = true), the
-/// key GET /learn/path reads.
-Future<bool> skipReadingGate({String source = 'placeholder'}) async {
-  Analytics.track('path_gate_skipped', {'source': source});
-  try {
-    return await UserKv.instance.update(
-          'script',
-          'gate_skipped',
-          (_) => true,
-        ) !=
-        null;
-  } catch (_) {
-    return false;
-  }
 }
