@@ -25,6 +25,11 @@ typedef DialogueAudio = Future<void> Function(String url);
 typedef DialogueSubmitter =
     Future<bool> Function(Dialogue dialogue, List<DialogueAnswer> answers);
 
+/// Counts the finished dialogue's learning-path node
+/// (`POST /learn/path/nodes/dialogue:<id>/complete`).
+typedef DialogueNodeCompleter =
+    Future<void> Function(String nodeId, int correct, int total);
+
 /// Plays a listening dialogue (plan item #27): lines appear one at a time
 /// with the speaker's avatar and audio, a tap shows the English, phonetics
 /// follow Settings > Reading Help, then 2 or 3 questions. Signed-in
@@ -44,6 +49,7 @@ class DialoguePlayerScreen extends StatefulWidget {
   final DialogueLoader? loader;
   final DialogueAudio? playAudio;
   final DialogueSubmitter? submit;
+  final DialogueNodeCompleter? completeNode;
   final TransliterationMode? readingMode;
   final bool? enabled;
   final bool? autoplay;
@@ -54,6 +60,7 @@ class DialoguePlayerScreen extends StatefulWidget {
     this.loader,
     this.playAudio,
     this.submit,
+    this.completeNode,
     this.readingMode,
     this.enabled,
     this.autoplay,
@@ -61,6 +68,9 @@ class DialoguePlayerScreen extends StatefulWidget {
 
   static String routeFor(String dialogueId) =>
       '$routePrefix${Uri.encodeComponent(dialogueId)}';
+
+  /// The dialogue's node id on the learning path (`GET /learn/path`).
+  static String pathNodeId(String dialogueId) => 'dialogue:$dialogueId';
 
   /// Builds `/dialogue/<id>`; null for any other route name.
   static Route<bool>? onGenerateRoute(RouteSettings settings) {
@@ -281,6 +291,20 @@ class _DialoguePlayerScreenState extends State<DialoguePlayerScreen> {
     return await ApiService().recordActivity(localDate) != null;
   }
 
+  Future<void> _defaultCompleteNode(
+    String nodeId,
+    int correct,
+    int total,
+  ) async {
+    final api = ApiService();
+    if (!api.isAuthenticated) return;
+    await api.completePathNode(
+      nodeId,
+      correct: total > 0 ? correct : null,
+      total: total > 0 ? total : null,
+    );
+  }
+
   Future<void> _finish() async {
     final dialogue = _dialogue!;
     _clock.stop();
@@ -292,6 +316,15 @@ class _DialoguePlayerScreenState extends State<DialoguePlayerScreen> {
     } catch (_) {
       ok = false;
     }
+    // The learning path's dialogue node (signed-in learners only; the
+    // server ignores a session under 70%).
+    try {
+      await (widget.completeNode ?? _defaultCompleteNode)(
+        DialoguePlayerScreen.pathNodeId(dialogue.id),
+        correct,
+        _answers.length,
+      );
+    } catch (_) {}
     Analytics.track('dialogue_completed', {
       'dialogue_id': dialogue.id,
       'correct': correct,

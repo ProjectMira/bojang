@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:bojang/models/learning_path.dart';
 import 'package:bojang/screens/home_page.dart';
 import 'package:bojang/screens/path_navigation.dart';
 import 'package:bojang/screens/script/script_course_screen.dart';
@@ -114,5 +115,54 @@ void main() {
       isA<MaterialPageRoute<dynamic>>(),
     );
     expect(PathRoutes.onGenerateRoute(const RouteSettings(name: '/nope')), isNull);
+  });
+
+  group('dialogue nodes', () {
+    Map<String, dynamic> withDialogue() {
+      final json = samplePathJson();
+      final nodes = (json['units'] as List).first['nodes'] as List;
+      nodes.insert(1, {
+        'id': 'dialogue:dlg-greetings', 'type': 'dialogue', 'subtype': 'dialogue',
+        'state': 'unlocked', 'title': 'Saying hello', 'level_id': 'basics-letters-1',
+        'route': '/dialogue/dlg-greetings', 'finished_sessions': 0, 'total_sessions': 1,
+      });
+      return json;
+    }
+
+    testWidgets('render on the path and push their route', (tester) async {
+      final path = LearningPath.fromJson(withDialogue());
+      final node = path.nodes.firstWhere((n) => n.type == PathNodeType.dialogue);
+      final pushed = <String?>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          onGenerateRoute: (settings) {
+            pushed.add(settings.name);
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => const Scaffold(body: Text('dialogue player')),
+            );
+          },
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => SingleChildScrollView(
+                child: LearningPathView(
+                  path: path,
+                  onOpen: (n) => openPathNode(context, n, source: 'test'),
+                  onLocked: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.byIcon(Icons.forum_rounded), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.forum_rounded));
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(pushed, [node.route]);
+      expect(find.text('dialogue player'), findsOneWidget);
+    });
   });
 }

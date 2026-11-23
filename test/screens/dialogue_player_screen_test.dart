@@ -9,6 +9,7 @@ import '../models/dialogue_test.dart' show dialogueJson;
 void main() {
   late List<String> played;
   late List<List<DialogueAnswer>> submitted;
+  late List<String> completedNodes;
 
   Future<void> pump(
     WidgetTester tester, {
@@ -18,6 +19,7 @@ void main() {
   }) async {
     played = [];
     submitted = [];
+    completedNodes = [];
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -30,6 +32,9 @@ void main() {
           submit: (_, answers) async {
             submitted.add(answers);
             return true;
+          },
+          completeNode: (nodeId, correct, total) async {
+            completedNodes.add('$nodeId $correct/$total');
           },
           readingMode: mode,
           enabled: enabled,
@@ -90,6 +95,8 @@ void main() {
     expect(find.text('0 of 1 right'), findsOneWidget);
     expect(submitted.single.single.optionId, 'q1-a');
     expect(submitted.single.single.correct, isFalse);
+    // Finishing counts the dialogue's path node.
+    expect(completedNodes, ['dialogue:dlg-greetings 0/1']);
   });
 
   testWidgets('kill switch shows a message instead', (tester) async {
