@@ -46,7 +46,8 @@ enum PriorKnowledge {
 }
 
 /// Lessons a day the learner aims for. Stored as `onboarding/daily_goal`
-/// (the number of lessons).
+/// (the number of lessons); `GET /learn/path` reads it as sessions a day for
+/// the daily goal ring.
 enum DailyGoal {
   easy(1, 'Easy does it'),
   steady(2, 'Steady'),

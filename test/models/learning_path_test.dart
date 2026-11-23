@@ -83,7 +83,7 @@ void main() {
       expect(path.nodes.firstWhere((n) => n.type == PathNodeType.unitReview).isReview, isTrue);
     });
 
-    test('reads the daily goal', () {
+    test('reads the daily goal (sessions a day)', () {
       expect(path.daily!.sessions, 1);
       expect(path.daily!.goal, 2);
       expect(path.daily!.progress, 0.5);

@@ -146,4 +146,14 @@ void main() {
       );
     });
   });
+
+  group('DailyGoal (onboarding/daily_goal)', () {
+    test('stores lessons a day, the unit GET /learn/path counts in', () {
+      // The path reads a bare number as sessions a day (not minutes), so
+      // "Keen" (3) is a ring of 3 sessions.
+      expect(DailyGoal.values.map((g) => g.lessons), [1, 2, 3, 5]);
+      expect(DailyGoal.fromLessons(3), DailyGoal.keen);
+      expect(DailyGoal.fromLessons(10), isNull);
+    });
+  });
 }
