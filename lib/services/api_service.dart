@@ -834,6 +834,86 @@ class ApiService {
     return response?['recorded'] == true;
   }
 
+  // =====================================================
+  // SOCIAL: weekly leaderboard (#24) and family streaks (#26)
+  // =====================================================
+
+  /// `(status, decoded body)`; status null when offline. Social calls need
+  /// the status (409/429 carry a reason), so they go through [rawRequest].
+  Future<(int?, Object?)> _social(
+    String method,
+    String endpoint, {
+    Object? body,
+  }) async {
+    final response = await rawRequest(method, endpoint, body: body);
+    if (response == null) return (null, null);
+    Object? decoded;
+    try {
+      decoded = response.body.isEmpty ? null : jsonDecode(response.body);
+    } catch (_) {}
+    return (response.statusCode, decoded);
+  }
+
+  static String _localDay() {
+    final now = DateTime.now();
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${now.year.toString().padLeft(4, '0')}-${two(now.month)}-${two(now.day)}';
+  }
+
+  Map<String, dynamic>? _okMap((int?, Object?) result) {
+    final (status, body) = result;
+    if (status == null || status < 200 || status >= 300 || body is! Map) {
+      return null;
+    }
+    return Map<String, dynamic>.from(body);
+  }
+
+  /// This week's top 50 plus the learner's own rank.
+  Future<Map<String, dynamic>?> getWeeklyLeaderboard() async =>
+      _okMap(await _social('GET', '/v1/leaderboard/weekly'));
+
+  /// How the learner finished last week.
+  Future<Map<String, dynamic>?> getLastWeekResult() async =>
+      _okMap(await _social('GET', '/v1/leaderboard/weekly/last'));
+
+  /// Settings > "Show me on the leaderboard". True when the server took it.
+  Future<bool> setLeaderboardVisible(bool visible) async {
+    final result = await _social(
+      'PUT',
+      '/v1/leaderboard/visibility',
+      body: {'visible': visible},
+    );
+    return _okMap(result)?['visible'] == visible;
+  }
+
+  Future<Map<String, dynamic>?> getFamily() async => _okMap(
+    await _social('GET', '/v1/family?local_date=${_localDay()}'),
+  );
+
+  /// A code to share (reuses the open one). Null when offline or full.
+  Future<Map<String, dynamic>?> createFamilyInvite() async =>
+      _okMap(await _social('POST', '/v1/family/invites'));
+
+  /// `(status, body)`: 200 with the new member, 404/409 with
+  /// `detail.error`, status null offline.
+  Future<(int?, Object?)> acceptFamilyInvite(String code) =>
+      _social('POST', '/v1/family/invites/accept', body: {'code': code});
+
+  Future<bool> removeFamilyLink(String linkId) async {
+    final (status, _) = await _social(
+      'DELETE',
+      '/v1/family/${Uri.encodeComponent(linkId)}',
+    );
+    return status != null && status >= 200 && status < 300;
+  }
+
+  /// `(status, body)`: 200 sent, 409 they already practised, 429 already
+  /// nudged today.
+  Future<(int?, Object?)> nudgeFamilyMember(String linkId) => _social(
+    'POST',
+    '/v1/family/${Uri.encodeComponent(linkId)}/nudge?local_date=${_localDay()}',
+  );
+
   Uri _uri(String endpoint, [Map<String, String>? queryParameters]) {
     final cleanBase =
         baseUrl.endsWith('/')

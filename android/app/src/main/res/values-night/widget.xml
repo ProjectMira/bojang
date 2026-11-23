@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_surface">#FF242A31</color>
+    <color name="widget_ink">#FFFFFFFF</color>
+    <color name="widget_ink_soft">#FF9AA4B0</color>
+    <color name="widget_accent">#FF6DAAE8</color>
+    <color name="widget_flame">#FFF2924F</color>
+    <color name="widget_flame_dim">#FF6B7480</color>
+    <color name="widget_ice">#FF6DAAE8</color>
+    <color name="widget_done">#FF43C281</color>
+</resources>

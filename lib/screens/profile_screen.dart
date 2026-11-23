@@ -15,6 +15,11 @@ import '../widgets/yak_mascot.dart';
 import 'settings_screen.dart';
 import 'auth_screen.dart';
 import '../widgets/content_width.dart';
+import '../services/feature_flags.dart';
+import '../services/home_widget_sync.dart';
+import '../services/social_service.dart';
+import '../widgets/family_streaks_card.dart';
+import '../widgets/leaderboard_entry_points.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -33,6 +38,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _loadUserData();
     _loadPackageInfo();
+    // Profile is built at launch (the tabs live in an IndexedStack), so it
+    // starts the home-screen widget sync and the once-a-week result sheet.
+    HomeWidgetSync.instance.attach(
+      Provider.of<ProgressService>(context, listen: false),
+    );
+    _showLastWeekResult();
+  }
+
+  /// "You finished #12": once per week, a moment after launch, and only
+  /// when nothing else is on top (a lesson, a celebration).
+  Future<void> _showLastWeekResult() async {
+    await Future<void>.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+    final result = await SocialService.instance.unseenLastWeekResult();
+    if (result == null || !mounted) return;
+    if (ModalRoute.of(context)?.isCurrent == false) return;
+    await showWeeklyResultSheet(context, result);
   }
 
   Future<void> _loadUserData() async {
@@ -426,6 +448,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ],
                         ),
+
+                        const SizedBox(height: 16),
+
+                        ValueListenableBuilder<int>(
+                          valueListenable: FeatureFlags.instance.changes,
+                          builder: (context, _, child) {
+                            if (!SocialService.leaderboardEnabled) {
+                              return const SizedBox.shrink();
+                            }
+                            return _buildSettingsCard(
+                              context,
+                              'Weekly leaderboard',
+                              'See where your XP puts you this week',
+                              Icons.emoji_events,
+                              () => openLeaderboard(context, 'profile'),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        const FamilyStreaksCard(),
 
                         const SizedBox(height: 32),
 

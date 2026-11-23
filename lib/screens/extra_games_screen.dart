@@ -11,6 +11,7 @@ import 'games/word_builder_game.dart';
 import 'memory_match_game.dart';
 import 'speed_quiz_screen.dart';
 import '../widgets/content_width.dart';
+import '../widgets/leaderboard_entry_points.dart';
 
 class _Game {
   /// The skill the game trains, shown as a tag on its card.
@@ -123,6 +124,7 @@ class ExtraGamesScreen extends StatelessWidget {
         foregroundColor: AppTokens.ink(context),
         elevation: 0,
         scrolledUnderElevation: 0,
+        actions: const [LeaderboardButton(source: 'games')],
       ),
       body: ContentWidth(
         child: ListView(

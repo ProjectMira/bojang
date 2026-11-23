@@ -196,6 +196,15 @@ deletes its rows.
 | `offline_lessons_prefetched` | offline mode | `added`, `ready`, `reason` (`lesson`: after a lesson; `wifi_start`: app start on Wi-Fi), `media_mb` (offline media on disk, capped at 50 MB) |
 | `offline_lesson_started` | api service (lesson start with no network) | `level_id`, `available` (a prefetched session was played), `lessons_left` |
 | `offline_banner_viewed` | home offline banner | `state` (`offline`/`ready`), `lessons_ready`, `pending` |
+| `leaderboard_opened` | Games header trophy, Profile card, weekly result sheet | `source` (`games`/`profile`/`weekly_result`) |
+| `leaderboard_viewed` | leaderboard screen (first load) | `source`, `rank` (null: no XP or hidden), `xp`, `in_top` (top 50), `visible`, `learners` |
+| `leaderboard_result_shown` | Profile, first launch of a new week ("You finished #12") | `rank`, `xp`, `learners` (last week) |
+| `setting_changed` (`setting`: `show_on_leaderboard`) | Settings > Privacy | `value` |
+| `family_invite_created` | Profile > Family streaks | `members` (already linked) |
+| `family_invite_shared` | invite sheet | `via` (`share`/`copy`) |
+| `family_invite_accepted` | enter-code sheet | `success`, `error` (`invalid`/`ownCode`/`alreadyLinked`/`full`/`theirFull`/`offline`) |
+| `family_nudge_sent` | family member row | `outcome` (`sent`/`alreadyNudged`/`alreadyPractised`/`offline`/`failed`), `shared_streak` |
+| `family_member_removed` | family member row | `success` |
 
 ## Experiments: assignment is not exposure
 
@@ -270,3 +279,10 @@ learner's local midnight, when the push expires): one per automated streak
 push from `POST /jobs/streak-reminders`. The same sends are in the
 `push_notifications` table with `opened_at`, set by the app's
 `POST /notifications/opened`.
+
+`server_family_linked` (`link_id`) when a family invite is accepted, and
+`server_family_nudge_sent` (`link_id`, `line_id` from the `fn_*` pool in
+`services/family.py`, `devices`, `delivered`) for each nudge push. Nudges are
+logged in `family_nudges`, not `push_notifications`, so they never use up the
+learner's streak-reminder cap; their push data carries `campaign`
+`family_nudge` and `screen` `profile`.

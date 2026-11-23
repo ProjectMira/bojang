@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_surface">#FFFFFFFF</color>
+    <color name="widget_ink">#FF2C3E50</color>
+    <color name="widget_ink_soft">#FF5F6E7D</color>
+    <color name="widget_accent">#FF2174C8</color>
+    <color name="widget_flame">#FFC2550E</color>
+    <color name="widget_flame_dim">#FF9AA4B0</color>
+    <color name="widget_ice">#FF2174C8</color>
+    <color name="widget_done">#FF1F844F</color>
+    <string name="widget_description">Your streak and a Tibetan word every day</string>
+    <string name="widget_default_line">Open Bojang to start your streak</string>
+    <string name="widget_streak_description">Streak</string>
+    <string name="widget_done_description">Practised today</string>
+</resources>

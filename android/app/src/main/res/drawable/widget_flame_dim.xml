@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@color/widget_flame_dim" android:pathData="M12,2C12,2 6,8.5 6,13.5C6,17.1 8.7,20 12,20C15.3,20 18,17.1 18,13.5C18,10.6 16.4,8.4 15.3,7.3C15.2,9.4 14.1,11 12.6,11.6C13.3,9.2 12.9,5.4 12,2ZM12,18C10.3,18 9,16.6 9,14.9C9,13.5 10,12.2 11,11.4C11.1,12.8 12,13.9 13.2,14.3C13.6,13.7 13.9,13 14,12.3C14.6,13 15,13.9 15,14.9C15,16.6 13.7,18 12,18Z" />
+</vector>
