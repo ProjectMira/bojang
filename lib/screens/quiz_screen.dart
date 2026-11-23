@@ -24,6 +24,7 @@ import '../widgets/lesson_style_sheet.dart';
 import '../widgets/speaker_button.dart';
 import '../widgets/reading_voice_pickers.dart';
 import '../widgets/romanisation_text.dart';
+import '../services/reading_help.dart';
 import 'lesson_complete_screen.dart';
 import '../widgets/content_width.dart';
 import '../widgets/app_text_style.dart';
@@ -424,6 +425,14 @@ class _QuizScreenState extends State<QuizScreen>
     if (isCorrect) HapticFeedback.lightImpact();
 
     final answered = item.question;
+    // Reading help: word counts for "new words only", and the run of right
+    // answers behind the "turn off reading help?" suggestion.
+    ReadingHelp.instance.recordAnswer(
+      answered.romanisation,
+      correct: isCorrect,
+      mode: themeService.transliterationMode,
+      hiddenUntilAnswered: !answered.showsRomanisation(answered: false),
+    );
     Analytics.track('question_answered', {
       'topic': _topicName,
       'topic_path': widget.topicFilePath,

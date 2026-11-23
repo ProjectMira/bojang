@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/analytics.dart';
 import '../services/location_service.dart';
+import '../models/romanisation.dart';
+import '../services/reading_help.dart';
 import '../services/theme_service.dart';
 import '../services/pronunciation_player.dart';
 import '../services/progress_service.dart';
@@ -117,13 +119,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 const SizedBox(height: 12),
 
-                _buildSettingsCard(
+                ListenableBuilder(
+                  listenable: ReadingHelp.instance,
+                  builder: (context, _) => _buildSettingsCard(
                   title: 'Reading Help',
                   subtitle:
-                      '${themeService.transliterationMode.title} · ${themeService.transliterationMode.subtitle}',
+                      themeService.transliterationMode != TransliterationMode.off &&
+                              ReadingHelp.instance.newWordsOnly
+                          ? '${themeService.transliterationMode.title} · new words only'
+                          : '${themeService.transliterationMode.title} · ${themeService.transliterationMode.subtitle}',
                   icon: Icons.translate,
                   onTap: () => showTransliterationPicker(context),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                ),
                 ),
 
                 const SizedBox(height: 12),

@@ -6,6 +6,10 @@ import '../services/analytics.dart';
 import '../services/location_service.dart';
 import '../services/notification_primer.dart';
 import '../services/progress_service.dart';
+import '../services/reading_help.dart';
+import '../services/save_progress_prompt.dart';
+import '../services/theme_service.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_tokens.dart';
 import '../theme/motion.dart';
 import '../utils/session_end_sequence.dart';
@@ -73,8 +77,11 @@ class LessonCompleteScreen extends StatefulWidget {
   ///
   /// 1. The notification primer, at a streak moment (started, extended or
   ///    saved by a freeze): at most 3 asks, 3+ days apart.
-  /// 2. Location, once, from the first lesson on; it waits for a session
+  /// 2. "Save your progress", for a learner without a real account, from
+  ///    the first lesson or a 3-day streak: at most 3 asks, 4+ days apart.
+  /// 3. Location, once, from the first lesson on; it waits for a session
   ///    end the primer does not take.
+  /// 4. "Turn off reading help?", once, after 20 right in a row with it on.
   static final List<SessionEndAsk> asks = [
     (context, end) async {
       final streak = end.streak;
@@ -84,7 +91,27 @@ class LessonCompleteScreen extends StatefulWidget {
         streak,
       );
     },
+    (context, end) => SaveProgressPrompt.instance.maybeAsk(
+      context,
+      lessonsCompleted: end.lessonsCompleted,
+      streak: end.streak?.streak ?? 0,
+    ),
     (context, end) => LocationService.instance.maybePromptAfterLesson(context),
+    (context, end) async {
+      final help = ReadingHelp.instance;
+      if (!help.suggestionDue) return false;
+      final ThemeService theme;
+      try {
+        theme = Provider.of<ThemeService>(context, listen: false);
+      } on ProviderNotFoundException {
+        return false;
+      }
+      return help.maybeSuggest(
+        context,
+        currentMode: theme.transliterationMode,
+        setMode: theme.setTransliterationMode,
+      );
+    },
   ];
 
   @override

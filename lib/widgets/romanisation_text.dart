@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/romanisation.dart';
+import '../services/reading_help.dart';
 import '../services/theme_service.dart';
 import 'app_text_style.dart';
 
 /// A Tibetan word's phonetics and/or Wylie, as the learner chose in
 /// Settings > Reading. Shows nothing when the setting is off or the word has
-/// no romanisation.
+/// no romanisation, and, under "new words only", for a word the learner
+/// has already answered right twice ([ReadingHelp]).
 class RomanisationText extends StatelessWidget {
   final Romanisation value;
 
@@ -37,7 +39,17 @@ class RomanisationText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selected = mode ?? context.watch<ThemeService>().transliterationMode;
+    if (mode != null) return _build(context, mode!);
+    final selected = context.watch<ThemeService>().transliterationMode;
+    return ListenableBuilder(
+      listenable: ReadingHelp.instance,
+      builder: (context, _) => ReadingHelp.instance.hides(value)
+          ? const SizedBox.shrink()
+          : _build(context, selected),
+    );
+  }
+
+  Widget _build(BuildContext context, TransliterationMode selected) {
     final showPhonetic = selected.showsPhonetics && value.phonetic.isNotEmpty;
     final showWylie = selected.showsWylie && value.wylie.isNotEmpty;
     if (!showPhonetic && !showWylie) return const SizedBox.shrink();

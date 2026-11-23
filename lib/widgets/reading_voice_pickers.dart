@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/romanisation.dart';
 import '../services/analytics.dart';
 import '../services/pronunciation_voices.dart';
+import '../services/reading_help.dart';
 import '../services/theme_service.dart';
 import '../theme/app_tokens.dart';
 import 'app_text_style.dart';
@@ -156,6 +157,44 @@ Future<void> showTransliterationPicker(BuildContext context) {
           ),
           const SizedBox(height: 10),
         ],
+        const SizedBox(height: 6),
+        // Which words get the reading: all, or only the ones not yet known.
+        ListenableBuilder(
+          listenable: ReadingHelp.instance,
+          builder: (context, _) {
+            final on = theme.transliterationMode != TransliterationMode.off;
+            final help = ReadingHelp.instance;
+            return Material(
+              color: AppTokens.surface(context),
+              borderRadius: BorderRadius.circular(16),
+              child: SwitchListTile.adaptive(
+                key: const ValueKey('reading_help_new_words_only'),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: AppTokens.cardBorder(context)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                title: Text(
+                  'New words only',
+                  style: AppTextStyles.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: on ? AppTokens.ink(context) : AppTokens.inkSoft(context),
+                  ),
+                ),
+                subtitle: Text(
+                  'Hide it for words you have answered right twice',
+                  style: AppTextStyles.poppins(
+                    fontSize: 13,
+                    color: on ? AppTokens.ink(context) : AppTokens.inkSoft(context),
+                  ),
+                ),
+                value: help.newWordsOnly,
+                onChanged: on ? (value) => help.setNewWordsOnly(value) : null,
+              ),
+            );
+          },
+        ),
       ],
     );
   });
