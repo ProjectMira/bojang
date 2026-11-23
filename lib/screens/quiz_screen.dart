@@ -30,6 +30,7 @@ import '../widgets/app_text_style.dart';
 import '../theme/tibetan_type.dart';
 import '../widgets/script/script_exercise_views.dart';
 import '../widgets/script/trace_pad.dart';
+import '../widgets/offline_lessons_banner.dart';
 
 class QuizScreen extends StatefulWidget {
   final String topicFilePath;
@@ -1226,7 +1227,7 @@ class _QuizScreenState extends State<QuizScreen>
       return [
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.network(
+          child: offlineImage(
             question.imageUrl!,
             height: 200,
             fit: BoxFit.contain,

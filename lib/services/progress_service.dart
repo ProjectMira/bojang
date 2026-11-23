@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'analytics.dart';
 import 'api_service.dart';
+import 'offline_mode.dart';
+import 'offline_queue.dart';
+import '../utils/offline_progress.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../utils/streak_rules.dart';
@@ -134,11 +139,30 @@ class ProgressService extends ChangeNotifier {
   int? get rank => _rank;
   int get completedLevelsCount => _completedLevelsCount;
 
+  /// [offlineQueue] replaces the legacy pending-day list with the
+  /// persisted offline queue (plan item #23); by default the app's queue is
+  /// used whenever offline mode is on. Tests that inject [recordActivity]
+  /// alone keep the legacy path.
   ProgressService({
     bool Function()? isSignedIn,
     Future<Map<String, dynamic>?> Function(String localDate)? recordActivity,
+    OfflineQueue? offlineQueue,
+    bool Function()? offlineEnabled,
+    Future<Map<String, dynamic>?> Function()? fetchStats,
   }) : _isSignedIn = isSignedIn ?? (() => ApiService().isAuthenticated),
-       _recordActivity = recordActivity ?? ApiService().recordActivity {
+       _recordActivity = recordActivity ?? ApiService().recordActivity,
+       _fetchStats = fetchStats ?? ApiService().getUserProgress,
+       _queueFactory =
+           offlineQueue != null
+               ? (() => offlineQueue)
+               : recordActivity != null
+               ? null
+               : (() => OfflineMode.instance.queue),
+       _offlineEnabled =
+           offlineEnabled ??
+           (offlineQueue != null
+               ? () => true
+               : () => OfflineMode.instance.enabled) {
     _loadProgressData();
   }
 
@@ -146,6 +170,69 @@ class ProgressService extends ChangeNotifier {
   final bool Function() _isSignedIn;
   final Future<Map<String, dynamic>?> Function(String localDate)
   _recordActivity;
+  final Future<Map<String, dynamic>?> Function() _fetchStats;
+  final OfflineQueue Function()? _queueFactory;
+  final bool Function() _offlineEnabled;
+  OfflineQueue? _queue;
+  PendingProgress _pending = PendingProgress.none;
+
+  /// Writes not yet on the server (XP and days shown optimistically).
+  PendingProgress get pendingProgress => _pending;
+
+  /// The offline queue when offline mode is on, else null (legacy path).
+  OfflineQueue? get _activeQueue {
+    final factory = _queueFactory;
+    if (factory == null || !_offlineEnabled()) return null;
+    final existing = _queue;
+    if (existing != null) return existing;
+    final queue = _queue = factory();
+    queue.addListener(_onQueueDelivered);
+    return queue;
+  }
+
+  void _onQueueDelivered(QueuedRequest item, SendResult result) {
+    if (result.outcome != SendOutcome.delivered) {
+      unawaited(_refreshPending());
+      return;
+    }
+    final response = result.response;
+    if (item.kind == QueuedKind.activity && response != null) {
+      unawaited(_applyActivityResponse(response));
+    } else if (item.kind == QueuedKind.lessonComplete && item.attempts > 0) {
+      // A lesson played offline just reached the server: show its numbers.
+      unawaited(_refreshFromServer());
+    } else {
+      unawaited(_refreshPending());
+    }
+  }
+
+  Future<void> _refreshFromServer() async {
+    try {
+      final stats = await _fetchStats();
+      if (stats != null) await updateFromServer(stats);
+    } catch (e) {
+      debugPrint('Stats refresh after replay failed: $e');
+    }
+  }
+
+  Future<void> _refreshPending() async {
+    final queue = _activeQueue;
+    if (queue == null) {
+      _pending = PendingProgress.none;
+      return;
+    }
+    try {
+      final before = _pending;
+      _pending = PendingProgress.of([
+        ...await queue.itemsOf(QueuedKind.lessonComplete),
+        ...await queue.itemsOf(QueuedKind.activity),
+      ]);
+      if (before.lessons != _pending.lessons ||
+          before.activities != _pending.activities) {
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
 
   Future<void> _loadProgressData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -196,6 +283,8 @@ class ProgressService extends ChangeNotifier {
   }
 
   Future<void> updateFromServer(Map<String, dynamic> data) async {
+    // Queued lessons and days the server hasn't seen stay on screen.
+    await _refreshPending();
     final stats =
         data['xp'] is Map<String, dynamic> ||
                 data['streak'] is Map<String, dynamic> ||
@@ -208,7 +297,8 @@ class ProgressService extends ChangeNotifier {
       final streakInfo = stats['streak'] as Map<String, dynamic>?;
       final leagueInfo = stats['league'] as Map<String, dynamic>?;
       final levelsInfo = stats['levels'] as Map<String, dynamic>?;
-      _xp = xpInfo?['total'] as int? ?? _xp;
+      final serverXp = xpInfo?['total'] as int?;
+      if (serverXp != null) _xp = _pending.mergeXp(server: serverXp);
       final serverStreak = streakInfo?['current'] as int?;
       if (serverStreak != null) _currentStreak = _mergedStreak(serverStreak);
       if (streakInfo != null) {
@@ -219,7 +309,8 @@ class ProgressService extends ChangeNotifier {
       _completedLevelsCount =
           levelsInfo?['count'] as int? ?? _completedLevelsCount;
     } else {
-      _xp = data['xp'] as int? ?? _xp;
+      final serverXp = data['xp'] as int?;
+      if (serverXp != null) _xp = _pending.mergeXp(server: serverXp);
       final serverStreak = data['streak'] as int?;
       if (serverStreak != null) _currentStreak = _mergedStreak(serverStreak);
       _league = (data['league'] ?? _league).toString();
@@ -634,6 +725,8 @@ class ProgressService extends ChangeNotifier {
     await prefs.remove('completed_levels_count');
     // Unsent streak days belong to this account; never post them for the next.
     await prefs.remove(_pendingActivityKey);
+    await _queue?.clear();
+    _pending = PendingProgress.none;
     notifyListeners();
   }
 
@@ -697,16 +790,69 @@ class ProgressService extends ChangeNotifier {
   /// [updateQuizResults], so this is the single hook. Days that can't be sent
   /// stay pending and go out (oldest first) on the next report or
   /// [flushPendingActivity].
+  ///
+  /// With offline mode on, each report is an item of the persisted offline
+  /// queue instead: it carries a client UUID (a replay counts once) and, if
+  /// sent late, `offline: true`, so the server credits the day it was
+  /// played, up to 7 days back.
   Future<void> _reportActivity(String localDate) => _enqueueActivity(() async {
+    final queue = _activeQueue;
     final prefs = await SharedPreferences.getInstance();
+    if (queue != null) {
+      await _moveLegacyPending(prefs, queue);
+      await queue.submit(QueuedKind.activity, 'progress/activity', {
+        'local_date': localDate,
+      });
+      await _refreshPending();
+      return;
+    }
     await _sendPending(prefs, [..._recentPending(prefs), localDate]);
   });
 
   /// Retries days that couldn't be sent before (offline, signed out).
   Future<void> flushPendingActivity() => _enqueueActivity(() async {
+    final queue = _activeQueue;
     final prefs = await SharedPreferences.getInstance();
+    if (queue != null) {
+      await _moveLegacyPending(prefs, queue);
+      await queue.flush(force: true);
+      await _refreshPending();
+      return;
+    }
     await _sendPending(prefs, _recentPending(prefs));
   });
+
+  /// Days left in the old pending list (from a build before the queue) go
+  /// to the front of the queue, oldest first.
+  Future<void> _moveLegacyPending(
+    SharedPreferences prefs,
+    OfflineQueue queue,
+  ) async {
+    final days = prefs.getStringList(_pendingActivityKey);
+    if (days == null || days.isEmpty) return;
+    for (final day in days.toList()..sort()) {
+      await queue.enqueue(QueuedKind.activity, 'progress/activity', {
+        'local_date': day,
+        'offline': true,
+      });
+    }
+    await prefs.remove(_pendingActivityKey);
+  }
+
+  /// Takes a delivered activity report's streak, freezes and Earn Back.
+  Future<void> _applyActivityResponse(Map<String, dynamic> response) async {
+    final prefs = await SharedPreferences.getInstance();
+    await _refreshPending();
+    final serverStreak = response['streak'];
+    if (serverStreak is int) {
+      _currentStreak = _mergedStreak(serverStreak);
+      await prefs.setInt('current_streak', _currentStreak);
+    }
+    _applyServerFreezes(response);
+    _applyServerEarnBack(response);
+    await _saveFreezes(prefs);
+    notifyListeners();
+  }
 
   /// Stored pending days still worth sending: only today and yesterday. The
   /// server treats anything older as "today", which would be wrong.
@@ -762,8 +908,12 @@ class ProgressService extends ChangeNotifier {
   int _mergedStreak(int serverStreak) {
     final playedToday =
         _lastPlayDate != null && _isSameDay(_lastPlayDate!, DateTime.now());
-    if (playedToday && _currentStreak > serverStreak) return _currentStreak;
-    return serverStreak;
+    // Also while queued days are still on their way (offline queue).
+    return _pending.mergeStreak(
+      server: serverStreak,
+      local: _currentStreak,
+      playedToday: playedToday,
+    );
   }
 
   String getAchievementTitle(String achievementId) {

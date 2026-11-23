@@ -189,6 +189,13 @@ deletes its rows.
 | `daily_goal_tapped` | home top bar | `sessions`, `goal` |
 | `review_loaded` | Practice tab | `words`, `mistakes`, `weak`, `offline` |
 | `review_started` | Practice tab | `words`, `source` |
+| `offline_queue_enqueued` | offline queue (`offline_mode` on) | `kind` (`lesson_complete`/`activity`/`kv_patch`/`notification_opened`) — every queueable write is queued first, then sent at once when nothing waits ahead of it |
+| `offline_queue_replayed` | offline queue | `kind`, `attempts`, `status`, `age_minutes`, `replayed` (the server had already counted it) — a write that failed at least once reached the server |
+| `offline_queue_dropped` | offline queue | `kind`, `reason` (`rejected`: a final 4xx such as 410 expired session or 409 kv conflict; `expired`: older than 7 days), `attempts`, `status`, `age_minutes` |
+| `offline_mode_offline` / `offline_mode_back_online` | offline mode (connectivity) | `pending` (writes queued), `lessons_ready` |
+| `offline_lessons_prefetched` | offline mode | `added`, `ready`, `reason` (`lesson`: after a lesson; `wifi_start`: app start on Wi-Fi), `media_mb` (offline media on disk, capped at 50 MB) |
+| `offline_lesson_started` | api service (lesson start with no network) | `level_id`, `available` (a prefetched session was played), `lessons_left` |
+| `offline_banner_viewed` | home offline banner | `state` (`offline`/`ready`), `lessons_ready`, `pending` |
 
 ## Experiments: assignment is not exposure
 
@@ -235,7 +242,8 @@ and unsent batches: `server_session_issued` (`session_id`, `level_id`,
 `adaptive`, `labels`),
 `server_lesson_cards` (`level_id`, `items`), `server_lesson_completed`
 (`session_id`, `level_id`, `correct_answers`, `total_questions`,
-`time_taken_seconds`, `xp_earned`, `level_completed`, `graded`, and when the
+`time_taken_seconds`, `xp_earned`, `level_completed`, `graded`, `offline`
+(sent late from the app's queue), `local_date` (the day credited), and when the
 app sent answers: `server_graded`, `client_trusted`, `grading_mismatches`,
 `unknown_answers`, `recycled`, `fixed`, `adaptive_correct`),
 `server_earn_back_started` (`streak`, `expires_at`, `sessions_done`) and

@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'analytics.dart';
 import 'app_check_service.dart';
 import 'crash_reporting.dart';
+import 'offline_mode.dart';
+import 'offline_queue.dart';
+import 'dart:async';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -60,6 +63,8 @@ class ApiService {
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     _authToken = prefs.getString('auth_token');
+    // Offline queue and prefetched lessons (no-op when switched off).
+    unawaited(OfflineMode.instance.start());
   }
 
   // =====================================================
@@ -176,6 +181,8 @@ class ApiService {
     _authToken = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
+    // Queued writes and prefetched lessons belong to the signed-out account.
+    await OfflineMode.instance.clear();
   }
 
   // =====================================================
@@ -288,18 +295,33 @@ class ApiService {
     List<String>? exerciseTypes,
     List<String>? supportedTypes,
   }) async {
-    return _get(
-      'learn/session/$levelId',
-      queryParameters: {
-        'num_questions': numQuestions.toString(),
-        if (exerciseTypes != null && exerciseTypes.isNotEmpty)
-          'exercise_types': exerciseTypes.join(','),
-        // Every type this build can render: the server builds only these,
-        // and adds bonus `adaptive_exercises` and per-exercise labels.
-        if (supportedTypes != null && supportedTypes.isNotEmpty)
-          'supported_types': supportedTypes.join(','),
-      },
-    );
+    final query = {
+      'num_questions': numQuestions.toString(),
+      if (exerciseTypes != null && exerciseTypes.isNotEmpty)
+        'exercise_types': exerciseTypes.join(','),
+      // Every type this build can render: the server builds only these,
+      // and adds bonus `adaptive_exercises` and per-exercise labels.
+      if (supportedTypes != null && supportedTypes.isNotEmpty)
+        'supported_types': supportedTypes.join(','),
+    };
+    final session = await _get('learn/session/$levelId', queryParameters: query);
+    // Only lessons (the quiz sends its supported types) work offline; games
+    // and the speed quiz keep needing the network.
+    final offline = OfflineMode.instance;
+    if (supportedTypes == null || !offline.enabled) return session;
+    if (session != null) {
+      unawaited(offline.prefetcher.setActiveLevel(levelId, query));
+      return session;
+    }
+    // No answer: play a lesson fetched earlier. Its answer key stays on the
+    // server, which grades the completion when the queue replays it.
+    final cached = await offline.prefetcher.take(levelId);
+    Analytics.track('offline_lesson_started', {
+      'level_id': levelId,
+      'available': cached != null,
+      'lessons_left': offline.prefetcher.ready.value,
+    });
+    return cached;
   }
 
   /// The script chart (`GET /learn/script/course`): consonant rows, vowels
@@ -345,6 +367,13 @@ class ApiService {
     'session_id': sessionId,
     'answers': answers,
   });
+
+  /// A fresh session for [levelId] with the query a lesson used, for the
+  /// offline prefetch. Null when offline.
+  Future<Map<String, dynamic>?> fetchSessionForOffline(
+    String levelId,
+    Map<String, String> query,
+  ) => _get('learn/session/$levelId', queryParameters: query);
 
   /// Teaching notes and items for a level (`GET /learn/levels/{id}/lesson`).
   Future<Map<String, dynamic>?> getLevelLesson(String levelId) async {
@@ -403,7 +432,26 @@ class ApiService {
     return submitProgressCompletion(sessionData);
   }
 
+  /// Posts a finished lesson. With offline mode on it goes through the
+  /// persisted queue (with a client UUID, so a replay counts once): true
+  /// when the server took it or it is queued for later, false when the
+  /// server refused it. Then tops up the level's offline lessons.
   Future<bool> submitProgressCompletion(Map<String, dynamic> submission) async {
+    final offline = OfflineMode.instance;
+    if (offline.enabled) {
+      final result = await offline.queue.submit(
+        QueuedKind.lessonComplete,
+        'progress/complete',
+        submission,
+      );
+      final levelId = submission['level_id']?.toString();
+      if (levelId != null) {
+        unawaited(offline.prefetchActive(levelId: levelId));
+      }
+      if (result == null) return true; // queued
+      return result.outcome == SendOutcome.delivered &&
+          result.response?['success'] == true;
+    }
     try {
       final response = await _post('progress/complete', submission);
       return response != null && response['success'] == true;
@@ -768,10 +816,21 @@ class ApiService {
   /// Reports that the learner opened an automated push (PushService), so
   /// the backend does not send that evening's streak saver.
   Future<bool> reportPushOpened(String notificationId, {String? lineId}) async {
-    final response = await _post('/notifications/opened', {
+    final body = {
       'notification_id': notificationId,
       if (lineId != null) 'line_id': lineId,
-    });
+    };
+    final offline = OfflineMode.instance;
+    if (offline.enabled) {
+      // Opened on a train: the open still reaches the server later.
+      final result = await offline.queue.submit(
+        QueuedKind.notificationOpened,
+        'notifications/opened',
+        body,
+      );
+      return result?.response?['recorded'] == true;
+    }
+    final response = await _post('/notifications/opened', body);
     return response?['recorded'] == true;
   }
 
