@@ -1,3 +1,4 @@
+import 'screens/script/script_routes.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -97,6 +98,7 @@ class MyApp extends StatelessWidget {
             themeMode:
                 themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             home: const SplashScreen(),
+            routes: ScriptRoutes.all,
             // Above the navigator, so an out-of-date install cannot get
             // past the update notice by any route, and every tap, swipe and
             // scroll on any route, dialog or sheet is recorded.

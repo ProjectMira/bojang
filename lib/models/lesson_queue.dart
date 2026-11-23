@@ -184,11 +184,14 @@ class LessonQueue {
     ..._bonus,
   ];
 
-  /// Records the answer to [current]. [optionIndex] is the option picked.
+  /// Records the answer to [current]. [optionIndex] is the option picked;
+  /// [answerText], when given, is sent instead of its id (a built syllable,
+  /// a tracing score).
   void answer({
     required int optionIndex,
     required bool correct,
     required int ms,
+    String? answerText,
   }) {
     if (_answeredCurrent) return;
     _answeredCurrent = true;
@@ -197,7 +200,7 @@ class LessonQueue {
     _answers.add(
       LessonAnswer(
         exerciseId: q.exerciseId,
-        answer: q.answerIdFor(optionIndex),
+        answer: answerText ?? q.answerIdFor(optionIndex),
         correct: correct,
         ms: ms,
         attempt: item.attempt,

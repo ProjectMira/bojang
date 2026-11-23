@@ -302,6 +302,50 @@ class ApiService {
     );
   }
 
+  /// The script chart (`GET /learn/script/course`): consonant rows, vowels
+  /// and stacks with readings, hints, examples, audio and, signed in,
+  /// per-letter strength.
+  Future<Map<String, dynamic>?> getScriptCourse() => _get('learn/script/course');
+
+  /// A script lesson: `learn` (next weak letters) or `practice`
+  /// (strength-weighted). Complete it with [submitProgressCompletion].
+  Future<Map<String, dynamic>?> getScriptSession({
+    required String mode,
+    int numQuestions = 10,
+    List<String>? supportedTypes,
+  }) => _get(
+    'learn/script/session',
+    queryParameters: {
+      'mode': mode,
+      'num_questions': numQuestions.toString(),
+      if (supportedTypes != null && supportedTypes.isNotEmpty)
+        'supported_types': supportedTypes.join(','),
+    },
+  );
+
+  /// The alphabet gate's reading check: `full` (10) or `quick` (5).
+  Future<Map<String, dynamic>?> getScriptGate({
+    required String mode,
+    List<String>? supportedTypes,
+  }) => _get(
+    'learn/script/gate',
+    queryParameters: {
+      'mode': mode,
+      if (supportedTypes != null && supportedTypes.isNotEmpty)
+        'supported_types': supportedTypes.join(','),
+    },
+  );
+
+  /// Grades the reading check on the server. Returns `{passed, correct,
+  /// total, gate_passed, gate_skipped}`, or null when offline.
+  Future<Map<String, dynamic>?> completeScriptGate({
+    required String sessionId,
+    required List<Map<String, dynamic>> answers,
+  }) => _post('learn/script/gate/complete', {
+    'session_id': sessionId,
+    'answers': answers,
+  });
+
   /// Teaching notes and items for a level (`GET /learn/levels/{id}/lesson`).
   Future<Map<String, dynamic>?> getLevelLesson(String levelId) async {
     return _get('learn/levels/${Uri.encodeComponent(levelId)}/lesson');
