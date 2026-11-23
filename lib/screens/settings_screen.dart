@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Feedback;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/analytics.dart';
@@ -30,8 +31,19 @@ class SettingsScreen extends StatefulWidget {
 /// The published privacy policy (also the App Store Connect privacy URL).
 const String privacyPolicyUrl = 'https://www.bojang.in/privacy-policy.html';
 
+/// "Version 2.17.0 (22)" from the installed package, or "Version" while it
+/// is still loading or unavailable.
+String versionLabel(PackageInfo? info) {
+  if (info == null || info.version.isEmpty) return 'Version';
+  final build = info.buildNumber;
+  return build.isEmpty
+      ? 'Version ${info.version}'
+      : 'Version ${info.version} ($build)';
+}
+
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _locationSharing = false;
+  PackageInfo? _packageInfo;
 
   @override
   void initState() {
@@ -39,7 +51,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     LocationService.instance.sharingEnabled.then((on) {
       if (mounted) setState(() => _locationSharing = on);
     });
+    _loadPackageInfo();
   }
+
+  /// The installed version comes from the platform, never a literal: CI
+  /// bumps pubspec's version on every push.
+  Future<void> _loadPackageInfo() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (mounted) setState(() => _packageInfo = info);
+    } catch (_) {
+      // No platform channel (e.g. some test hosts): keep the bare label.
+    }
+  }
+
+  String get _versionLabel => versionLabel(_packageInfo);
 
   @override
   Widget build(BuildContext context) {
@@ -304,7 +330,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 _buildSettingsCard(
                   title: 'About Bojang',
-                  subtitle: 'Version 2.0.0',
+                  subtitle: _versionLabel,
                   icon: Icons.info,
                   onTap: () => _showAboutDialog(),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -918,19 +944,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder:
           (context) => AlertDialog(
             title: const Text('About Bojang'),
-            content: const Column(
+            content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Bojang - Tibetan Learning App'),
-                SizedBox(height: 8),
-                Text('Version 2.0.0'),
-                SizedBox(height: 16),
-                Text(
+                const Text('Bojang - Tibetan Learning App'),
+                const SizedBox(height: 8),
+                Text(_versionLabel),
+                const SizedBox(height: 16),
+                const Text(
                   'Learn Tibetan through short lessons, generated practice sessions, vocabulary drills, XP, streaks, and league progress.',
                 ),
-                SizedBox(height: 16),
-                Text(
+                const SizedBox(height: 16),
+                const Text(
                   'Bojang connects Tibetan language learning with a modern practice flow designed for daily study.',
                 ),
               ],
