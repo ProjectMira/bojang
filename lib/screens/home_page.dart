@@ -10,6 +10,7 @@ import '../theme/app_tokens.dart';
 import '../utils/topic_visuals.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/announcement_banner.dart';
+import '../widgets/offline_lessons_banner.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/cultural_tip_card.dart';
 import '../widgets/earn_back_card.dart';
@@ -138,6 +139,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       const SizedBox(height: AppSpacing.xl),
 
                       const AnnouncementBanner(),
+                      const OfflineLessonsBanner(),
 
                       _buildStatsStrip(context, progressService),
 

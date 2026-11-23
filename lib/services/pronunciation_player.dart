@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'analytics.dart';
+import 'offline_mode.dart';
 
 export 'pronunciation_voices.dart';
 
@@ -77,6 +78,11 @@ class PronunciationPlayer {
         final name = sha1.convert(utf8.encode(url)).toString();
         final file = File('${dir.path}/$name.mp3');
         if (await file.exists() && await file.length() > 0) return file;
+        // Prefetched with an offline lesson.
+        if (OfflineMode.instance.enabled) {
+          final offline = await OfflineMode.instance.media.fileFor(url);
+          if (offline != null) return offline;
+        }
         final response = await http
             .get(Uri.parse(url))
             .timeout(const Duration(seconds: 15));

@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api_service.dart';
+import 'offline_mode.dart';
+import 'offline_queue.dart';
 
 /// Sends one request to the backend and returns the raw response (null when
 /// offline). Replaced in tests.
@@ -61,6 +63,11 @@ class KvWrite {
   };
 }
 
+/// Queues a PATCH body for [namespace] to send when back online. Returns
+/// false when it can't be queued (offline mode off).
+typedef KvQueueWrite =
+    Future<bool> Function(String namespace, Map<String, Object?> body);
+
 enum KvOutcome { ok, conflict, failed }
 
 /// What a write did. On [KvOutcome.ok], [entries] is the whole namespace;
@@ -72,11 +79,17 @@ class KvWriteResult {
     this.outcome, {
     this.entries = const {},
     this.conflicts = const [],
+    this.queued = false,
   });
 
   final KvOutcome outcome;
   final Map<String, KvEntry> entries;
   final List<String> conflicts;
+
+  /// Offline: [entries] is the local copy with the write applied, and the
+  /// PATCH waits in the offline queue. A conflict on replay refreshes the
+  /// local copy from the server.
+  final bool queued;
 }
 
 /// Client for the backend's per-learner key-value store,
@@ -89,9 +102,45 @@ class KvWriteResult {
 ///
 /// Ready-made helpers: [OnboardingAnswers], [SeenTips], [FeatureState].
 class UserKv {
-  UserKv({KvTransport? transport, String Function()? uid})
+  UserKv({KvTransport? transport, String Function()? uid, KvQueueWrite? queueWrite})
     : _transport = transport ?? _defaultTransport,
-      _uid = uid ?? _defaultUid;
+      _uid = uid ?? _defaultUid,
+      _queueWrite = queueWrite ?? (transport == null ? _defaultQueueWrite : null);
+
+  final KvQueueWrite? _queueWrite;
+  static bool _listening = false;
+
+  static Future<bool> _defaultQueueWrite(
+    String namespace,
+    Map<String, Object?> body,
+  ) async {
+    final offline = OfflineMode.instance;
+    if (!offline.enabled) return false;
+    if (!_listening) {
+      _listening = true;
+      offline.queue.addListener(_onReplayed);
+    }
+    await offline.queue.enqueue(
+      QueuedKind.kvPatch,
+      'v1/kv/$namespace',
+      Map<String, dynamic>.from(body),
+      method: 'PATCH',
+    );
+    return true;
+  }
+
+  /// A queued PATCH reached the server: keep its answer, or on a conflict
+  /// take the server's copy.
+  static void _onReplayed(QueuedRequest item, SendResult result) {
+    if (item.kind != QueuedKind.kvPatch) return;
+    final namespace = item.path.split('/').last;
+    if (result.outcome == SendOutcome.delivered) {
+      final items = result.response?['items'];
+      if (items != null) unawaited(instance._store(namespace, _parseItems(items)));
+    } else {
+      unawaited(instance.read(namespace));
+    }
+  }
 
   static final UserKv instance = UserKv();
 
@@ -190,7 +239,7 @@ class UserKv {
         'items': [for (final w in writes) w.toJson()],
       },
     );
-    if (response == null) return const KvWriteResult(KvOutcome.failed);
+    if (response == null) return _queueOffline(namespace, writes);
     try {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
       if (response.statusCode == 200) {
@@ -225,6 +274,31 @@ class UserKv {
       debugPrint('user_kv write answer unreadable: $e');
     }
     return const KvWriteResult(KvOutcome.failed);
+  }
+
+  Future<KvWriteResult> _queueOffline(
+    String namespace,
+    List<KvWrite> writes,
+  ) async {
+    final queue = _queueWrite;
+    final body = {
+      'items': [for (final w in writes) w.toJson()],
+    };
+    if (queue == null || !await queue(namespace, body)) {
+      return const KvWriteResult(KvOutcome.failed);
+    }
+    // Apply it locally, at the version the server will reach, so a second
+    // offline write to the key chains onto this one.
+    final merged = Map<String, KvEntry>.of(await cached(namespace));
+    for (final w in writes) {
+      if (w.delete) {
+        merged.remove(w.key);
+      } else {
+        merged[w.key] = KvEntry(w.value, w.version + 1);
+      }
+    }
+    await _store(namespace, merged);
+    return KvWriteResult(KvOutcome.ok, entries: merged, queued: true);
   }
 
   /// Read-modify-write of one key: [change] gets the stored value (null when
