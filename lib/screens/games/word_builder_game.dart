@@ -1,11 +1,9 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart' hide Feedback;
 
 import '../../models/game_word.dart';
-import '../../services/sound_effects.dart';
-import '../../services/theme_service.dart';
+import '../../services/feedback.dart';
 import '../../theme/app_tokens.dart';
 import '../../widgets/romanisation_text.dart';
 import '../../widgets/app_text_style.dart';
@@ -117,9 +115,8 @@ class _WordBuilderGameState extends State<WordBuilderGame> {
       if (built[i] != answer[i]) isCorrect = false;
     }
 
-    final theme = context.read<ThemeService>();
     if (isCorrect) {
-      SoundEffects.instance.correct(theme);
+      Feedback.answer(true, context: context);
       setState(() {
         _state = _BuildState.solved;
         if (_attempts == 0) _correct++;
@@ -128,7 +125,7 @@ class _WordBuilderGameState extends State<WordBuilderGame> {
       return;
     }
 
-    SoundEffects.instance.wrong(theme);
+    Feedback.answer(false, context: context);
     _attempts++;
     setState(() => _state = _BuildState.wrong);
     Future.delayed(const Duration(milliseconds: 750), () {

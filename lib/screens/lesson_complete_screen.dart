@@ -1,8 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:confetti/confetti.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Feedback;
 import '../services/analytics.dart';
+import '../services/feedback.dart';
 import '../services/location_service.dart';
 import '../services/notification_primer.dart';
 import '../services/progress_service.dart';
@@ -131,6 +132,7 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
       lessonsCompleted: widget.lessonsCompleted,
       accuracy: widget.accuracy,
     );
+    Feedback.play(FeedbackEvent.lessonComplete, context: context);
     _confettiLeft = ConfettiController(
       duration: const Duration(milliseconds: 2500),
     );

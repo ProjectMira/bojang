@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Feedback;
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import '../models/learning_path.dart';
@@ -9,10 +9,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 import '../services/analytics.dart';
+import '../services/feedback.dart';
 import '../services/api_service.dart';
 import '../services/lesson_milestones.dart';
 import '../services/progress_service.dart';
 import '../services/pronunciation_player.dart';
+import '../services/sound_effects.dart';
 import '../services/theme_service.dart';
 import '../theme/app_tokens.dart';
 import '../utils/yak_lines.dart';
@@ -118,6 +120,7 @@ class _QuizScreenState extends State<QuizScreen>
   @override
   void initState() {
     super.initState();
+    Feedback.startLesson();
     _style =
         widget.style ??
         Provider.of<ThemeService>(context, listen: false).lessonStyle;
@@ -408,21 +411,8 @@ class _QuizScreenState extends State<QuizScreen>
       ms: responseMs,
       answerText: answerText,
     );
-    final audioPath = isCorrect ? 'audio/correct.mp3' : 'audio/incorrect.mp3';
-
     final themeService = Provider.of<ThemeService>(context, listen: false);
-    if (themeService.soundEffectsEnabled) {
-      try {
-        debugPrint('Attempting to play audio: $audioPath');
-        await _audioPlayer.setVolume(themeService.soundEffectsVolume);
-        await _audioPlayer.play(AssetSource(audioPath));
-        debugPrint('Audio played successfully.');
-      } catch (e) {
-        debugPrint('Error playing audio: $e');
-      }
-    }
-
-    if (isCorrect) HapticFeedback.lightImpact();
+    Feedback.answer(isCorrect, context: context);
 
     final answered = item.question;
     // Reading help: word counts for "new words only", and the run of right
@@ -471,7 +461,7 @@ class _QuizScreenState extends State<QuizScreen>
         if (!mounted || revealGeneration != _generation) return;
         if (!identical(lesson.current, item)) return;
         try {
-          await _audioPlayer.setVolume(themeService.soundEffectsVolume * 0.3);
+          await SoundEffects.instance.duck(0.3);
         } catch (_) {}
         await PronunciationPlayer.instance.play(
           revealUrl,

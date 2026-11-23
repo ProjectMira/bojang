@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Feedback;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/analytics.dart';
+import '../services/feedback.dart';
 import '../services/location_service.dart';
 import '../models/romanisation.dart';
 import '../services/reading_help.dart';
@@ -156,7 +157,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 _buildSettingsCard(
                   title: 'Audio Settings',
-                  subtitle: 'Sound effects and pronunciation',
+                  subtitle: 'Sound effects, haptics and pronunciation',
                   icon: Icons.volume_up,
                   onTap: () => _showAudioSettings(),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -483,6 +484,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle: const Text('Play correct/incorrect answers sound'),
                     value: themeService.soundEffectsEnabled,
                     onChanged: (val) => themeService.setSoundEffectsEnabled(val),
+                  ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: Feedback.haptics..load(),
+                    builder: (context, on, _) => SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Haptics'),
+                      subtitle: const Text('Vibrate with answers and celebrations'),
+                      value: on,
+                      onChanged: Feedback.haptics.set,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Text('Sound Effects Volume'),

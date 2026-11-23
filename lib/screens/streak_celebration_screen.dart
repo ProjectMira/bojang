@@ -1,11 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:confetti/confetti.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Feedback;
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../services/analytics.dart';
+import '../services/feedback.dart';
 import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
 import '../theme/motion.dart';
@@ -107,6 +108,10 @@ class _StreakCelebrationScreenState extends State<StreakCelebrationScreen>
       'restored': c.restored,
       if (c.earnBack != null) 'earn_back_sessions': c.earnBack!.sessionsDone,
     });
+    Feedback.play(
+      c.tierUp ? FeedbackEvent.tierUp : FeedbackEvent.streakExtended,
+      context: context,
+    );
     if (c.tierUp) {
       Analytics.track('streak_tier_reached', {
         'streak': c.streak,

@@ -7,8 +7,14 @@
 ///
 /// One [YakMascot] is a single character with many moods. Changing [mood]
 /// tweens the pose, so the yak visibly *reacts* rather than swapping images.
+///
+/// Give it a [YakController] and it also plays the state-machine contract
+/// (`docs/YAK_ANIMATION_CONTRACT.md`): a hop on `correct_trig`, a head shake
+/// on `incorrect_trig`, a cheer on `correct_after_mistake_trig`, and the
+/// `idle_num` variants. The same controller will drive the Rive yak.
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -16,6 +22,8 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_tokens.dart';
 import '../theme/motion.dart';
+import 'rive_yak.dart';
+import 'yak_controller.dart';
 
 /// What the yak is feeling. Pick by moment, not by screen.
 enum YakMood {
@@ -112,6 +120,72 @@ class _Pose {
   final _EyeStyle eyes;
   final _Extra extra;
   final bool armRInFront;
+
+  _Pose copyWith({
+    double? armL,
+    double? armR,
+    double? eyeOpen,
+    double? mouthCurve,
+    double? mouthOpen,
+    double? lookX,
+    double? blush,
+    double? breath,
+    _EyeStyle? eyes,
+    _Extra? extra,
+  }) => _Pose(
+    armL: armL ?? this.armL,
+    armR: armR ?? this.armR,
+    waveL: waveL,
+    waveR: waveR,
+    headTilt: headTilt,
+    eyeOpen: eyeOpen ?? this.eyeOpen,
+    brow: brow,
+    browTilt: browTilt,
+    browLift: browLift,
+    mouthCurve: mouthCurve ?? this.mouthCurve,
+    mouthOpen: mouthOpen ?? this.mouthOpen,
+    mouthWidth: mouthWidth,
+    earDroop: earDroop,
+    lookX: lookX ?? this.lookX,
+    lookY: lookY,
+    blush: blush ?? this.blush,
+    bounce: bounce,
+    breath: breath ?? this.breath,
+    eyes: eyes ?? this.eyes,
+    extra: extra ?? this.extra,
+    armRInFront: armRInFront,
+  );
+
+  /// The `idle_num` variants, layered on whatever mood is showing.
+  /// [t] is the 0..1 idle loop; [still] freezes the drift.
+  _Pose idleVariant(int idle, double t, {required bool still}) {
+    switch (idle) {
+      case 1: // Looking around: eyes drift left and right.
+        return copyWith(
+          lookX: lookX + (still ? 0.4 : 0.7 * math.sin(math.pi * 2 * t)),
+        );
+      case 2: // Slow and sleepy: heavier lids, deeper breaths.
+        return copyWith(eyeOpen: eyeOpen * 0.72, breath: breath * 1.6);
+      default:
+        return this;
+    }
+  }
+
+  /// The cheer for `correct_after_mistake_trig`: arms up, mouth open,
+  /// sparkles. [k] 0..1 is how far into the cheer pose.
+  _Pose cheer(double k) {
+    if (k <= 0) return this;
+    double l(double a, double b) => lerpDouble(a, b, k)!;
+    return copyWith(
+      armL: l(armL, 2.55),
+      armR: l(armR, 2.55),
+      mouthCurve: l(mouthCurve, 1),
+      mouthOpen: l(mouthOpen, 1),
+      blush: l(blush, 0.7),
+      eyes: k > 0.35 ? _EyeStyle.smile : eyes,
+      extra: k > 0.35 ? _Extra.sparkles : extra,
+    );
+  }
 
   static _Pose lerp(_Pose a, _Pose b, double t) {
     double l(double x, double y) => lerpDouble(x, y, t)!;
@@ -251,6 +325,7 @@ class YakMascot extends StatefulWidget {
     this.showBody = true,
     this.animate = true,
     this.semanticLabel,
+    this.controller,
   });
 
   final YakMood mood;
@@ -265,6 +340,10 @@ class YakMascot extends StatefulWidget {
   /// The yak is decorative by default. Give a label when it is the only
   /// thing carrying meaning on screen.
   final String? semanticLabel;
+
+  /// Fires the contract's reactions on this yak (see [YakController]).
+  /// Without one the yak only follows [mood].
+  final YakController? controller;
 
   static const double bodyAspect = 900 / 1140;
 
@@ -288,20 +367,47 @@ class _YakMascotState extends State<YakMascot> with TickerProviderStateMixin {
     value: 1,
   );
 
+  /// Plays one contract reaction (hop, shake, cheer) on top of the mood.
+  late final AnimationController _react = AnimationController(vsync: this)
+    ..addStatusListener((status) {
+      if (status == AnimationStatus.completed) _endReaction();
+    });
+
   late _Pose _from = _poses[widget.mood]!;
   late _Pose _to = _poses[widget.mood]!;
   bool _reduceMotion = false;
+  MotionLevel _motion = MotionLevel.full;
+  bool _dark = false;
+
+  YakState _reaction = YakState.idle;
+  int _reactionSerial = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _reactionSerial = widget.controller?.reaction ?? 0;
+    widget.controller?.addListener(_onController);
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _reduceMotion = !Motion.of(context).allowsLoops;
+    _motion = Motion.of(context);
+    _reduceMotion = !_motion.allowsLoops;
+    _dark = Theme.of(context).brightness == Brightness.dark;
+    widget.controller?.syncEnvironment(darkMode: _dark, motion: _motion);
     _syncLoop();
   }
 
   @override
   void didUpdateWidget(YakMascot old) {
     super.didUpdateWidget(old);
+    if (old.controller != widget.controller) {
+      old.controller?.removeListener(_onController);
+      widget.controller?.addListener(_onController);
+      _reactionSerial = widget.controller?.reaction ?? 0;
+      _stopReaction();
+    }
     if (old.mood != widget.mood) {
       _from = _Pose.lerp(_from, _to, Curves.easeOutCubic.transform(_shift.value));
       _to = _poses[widget.mood]!;
@@ -312,6 +418,46 @@ class _YakMascotState extends State<YakMascot> with TickerProviderStateMixin {
       }
     }
     if (old.animate != widget.animate) _syncLoop();
+  }
+
+  void _onController() {
+    final c = widget.controller;
+    if (c == null || !mounted) return;
+    if (c.reaction == _reactionSerial) {
+      // idle_num, or the controller settling back to idle.
+      setState(() {});
+      return;
+    }
+    _reactionSerial = c.reaction;
+    final length = YakController.reactionLength(c.state, _motion);
+    if (c.state == YakState.idle || length == Duration.zero || !widget.animate) {
+      // reset_trig, or static motion: no movement, straight to the end.
+      _stopReaction();
+      if (c.state != YakState.idle) {
+        final serial = c.reaction;
+        scheduleMicrotask(() => c.finishReaction(serial));
+      }
+      setState(() {});
+      return;
+    }
+    setState(() => _reaction = c.state);
+    _react
+      ..duration = length
+      ..forward(from: 0);
+  }
+
+  void _endReaction() {
+    final c = widget.controller;
+    final serial = _reactionSerial;
+    if (mounted) setState(() => _reaction = YakState.idle);
+    _react.value = 0;
+    c?.finishReaction(serial);
+  }
+
+  void _stopReaction() {
+    _react.stop();
+    _react.value = 0;
+    _reaction = YakState.idle;
   }
 
   void _syncLoop() {
@@ -325,28 +471,70 @@ class _YakMascotState extends State<YakMascot> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    widget.controller?.removeListener(_onController);
     _loop.dispose();
     _shift.dispose();
+    _react.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = widget.controller;
+    if (controller != null && RiveYak.enabled) {
+      return RiveYak(
+        controller: controller,
+        size: widget.size,
+        width: widget.width,
+        semanticLabel: widget.semanticLabel,
+      );
+    }
     final still = !widget.animate || _reduceMotion;
+    final idle = controller?.idleNum ?? 0;
+    // Reduced motion keeps reactions, briefly and smaller.
+    final amp = _motion == MotionLevel.full ? 1.0 : 0.55;
     Widget child = RepaintBoundary(
       child: AnimatedBuilder(
-        animation: Listenable.merge([_loop, _shift]),
+        animation: Listenable.merge([_loop, _shift, _react]),
         builder: (context, _) {
           final k = Curves.easeOutCubic.transform(_shift.value);
+          final t = still ? 0.1 : _loop.value;
+          var pose = _Pose.lerp(_from, _to, k).idleVariant(idle, t, still: still);
+          final r = _react.value;
+          var hop = 0.0;
+          var shake = 0.0;
+          var stretch = 0.0;
+          switch (_reaction) {
+            case YakState.idle:
+              break;
+            case YakState.correct:
+              // One springy hop, stretching in the air.
+              final up = math.sin(math.pi * Curves.easeOut.transform(r));
+              hop = amp * 48 * up;
+              stretch = amp * 0.06 * up;
+            case YakState.incorrect:
+              // A damped "no": two and a half side-to-side turns.
+              shake = amp * 0.15 * math.sin(math.pi * 5 * r) * (1 - r);
+            case YakState.correctAfterMistake:
+              // The cheer: two hops, a wiggle, arms up and sparkles.
+              hop = amp * 40 * math.sin(math.pi * 2 * r).abs();
+              shake = amp * 0.06 * math.sin(math.pi * 4 * r);
+              stretch = amp * 0.04 * math.sin(math.pi * 2 * r).abs();
+              pose = pose.cheer(math.sin(math.pi * r));
+          }
           return CustomPaint(
             size: Size(widget.width, widget.size),
             painter: _YakPainter(
-              pose: _Pose.lerp(_from, _to, k),
+              pose: pose,
               // A fixed, flattering frame when motion is off.
-              t: still ? 0.1 : _loop.value,
+              t: t,
               pop: math.sin(math.pi * _shift.value),
               showBody: widget.showBody,
               still: still,
+              hop: hop,
+              shake: shake,
+              stretch: stretch,
+              dark: _dark,
             ),
           );
         },
@@ -386,6 +574,10 @@ class _YakPainter extends CustomPainter {
     required this.pop,
     required this.showBody,
     required this.still,
+    this.hop = 0,
+    this.shake = 0,
+    this.stretch = 0,
+    this.dark = false,
   });
 
   final _Pose pose;
@@ -393,6 +585,16 @@ class _YakPainter extends CustomPainter {
   final double pop;
   final bool showBody;
   final bool still;
+
+  /// Contract reactions: extra lift (logo units), head turn (radians) and
+  /// vertical stretch while airborne.
+  final double hop;
+  final double shake;
+  final double stretch;
+
+  /// `dark_mode_bool`: the ground shadow turns into a soft glow so it still
+  /// reads on a dark background.
+  final bool dark;
 
   static const double _tau = math.pi * 2;
   static const double _stroke = 18;
@@ -452,21 +654,29 @@ class _YakPainter extends CustomPainter {
 
     if (showBody) {
       // Ground shadow — shrinks as the yak leaves the ground.
-      final lift = pose.bounce == 0 ? 0.0 : jump / pose.bounce;
+      final idleLift = pose.bounce == 0 ? 0.0 : jump / pose.bounce;
+      final lift = math.min(1.0, idleLift + hop / 60);
       canvas.drawOval(
         Rect.fromCenter(
           center: const Offset(512, 1206),
           width: 420 * (1 - 0.25 * lift),
           height: 44 * (1 - 0.25 * lift),
         ),
-        _fill(Colors.black.withOpacity(0.10)),
+        _fill(
+          dark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.10),
+        ),
       );
     }
 
     // Mood-change "pop" and jump act on the whole character.
     final anchor = showBody ? const Offset(512, 1200) : const Offset(512, 510);
-    canvas.translate(anchor.dx, anchor.dy - jump);
-    canvas.scale(1 + 0.05 * pop, 1 + 0.05 * pop);
+    canvas.translate(anchor.dx, anchor.dy - jump - hop);
+    canvas.scale(
+      (1 + 0.05 * pop) * (1 - 0.5 * stretch),
+      (1 + 0.05 * pop) * (1 + stretch),
+    );
     canvas.translate(-anchor.dx, -anchor.dy);
 
     if (showBody) {
@@ -480,8 +690,8 @@ class _YakPainter extends CustomPainter {
     }
 
     canvas.save();
-    canvas.translate(512, 800 - 5 * breath);
-    canvas.rotate(pose.headTilt + sway);
+    canvas.translate(512 + 120 * shake, 800 - 5 * breath);
+    canvas.rotate(pose.headTilt + sway + shake);
     canvas.translate(-512, -800);
     _paintHead(canvas);
     canvas.restore();
@@ -1007,5 +1217,9 @@ class _YakPainter extends CustomPainter {
       old.pop != pop ||
       old.pose != pose ||
       old.showBody != showBody ||
-      old.still != still;
+      old.still != still ||
+      old.hop != hop ||
+      old.shake != shake ||
+      old.stretch != stretch ||
+      old.dark != dark;
 }

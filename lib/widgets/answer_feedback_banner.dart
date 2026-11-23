@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Feedback;
 import '../models/romanisation.dart';
+import '../services/feedback.dart';
 import '../theme/app_tokens.dart';
 import '../utils/yak_lines.dart';
 import 'app_text_style.dart';
@@ -98,6 +99,7 @@ class AnswerFeedbackBanner extends StatelessWidget {
                         mood: visible ? line.mood : YakMood.happy,
                         size: 64,
                         showBody: false,
+                        controller: Feedback.yak,
                       ),
                       Positioned(
                         right: -2,

@@ -1,11 +1,9 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart' hide Feedback;
 
 import '../../models/game_word.dart';
-import '../../services/sound_effects.dart';
-import '../../services/theme_service.dart';
+import '../../services/feedback.dart';
 import '../../theme/app_tokens.dart';
 import '../../widgets/romanisation_text.dart';
 import '../../widgets/app_text_style.dart';
@@ -118,12 +116,7 @@ class _PicturePickGameState extends State<PicturePickGame> {
   void _pick(GameWord word) {
     if (_answered) return;
     final isCorrect = word.id == _target.id;
-    final theme = context.read<ThemeService>();
-    if (isCorrect) {
-      SoundEffects.instance.correct(theme);
-    } else {
-      SoundEffects.instance.wrong(theme);
-    }
+    Feedback.answer(isCorrect, context: context);
     setState(() {
       _pickedId = word.id;
       if (isCorrect) _correct++;

@@ -109,6 +109,16 @@ flutter:
   assets:
     - assets/audio/correct.mp3
     - assets/audio/incorrect.mp3
+    - assets/audio/correct_1.mp3
+    - assets/audio/correct_2.mp3
+    - assets/audio/correct_3.mp3
+    - assets/audio/correct_4.mp3
+    - assets/audio/correct_after_mistake.mp3
+    - assets/audio/lesson_complete.mp3
+    - assets/audio/streak_extended.mp3
+    - assets/audio/tier_up.mp3
+    - assets/audio/tap.mp3
+    - assets/audio/select.mp3
     - assets/quiz_data/levels.json
     - assets/quiz_data/level-1/
     - assets/quiz_data/level-2/

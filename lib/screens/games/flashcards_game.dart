@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/material.dart' hide Feedback;
 import 'package:provider/provider.dart';
 
 import '../../models/game_word.dart';
+import '../../services/feedback.dart';
 import '../../services/theme_service.dart';
 import '../../theme/app_tokens.dart';
 import '../../widgets/romanisation_text.dart';
@@ -77,7 +77,7 @@ class _FlashcardsGameState extends State<FlashcardsGame> {
   void _grade({required bool knewIt}) {
     final card = _queue.removeAt(0);
     if (knewIt) {
-      HapticFeedback.lightImpact();
+      Feedback.play(FeedbackEvent.select, context: context);
     } else {
       _missed.add(card.id);
       _queue.add(card);
