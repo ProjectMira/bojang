@@ -173,6 +173,15 @@ deletes its rows.
 | `force_update_shown` | update gate (iOS, Android) | `installed_version`, `store_version` (empty for a server wall), `reason` (`storeRelease`: newer App Store version; `belowMinimumBuild`: below `/v1/config` `min_supported_build`) |
 | `force_update_tapped` | update gate (iOS, Android) | `installed_version`, `store_version`, `reason`, `opened` (bool: store app or web page opened) |
 | `experiment_exposed` | `Experiments.exposed` / `ExperimentExposure` (any screen) | `experiment` (`exp_*` key or PostHog flag), `arm`, `surface` (where it was shown), `source` (`remote_config`/`posthog`) |
+| `leaderboard_opened` | Games header trophy, Profile card, weekly result sheet | `source` (`games`/`profile`/`weekly_result`) |
+| `leaderboard_viewed` | leaderboard screen (first load) | `source`, `rank` (null: no XP or hidden), `xp`, `in_top` (top 50), `visible`, `learners` |
+| `leaderboard_result_shown` | Profile, first launch of a new week ("You finished #12") | `rank`, `xp`, `learners` (last week) |
+| `setting_changed` (`setting`: `show_on_leaderboard`) | Settings > Privacy | `value` |
+| `family_invite_created` | Profile > Family streaks | `members` (already linked) |
+| `family_invite_shared` | invite sheet | `via` (`share`/`copy`) |
+| `family_invite_accepted` | enter-code sheet | `success`, `error` (`invalid`/`ownCode`/`alreadyLinked`/`full`/`theirFull`/`offline`) |
+| `family_nudge_sent` | family member row | `outcome` (`sent`/`alreadyNudged`/`alreadyPractised`/`offline`/`failed`), `shared_streak` |
+| `family_member_removed` | family member row | `success` |
 
 ## Experiments: assignment is not exposure
 
@@ -236,3 +245,10 @@ learner's local midnight, when the push expires): one per automated streak
 push from `POST /jobs/streak-reminders`. The same sends are in the
 `push_notifications` table with `opened_at`, set by the app's
 `POST /notifications/opened`.
+
+`server_family_linked` (`link_id`) when a family invite is accepted, and
+`server_family_nudge_sent` (`link_id`, `line_id` from the `fn_*` pool in
+`services/family.py`, `devices`, `delivered`) for each nudge push. Nudges are
+logged in `family_nudges`, not `push_notifications`, so they never use up the
+learner's streak-reminder cap; their push data carries `campaign`
+`family_nudge` and `screen` `profile`.

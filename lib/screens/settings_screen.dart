@@ -15,6 +15,7 @@ import '../widgets/reading_voice_pickers.dart';
 import 'notification_settings_screen.dart';
 import 'auth_screen.dart';
 import '../widgets/content_width.dart';
+import '../widgets/leaderboard_entry_points.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -275,6 +276,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           },
                     activeColor: Theme.of(context).primaryColor,
                   ),
+                ),
+
+                const SizedBox(height: 12),
+
+                _buildSettingsCard(
+                  title: 'Show me on the leaderboard',
+                  subtitle: 'Your display name and weekly XP, nothing else',
+                  icon: Icons.emoji_events_outlined,
+                  trailing: const LeaderboardVisibilitySwitch(),
                 ),
 
                 const SizedBox(height: 32),
