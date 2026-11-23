@@ -155,6 +155,36 @@ class NotificationPrimer {
     }
   }
 
+  /// Whether the OS prompt can still be shown, for onboarding's own primer
+  /// screen (it is skipped when there is nothing to ask). Never throws.
+  Future<bool> canAskDuringOnboarding() async {
+    try {
+      return await _canPrompt();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Onboarding's soft primer was answered "Turn on reminders": shows the
+  /// OS prompt. It does not count against [PrimerPolicy.maxAsks] or start
+  /// the [PrimerPolicy.minGap], so the session-end primer keeps all three
+  /// asks for a learner who said "Maybe later". A refusal at the OS level
+  /// stops the session-end primer, as it does there. Returns whether
+  /// notifications are allowed.
+  Future<bool> requestDuringOnboarding() async {
+    try {
+      final allowed = await _requestPermission('onboarding');
+      if (!allowed) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt(asksKey, PrimerPolicy.maxAsks);
+      }
+      return allowed;
+    } catch (e) {
+      debugPrint('Onboarding notification request skipped: $e');
+      return false;
+    }
+  }
+
   static Future<bool?> _showPrePrompt(BuildContext context, PrimerMoment moment) {
     final title = moment == PrimerMoment.freeze
         ? 'Want a heads-up next time?'

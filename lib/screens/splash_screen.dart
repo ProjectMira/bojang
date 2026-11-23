@@ -1,5 +1,13 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/onboarding_service.dart';
+import '../services/reading_help.dart';
+import 'onboarding_screen.dart';
 import '../services/google_auth_service.dart';
 import '../services/api_service.dart';
 import '../utils/yak_lines.dart';
@@ -48,12 +56,55 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
+    // What the install held before this launch, for "existing users never
+    // see onboarding". Taken first, before sign-in writes anything.
+    _installSnapshot = _snapshotInstall();
+
     // Sign-in starts at once, alongside the animation, instead of after it.
     _start();
   }
 
+  late final Future<({Set<String> keys, bool hadAccount})> _installSnapshot;
+  bool _showOnboarding = false;
+
+  static Future<({Set<String> keys, bool hadAccount})> _snapshotInstall() async {
+    var keys = <String>{};
+    var hadAccount = false;
+    try {
+      keys = (await SharedPreferences.getInstance()).getKeys();
+    } catch (_) {}
+    try {
+      hadAccount =
+          Firebase.apps.isNotEmpty &&
+          firebase_auth.FirebaseAuth.instance.currentUser != null;
+    } catch (_) {}
+    return (keys: keys, hadAccount: hadAccount);
+  }
+
+  Future<void> _decideOnboarding() async {
+    try {
+      final snapshot = await _installSnapshot;
+      final service = OnboardingService.instance;
+      final previous = await service.status();
+      _showOnboarding = await service.shouldShow(
+        storedKeys: snapshot.keys,
+        hadAccount: snapshot.hadAccount,
+      );
+      if (_showOnboarding && previous != null) {
+        Analytics.track('onboarding_restarted', {
+          'last_step': await service.lastStep(),
+        });
+      }
+    } catch (e) {
+      debugPrint('Onboarding check failed: $e');
+      _showOnboarding = false;
+    }
+  }
+
   Future<void> _start() async {
     final startup = _checkAuthenticationStatus();
+    unawaited(ReadingHelp.instance.load());
+    await _decideOnboarding();
     // Leave as soon as sign-in is done (but not before minSplash), and never
     // later than maxSplash.
     await Future.any([
@@ -92,6 +143,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         'auth_provider': user?.authProvider.name,
         'is_anonymous': user == null ? anonymous : null,
       });
+      // Onboarding answers given offline (or before the account existed).
+      unawaited(OnboardingService.instance.syncPending());
     } catch (e) {
       // Startup must never trap the learner on the splash.
       debugPrint('Startup sign-in failed: $e');
@@ -103,13 +156,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void _leave() {
     if (_left || !mounted) return;
     _left = true;
-    // Everyone starts learning right away; signing in is offered from the
-    // Profile tab.
-    const Widget nextScreen = MainNavigationScreen();
+    // New installs get a short onboarding that ends in their first lesson;
+    // everyone else starts learning right away. Signing in is offered from
+    // the Profile tab and the "save your progress" ask.
+    final Widget nextScreen =
+        _showOnboarding ? const OnboardingScreen() : const MainNavigationScreen();
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        settings: const RouteSettings(name: 'main'),
+        settings: RouteSettings(name: _showOnboarding ? 'onboarding' : 'main'),
         pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
