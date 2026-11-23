@@ -115,6 +115,22 @@ class LessonCompleteScreen extends StatefulWidget {
     },
   ];
 
+  /// Runs [asks] (default: [LessonCompleteScreen.asks]) in order and stops
+  /// at the first that shows, so one lesson end makes at most one ask.
+  /// Returns the index of the ask shown, or null when none showed.
+  static Future<int?> showFirstAsk(
+    BuildContext context,
+    SessionEndInfo end, {
+    List<SessionEndAsk>? asks,
+  }) async {
+    final list = asks ?? LessonCompleteScreen.asks;
+    for (var i = 0; i < list.length; i++) {
+      if (!context.mounted) return null;
+      if (await list[i](context, end)) return i;
+    }
+    return null;
+  }
+
   @override
   State<LessonCompleteScreen> createState() => _LessonCompleteScreenState();
 }
@@ -189,12 +205,9 @@ class _LessonCompleteScreenState extends State<LessonCompleteScreen> {
       streak: streak,
       lessonsCompleted: widget.lessonsCompleted,
     );
-    for (final ask in LessonCompleteScreen.asks) {
-      if (!mounted) break;
-      if (await ask(context, end)) {
-        shown.add(SessionEndStep.ask.name);
-        break;
-      }
+    if (mounted &&
+        await LessonCompleteScreen.showFirstAsk(context, end) != null) {
+      shown.add(SessionEndStep.ask.name);
     }
     Analytics.track('session_end_completed', {
       'steps': shown,

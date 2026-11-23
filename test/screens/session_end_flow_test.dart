@@ -235,4 +235,63 @@ void main() {
     expect(rect.width, lessThanOrEqualTo(640));
     expect(tester.takeException(), isNull);
   });
+
+  group('one ask per lesson end', () {
+    test('primer, save-progress, location and the wean-off sheet', () {
+      expect(LessonCompleteScreen.asks, hasLength(4));
+    });
+
+    testWidgets('stops at the first ask that shows', (tester) async {
+      late BuildContext context;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (c) {
+              context = c;
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      final called = <String>[];
+      SessionEndAsk ask(String name, bool shows) => (_, _) async {
+        called.add(name);
+        return shows;
+      };
+      const end = SessionEndInfo(lessonsCompleted: 3);
+
+      // Every ask is due: only the first one shows.
+      final all = [
+        ask('primer', true),
+        ask('save_progress', true),
+        ask('location', true),
+        ask('wean_off', true),
+      ];
+      expect(await LessonCompleteScreen.showFirstAsk(context, end, asks: all), 0);
+      expect(called, ['primer']);
+
+      // The primer passes: the next one takes the slot, the rest wait.
+      called.clear();
+      final later = [
+        ask('primer', false),
+        ask('save_progress', false),
+        ask('location', true),
+        ask('wean_off', true),
+      ];
+      expect(
+        await LessonCompleteScreen.showFirstAsk(context, end, asks: later),
+        2,
+      );
+      expect(called, ['primer', 'save_progress', 'location']);
+
+      // None due: nothing shows.
+      called.clear();
+      final none = [for (final n in ['a', 'b', 'c', 'd']) ask(n, false)];
+      expect(
+        await LessonCompleteScreen.showFirstAsk(context, end, asks: none),
+        isNull,
+      );
+      expect(called, hasLength(4));
+    });
+  });
 }
