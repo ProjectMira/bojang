@@ -233,6 +233,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
       pairId++;
     }
     cards.shuffle(Random());
+    _prefetchBoardAudio(cards);
 
     setState(() {
       _cards = cards;
@@ -244,19 +245,30 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
     });
   }
 
-  /// A flipped Tibetan card says its word in the learner's voice.
+  /// A flipped Tibetan card says its word in the learner's voice, unless
+  /// sound effects are off (the same switch the lessons' read-aloud uses).
   void _speak(MemoryCard card) {
-    if (card.type != CardType.tibetan) return;
     final theme = context.read<ThemeService>();
-    final url = PronunciationVoices.pick(
-      card.audioUrls,
-      theme.pronunciationVoice,
-      fallbackUrl: card.audioUrl,
+    final url = card.revealClip(
+      voice: theme.pronunciationVoice,
+      soundOn: theme.soundEffectsEnabled,
     );
+    if (url == null) return;
     PronunciationPlayer.instance.play(
       url,
       volume: theme.pronunciationVolume,
       source: 'memory_match',
+    );
+  }
+
+  /// Downloads the board's clips up front, so a card speaks the moment it
+  /// turns over instead of after a network wait (by which time the second
+  /// card has often been flipped).
+  void _prefetchBoardAudio(List<MemoryCard> cards) {
+    final theme = context.read<ThemeService>();
+    if (!theme.soundEffectsEnabled) return;
+    PronunciationPlayer.instance.prefetch(
+      cards.map((card) => card.revealClip(voice: theme.pronunciationVoice)),
     );
   }
 
@@ -906,6 +918,19 @@ class MemoryCard {
     this.isFlipped = false,
     this.isMatched = false,
   });
+
+  /// Recording in [voice], falling back to another voice of the same
+  /// dialect, then the default voice (see [PronunciationVoices.pick]).
+  /// Null for photo and English cards: only the Tibetan side speaks.
+  String? audioFor(String voice) =>
+      type == CardType.tibetan
+          ? PronunciationVoices.pick(audioUrls, voice, fallbackUrl: audioUrl)
+          : null;
+
+  /// What to play when this card turns face up: its word in [voice], or
+  /// null when it has none or sound effects are off ([soundOn]).
+  String? revealClip({required String voice, bool soundOn = true}) =>
+      soundOn ? audioFor(voice) : null;
 }
 
 enum CardType { tibetan, english, photo }
