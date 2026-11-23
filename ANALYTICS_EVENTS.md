@@ -80,7 +80,7 @@ deletes its rows.
 - **`reset()`**: on sign-out and account deletion.
 - **Person properties** (set after each lesson or game, and on load): `xp`, `level`,
   `current_streak`, `longest_streak`, `completed_levels`, `accuracy`, `dark_mode`, `language`,
-  `voice`, `lesson_style`, `sound_effects`, `daily_target`, `weekly_goal`,
+  `voice`, `lesson_style`, `sound_effects`, `haptics`, `daily_target`, `weekly_goal`,
   `notifications_enabled`, `reminder_time`.
 
 ## Events
@@ -210,6 +210,7 @@ deletes its rows.
 Every PostHog event also carries `current_screen` (the screen on display,
 from the tracker), `voice`, `lesson_style` and `bojang_session_id`.
 `setting_changed` covers `transliteration` (`phonetics`, `wylie`, `both`, `off`).
+`setting_changed` also covers `haptics` (`true`/`false`, Settings > Audio > Haptics; saved on the device, not in ThemeService). Feedback sounds, haptics and yak reactions (`Feedback.play`) send no events of their own.
 
 ## Server-side events (app_events, platform `server`)
 

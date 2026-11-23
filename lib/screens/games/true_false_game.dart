@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Feedback;
 import 'package:provider/provider.dart';
 
 import '../../models/game_word.dart';
-import '../../services/sound_effects.dart';
+import '../../services/feedback.dart';
 import '../../services/theme_service.dart';
 import '../../theme/app_tokens.dart';
 import '../../widgets/romanisation_text.dart';
@@ -84,12 +84,7 @@ class _TrueFalseGameState extends State<TrueFalseGame> {
   void _respond(bool saysTrue) {
     if (_answered) return;
     final isRight = saysTrue == _claimIsTrue;
-    final theme = context.read<ThemeService>();
-    if (isRight) {
-      SoundEffects.instance.correct(theme);
-    } else {
-      SoundEffects.instance.wrong(theme);
-    }
+    Feedback.answer(isRight, context: context);
     setState(() {
       _answer = saysTrue;
       if (isRight) {

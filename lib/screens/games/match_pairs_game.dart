@@ -1,12 +1,9 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart' hide Feedback;
 
 import '../../models/game_word.dart';
-import '../../services/sound_effects.dart';
-import '../../services/theme_service.dart';
+import '../../services/feedback.dart';
 import '../../theme/app_tokens.dart';
 import '../../widgets/app_text_style.dart';
 import 'game_host.dart';
@@ -102,6 +99,7 @@ class _MatchPairsGameState extends State<MatchPairsGame> {
 
   void _tapRight(GameWord word) {
     if (_matched.contains(word.id) || _wrongLeft != null) return;
+    if (_selectedLeft == null) Feedback.play(FeedbackEvent.select, context: context);
     setState(() => _selectedRight = word.id);
     _check();
   }
@@ -112,7 +110,7 @@ class _MatchPairsGameState extends State<MatchPairsGame> {
     if (left == null || right == null) return;
 
     if (left == right) {
-      HapticFeedback.lightImpact();
+      Feedback.answer(true, context: context);
       setState(() {
         _matched.add(left);
         _pairsDone++;
@@ -124,7 +122,7 @@ class _MatchPairsGameState extends State<MatchPairsGame> {
       return;
     }
 
-    SoundEffects.instance.wrong(context.read<ThemeService>());
+    Feedback.answer(false, context: context);
     setState(() {
       _missed
         ..add(left)

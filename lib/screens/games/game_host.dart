@@ -1,11 +1,12 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Feedback;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/game_word.dart';
 import '../../services/analytics.dart';
+import '../../services/feedback.dart';
 import '../../services/game_words_repository.dart';
 import '../../services/notification_primer.dart';
 import '../../services/pronunciation_player.dart';
@@ -194,6 +195,7 @@ class _GameHostState extends State<GameHost> {
     });
     setState(() {
       _words = usable;
+      Feedback.startLesson();
       _roundId++;
       _phase = _Phase.playing;
     });
@@ -208,6 +210,7 @@ class _GameHostState extends State<GameHost> {
   Future<void> _finish(GameResult result) async {
     if (_phase != _Phase.playing) return;
     PronunciationPlayer.instance.stop();
+    Feedback.play(FeedbackEvent.lessonComplete, context: context);
     final newBest = result.correct > _best;
     Analytics.track('game_completed', {
       'game': widget.gameId,
