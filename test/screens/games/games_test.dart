@@ -490,6 +490,18 @@ void main() {
     expect(find.text('Spelling'), findsOneWidget);
   });
 
+  testWidgets('the games kill switch hides the Games tab content', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await pumpGame(tester, const ExtraGamesScreen(enabled: false));
+    expect(find.text('Games are taking a break'), findsOneWidget);
+    expect(find.text('Listen & Tap'), findsNothing);
+    expect(find.text('Games'), findsOneWidget);
+  });
+
   testWidgets('the lesson style sheet saves the choice for every topic', (
     tester,
   ) async {

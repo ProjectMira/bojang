@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/analytics.dart';
+import '../services/feature_flags.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/app_text_style.dart';
 import 'games/flashcards_game.dart';
@@ -12,6 +13,8 @@ import 'memory_match_game.dart';
 import 'speed_quiz_screen.dart';
 import '../widgets/content_width.dart';
 import '../widgets/leaderboard_entry_points.dart';
+import '../widgets/yak_mascot.dart';
+import '../widgets/yak_says.dart';
 
 class _Game {
   /// The skill the game trains, shown as a tag on its card.
@@ -34,7 +37,14 @@ class _Game {
 
 /// The Games tab: every practice game, tagged with the skill it trains.
 class ExtraGamesScreen extends StatelessWidget {
-  const ExtraGamesScreen({super.key});
+  const ExtraGamesScreen({super.key, this.enabled});
+
+  /// The `games` kill switch in `GET /v1/config`: when on, the tab shows a
+  /// notice instead of the games.
+  static const String killSwitch = 'games';
+
+  /// Test seam; the default reads [FeatureFlags].
+  final bool? enabled;
 
   static final List<_Game> _games = [
     _Game(
@@ -126,33 +136,56 @@ class ExtraGamesScreen extends StatelessWidget {
         scrolledUnderElevation: 0,
         actions: const [LeaderboardButton(source: 'games')],
       ),
-      body: ContentWidth(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
-          children: [
-            Text(
-              '${_games.length} games with the words from your lessons. '
-              'Every right answer earns XP and keeps your streak.',
-              style: AppTextStyles.poppins(
-                fontSize: 14,
-                color: AppTokens.inkSoft(context),
-              ),
-            ),
-            const SizedBox(height: 16),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                mainAxisExtent: 150,
-              ),
-              itemCount: _games.length,
-              itemBuilder: (context, index) => _GameCard(game: _games[index]),
-            ),
-          ],
+      body: ValueListenableBuilder<int>(
+        valueListenable: FeatureFlags.instance.changes,
+        builder: (context, _, _) {
+          final on = enabled ?? FeatureFlags.instance.isEnabled(killSwitch);
+          return on ? _buildGames(context, columns) : _buildOff(context);
+        },
+      ),
+    );
+  }
+
+  Widget _buildOff(BuildContext context) {
+    return const ContentWidth(
+      maxWidth: ContentWidth.reading,
+      child: Center(
+        child: YakNotice(
+          title: 'Games are taking a break',
+          body: 'They will be back soon. Lessons and Practice still work.',
+          mood: YakMood.sleeping,
         ),
+      ),
+    );
+  }
+
+  Widget _buildGames(BuildContext context, int columns) {
+    return ContentWidth(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
+        children: [
+          Text(
+            '${_games.length} games with the words from your lessons. '
+            'Every right answer earns XP and keeps your streak.',
+            style: AppTextStyles.poppins(
+              fontSize: 14,
+              color: AppTokens.inkSoft(context),
+            ),
+          ),
+          const SizedBox(height: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+              mainAxisExtent: 150,
+            ),
+            itemCount: _games.length,
+            itemBuilder: (context, index) => _GameCard(game: _games[index]),
+          ),
+        ],
       ),
     );
   }
