@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import '../models/learning_path.dart';
 import '../models/lesson_queue.dart';
 import '../models/lesson_style.dart';
 import '../models/quiz_question.dart';
@@ -224,15 +225,25 @@ class _QuizScreenState extends State<QuizScreen>
     try {
       debugPrint('Loading quiz from: ${widget.topicFilePath}');
 
-      if (widget.topicFilePath.startsWith('api://level/')) {
+      // Review (Practice tab, path practice / unit review): words from the
+      // learner's mistakes, issued under a real level the server picks.
+      final isReview = widget.topicFilePath.startsWith(kReviewTopicPath);
+      if (widget.topicFilePath.startsWith('api://level/') || isReview) {
         final levelId = widget.topicFilePath.replaceFirst('api://level/', '');
-        _remoteLevelId = levelId;
-        final session = await ApiService().getLearningSession(
-          levelId: levelId,
-          numQuestions: 10,
-          exerciseTypes: _style.exerciseTypes,
-          supportedTypes: QuizQuestion.renderableTypes,
-        );
+        _remoteLevelId = isReview ? null : levelId;
+        final session =
+            isReview
+                ? await ApiService().getReviewSession(
+                  nodeId: reviewNodeIdOf(widget.topicFilePath),
+                  supportedTypes: QuizQuestion.renderableTypes,
+                )
+                : await ApiService().getLearningSession(
+                  levelId: levelId,
+                  numQuestions: 10,
+                  exerciseTypes: _style.exerciseTypes,
+                  supportedTypes: QuizQuestion.renderableTypes,
+                );
+        if (isReview) _remoteLevelId = session?['level_id'] as String?;
         if (session == null) {
           throw FormatException(
             'Could not start this lesson. Please try again.',

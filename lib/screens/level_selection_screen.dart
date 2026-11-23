@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/learning_path.dart';
 import '../models/level_models.dart';
 import '../services/analytics.dart';
+import '../services/learning_path_repository.dart';
 import '../services/levels_repository.dart';
 import '../services/progress_service.dart';
 import '../theme/app_tokens.dart';
 import '../utils/topic_visuals.dart';
 import '../utils/yak_lines.dart';
 import '../widgets/app_text_style.dart';
+import '../widgets/learning_path_view.dart';
 import '../widgets/yak_says.dart';
 import 'lesson_intro_screen.dart';
+import 'path_navigation.dart';
 import '../widgets/content_width.dart';
 
 const List<IconData> _kSectionIcons = [
@@ -19,8 +23,14 @@ const List<IconData> _kSectionIcons = [
   Icons.extension_rounded,
 ];
 
+/// The learn screen: the learning path (locked steps, session rings) or
+/// every topic, always open. Locks exist only on the path; finishing a
+/// topic here also counts on the path (the server keeps one record).
 class LevelSelectionScreen extends StatefulWidget {
-  const LevelSelectionScreen({super.key});
+  const LevelSelectionScreen({super.key, this.initialTopics = false});
+
+  /// Open on the topic list rather than the path.
+  final bool initialTopics;
 
   @override
   State<LevelSelectionScreen> createState() => _LevelSelectionScreenState();
@@ -29,6 +39,9 @@ class LevelSelectionScreen extends StatefulWidget {
 class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   List<Level> levels = [];
   bool isLoading = true;
+
+  LearningPath? _path;
+  late bool _showPath = !widget.initialTopics && LearningPathRepository.enabled;
 
   int _getColumns(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -40,6 +53,78 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   void initState() {
     super.initState();
     _loadLevels();
+    _loadPath();
+  }
+
+  Future<void> _loadPath() async {
+    if (!LearningPathRepository.enabled) return;
+    final path = await LearningPathRepository.load();
+    if (mounted) setState(() => _path = path);
+  }
+
+  void _setMode(bool showPath) {
+    if (showPath == _showPath) return;
+    Analytics.track('learn_mode_switched', {
+      'mode': showPath ? 'path' : 'topics',
+    });
+    setState(() => _showPath = showPath);
+  }
+
+  Future<void> _openNode(PathNode node) async {
+    await openPathNode(
+      context,
+      node,
+      source: 'learn_path',
+      unit: _path?.unitOf(node),
+    );
+    if (mounted) await _loadPath();
+  }
+
+  Widget _buildModeSwitch(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+      child: SegmentedButton<bool>(
+        segments: const [
+          ButtonSegment(
+            value: true,
+            label: Text('Path'),
+            icon: Icon(Icons.route_rounded),
+          ),
+          ButtonSegment(
+            value: false,
+            label: Text('Topics'),
+            icon: Icon(Icons.grid_view_rounded),
+          ),
+        ],
+        selected: {_showPath},
+        showSelectedIcon: false,
+        onSelectionChanged: (s) => _setMode(s.first),
+      ),
+    );
+  }
+
+  Widget _buildPath(BuildContext context, LearningPath path) {
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      children: [
+        LearningPathView(
+          path: path,
+          onOpen: _openNode,
+          onLocked:
+              (node) => showLockedNode(
+                context,
+                path,
+                node,
+                source: 'learn_path',
+                onGoToActive: () {
+                  final active = path.activeNode;
+                  if (active != null) _openNode(active);
+                },
+              ),
+        ),
+      ],
+    );
   }
 
   Future<void> _loadLevels() async {
@@ -108,12 +193,22 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
             foregroundColor: AppTokens.ink(context),
           ),
           body: ContentWidth(
-            child:
-                isLoading
-                    ? const YakLoader(message: 'Laying out your topics…')
-                    : levels.isEmpty
-                    ? _buildEmptyState(context)
-                    : _buildTopicSections(context, progressService),
+            maxWidth: _showPath && _path != null ? 640 : ContentWidth.standard,
+            child: Column(
+              children: [
+                if (_path != null) _buildModeSwitch(context),
+                Expanded(
+                  child:
+                      _showPath && _path != null
+                          ? _buildPath(context, _path!)
+                          : isLoading
+                          ? const YakLoader(message: 'Laying out your topics…')
+                          : levels.isEmpty
+                          ? _buildEmptyState(context)
+                          : _buildTopicSections(context, progressService),
+                ),
+              ],
+            ),
           ),
         );
       },
