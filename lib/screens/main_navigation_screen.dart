@@ -1,9 +1,15 @@
+import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../services/analytics.dart';
+import '../services/home_widget_sync.dart';
+import '../services/progress_service.dart';
 import '../services/push_service.dart';
+import '../services/social_service.dart';
+import '../widgets/leaderboard_entry_points.dart';
 import '../theme/app_tokens.dart';
 import '../theme/motion.dart';
 import 'home_page.dart';
@@ -35,11 +41,33 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     PushService.requestedScreen.addListener(_openRequestedTab);
     // A notification tapped while the app was closed is already waiting.
     WidgetsBinding.instance.addPostFrameCallback((_) => _openRequestedTab());
+    // App start (the main navigation is built once, after splash and
+    // onboarding): the home-screen widget sync and the weekly result.
+    HomeWidgetSync.instance.attach(
+      Provider.of<ProgressService>(context, listen: false),
+    );
+    _weeklyResultTimer = Timer(weeklyResultDelay, _showLastWeekResult);
   }
+
+  Timer? _weeklyResultTimer;
+
+  /// "You finished #12": once per week, a moment after launch, and only
+  /// when nothing else is on top (a lesson, a celebration, a sheet).
+  Future<void> _showLastWeekResult() async {
+    if (!mounted) return;
+    final result = await SocialService.instance.unseenLastWeekResult();
+    if (result == null || !mounted) return;
+    if (ModalRoute.of(context)?.isCurrent == false) return;
+    await showWeeklyResultSheet(context, result);
+  }
+
+  /// How long after launch the weekly result waits.
+  static const Duration weeklyResultDelay = Duration(seconds: 3);
 
   @override
   void dispose() {
     PushService.requestedScreen.removeListener(_openRequestedTab);
+    _weeklyResultTimer?.cancel();
     super.dispose();
   }
 
