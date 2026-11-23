@@ -247,6 +247,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // Profile Header
                   Container(
                     width: double.infinity,
+                    key: const Key('profile-header'),
                     decoration: BoxDecoration(
                       // On an iPad the header is narrower than the screen,
                       // so it gets rounded top corners instead of ending in
@@ -257,14 +258,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 top: Radius.circular(AppRadius.hero),
                               )
                               : null,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          AppColors.primary,
-                          Theme.of(context).scaffoldBackgroundColor,
-                        ],
-                      ),
+                      // Solid brand blue behind all the text (white reads at
+                      // 4.5:1 or more on it). The fade into the page lives in
+                      // a separate strip below, so no label ever sits on the
+                      // pale end of a gradient.
+                      color: AppColors.primary,
                     ),
                     child: Column(
                       children: [
@@ -313,39 +311,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             currentUser!.email,
                             style: AppTextStyles.poppins(
                               fontSize: 14,
-                              color: Colors.white70,
+                              // White70 on the blue is about 3:1; full white
+                              // clears 4.5:1.
+                              color: Colors.white,
                             ),
                           ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${progressService.league} League • ${progressService.xp} XP',
-                          style: AppTextStyles.poppins(
-                            fontSize: 16,
-                            color: Colors.white70,
-                          ),
+                        const SizedBox(height: 8),
+                        ProfileHeaderPill(
+                          key: const Key('profile-league-pill'),
+                          text:
+                              '${progressService.league} League • ${progressService.xp} XP',
+                          fontSize: 14,
                         ),
                         if (currentUser != null)
-                          Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              switch (currentUser!.authProvider) {
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: ProfileHeaderPill(
+                              text: switch (currentUser!.authProvider) {
                                 AuthProvider.apple => 'Apple Account',
                                 AuthProvider.google => 'Google Account',
                                 AuthProvider.email => 'Email Account',
                               },
-                              style: AppTextStyles.poppins(
-                                fontSize: 12,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              fontSize: 12,
                             ),
                           ),
                         if (currentUser == null)
@@ -374,8 +361,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                           ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 16),
                       ],
+                    ),
+                  ),
+                  // Fade from the header's blue into the page.
+                  Container(
+                    height: 24,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppColors.primary,
+                          Theme.of(context).scaffoldBackgroundColor,
+                        ],
+                      ),
                     ),
                   ),
 
@@ -699,6 +700,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
+    );
+  }
+}
+
+/// A label on the profile header's blue: the blue hue's tint as the fill
+/// and [AppTokens.textOnTint] as the text, so it reads at 4.5:1 or more in
+/// light and dark mode (white on translucent white did not).
+class ProfileHeaderPill extends StatelessWidget {
+  final String text;
+  final double fontSize;
+
+  const ProfileHeaderPill({super.key, required this.text, this.fontSize = 12});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppTokens.hueTint(AppPalette.blue, context),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: AppTextStyles.poppins(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+          color: AppTokens.textOnTint(AppColors.primary, context),
+        ),
+      ),
     );
   }
 }
