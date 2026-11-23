@@ -307,6 +307,22 @@ class ApiService {
     return _get('learn/levels/${Uri.encodeComponent(levelId)}/lesson');
   }
 
+  /// Listening dialogues served now (plan item #27), each a
+  /// `type: "dialogue"` path node placed after its `after_level_id`.
+  Future<List<Map<String, dynamic>>?> getDialogues({String? unitId}) async {
+    return _getList(
+      'learn/dialogues',
+      queryParameters: unitId == null ? null : {'unit_id': unitId},
+    );
+  }
+
+  /// One dialogue: speakers, lines, questions and, when signed in, a
+  /// `session` to complete with [submitProgressCompletion]. Null when it is
+  /// missing, not reviewed yet, switched off or the app is offline.
+  Future<Map<String, dynamic>?> getDialogue(String dialogueId) async {
+    return _get('learn/dialogues/${Uri.encodeComponent(dialogueId)}');
+  }
+
   Future<List<Map<String, dynamic>>?> getGames(String levelId) async {
     return null;
   }

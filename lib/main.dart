@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'screens/dialogue_player_screen.dart';
 import 'screens/splash_screen.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 import 'services/analytics.dart';
@@ -97,6 +98,7 @@ class MyApp extends StatelessWidget {
             themeMode:
                 themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             home: const SplashScreen(),
+            onGenerateRoute: DialoguePlayerScreen.onGenerateRoute,
             // Above the navigator, so an out-of-date install cannot get
             // past the update notice by any route, and every tap, swipe and
             // scroll on any route, dialog or sheet is recorded.

@@ -119,6 +119,13 @@ deletes its rows.
 | `memory_board_resized` | Memory Match | `pairs` (cards per board ÷ 2; more on iPad) |
 | `lesson_completed` | quiz | `topic`, `topic_path`, `style`, `score`, `total`, `accuracy`, `xp_earned`, `streak`, `duration_s`, `recycled` (missed words asked again), `fixed` (of those, right the second time), `bonus_shown`, `bonus_correct` |
 | `lesson_progress_submitted` | quiz | `success`, `answers` (attempts sent for server grading) |
+| `dialogue_started` | dialogue player | `dialogue_id`, `status` (draft/reviewed), `lines`, `questions`, `has_audio`, `graded` (server session issued) |
+| `dialogue_translation_toggled` | dialogue player | `dialogue_id`, `line` (1-based), `shown` |
+| `dialogue_line_replayed` | dialogue player | `dialogue_id`, `line` |
+| `dialogue_question_answered` | dialogue player | `dialogue_id`, `question_id`, `correct` (the app's check; the server grades again) |
+| `dialogue_completed` | dialogue player | `dialogue_id`, `correct`, `total`, `graded`, `submitted`, `translations_opened`, `duration_s` |
+| `dialogue_load_failed` | dialogue player | `dialogue_id` (missing, not reviewed, or offline) |
+| `dialogue_disabled` | dialogue player | `dialogue_id` (`dialogues` kill switch on) |
 | `lesson_result_shown` | lesson complete | `topic`, `celebration` (`big` for the first lesson and lesson milestones, `normal`, `quiet` below 70%), `lessons_completed`, `accuracy`, `recycled`, `fixed` |
 | `lesson_complete_action` | lesson complete | `action` (continue/practice_again) |
 | `lesson_goal_closed` | lesson goal (after a lessons-finished milestone) | `lessons_completed`, `next_goal` |
@@ -217,7 +224,8 @@ Written by the backend itself, so the log is complete for old app versions
 and unsent batches: `server_session_issued` (`session_id`, `level_id`,
 `requested_types`, `supported_types`, `exercise_types`, `total_questions`,
 `adaptive`, `labels`),
-`server_lesson_cards` (`level_id`, `items`), `server_lesson_completed`
+`server_lesson_cards` (`level_id`, `items`), `server_dialogue_issued`
+(`dialogue_id`, `status`, `session_id`, `lines`, `questions`), `server_lesson_completed`
 (`session_id`, `level_id`, `correct_answers`, `total_questions`,
 `time_taken_seconds`, `xp_earned`, `level_completed`, `graded`, and when the
 app sent answers: `server_graded`, `client_trusted`, `grading_mismatches`,
