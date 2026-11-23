@@ -1,3 +1,4 @@
+import 'screens/script/script_routes.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -77,6 +78,18 @@ void main() async {
   }
 }
 
+/// The app's single `onGenerateRoute` chain: each feature's routes are
+/// tried in turn and the first that knows the name builds it.
+Route<dynamic>? appOnGenerateRoute(RouteSettings settings) {
+  final pathRoute = PathRoutes.onGenerateRoute(settings);
+  if (pathRoute != null) return pathRoute;
+  final scriptBuilder = ScriptRoutes.all[settings.name];
+  if (scriptBuilder != null) {
+    return MaterialPageRoute(builder: scriptBuilder, settings: settings);
+  }
+  return null;
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -98,8 +111,9 @@ class MyApp extends StatelessWidget {
             themeMode:
                 themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             home: const SplashScreen(),
-            // Learning-path node routes (/script, /script/gate).
-            onGenerateRoute: PathRoutes.onGenerateRoute,
+            // One route chain: learning-path node routes, then the script
+            // course.
+            onGenerateRoute: appOnGenerateRoute,
             // Above the navigator, so an out-of-date install cannot get
             // past the update notice by any route, and every tap, swipe and
             // scroll on any route, dialog or sheet is recorded.

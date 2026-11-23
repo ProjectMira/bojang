@@ -1,5 +1,6 @@
 import '../services/pronunciation_voices.dart';
 import 'romanisation.dart';
+import 'script/script_exercise.dart';
 
 class QuizQuestion {
   final String tibetanText;
@@ -46,6 +47,9 @@ class QuizQuestion {
   /// (answered wrong last time), `weak` or `hard`. Null for plain review.
   final String? label;
 
+  /// The script course part of a [scriptTypes] exercise; null otherwise.
+  final ScriptPayload? script;
+
   /// Tibetan prompt, English options. The prompt is spoken when it appears.
   static const String multipleChoice = 'multiple_choice';
 
@@ -59,6 +63,32 @@ class QuizQuestion {
   /// English prompt, Tibetan options. Made on the device from a
   /// [pictureChoice] exercise; see [asReverse].
   static const String reverseChoice = 'reverse_choice';
+
+  /// Script course: tell ཀ / ཁ / ག apart by ear (same/different, or pick
+  /// the letter heard).
+  static const String nearSound = 'near_sound';
+
+  /// Script course: build a syllable from prefix, letter on top, root,
+  /// letter underneath and vowel.
+  static const String buildStack = 'build_stack';
+
+  /// Script course: tap the root letter of a syllable.
+  static const String findRoot = 'find_root';
+
+  /// Script course: pick a syllable's reading; audio only after answering.
+  static const String readSyllable = 'read_syllable';
+
+  /// Script course: trace a letter (guided) or write it (freehand).
+  static const String trace = 'trace';
+
+  /// The script course types, built with [QuizQuestion.fromScriptExercise].
+  static const List<String> scriptTypes = [
+    nearSound,
+    buildStack,
+    findRoot,
+    readSyllable,
+    trace,
+  ];
 
   QuizQuestion({
     required this.tibetanText,
@@ -76,6 +106,7 @@ class QuizQuestion {
     this.exerciseId,
     this.optionIds = const [],
     this.label,
+    this.script,
   });
 
   /// The server id of option [index], or its text when the payload had no
@@ -87,7 +118,24 @@ class QuizQuestion {
 
   /// Server exercise types the quiz screen can render; sent as
   /// `supported_types` so the server builds only these.
-  static const List<String> renderableTypes = [multipleChoice, pictureChoice];
+  static const List<String> renderableTypes = [
+    multipleChoice,
+    pictureChoice,
+    ...scriptTypes,
+  ];
+
+  bool get isScriptType => script != null;
+
+  /// The learner answers by building or drawing, not by picking an option.
+  bool get answersWithoutOptions => type == buildStack || type == trace;
+
+  /// The word's recording would give the answer away, so it waits until
+  /// the learner has answered.
+  bool get holdsAudio =>
+      hasTibetanOptions ||
+      type == readSyllable ||
+      type == findRoot ||
+      (type == buildStack && script?.heard != true);
 
   /// The same question with a different [label].
   QuizQuestion withLabel(String? newLabel) =>
@@ -96,7 +144,9 @@ class QuizQuestion {
   /// The question's Tibetan word: the correct option when the options are
   /// Tibetan (picture payloads carry no `tibetan_word`), else the prompt.
   String get wordTibetan =>
-      hasTibetanOptions &&
+      script != null
+          ? script!.focusText
+          : hasTibetanOptions &&
               correctAnswerIndex >= 0 &&
               correctAnswerIndex < options.length
           ? options[correctAnswerIndex]
@@ -124,7 +174,11 @@ class QuizQuestion {
 
   /// True when the options are Tibetan words, so the word's recording must
   /// wait until the learner has answered (earlier would give it away).
-  bool get hasTibetanOptions => type == pictureChoice || type == reverseChoice;
+  bool get hasTibetanOptions =>
+      type == pictureChoice ||
+      type == reverseChoice ||
+      type == findRoot ||
+      (type == nearSound && script?.mode == 'pick_heard');
 
   bool get _hasAudio => audioUrl != null || audioUrls.isNotEmpty;
 
@@ -191,6 +245,7 @@ class QuizQuestion {
       exerciseId: exerciseId,
       optionIds: optionIds,
       label: label ?? this.label,
+      script: script,
     );
   }
 
@@ -274,6 +329,84 @@ class QuizQuestion {
       ],
       label: _nonEmpty(json['label']),
     );
+  }
+
+  /// A script course exercise (see [scriptTypes]). Option-based types keep
+  /// [options]/[correctAnswerIndex]; [buildStack] and [trace] have one
+  /// option, the target, and are answered with a text.
+  factory QuizQuestion.fromScriptExercise(Map<String, dynamic> json) {
+    final type = (json['type'] ?? '').toString();
+    if (!scriptTypes.contains(type)) {
+      throw FormatException('Not a script exercise: $type');
+    }
+    final script = ScriptPayload.fromJson(json);
+    final rawOptions = List<Map<String, dynamic>>.from(
+      json['options'] as List<dynamic>? ?? const [],
+    );
+    var options = <String>[];
+    var ids = <String>[];
+    var optionTibetan = <String?>[];
+    var optionRoman = <Romanisation>[];
+    var correct = 0;
+    final correctId = json['correct_answer_id']?.toString();
+    if (type == findRoot) {
+      options = [for (final t in script.rootTiles) t.char];
+      ids = [for (final t in script.rootTiles) t.id];
+      correct = ids.indexOf(correctId ?? '');
+    } else if (type == buildStack || type == trace) {
+      final target = type == trace ? script.char : script.target;
+      options = [target];
+      ids = [target];
+    } else {
+      options = [for (final o in rawOptions) o['text']?.toString() ?? ''];
+      ids = [for (final o in rawOptions) o['id']?.toString() ?? ''];
+      optionTibetan = [for (final o in rawOptions) _nonEmpty(o['tibetan'])];
+      optionRoman = [for (final o in rawOptions) Romanisation.fromJson(o)];
+      correct = rawOptions.indexWhere(
+        (o) => o['id']?.toString() == correctId || o['is_correct'] == true,
+      );
+    }
+    if (options.isEmpty || options.any((o) => o.isEmpty) || correct < 0) {
+      throw FormatException('Script exercise $type has no valid answer.');
+    }
+    final firstClip = script.clips.isNotEmpty ? script.clips.first : null;
+    final prompt = switch (type) {
+      readSyllable || findRoot => script.syllable,
+      buildStack => script.target,
+      _ => script.char,
+    };
+    return QuizQuestion(
+      tibetanText: prompt,
+      options: options,
+      correctAnswerIndex: correct,
+      type: type,
+      audioUrl: _nonEmpty(json['audio_url']) ?? firstClip?.audioUrl,
+      audioUrls:
+          json['audio_urls'] is Map
+              ? _voiceUrls(json['audio_urls'])
+              : (firstClip?.audioUrls ?? const {}),
+      romanisation: Romanisation.fromJson({
+        'phonetic':
+            json['reading'] ??
+            (type == readSyllable ? json['correct_answer'] : null),
+        'wylie': json['wylie'],
+      }),
+      isScript: true,
+      optionTibetan: optionTibetan,
+      optionRomanisations: optionRoman,
+      exerciseId: _nonEmpty(json['exercise_id']),
+      optionIds: ids,
+      label: _nonEmpty(json['label']),
+      script: script,
+    );
+  }
+
+  /// Any server exercise this build renders.
+  static QuizQuestion fromAnyExercise(Map<String, dynamic> json) {
+    final type = (json['type'] ?? json['exercise_type'])?.toString();
+    return scriptTypes.contains(type)
+        ? QuizQuestion.fromScriptExercise(json)
+        : QuizQuestion.fromApiExercise(json);
   }
 
   static Map<String, String> _voiceUrls(Object? value) {

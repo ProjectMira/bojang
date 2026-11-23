@@ -307,7 +307,15 @@ void main() {
     });
 
     test('the quiz screen asks the server only for types it renders', () {
-      expect(QuizQuestion.renderableTypes, ['multiple_choice', 'picture_choice']);
+      expect(QuizQuestion.renderableTypes, [
+        'multiple_choice',
+        'picture_choice',
+        'near_sound',
+        'build_stack',
+        'find_root',
+        'read_syllable',
+        'trace',
+      ]);
     });
   });
 }

@@ -27,6 +27,9 @@ import '../widgets/romanisation_text.dart';
 import 'lesson_complete_screen.dart';
 import '../widgets/content_width.dart';
 import '../widgets/app_text_style.dart';
+import '../theme/tibetan_type.dart';
+import '../widgets/script/script_exercise_views.dart';
+import '../widgets/script/trace_pad.dart';
 
 class QuizScreen extends StatefulWidget {
   final String topicFilePath;
@@ -213,7 +216,7 @@ class _QuizScreenState extends State<QuizScreen>
       final type = exercise['type'] ?? exercise['exercise_type'];
       if (!QuizQuestion.renderableTypes.contains(type)) continue;
       try {
-        questions.add(QuizQuestion.fromApiExercise(exercise));
+        questions.add(QuizQuestion.fromAnyExercise(exercise));
       } catch (e) {
         debugPrint('Skipping invalid remote exercise: $e');
       }
@@ -224,6 +227,25 @@ class _QuizScreenState extends State<QuizScreen>
   Future<LessonQueue> _loadQuestions() async {
     try {
       debugPrint('Loading quiz from: ${widget.topicFilePath}');
+
+      // The script course: api://script/learn or api://script/practice.
+      if (widget.topicFilePath.startsWith('api://script/')) {
+        final mode = widget.topicFilePath.replaceFirst('api://script/', '');
+        final session = await ApiService().getScriptSession(
+          mode: mode,
+          supportedTypes: QuizQuestion.renderableTypes,
+        );
+        if (session == null) {
+          throw FormatException('Could not start this lesson. Please try again.');
+        }
+        _remoteSessionId = session['session_id'] as String?;
+        _remoteLevelId = session['level_id'] as String?;
+        final questions = _parseExercises(session['exercises']);
+        if (questions.isEmpty) {
+          throw FormatException('No exercises found for this lesson yet.');
+        }
+        return LessonQueue(questions);
+      }
 
       // Review (Practice tab, path practice / unit review): words from the
       // learner's mistakes, issued under a real level the server picks.
@@ -347,7 +369,9 @@ class _QuizScreenState extends State<QuizScreen>
     _autoPlayedIndex = currentQuestionIndex;
     final themeService = Provider.of<ThemeService>(context, listen: false);
     final url = question.audioFor(themeService.pronunciationVoice);
-    if (url == null || question.hasTibetanOptions) return;
+    // Near sounds play from their own prompt; held-back audio waits.
+    if (url == null || question.holdsAudio) return;
+    if (question.type == QuizQuestion.nearSound) return;
     // A listening question IS its recording, so it plays even with sound
     // effects off; a written prompt's read-aloud follows that switch.
     final isListening = question.type == QuizQuestion.listening;
@@ -362,13 +386,26 @@ class _QuizScreenState extends State<QuizScreen>
     });
   }
 
-  void _handleAnswer(int answerIndex, LessonQueue lesson) async {
+  /// [correct] and [answerText] are given by exercises answered without
+  /// picking an option (build the stack, tracing).
+  void _handleAnswer(
+    int answerIndex,
+    LessonQueue lesson, {
+    bool? correct,
+    String? answerText,
+  }) async {
     if (showFeedback || lesson.answeredCurrent) return;
     final item = lesson.current;
-    final isCorrect = answerIndex == item.question.correctAnswerIndex;
+    final isCorrect =
+        correct ?? answerIndex == item.question.correctAnswerIndex;
     final responseMs =
         DateTime.now().difference(_questionShownAt).inMilliseconds;
-    lesson.answer(optionIndex: answerIndex, correct: isCorrect, ms: responseMs);
+    lesson.answer(
+      optionIndex: answerIndex,
+      correct: isCorrect,
+      ms: responseMs,
+      answerText: answerText,
+    );
     final audioPath = isCorrect ? 'audio/correct.mp3' : 'audio/incorrect.mp3';
 
     final themeService = Provider.of<ThemeService>(context, listen: false);
@@ -417,7 +454,7 @@ class _QuizScreenState extends State<QuizScreen>
     // chime, which is ducked so the word stays clear.
     final question = answered;
     final revealUrl = question.audioFor(themeService.pronunciationVoice);
-    final revealAudio = question.hasTibetanOptions && revealUrl != null;
+    final revealAudio = question.holdsAudio && revealUrl != null;
     if (revealAudio && themeService.soundEffectsEnabled) {
       final revealGeneration = _generation;
       Future.delayed(const Duration(milliseconds: 600), () async {
@@ -687,6 +724,7 @@ class _QuizScreenState extends State<QuizScreen>
                 // Tibetan answers are shown on the word line below instead.
                 correctAnswerText:
                     !question.hasTibetanOptions &&
+                            !question.answersWithoutOptions &&
                             question.correctAnswerIndex >= 0 &&
                             question.correctAnswerIndex <
                                 question.options.length
@@ -840,6 +878,9 @@ class _QuizScreenState extends State<QuizScreen>
                     ),
                   ),
                   const SizedBox(height: 24),
+                  if (_scriptBody(question, lesson) case final body?)
+                    body
+                  else
                   // Answer options
                   ListView.builder(
                     shrinkWrap: true,
@@ -966,11 +1007,66 @@ class _QuizScreenState extends State<QuizScreen>
     );
   }
 
+  /// The answer area of script exercises that are not a list of options.
+  Widget? _scriptBody(QuizQuestion question, LessonQueue lesson) {
+    final script = question.script;
+    if (script == null) return null;
+    switch (question.type) {
+      case QuizQuestion.buildStack:
+        return BuildStackView(
+          key: ValueKey(question.exerciseId ?? currentQuestionIndex),
+          payload: script,
+          answered: showFeedback,
+          onSubmit:
+              (built, correct) => _handleAnswer(
+                0,
+                lesson,
+                correct: correct,
+                answerText: built,
+              ),
+        );
+      case QuizQuestion.trace:
+        return TracePad(
+          key: ValueKey(question.exerciseId ?? currentQuestionIndex),
+          char: script.char,
+          freehand: script.freehand,
+          enabled: !showFeedback,
+          onDone:
+              (passed, score) => _handleAnswer(
+                0,
+                lesson,
+                correct: passed,
+                answerText: score.toStringAsFixed(2),
+              ),
+        );
+      case QuizQuestion.findRoot:
+        return FindRootTiles(
+          payload: script,
+          answered: showFeedback,
+          selected: selectedAnswerIndex,
+          correctIndex: question.correctAnswerIndex,
+          onPick: (i) => _handleAnswer(i, lesson),
+        );
+    }
+    return null;
+  }
+
   /// Share of the questions answered so far that were right, counted as the
   /// server counts it (first attempts; bonus questions only when right).
   int _accuracySoFar() => (_lesson?.accuracy ?? 0).round();
 
   String _instructionFor(QuizQuestion question) => switch (question.type) {
+    QuizQuestion.nearSound when question.script?.mode == 'same_different' =>
+      'Do these sound the same?',
+    QuizQuestion.nearSound => 'Which letter do you hear?',
+    QuizQuestion.buildStack when question.script?.heard == true =>
+      'Build the syllable you hear',
+    QuizQuestion.buildStack => 'Build this syllable from its parts',
+    QuizQuestion.findRoot => 'Tap the root letter',
+    QuizQuestion.readSyllable => 'How do you read this?',
+    QuizQuestion.trace when question.script?.freehand == true =>
+      'Write this letter',
+    QuizQuestion.trace => 'Trace this letter',
     QuizQuestion.pictureChoice => 'Which word matches the picture?',
     QuizQuestion.listening => 'What do you hear?',
     QuizQuestion.reverseChoice when question.isScript =>
@@ -1014,6 +1110,74 @@ class _QuizScreenState extends State<QuizScreen>
   /// a speaker, an English word or a Tibetan word, by question kind.
   List<Widget> _buildPrompt(BuildContext context, QuizQuestion question) {
     final audio = _audioOf(question);
+    final script = question.script;
+
+    if (script != null) {
+      switch (question.type) {
+        case QuizQuestion.nearSound:
+          return [NearSoundPrompt(payload: script, answered: showFeedback)];
+        case QuizQuestion.buildStack:
+          return [
+            if (script.heard && audio != null)
+              _audioRow(question, audio, size: 56)
+            else
+              Text(
+                script.target,
+                textAlign: TextAlign.center,
+                style: TibetanType.style(
+                  size: TibetanType.letterSize,
+                  color: AppTokens.ink(context),
+                ),
+              ),
+            _romanisationOf(question),
+            if (showFeedback && audio != null && !script.heard) ...[
+              const SizedBox(height: 8),
+              _audioRow(question, audio),
+            ],
+          ];
+        case QuizQuestion.trace:
+          return [
+            Text(
+              script.char,
+              textAlign: TextAlign.center,
+              style: TibetanType.style(
+                size: TibetanType.displaySize,
+                color: AppTokens.ink(context),
+              ),
+            ),
+            RomanisationText(question.romanisation, fontSize: 18),
+            if (audio != null) ...[
+              const SizedBox(height: 8),
+              _audioRow(question, audio),
+            ],
+          ];
+        case QuizQuestion.readSyllable:
+        case QuizQuestion.findRoot:
+          return [
+            Text(
+              question.tibetanText,
+              textAlign: TextAlign.center,
+              style: TibetanType.style(
+                size: TibetanType.letterSize,
+                color: AppTokens.ink(context),
+              ),
+            ),
+            if (question.type == QuizQuestion.findRoot) _romanisationOf(question),
+            if (showFeedback && script.english.isNotEmpty)
+              Text(
+                script.english,
+                style: AppTextStyles.poppins(
+                  fontSize: 16,
+                  color: AppTokens.inkSoft(context),
+                ),
+              ),
+            if (showFeedback && audio != null) ...[
+              const SizedBox(height: 8),
+              _audioRow(question, audio),
+            ],
+          ];
+      }
+    }
 
     if (question.type == QuizQuestion.listening && audio != null) {
       return [

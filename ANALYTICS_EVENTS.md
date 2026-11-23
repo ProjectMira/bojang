@@ -115,6 +115,12 @@ deletes its rows.
 | `lesson_quit` | quiz | `topic`, `question_index`, `question_count`, `score`, `reason` (`back`), `answered`, `question_s` (time on the open question), `source` |
 | `lesson_intro_opened` | Basics lesson cards | `level`, `source` |
 | `lesson_intro_practice` | Basics lesson cards | `level`, `items`, `heard` (cards tapped), `duration_s` |
+| `script_course_opened` | Reading Tibetan chart (`/script`) | `source`, `offline` (bundled chart, no server), `seen`, `strong` (strength >= 0.6), `total`, `gate_passed` |
+| `script_char_opened` | chart cell tapped (plays the letter, opens its sheet) | `char`, `kind` (`consonant`/`vowel`/`stack`), `strength` (0-100), `seen`, `has_audio`, `voice` |
+| `script_learn_started` / `script_practice_started` | chart Learn / Practice buttons | `next` (the next weak characters), `seen`, `strong`. The lesson then logs the usual `lesson_*` and `question_answered` events (`question_type` `near_sound`, `build_stack`, `find_root`, `read_syllable`, `trace`), `topic_path` `api://script/learn` or `api://script/practice` |
+| `script_gate_started` | alphabet gate (`/script/gate`) | `mode` (`full` = 10-question check, `quick` = "I already read Tibetan"), `source` |
+| `script_gate_skip_chosen` | gate, "I already read Tibetan" | `source` |
+| `script_gate_completed` | gate result | `mode`, `passed` (>= 80%), `correct`, `total`, `saved` (graded and stored by the server) |
 | `voice_picked` | voice picker | `voice`, `source` (`settings`, `quiz`, `game`, `lesson_intro`, `chip`) |
 | `memory_board_resized` | Memory Match | `pairs` (cards per board ÷ 2; more on iPad) |
 | `lesson_completed` | quiz | `topic`, `topic_path`, `style`, `score`, `total`, `accuracy`, `xp_earned`, `streak`, `duration_s`, `recycled` (missed words asked again), `fixed` (of those, right the second time), `bonus_shown`, `bonus_correct` |
@@ -233,7 +239,11 @@ and unsent batches: `server_session_issued` (`session_id`, `level_id`,
 app sent answers: `server_graded`, `client_trusted`, `grading_mismatches`,
 `unknown_answers`, `recycled`, `fixed`, `adaptive_correct`),
 `server_earn_back_started` (`streak`, `expires_at`, `sessions_done`) and
-`server_earn_back_completed` (`streak`, `repaired_days`).
+`server_earn_back_completed` (`streak`, `repaired_days`),
+`server_script_session_issued` (`session_id`, `mode`, `focus`, `exercise_types`)
+and `server_script_gate_completed` (`session_id`, `mode`, `correct`, `total`,
+`passed`). Script answers also carry `exercise_responses.char` (the letter,
+vowel sign or stack practised), which letter strength is computed from.
 `server_session_issued` sessions from `/learn/session` now carry the path
 node in `learning_sessions.path_node_id`. `server_review_session_issued`
 (`session_id`, `node_id` null for the Practice tab, `words`, `flagged`) and
