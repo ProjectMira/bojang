@@ -215,6 +215,7 @@ class ReviewWord {
     this.attempts = 0,
     this.correct = 0,
     this.audioUrls = const {},
+    this.dueAt,
   });
 
   final String lexemeId;
@@ -222,11 +223,16 @@ class ReviewWord {
   final String english;
   final String phonetic;
 
-  /// `mistake` (last answer wrong) or `weak` (under 70% right).
+  /// `mistake` (last answer wrong), `weak` (under 70% right) or `due`
+  /// (scheduled for review, neither a mistake nor weak).
   final String label;
   final int attempts;
   final int correct;
   final Map<String, String> audioUrls;
+
+  /// When spaced repetition schedules this word next (null from servers
+  /// without it).
+  final DateTime? dueAt;
 
   factory ReviewWord.fromJson(Map<String, dynamic> json) => ReviewWord(
     lexemeId: (json['lexeme_id'] ?? '').toString(),
@@ -240,33 +246,109 @@ class ReviewWord {
       for (final e in ((json['audio_urls'] as Map?) ?? const {}).entries)
         e.key.toString(): e.value.toString(),
     },
+    dueAt: _parseTime(json['due_at']),
   );
 }
 
+DateTime? _parseTime(Object? value) =>
+    value is String ? DateTime.tryParse(value) : null;
+
+int _int(Object? value) => (value as num?)?.toInt() ?? 0;
+
+List<ReviewWord> _words(Object? value) => [
+  for (final w in (value is List ? value : const []))
+    if (w is Map) ReviewWord.fromJson(Map<String, dynamic>.from(w)),
+];
+
+/// `GET /learn/review`: mistake / weak words (every server) plus the
+/// spaced-repetition schedule (FSRS) from servers that have it. An older
+/// server sends no FSRS fields: [fsrsEnabled] is then false and the screen
+/// falls back to mistake / weak words.
 class ReviewSummary {
   const ReviewSummary({
     required this.wordCount,
     this.mistakeCount = 0,
     this.weakCount = 0,
     this.words = const [],
+    this.fsrsEnabled = false,
+    this.dueCount = 0,
+    this.nextDueAt,
+    this.trackedCount = 0,
+    this.sessionSize = 0,
+    this.dueWords = const [],
   });
 
+  /// Mistake + weak words.
   final int wordCount;
   final int mistakeCount;
   final int weakCount;
   final List<ReviewWord> words;
 
+  /// False on older servers and when the `fsrs_review` kill switch is on.
+  final bool fsrsEnabled;
+
+  /// Words due for review now.
+  final int dueCount;
+
+  /// When the next word falls due (null when none is scheduled).
+  final DateTime? nextDueAt;
+
+  /// Words with a review schedule ("You're remembering N words").
+  final int trackedCount;
+
+  /// Words the next review session would ask (due first, then weak).
+  final int sessionSize;
+
+  /// Due words, most overdue first.
+  final List<ReviewWord> dueWords;
+
   static const empty = ReviewSummary(wordCount: 0);
 
-  factory ReviewSummary.fromJson(Map<String, dynamic> json) => ReviewSummary(
-    wordCount: (json['word_count'] as num?)?.toInt() ?? 0,
-    mistakeCount: (json['mistake_count'] as num?)?.toInt() ?? 0,
-    weakCount: (json['weak_count'] as num?)?.toInt() ?? 0,
-    words: [
-      for (final w in (json['words'] as List? ?? const []))
-        if (w is Map) ReviewWord.fromJson(Map<String, dynamic>.from(w)),
-    ],
+  /// Due words first, then mistake / weak words not already listed.
+  List<ReviewWord> get allWords {
+    final seen = <String>{};
+    return [
+      for (final w in [...dueWords, ...words])
+        if (seen.add(w.lexemeId)) w,
+    ];
+  }
+
+  /// This summary with the FSRS part dropped (the client-side kill switch).
+  ReviewSummary withoutFsrs() => ReviewSummary(
+    wordCount: wordCount,
+    mistakeCount: mistakeCount,
+    weakCount: weakCount,
+    words: words,
   );
+
+  factory ReviewSummary.fromJson(Map<String, dynamic> json) => ReviewSummary(
+    wordCount: _int(json['word_count']),
+    mistakeCount: _int(json['mistake_count']),
+    weakCount: _int(json['weak_count']),
+    words: _words(json['words']),
+    fsrsEnabled: json['fsrs_enabled'] == true,
+    dueCount: _int(json['due_count']),
+    nextDueAt: _parseTime(json['next_due_at']),
+    trackedCount: _int(json['tracked_count']),
+    sessionSize: _int(json['session_size']),
+    dueWords: _words(json['due_words']),
+  );
+}
+
+/// "in 3 h", "in 20 min", "tomorrow", "in 4 days" for the next review
+/// [due] seen from [now] (both compared in local time for "tomorrow").
+String nextReviewPhrase(DateTime due, DateTime now) {
+  final d = due.toLocal();
+  final n = now.toLocal();
+  final diff = d.difference(n);
+  if (diff.inMinutes < 1) return 'now';
+  if (diff.inMinutes < 60) return 'in ${diff.inMinutes} min';
+  final today = DateTime(n.year, n.month, n.day);
+  final dueDay = DateTime(d.year, d.month, d.day);
+  final days = dueDay.difference(today).inDays;
+  if (days == 0) return 'in ${diff.inHours} h';
+  if (days == 1) return diff.inHours < 12 ? 'in ${diff.inHours} h' : 'tomorrow';
+  return 'in $days days';
 }
 
 /// QuizScreen topic path for a review session (optionally scoped to a
