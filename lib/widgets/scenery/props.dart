@@ -377,6 +377,23 @@ void drawYak(
         ..lineTo(-15, -6)
         ..close();
   c.drawPath(torso, paint);
+  // Light along the hump and back, from the sun's side.
+  final sunward = (p.lightFromLeft ? -1.0 : 1.0) * facing;
+  c.drawPath(
+    Path()
+      ..moveTo(-14.5, -12)
+      ..cubicTo(-15.5, -17, -10, -20.5, -2, -19.6)
+      ..cubicTo(4, -23.4, 9.5, -21.6, 12.5, -17),
+    _stroke(
+      (white
+              ? const Color(0xFFFFFFFF)
+              : p.dark
+              ? const Color(0xFF6D7DA6)
+              : const Color(0xFF7A6656))
+          .withValues(alpha: sunward < 0 ? 0.55 : 0.35),
+      1.3,
+    ),
+  );
   // Head, low and forward.
   c.drawPath(
     Path()

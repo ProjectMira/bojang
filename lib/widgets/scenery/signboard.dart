@@ -62,17 +62,19 @@ class _FramePainter extends CustomPainter {
     required this.panel,
     required this.frame,
     required this.border,
+    this.flare = 10,
   });
 
   final Color panel;
   final Color frame;
   final double border;
+  final double flare;
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width, h = size.height;
     // The frame flares a little at the foot, like a Tibetan window.
-    final flare = math.min(10.0, w * 0.03);
+    final flare = math.min(this.flare, w * 0.03);
     final outer =
         Path()
           ..moveTo(flare, 0)
@@ -91,7 +93,10 @@ class _FramePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_FramePainter old) =>
-      old.panel != panel || old.frame != frame || old.border != border;
+      old.panel != panel ||
+      old.frame != frame ||
+      old.border != border ||
+      old.flare != flare;
 }
 
 /// A whitewashed board in a black flared frame under a shambu. The child
@@ -101,10 +106,15 @@ class Signboard extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.fromLTRB(18, 14, 18, 16),
+    this.compact = false,
   });
 
   final Widget child;
   final EdgeInsets padding;
+
+  /// A slim board for unit names: thinner frame and valance, tight
+  /// padding, so it names the place without hiding it.
+  final bool compact;
 
   static const double border = 6;
   static const double shambuHeight = 20;
@@ -113,29 +123,34 @@ class Signboard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = AppTokens.isDark(context);
     final colors = SignboardColors.of(context);
+    final frame = compact ? 3.5 : border;
+    final inset = compact ? const EdgeInsets.fromLTRB(12, 7, 12, 8) : padding;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: EdgeInsets.symmetric(horizontal: compact ? 3 : 4),
           child: SizedBox(
-            height: shambuHeight,
-            child: CustomPaint(painter: ShambuPainter(dark: dark)),
+            height: compact ? 11 : shambuHeight,
+            child: CustomPaint(
+              painter: ShambuPainter(dark: dark, pleatWidth: compact ? 10 : 14),
+            ),
           ),
         ),
         CustomPaint(
           painter: _FramePainter(
             panel: colors.panel,
             frame: colors.frame,
-            border: border,
+            border: frame,
+            flare: compact ? 5 : 10,
           ),
           child: Padding(
             padding:
-                padding +
-                const EdgeInsets.symmetric(
-                  horizontal: border + 6,
-                  vertical: border,
+                inset +
+                EdgeInsets.symmetric(
+                  horizontal: frame + (compact ? 4 : 6),
+                  vertical: frame,
                 ),
             child: child,
           ),

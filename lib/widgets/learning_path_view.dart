@@ -151,7 +151,7 @@ class _UnitScene extends StatelessWidget {
     final ring = nodeSize * 1.28;
     final swing = tablet ? 120.0 : 70.0;
     final trailWidth = tablet ? 30.0 : 24.0;
-    final ridgeZone = tablet ? 230.0 : 190.0;
+    final ridgeZone = tablet ? 300.0 : 250.0;
     final column = math.min(width, LearningPathView.columnWidth);
     final cx = width / 2;
     final slot = math.max(nodeSize * 2.6, 200.0);
@@ -195,91 +195,82 @@ class _UnitScene extends StatelessWidget {
       propScale: tablet ? 1.25 : 1.0,
     );
 
-    final flags = switch (biome) {
-      Biome.lake || Biome.pass || Biome.monastery || Biome.valley => true,
-      _ => false,
-    };
+    final skyHeight = tablet ? 480.0 : 400.0;
+    final skySize = Size(width, skyHeight);
+    final strings = flagStringsFor(biome, skySize, ridgeZone);
 
-    final sky = Stack(
-      children: [
-        Positioned.fill(
-          child: Parallax(
-            enabled: parallax,
-            overscan: _overscan,
-            child: RepaintBoundary(
-              child: CustomPaint(
-                painter: SkyPainter(
-                  biome: biome,
-                  palette: palette,
-                  ridgeZone: ridgeZone,
-                  seed: unit.index,
-                  overscan: _overscan,
+    final sky = SizedBox(
+      height: skyHeight,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Parallax(
+              enabled: parallax,
+              overscan: _overscan,
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: SkyPainter(
+                    biome: biome,
+                    palette: palette,
+                    ridgeZone: ridgeZone,
+                    seed: unit.index,
+                    overscan: _overscan,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        Positioned.fill(
-          child: DriftingClouds(dark: dark, seed: unit.index, ambient: ambient),
-        ),
-        Positioned.fill(
-          child: RepaintBoundary(
-            child: CustomPaint(
-              painter: HorizonPainter(
-                biome: biome,
-                palette: palette,
-                ridgeZone: ridgeZone,
-                seed: unit.index,
-                trailX: cx,
-                trailWidth: trailWidth,
-              ),
+          Positioned.fill(
+            child: DriftingClouds(
+              palette: palette,
+              seed: unit.index,
+              ambient: ambient,
+              top: tablet ? 0.32 : 0.36,
+              bottom: tablet ? 0.42 : 0.46,
             ),
           ),
-        ),
-        if (flags)
           Positioned.fill(
             child: RepaintBoundary(
-              child: LayoutBuilder(
-                builder: (context, box) {
-                  final h = box.maxHeight;
-                  final w = box.maxWidth;
-                  return CustomPaint(
-                    painter: WindFlagsPainter(
-                      palette: palette,
-                      wind: ambient,
-                      strings: [
-                        (
-                          Offset(w * 0.05, h - ridgeZone * 0.36),
-                          Offset(w * 0.33, h - ridgeZone * 0.2),
-                          14,
-                        ),
-                        (
-                          Offset(w * 0.68, h - ridgeZone * 0.22),
-                          Offset(w * 0.95, h - ridgeZone * 0.4),
-                          12,
-                        ),
-                      ],
-                    ),
-                  );
-                },
+              child: CustomPaint(
+                painter: HorizonPainter(
+                  biome: biome,
+                  palette: palette,
+                  ridgeZone: ridgeZone,
+                  seed: unit.index,
+                  trailX: cx,
+                  trailWidth: trailWidth,
+                  scale: tablet ? 1.2 : 1,
+                ),
               ),
             ),
           ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            AppSpacing.gutter,
-            tablet ? 56 : 40,
-            AppSpacing.gutter,
-            ridgeZone,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: PathUnitHeader(unit: unit, hue: hue),
+          if (strings.isNotEmpty)
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: WindFlagsPainter(
+                    palette: palette,
+                    wind: ambient,
+                    strings: strings,
+                  ),
+                ),
+              ),
+            ),
+          // The unit's name on a slim board high in its sky, so the ranges
+          // below it stay the picture.
+          Positioned(
+            top: tablet ? 54 : 42,
+            left: AppSpacing.gutter,
+            right: AppSpacing.gutter,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: tablet ? 440 : 340),
+                child: PathUnitHeader(unit: unit, hue: hue),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
 
     final ground = SizedBox(
@@ -347,7 +338,9 @@ class PathUnitHeader extends StatelessWidget {
           '${locked ? ', locked' : ''}',
       excludeSemantics: true,
       child: Signboard(
+        compact: true,
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Column(
@@ -356,53 +349,49 @@ class PathUnitHeader extends StatelessWidget {
                   Text(
                     'Unit ${unit.index}',
                     style: AppTextStyles.poppins(
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
+                      height: 1.2,
                       color: colors.inkSoft,
                     ),
                   ),
                   Text(
                     unit.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.poppins(
-                      fontSize: 20,
+                      fontSize: 17,
                       fontWeight: FontWeight.w600,
                       height: 1.25,
                       color: colors.ink,
                     ),
                   ),
-                  if (unit.description.isNotEmpty) ...[
-                    const SizedBox(height: 2),
+                  if (unit.description.isNotEmpty)
                     Text(
                       unit.description,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.poppins(
-                        fontSize: 13,
-                        height: 1.35,
+                        fontSize: 12,
+                        height: 1.3,
                         color: colors.inkSoft,
                       ),
                     ),
-                  ],
                 ],
               ),
             ),
-            const SizedBox(width: AppSpacing.md),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (locked)
-                  Icon(Icons.lock_rounded, size: 18, color: colors.inkSoft)
-                else
-                  Text(
-                    '$done/$lessons',
-                    style: AppTextStyles.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: colors.ink,
-                    ).copyWith(
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-              ],
-            ),
+            const SizedBox(width: AppSpacing.sm),
+            if (locked)
+              Icon(Icons.lock_rounded, size: 18, color: colors.inkSoft)
+            else
+              Text(
+                '$done/$lessons',
+                style: AppTextStyles.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: colors.ink,
+                ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+              ),
           ],
         ),
       ),
@@ -505,7 +494,8 @@ class _PathNodeButtonState extends State<PathNodeButton>
         ink = dark ? AppColors.inkLight : hue.onFace;
     }
     // The rim that lifts every step off the painted ground.
-    final rim = dark ? const Color(0xFF0F1626) : const Color(0xFFFFFFFF);
+    // At night a moonlit rim, so dark discs still part from dark ground.
+    final rim = dark ? const Color(0xFF7484A8) : const Color(0xFFFFFFFF);
 
     final Widget glyph =
         node.isLocked

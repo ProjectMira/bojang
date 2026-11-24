@@ -1,6 +1,6 @@
-/// The painters behind the learning path: for each unit a sky with its far
-/// ranges, a horizon with the biome's landmark, and the valley floor the
-/// trail crosses.
+/// The painters behind the learning path. Each unit is one quiet scene:
+/// a sky in its own light, five ranges stepping back into haze, one
+/// landmark placed with intent, and an open valley floor for the trail.
 ///
 /// All of them paint once and sit in their own RepaintBoundary, so
 /// scrolling only moves cached pictures. The only painters that repaint
@@ -9,19 +9,176 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'biome.dart';
+import 'landmarks.dart';
+import 'paint_kit.dart';
 import 'props.dart';
 import 'ridges.dart';
 
-Paint _fill(Color c) => Paint()..color = c;
+/// One range in a scene. [base] and [amp] are fractions of the ridge
+/// zone, measured up from the bottom of the sky.
+class _Layer {
+  const _Layer(
+    this.base,
+    this.amp, {
+    this.wavelength = 160,
+    this.sharp = 0.6,
+    this.detail = 0.55,
+    this.snow,
+    this.shade = 0.5,
+    this.trees = 0,
+    this.haze = 0.7,
+    this.lit = 0.08,
+  });
 
-/// Sky gradient, stars or sun, and the farthest range. The part that
-/// moves with parallax.
+  final double base;
+  final double amp;
+  final double wavelength;
+  final double sharp;
+  final double detail;
+  final double? snow;
+  final double shade;
+
+  /// Conifer tip height for a forested ridge; 0 for bare.
+  final double trees;
+
+  /// How much haze sits in front of this range's foot.
+  final double haze;
+  final double lit;
+}
+
+// The ranges read best as a table.
+// dart format off
+/// The five ranges of [biome], far to near. The first two paint in the
+/// sky (they move with parallax), the rest on the horizon.
+List<_Layer> _layersOf(Biome biome) => switch (biome) {
+  Biome.valley => const [
+    _Layer(0.34, 0.58, wavelength: 260, sharp: 0.6, snow: 0.5, shade: 0.5, lit: 0.16),
+    _Layer(0.22, 0.36, wavelength: 190, sharp: 0.5, snow: 0.72, shade: 0.55, lit: 0.1),
+    _Layer(0.12, 0.24, wavelength: 210, sharp: 0.2, detail: 0.4, shade: 0.35),
+    _Layer(0.05, 0.15, wavelength: 280, sharp: 0.08, detail: 0.3, shade: 0.25, haze: 0.45),
+    _Layer(0.0, 0.10, wavelength: 300, sharp: 0, detail: 0.2, shade: 0.15, haze: 0),
+  ],
+  Biome.pasture => const [
+    _Layer(0.36, 0.46, wavelength: 250, sharp: 0.6, snow: 0.5, shade: 0.5, lit: 0.1),
+    _Layer(0.24, 0.30, wavelength: 170, sharp: 0.3, detail: 0.45, shade: 0.4),
+    _Layer(0.13, 0.22, wavelength: 230, sharp: 0.1, detail: 0.35, shade: 0.3, haze: 0.55),
+    _Layer(0.05, 0.16, wavelength: 300, sharp: 0.05, detail: 0.3, shade: 0.22, haze: 0.4),
+    _Layer(0.0, 0.08, wavelength: 340, sharp: 0, detail: 0.2, shade: 0.12, haze: 0),
+  ],
+  Biome.lake => const [
+    _Layer(0.44, 0.52, wavelength: 270, sharp: 0.6, snow: 0.5, shade: 0.6, lit: 0.16),
+    _Layer(0.36, 0.22, wavelength: 200, sharp: 0.4, detail: 0.45, shade: 0.5, snow: 0.82),
+    _Layer(0.36, 0.04, wavelength: 320, sharp: 0, detail: 0.2, shade: 0.1, haze: 0.3),
+    _Layer(0.03, 0.09, wavelength: 300, sharp: 0.1, detail: 0.3, shade: 0.2, haze: 0),
+    _Layer(0.0, 0.05, wavelength: 400, sharp: 0, detail: 0.2, shade: 0.1, haze: 0),
+  ],
+  Biome.forest => const [
+    _Layer(0.42, 0.46, wavelength: 250, sharp: 0.6, snow: 0.35, shade: 0.4, haze: 0.85),
+    _Layer(0.28, 0.28, wavelength: 190, sharp: 0.3, detail: 0.4, trees: 7, shade: 0.25, haze: 0.85),
+    _Layer(0.16, 0.25, wavelength: 220, sharp: 0.25, detail: 0.4, trees: 10, shade: 0.25, haze: 0.8),
+    _Layer(0.06, 0.20, wavelength: 260, sharp: 0.2, detail: 0.4, trees: 14, shade: 0.25, haze: 0.55),
+    _Layer(0.0, 0.08, wavelength: 340, sharp: 0, detail: 0.2, shade: 0.12, haze: 0),
+  ],
+  Biome.monastery => const [
+    _Layer(0.36, 0.56, wavelength: 260, sharp: 0.6, snow: 0.42, shade: 0.55, lit: 0.22),
+    _Layer(0.22, 0.30, wavelength: 210, sharp: 0.4, detail: 0.5, shade: 0.45, lit: 0.12),
+    _Layer(0.09, 0.40, wavelength: 300, sharp: 0.3, detail: 0.45, shade: 0.42, lit: 0.1, haze: 0.4),
+    _Layer(0.03, 0.12, wavelength: 300, sharp: 0.08, detail: 0.3, shade: 0.25, haze: 0.3),
+    _Layer(0.0, 0.07, wavelength: 360, sharp: 0, detail: 0.2, shade: 0.12, haze: 0),
+  ],
+  Biome.plateau => const [
+    _Layer(0.20, 0.24, wavelength: 240, sharp: 0.5, snow: 0.5, shade: 0.4, haze: 0.6, lit: 0.12),
+    _Layer(0.14, 0.11, wavelength: 280, sharp: 0.2, detail: 0.35, shade: 0.3, haze: 0.55),
+    _Layer(0.09, 0.05, wavelength: 420, sharp: 0.05, detail: 0.25, shade: 0.2, haze: 0.45),
+    _Layer(0.04, 0.04, wavelength: 460, sharp: 0, detail: 0.2, shade: 0.15, haze: 0.3),
+    _Layer(0.0, 0.03, wavelength: 520, sharp: 0, detail: 0.2, shade: 0.1, haze: 0),
+  ],
+  Biome.pass => const [
+    _Layer(0.42, 0.56, wavelength: 230, sharp: 0.7, snow: 0.3, shade: 0.55, lit: 0.12, haze: 0.6),
+    _Layer(0.30, 0.46, wavelength: 200, sharp: 0.65, snow: 0.36, shade: 0.6, haze: 0.55),
+    _Layer(0.14, 0.38, wavelength: 240, sharp: 0.55, snow: 0.5, shade: 0.62, haze: 0.4),
+    _Layer(0.04, 0.20, wavelength: 260, sharp: 0.3, detail: 0.4, snow: 0, shade: 0.45, haze: 0.2),
+    _Layer(0.0, 0.06, wavelength: 380, sharp: 0, detail: 0.2, snow: 0, shade: 0.15, haze: 0),
+  ],
+};
+// dart format on
+
+/// One range painted into [canvas]; returns its ridgeline.
+RidgeLine _paintLayer(
+  Canvas canvas,
+  _Layer l,
+  int index,
+  BiomePalette p, {
+  required double w,
+  required double h,
+  required double z,
+  required double bottom,
+  required int seed,
+}) {
+  final ridge = RidgeLine.generate(
+    seed: seed * 53 + index * 7 + 1,
+    width: w,
+    wavelength: l.wavelength,
+    sharpness: l.sharp,
+    detail: l.detail,
+    floor: 0.08,
+  );
+  final baseY = h - z * l.base;
+  final amp = z * l.amp;
+  final shape =
+      l.trees > 0
+          ? treelinePath(
+            ridge,
+            w: w,
+            baseY: baseY,
+            amp: amp,
+            bottom: bottom,
+            tip: l.trees,
+            seed: seed + index,
+          )
+          : null;
+  paintRange(
+    canvas,
+    ridge,
+    p,
+    RangeStyle(
+      rock: p.ridges[index],
+      snowFrom: l.snow,
+      shade: l.shade,
+      lit: l.lit,
+      snowShadeMix: index == 0 ? 0.75 : 1,
+    ),
+    w: w,
+    baseY: baseY,
+    amp: amp,
+    bottom: bottom,
+    wavelength: l.wavelength,
+    seed: seed * 13 + index,
+    shape: shape,
+  );
+  if (l.haze > 0) {
+    paintHaze(
+      canvas,
+      w,
+      top: baseY - amp * 0.55,
+      bottom: baseY + 2,
+      floor: bottom,
+      color: p.haze,
+      alpha: l.haze,
+    );
+  }
+  return ridge;
+}
+
+/// The sky in the unit's light, its sun or moon, and the two farthest
+/// ranges. The part that moves with parallax.
 class SkyPainter extends CustomPainter {
   const SkyPainter({
     required this.biome,
@@ -29,17 +186,25 @@ class SkyPainter extends CustomPainter {
     required this.ridgeZone,
     required this.seed,
     this.overscan = 0,
+    this.seam = true,
+    this.mistDepth = 130,
   });
 
   final Biome biome;
   final BiomePalette palette;
 
-  /// Height at the bottom of the canvas the mountains stand in.
+  /// Height at the bottom of the canvas the ranges stand in.
   final double ridgeZone;
   final int seed;
 
   /// Extra height painted above and below, for [Parallax].
   final double overscan;
+
+  /// Whether the top is the cloud bank the unit rises out of.
+  final bool seam;
+
+  /// Without a [seam], how far down the veil of mist reaches.
+  final double mistDepth;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -47,145 +212,158 @@ class SkyPainter extends CustomPainter {
     canvas.save();
     canvas.translate(0, overscan);
     final w = size.width, h = size.height - overscan * 2;
-    final horizonY = h - ridgeZone;
+    final z = ridgeZone;
+    final horizonY = h - z * 0.3;
     final skyRect = Rect.fromLTRB(0, -overscan, w, h + overscan);
+    final s = p.sky;
+    canvas.drawRect(
+      skyRect,
+      vertical(
+        Rect.fromLTRB(0, 0, w, horizonY + z * 0.1),
+        [s[0], s[1], s[2], s[3]],
+        const [0, 0.38, 0.78, 1],
+      ),
+    );
+    final sun = Offset(w * p.sunAt.dx, horizonY * p.sunAt.dy);
+    final r = math.Random(seed);
+    if (p.dark) {
+      _stars(canvas, w, horizonY, r);
+    }
+    // The glow: wide and faint, then close and warm.
+    final wide = math.max(w, h) * 0.75;
     canvas.drawRect(
       skyRect,
       Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [p.mist, p.mist, p.skyHigh, p.horizon, p.horizon],
-          stops: [
-            0,
-            0.04,
-            (horizonY * 0.55 / h).clamp(0.1, 0.6),
-            (horizonY + ridgeZone * 0.2) / h,
-            1,
+        ..shader = RadialGradient(
+          colors: [
+            p.glow.withValues(alpha: p.dark ? 0.22 : 0.55),
+            p.glow.withValues(alpha: p.dark ? 0.06 : 0.18),
+            p.glow.withValues(alpha: 0),
           ],
-        ).createShader(Rect.fromLTWH(0, 0, w, h)),
+          stops: const [0, 0.35, 1],
+        ).createShader(Rect.fromCircle(center: sun, radius: wide)),
     );
-    final r = math.Random(seed);
+    if (p.rays) _rays(canvas, sun, w, h);
+    final disc = p.dark ? 13.0 : 17.0;
+    canvas.drawCircle(
+      sun,
+      disc * 3.2,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [p.sun.withValues(alpha: 0.65), p.sun.withValues(alpha: 0)],
+        ).createShader(Rect.fromCircle(center: sun, radius: disc * 3.2)),
+    );
+    canvas.drawCircle(sun, disc, fillPaint(p.sun));
     if (p.dark) {
-      final star = Paint();
-      final count = (w * horizonY / 2600).round();
-      for (var i = 0; i < count; i++) {
-        final o = Offset(
-          r.nextDouble() * w,
-          24 + r.nextDouble() * (horizonY * 0.95 - 24),
-        );
-        star.color = const Color(
-          0xFFE8EEFF,
-        ).withValues(alpha: 0.35 + r.nextDouble() * 0.55);
-        canvas.drawCircle(o, 0.5 + r.nextDouble() * 0.9, star);
-      }
-      // A crescent moon low over the ranges.
-      final moon = Offset(w * 0.82, horizonY + ridgeZone * 0.02);
-      canvas.drawCircle(
-        moon,
-        30,
-        Paint()
-          ..shader = RadialGradient(
-            colors: [
-              const Color(0xFFDDE6F7).withValues(alpha: 0.28),
-              const Color(0x00DDE6F7),
-            ],
-          ).createShader(Rect.fromCircle(center: moon, radius: 30)),
-      );
-      canvas.saveLayer(Rect.fromCircle(center: moon, radius: 14), Paint());
-      canvas.drawCircle(moon, 10, _fill(const Color(0xFFF1F4FB)));
-      canvas.drawCircle(
-        moon.translate(4.5, -3),
-        9,
-        Paint()..blendMode = BlendMode.clear,
-      );
-      canvas.restore();
-    } else {
-      // A pale sun sinking behind the far range.
-      final sun = Offset(w * 0.84, horizonY + ridgeZone * 0.08);
-      canvas.drawCircle(
-        sun,
-        64,
-        Paint()
-          ..shader = RadialGradient(
-            colors: [
-              const Color(0xFFFFF6DA).withValues(alpha: 0.75),
-              const Color(0x00FFF6DA),
-            ],
-          ).createShader(Rect.fromCircle(center: sun, radius: 64)),
-      );
-      canvas.drawCircle(sun, 17, _fill(const Color(0xFFFFF8E4)));
+      // Faint seas on the moon.
+      final sea = fillPaint(const Color(0xFFB9C3DC).withValues(alpha: 0.45));
+      canvas.drawCircle(sun.translate(-3.5, -2.5), 3.4, sea);
+      canvas.drawCircle(sun.translate(3.5, 3), 2.4, sea);
+      canvas.drawCircle(sun.translate(-1, 5), 1.6, sea);
     }
-    _farRange(canvas, w, h);
-    // The cloud bank this unit came up through.
-    final puff = _fill(p.mist);
-    var x = -10.0;
-    while (x < w + 40) {
-      final rr = 16 + r.nextDouble() * 22;
-      canvas.drawCircle(Offset(x, 4 + r.nextDouble() * 8), rr, puff);
-      x += rr * 1.3;
+
+    final layers = _layersOf(biome);
+    final bottom = h + overscan + 2;
+    for (var i = 0; i < 2; i++) {
+      _paintLayer(
+        canvas,
+        layers[i],
+        i,
+        p,
+        w: w,
+        h: h,
+        z: z,
+        bottom: bottom,
+        seed: seed,
+      );
     }
+    // The cloud this unit rises out of (it meets the bank at the foot of
+    // the unit above), or a plain veil of mist that a title can sit on.
+    final depth = seam ? 130.0 : mistDepth;
+    final top = Rect.fromLTRB(0, -overscan, w, depth);
+    final solid = seam ? overscan + 20 : (overscan + depth * 0.55);
+    canvas.drawRect(
+      top,
+      vertical(
+        top,
+        [p.mist, p.mist, p.mist.withValues(alpha: 0)],
+        [0, solid / (overscan + depth), 1],
+      ),
+    );
+    if (seam) paintCloudBank(canvas, w, 14, p, seed + 3, hangDown: true);
     canvas.restore();
   }
 
-  void _farRange(Canvas canvas, double w, double h) {
+  void _stars(Canvas canvas, double w, double horizonY, math.Random r) {
+    final count = (w * horizonY / 1500).round();
+    final small = <Offset>[];
+    final paint = Paint()..strokeCap = StrokeCap.round;
+    for (var i = 0; i < count; i++) {
+      final o = Offset(
+        r.nextDouble() * w,
+        40 + r.nextDouble() * (horizonY * 0.9 - 40),
+      );
+      final fade = 1 - (o.dy / horizonY).clamp(0.0, 1.0) * 0.7;
+      final size = r.nextDouble();
+      if (size > 0.93) {
+        canvas.drawCircle(
+          o,
+          5,
+          Paint()
+            ..shader = RadialGradient(
+              colors: [
+                const Color(0xFFDDE6FF).withValues(alpha: 0.4 * fade),
+                const Color(0x00DDE6FF),
+              ],
+            ).createShader(Rect.fromCircle(center: o, radius: 5)),
+        );
+        canvas.drawCircle(
+          o,
+          1.3,
+          fillPaint(const Color(0xFFF4F7FF).withValues(alpha: fade)),
+        );
+      } else {
+        small.add(o);
+        paint
+          ..color = const Color(
+            0xFFE6ECFF,
+          ).withValues(alpha: (0.25 + size * 0.5) * fade)
+          ..strokeWidth = 0.8 + size * 1.0;
+        canvas.drawPoints(ui.PointMode.points, [o], paint);
+      }
+    }
+  }
+
+  void _rays(Canvas canvas, Offset sun, double w, double h) {
     final p = palette;
-    final z = ridgeZone;
-    final (spacing, ampK, snowK, smooth, jag) = switch (biome) {
-      Biome.pass => (120.0, 1.05, 0.05, false, 0.025),
-      Biome.lake => (150.0, 0.85, 0.45, false, 0.02),
-      Biome.plateau => (190.0, 0.5, 0.3, true, 0.0),
-      Biome.forest => (110.0, 0.7, 0.85, false, 0.015),
-      Biome.pasture => (140.0, 0.75, 0.6, false, 0.02),
-      Biome.monastery => (130.0, 0.85, 0.5, false, 0.02),
-      Biome.valley => (130.0, 0.75, 0.72, false, 0.02),
-    };
-    final range = MountainRange.generate(
-      seed: seed * 31 + 7,
-      width: w,
-      spacing: spacing,
-      smooth: smooth,
-    );
-    final baseY = h - z * 0.3;
-    final amp = z * ampK;
-    final bottom = h + overscan + 2;
-    final shape = range.path(
-      width: w,
-      baseY: baseY,
-      amp: amp,
-      bottom: bottom,
-      jag: jag,
-    );
-    paintSnowRange(
-      canvas,
-      shape,
-      range,
-      w: w,
-      baseY: baseY,
-      amp: amp,
-      bottom: bottom,
-      rock: p.far,
-      snowLine: baseY - amp * (1 - snowK),
-      palette: p,
-      jag: jag,
-    );
-    // Haze at the foot of the range: distance.
-    canvas.save();
-    canvas.clipPath(shape);
-    final haze = Rect.fromLTRB(0, baseY - amp * 0.45, w, bottom);
-    canvas.drawRect(
-      haze,
+    final r = math.Random(seed + 77);
+    final len = h * 1.1;
+    final shafts = Path();
+    for (var i = 0; i < 5; i++) {
+      final a = math.pi * (0.12 + i * 0.11 + r.nextDouble() * 0.04);
+      final spread = 0.012 + r.nextDouble() * 0.018;
+      shafts
+        ..moveTo(sun.dx, sun.dy)
+        ..lineTo(
+          sun.dx + math.cos(a - spread) * len,
+          sun.dy + math.sin(a - spread) * len,
+        )
+        ..lineTo(
+          sun.dx + math.cos(a + spread) * len,
+          sun.dy + math.sin(a + spread) * len,
+        )
+        ..close();
+    }
+    canvas.drawPath(
+      shafts,
       Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+        ..shader = RadialGradient(
           colors: [
-            p.horizon.withValues(alpha: 0),
-            p.horizon.withValues(alpha: 0.75),
+            p.sun.withValues(alpha: p.dark ? 0.04 : 0.13),
+            p.sun.withValues(alpha: 0),
           ],
-        ).createShader(haze),
+        ).createShader(Rect.fromCircle(center: sun, radius: len)),
     );
-    canvas.restore();
   }
 
   @override
@@ -194,67 +372,13 @@ class SkyPainter extends CustomPainter {
       old.palette != palette ||
       old.ridgeZone != ridgeZone ||
       old.seed != seed ||
-      old.overscan != overscan;
+      old.overscan != overscan ||
+      old.seam != seam ||
+      old.mistDepth != mistDepth;
 }
 
-/// Fills [shape] in [rock], snows everything above a ragged [snowLine],
-/// and shades the right-hand face of each peak.
-void paintSnowRange(
-  Canvas canvas,
-  Path shape,
-  MountainRange range, {
-  required double w,
-  required double baseY,
-  required double amp,
-  required double bottom,
-  required Color rock,
-  required double snowLine,
-  required BiomePalette palette,
-  double jag = 0,
-}) {
-  final p = palette;
-  canvas.drawPath(shape, _fill(rock));
-  canvas.save();
-  canvas.clipPath(shape);
-  final snow = Path()..moveTo(-2, -10);
-  for (var x = -2.0; x <= w + 6; x += 6) {
-    final streak =
-        math.sin(x * 0.11) * 5 +
-        math.sin(x * 0.37 + 1) * 4 +
-        (math.sin(x * 0.9) > 0.6 ? 9 : 0);
-    snow.lineTo(x, snowLine + streak);
-  }
-  snow
-    ..lineTo(w + 6, -10)
-    ..close();
-  canvas.drawPath(snow, _fill(p.snow));
-  // Shadowed faces: from each peak down and to the right.
-  final shade = _fill(p.snowShade.withValues(alpha: p.dark ? 0.55 : 0.6));
-  final rockShade = _fill(
-    const Color(0xFF1C2433).withValues(alpha: p.dark ? 0.25 : 0.12),
-  );
-  for (var i = 0; i < range.peakCount; i++) {
-    final px = range.peakX(i);
-    if (px < -range.peakWidth(i) || px > w + range.peakWidth(i)) continue;
-    final py = range.yAt(px, baseY, amp, jag: jag);
-    final pw = range.peakWidth(i);
-    final face =
-        Path()
-          ..moveTo(px, py)
-          ..lineTo(px + pw, bottom)
-          ..lineTo(px + pw * 0.12, bottom)
-          ..close();
-    canvas.save();
-    canvas.clipPath(snow);
-    canvas.drawPath(face, shade);
-    canvas.restore();
-    canvas.drawPath(face, rockShade);
-  }
-  canvas.restore();
-}
-
-/// The middle range with the biome's landmark (the lake, the monastery,
-/// the glacier...), then the near slope blending into the valley floor.
+/// The three nearer ranges, the unit's landmark, its water, and the near
+/// slope blending into the valley floor.
 class HorizonPainter extends CustomPainter {
   const HorizonPainter({
     required this.biome,
@@ -263,6 +387,8 @@ class HorizonPainter extends CustomPainter {
     required this.seed,
     required this.trailX,
     required this.trailWidth,
+    this.scale = 1,
+    this.foreground = true,
   });
 
   final Biome biome;
@@ -274,315 +400,347 @@ class HorizonPainter extends CustomPainter {
   final double trailX;
   final double trailWidth;
 
+  /// Landmark scale (bigger on iPad).
+  final double scale;
+
+  /// Whether to stand things on the near slope (off under a header card).
+  final bool foreground;
+
   @override
   void paint(Canvas canvas, Size size) {
     final p = palette;
     final w = size.width, h = size.height;
     final z = ridgeZone;
-    final midBase = h - z * 0.1;
-    final midAmp = switch (biome) {
-      Biome.plateau => z * 0.16,
-      Biome.pass => z * 0.55,
-      Biome.monastery => z * 0.5,
-      Biome.forest => z * 0.48,
-      _ => z * 0.36,
-    };
-    final mid = MountainRange.generate(
-      seed: seed * 17 + 3,
-      width: w,
-      spacing: biome == Biome.plateau ? 220 : 160,
-      smooth: biome != Biome.pass && biome != Biome.forest,
-      minHeight: 0.35,
-    );
-    final midPath = mid.path(
-      width: w,
-      baseY: midBase,
-      amp: midAmp,
-      bottom: h + 2,
-      jag: biome == Biome.pass ? 0.03 : 0,
-    );
-    if (biome == Biome.pass) {
-      paintSnowRange(
-        canvas,
-        midPath,
-        mid,
-        w: w,
-        baseY: midBase,
-        amp: midAmp,
-        bottom: h + 2,
-        rock: p.mid,
-        snowLine: midBase - midAmp * 0.55,
-        palette: p,
-        jag: 0.03,
-      );
-      _saddle(canvas, mid, w, midBase, midAmp, h);
-    } else {
-      canvas.drawPath(midPath, _fill(p.mid));
-      canvas.save();
-      canvas.clipPath(midPath);
-      final band = Rect.fromLTRB(0, midBase - midAmp, w, h);
-      canvas.drawRect(
-        band,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [p.mid, Color.lerp(p.mid, p.horizon, 0.35)!],
-          ).createShader(band),
-      );
-      canvas.restore();
-    }
-    if (biome == Biome.forest) _forestCrest(canvas, mid, w, midBase, midAmp);
-    if (biome == Biome.monastery) _monastery(canvas, mid, w, midBase, midAmp);
-
-    // Water on the horizon: the lake, the valley river, the salt lake.
-    final waterTop = h - z * 0.2;
-    if (biome == Biome.lake || biome == Biome.plateau) {
-      final water = Path()..moveTo(-2, waterTop + 6);
-      for (var x = -2.0; x <= w + 8; x += 8) {
-        water.lineTo(x, waterTop + math.sin(x * 0.012 + seed) * 5);
-      }
-      water
-        ..lineTo(w + 8, h - z * 0.1)
-        ..lineTo(-2, h - z * 0.1)
-        ..close();
-      final rect = Rect.fromLTRB(0, waterTop - 6, w, h);
-      canvas.drawPath(
-        water,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [p.waterDeep, p.water],
-          ).createShader(rect),
-      );
-      final glint =
-          Paint()
-            ..color = const Color(
-              0xFFFFFFFF,
-            ).withValues(alpha: p.dark ? 0.18 : 0.45)
-            ..strokeWidth = 1.4
-            ..strokeCap = StrokeCap.round;
-      final r = math.Random(seed + 5);
-      for (var i = 0; i < w / 40; i++) {
-        final x = r.nextDouble() * w;
-        final y = waterTop + 6 + r.nextDouble() * (z * 0.12);
-        canvas.drawLine(
-          Offset(x, y),
-          Offset(x + 8 + r.nextDouble() * 18, y),
-          glint,
+    final layers = _layersOf(biome);
+    final bottom = h + 2;
+    final ridges = <RidgeLine>[];
+    for (var i = 2; i < 5; i++) {
+      if (biome == Biome.lake && i == 3) _lake(canvas, w, h, z);
+      if (biome == Biome.plateau && i == 3) _saltLake(canvas, w, h, z);
+      final l = layers[i];
+      if (i == 4) {
+        _nearSlope(canvas, l, w, h, z);
+      } else {
+        ridges.add(
+          _paintLayer(
+            canvas,
+            l,
+            i,
+            p,
+            w: w,
+            h: h,
+            z: z,
+            bottom: bottom,
+            seed: seed,
+          ),
         );
       }
+      if (i == 2 && biome == Biome.monastery) {
+        _monastery(canvas, ridges.last, layers[2], w, h, z);
+      }
+      if (i == 3) _landmark(canvas, ridges.last, layers[3], w, h, z);
+    }
+    if (foreground) _foreground(canvas, w, h, z);
+    if (trailWidth > 0) _trailHead(canvas, w, h);
+  }
+
+  double _yOn(RidgeLine r, _Layer l, double x, double h, double z) =>
+      r.yAt(x, h - z * l.base, z * l.amp);
+
+  void _nearSlope(Canvas canvas, _Layer l, double w, double h, double z) {
+    final p = palette;
+    final ridge = RidgeLine.generate(
+      seed: seed * 53 + 29,
+      width: w,
+      wavelength: l.wavelength,
+      sharpness: 0,
+      detail: l.detail,
+      floor: 0.15,
+    );
+    final baseY = h - z * l.base;
+    final amp = z * l.amp;
+    final shape = ridge.path(width: w, baseY: baseY, amp: amp, bottom: h + 2);
+    final rect = Rect.fromLTRB(0, baseY - amp, w, h);
+    canvas.drawPath(
+      shape,
+      vertical(
+        rect,
+        [p.near, Color.lerp(p.near, p.ground, 0.5)!, p.ground],
+        const [0, 0.35, 1],
+      ),
+    );
+    if (biome == Biome.valley) _river(canvas, w, h, z);
+  }
+
+  /// The valley's river: a ribbon from the gap in the hills down to the
+  /// near meadow, widening as it comes closer.
+  void _river(Canvas canvas, double w, double h, double z) {
+    final p = palette;
+    final y0 = h - z * 0.11, y1 = h + 4;
+    final x0 = w * 0.34, x1 = w * 0.06;
+    Offset at(double t) {
+      final y = y0 + (y1 - y0) * t;
+      final x =
+          x0 + (x1 - x0) * t + math.sin(t * math.pi * 1.7 + 0.3) * w * 0.13 * t;
+      return Offset(x, y);
     }
 
-    // The near slope: rolling, fading into the valley floor colour.
-    final near = MountainRange.generate(
-      seed: seed * 7 + 1,
-      width: w,
-      spacing: 200,
-      smooth: true,
-      minHeight: 0.3,
-    );
-    final nearBase = h;
-    final nearAmp = z * (biome == Biome.plateau ? 0.08 : 0.15);
-    final nearPath = near.path(
-      width: w,
-      baseY: nearBase,
-      amp: nearAmp,
-      bottom: h + 2,
-    );
-    final nr = Rect.fromLTRB(0, nearBase - nearAmp, w, h);
+    final left = <Offset>[], right = <Offset>[];
+    for (var i = 0; i <= 24; i++) {
+      final t = i / 24;
+      final c = at(t);
+      final half = 1.5 + 24 * math.pow(t, 1.8);
+      left.add(c.translate(-half, 0));
+      right.add(c.translate(half, 0));
+    }
+    final river = Path()..moveTo(left.first.dx, left.first.dy);
+    for (final o in left) {
+      river.lineTo(o.dx, o.dy);
+    }
+    for (final o in right.reversed) {
+      river.lineTo(o.dx, o.dy);
+    }
+    river.close();
+    final rect = Rect.fromLTRB(0, y0, w, y1);
     canvas.drawPath(
-      nearPath,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [p.near, p.ground],
-        ).createShader(nr),
+      river,
+      vertical(rect, [Color.lerp(p.water, p.haze, 0.4)!, p.water, p.waterDeep]),
     );
-    if (biome == Biome.valley) _river(canvas, w, h, nearAmp);
+    // The bright line of the sky in the water.
+    final glint = Path()..moveTo(at(0.05).dx, at(0.05).dy);
+    for (var i = 1; i <= 20; i++) {
+      final c = at(0.05 + i / 20 * 0.9);
+      glint.lineTo(c.dx - 2 - 4 * (i / 20), c.dy);
+    }
+    canvas.drawPath(
+      glint,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4
+        ..strokeCap = StrokeCap.round
+        ..color = p.light.withValues(alpha: p.dark ? 0.25 : 0.6),
+    );
+  }
 
-    if (trailWidth <= 0) return;
-    // The trail climbing over the near slope, narrowing with distance.
-    final crest = math.min(h - 6, near.yAt(trailX + 6, nearBase, nearAmp) + 3);
-    final trail =
+  /// The turquoise lake with the far range mirrored in it.
+  void _lake(Canvas canvas, double w, double h, double z) {
+    final p = palette;
+    final top = h - z * 0.36, bottom = h - z * 0.02;
+    final lake = Rect.fromLTRB(0, top, w, bottom);
+    canvas.drawRect(
+      lake,
+      vertical(
+        lake,
+        [Color.lerp(p.water, p.haze, 0.45)!, p.water, p.waterDeep],
+        const [0, 0.35, 1],
+      ),
+    );
+    canvas.save();
+    canvas.clipRect(lake);
+    // Reflection of the far snow range, upside down and softened.
+    final layers = _layersOf(biome);
+    final l = layers[0];
+    final ridge = RidgeLine.generate(
+      seed: seed * 53 + 1,
+      width: w,
+      wavelength: l.wavelength,
+      sharpness: l.sharp,
+      detail: l.detail,
+      floor: 0.08,
+    );
+    final amp = z * l.amp * 0.55;
+    final mirror = Path()..moveTo(-ridge.margin, top);
+    final offset = z * (l.base - 0.36) * 0.55;
+    for (var x = -ridge.margin; x <= w + ridge.margin; x += ridge.step) {
+      mirror.lineTo(x, top + offset + ridge.at(x) * amp);
+    }
+    mirror
+      ..lineTo(w + ridge.margin, top)
+      ..close();
+    canvas.drawPath(
+      mirror,
+      fillPaint(
+        Color.lerp(
+          p.waterDeep,
+          p.light,
+          p.dark ? 0.25 : 0.5,
+        )!.withValues(alpha: 0.28),
+      ),
+    );
+    // Glints toward the sun.
+    final r = math.Random(seed + 5);
+    final glint =
+        Paint()
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = 1.3;
+    final sx = w * p.sunAt.dx;
+    for (var i = 0; i < w / 14; i++) {
+      final y = top + 6 + r.nextDouble() * (bottom - top - 10);
+      final near = (y - top) / (bottom - top);
+      final x = sx + (r.nextDouble() - 0.5) * w * (0.25 + near * 0.5);
+      final len = 6 + r.nextDouble() * 16 * (0.5 + near);
+      glint.color = p.light.withValues(
+        alpha: (p.dark ? 0.16 : 0.5) * (1 - (x - sx).abs() / w),
+      );
+      canvas.drawLine(Offset(x, y), Offset(x + len, y), glint);
+    }
+    canvas.restore();
+    // The far shore line.
+    canvas.drawLine(
+      Offset(0, top + 0.5),
+      Offset(w, top + 0.5),
+      Paint()
+        ..color = p.light.withValues(alpha: p.dark ? 0.15 : 0.45)
+        ..strokeWidth = 1,
+    );
+  }
+
+  /// A white salt lake far out on the plain.
+  void _saltLake(Canvas canvas, double w, double h, double z) {
+    final p = palette;
+    final c = Offset(w * 0.3, h - z * 0.085);
+    final rect = Rect.fromCenter(center: c, width: w * 0.62, height: z * 0.035);
+    canvas.drawOval(rect, vertical(rect, [p.water, p.waterDeep]));
+    canvas.drawOval(
+      rect.deflate(2).translate(w * 0.04, -0.5),
+      fillPaint(p.light.withValues(alpha: p.dark ? 0.15 : 0.55)),
+    );
+  }
+
+  void _monastery(
+    Canvas canvas,
+    RidgeLine ridge,
+    _Layer l,
+    double w,
+    double h,
+    double z,
+  ) {
+    final x = ridge.highest(w * 0.56, w * 0.86);
+    final y = _yOn(ridge, l, x, h, z);
+    final s = (z / 200).clamp(0.9, 1.4) * scale;
+    drawMonasteryHero(
+      canvas,
+      Offset(x, y + 6 * s),
+      s,
+      palette,
+      (xx) => _yOn(ridge, l, xx, h, z),
+    );
+  }
+
+  /// The unit's landmark on the third range (the one just behind the near
+  /// slope).
+  void _landmark(
+    Canvas canvas,
+    RidgeLine ridge,
+    _Layer l,
+    double w,
+    double h,
+    double z,
+  ) {
+    final p = palette;
+    final s = (z / 210).clamp(0.85, 1.35) * scale;
+    double y(double x) => _yOn(ridge, l, x, h, z) + 3 * s;
+    switch (biome) {
+      case Biome.valley:
+        // Two farmhouses down the slope, lamp-lit at night.
+        for (final (fx, k, flip) in [(0.1, 0.5, false), (0.17, 0.44, true)]) {
+          final xx = w * fx;
+          drawHouse(canvas, Offset(xx, y(xx) + 4), s * k, p, flip: flip);
+        }
+        final x = w * 0.72;
+        drawChortenHero(canvas, Offset(x, y(x) + 6), s * 1.05, p);
+      case Biome.pasture:
+        final x = w * 0.22;
+        drawTentHero(canvas, Offset(x + 44 * s, y(x + 44 * s) + 3), s * 0.8, p);
+        drawTentHero(canvas, Offset(x, y(x) + 7), s * 1.15, p);
+      case Biome.plateau:
+        for (final (fx, k, dy) in [
+          (0.6, 0.85, 0.0),
+          (0.665, 0.8, 3.0),
+          (0.71, 0.9, 1.0),
+          (0.8, 0.7, -2.0),
+        ]) {
+          final xx = w * fx;
+          drawKiang(
+            canvas,
+            Offset(xx, h - z * 0.05 + dy),
+            s * k,
+            p,
+            facing: -1,
+          );
+        }
+      case Biome.pass:
+        final x = ridge.lowest(w * 0.38, w * 0.62);
+        drawLhatseHero(canvas, Offset(x, y(x) + 2), s * 0.9, p);
+      case Biome.forest:
+      case Biome.lake:
+      case Biome.monastery:
+        break;
+    }
+  }
+
+  /// Things standing on the near slope, in front of everything.
+  void _foreground(Canvas canvas, double w, double h, double z) {
+    final p = palette;
+    final s = (z / 210).clamp(0.85, 1.35) * scale;
+    switch (biome) {
+      case Biome.forest:
+        // A few tall firs framing the scene.
+        for (final (fx, k, tone) in [
+          (0.06, 1.0, 0.2),
+          (0.16, 0.72, 0.7),
+          (0.9, 0.92, 0.4),
+        ]) {
+          drawFirHero(
+            canvas,
+            Offset(w * fx, h - z * 0.02),
+            s * k,
+            p,
+            seed: (fx * 100).round(),
+            tone: tone,
+          );
+        }
+      case Biome.pasture:
+        // A few yaks grazing on the near slope.
+        for (final (fx, fy, k, f, white) in [
+          (0.58, 0.035, 0.95, -1.0, false),
+          (0.67, 0.012, 0.85, 1.0, true),
+          (0.86, 0.045, 1.0, -1.0, false),
+        ]) {
+          drawYak(
+            canvas,
+            Offset(w * fx, h - z * fy),
+            s * k,
+            p,
+            facing: f,
+            white: white,
+          );
+        }
+      case Biome.lake:
+        // Mani stones on the near shore.
+        drawManiPile(canvas, Offset(w * 0.12, h - z * 0.03), s * 0.9, p, 4);
+      default:
+        break;
+    }
+  }
+
+  void _trailHead(Canvas canvas, double w, double h) {
+    final p = palette;
+    final crest = h - 10;
+    final tw = trailWidth;
+    final path =
         Path()
-          ..moveTo(trailX - trailWidth / 2, h + 1)
+          ..moveTo(trailX - tw / 2, h + 1)
+          ..quadraticBezierTo(trailX - tw * 0.3, crest + 5, trailX - 2, crest)
+          ..lineTo(trailX + 2, crest)
           ..quadraticBezierTo(
-            trailX - trailWidth * 0.3,
-            crest + (h - crest) * 0.4,
-            trailX + 4,
-            crest,
-          )
-          ..lineTo(trailX + 8, crest)
-          ..quadraticBezierTo(
-            trailX + trailWidth * 0.3,
-            crest + (h - crest) * 0.4,
-            trailX + trailWidth / 2,
+            trailX + tw * 0.3,
+            crest + 5,
+            trailX + tw / 2,
             h + 1,
           )
           ..close();
-    canvas.drawPath(trail, _fill(p.trail.withValues(alpha: 0.9)));
-  }
-
-  void _river(Canvas canvas, double w, double h, double nearAmp) {
-    final p = palette;
-    final y = h - nearAmp * 0.4;
-    final river = Path()..moveTo(-4, y + 4);
-    for (var x = -4.0; x <= w + 8; x += 8) {
-      river.lineTo(x, y + math.sin(x * 0.02 + seed) * 4);
-    }
-    for (var x = w + 8; x >= -4; x -= 8) {
-      river.lineTo(x, y + 6 + math.sin(x * 0.02 + seed) * 4);
-    }
-    river.close();
-    canvas.drawPath(river, _fill(p.water));
-  }
-
-  void _saddle(
-    Canvas canvas,
-    MountainRange mid,
-    double w,
-    double base,
-    double amp,
-    double h,
-  ) {
-    final p = palette;
-    // The lowest saddle near the middle is the pass.
-    var bestX = w * 0.5, bestY = -1.0;
-    for (var x = w * 0.3; x <= w * 0.75; x += 6) {
-      final y = mid.yAt(x, base, amp, jag: 0.03);
-      if (y > bestY) {
-        bestY = y;
-        bestX = x;
-      }
-    }
-    // The la itself: a cairn with prayer flags on the saddle.
-    drawLhatse(canvas, Offset(bestX, bestY + 3), 0.6, p);
-  }
-
-  void _forestCrest(
-    Canvas canvas,
-    MountainRange mid,
-    double w,
-    double base,
-    double amp,
-  ) {
-    final p = palette;
-    final r = math.Random(seed + 11);
-    final dark = _fill(
-      Color.lerp(p.mid, const Color(0xFF0E2219), p.dark ? 0.3 : 0.25)!,
-    );
-    for (var x = -4.0; x < w + 8; x += 5 + r.nextDouble() * 5) {
-      final y = mid.yAt(x, base, amp) + 2;
-      final th = 8 + r.nextDouble() * 9;
-      canvas.drawPath(
-        Path()
-          ..moveTo(x - th * 0.28, y)
-          ..lineTo(x, y - th)
-          ..lineTo(x + th * 0.28, y)
-          ..close(),
-        dark,
-      );
-    }
-  }
-
-  /// A monastery on the highest ridge to the right: whitewashed halls
-  /// stepping up the slope to a red temple with a gold roof.
-  void _monastery(
-    Canvas canvas,
-    MountainRange mid,
-    double w,
-    double base,
-    double amp,
-  ) {
-    final p = palette;
-    var bestX = w * 0.75, bestY = double.infinity;
-    for (var x = w * 0.58; x <= w * 0.9; x += 4) {
-      final y = mid.yAt(x, base, amp);
-      if (y < bestY) {
-        bestY = y;
-        bestX = x;
-      }
-    }
-    final s = (amp / 70).clamp(0.8, 1.5);
-    final white = _fill(p.wall);
-    final frame = _fill(p.frame);
-    final window = _fill(p.window);
-    // Halls down the left slope.
-    for (var i = 3; i >= 1; i--) {
-      final x = bestX - i * 16 * s;
-      final y = mid.yAt(x, base, amp) + 3 * s;
-      final r = Rect.fromLTWH(x - 9 * s, y - 13 * s, 18 * s, 14 * s);
-      canvas.drawRect(r, white);
-      canvas.drawRect(
-        Rect.fromLTWH(r.left, r.top - 2 * s, r.width, 2.2 * s),
-        _fill(p.tone(const Color(0xFF6E2A20), 0.5)),
-      );
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: r.center.translate(0, -1 * s),
-          width: 3.4 * s,
-          height: 3.6 * s,
-        ),
-        frame,
-      );
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: r.center.translate(0, -1 * s),
-          width: 2 * s,
-          height: 2.2 * s,
-        ),
-        window,
-      );
-    }
-    // The red temple.
-    final base0 = bestY + 6 * s;
-    final hall = Rect.fromLTWH(bestX - 15 * s, base0 - 26 * s, 30 * s, 26 * s);
-    canvas.drawRect(
-      Rect.fromLTWH(
-        hall.left - 6 * s,
-        base0 - 10 * s,
-        hall.width + 12 * s,
-        10 * s,
-      ),
-      white,
-    );
-    canvas.drawRect(hall, _fill(p.tone(const Color(0xFF9B2F22), 0.5)));
-    canvas.drawRect(
-      Rect.fromLTWH(hall.left, hall.top, hall.width, 4 * s),
-      _fill(p.tone(const Color(0xFF5A1E16), 0.5)),
-    );
-    for (var i = 0; i < 3; i++) {
-      final c = Offset(hall.left + 6 * s + i * 9 * s, hall.top + 13 * s);
-      canvas.drawRect(
-        Rect.fromCenter(center: c, width: 4.2 * s, height: 6 * s),
-        frame,
-      );
-      canvas.drawRect(
-        Rect.fromCenter(center: c, width: 2.4 * s, height: 4 * s),
-        window,
-      );
-    }
-    final gold = _fill(p.tone(const Color(0xFFE5A928), 0.3));
-    canvas.drawPath(
-      Path()
-        ..moveTo(hall.left + 4 * s, hall.top)
-        ..lineTo(hall.left + 8 * s, hall.top - 7 * s)
-        ..lineTo(hall.right - 8 * s, hall.top - 7 * s)
-        ..lineTo(hall.right - 4 * s, hall.top)
-        ..close(),
-      gold,
-    );
-    for (final dx in [-9.0, 9.0]) {
-      final x = bestX + dx * s;
-      canvas.drawRect(
-        Rect.fromLTWH(x - 1.4 * s, hall.top - 13 * s, 2.8 * s, 6 * s),
-        gold,
-      );
-    }
-    canvas.drawCircle(Offset(bestX, hall.top - 9 * s), 2.2 * s, gold);
+    canvas.drawPath(path, fillPaint(p.trail.withValues(alpha: 0.55)));
   }
 
   @override
@@ -592,11 +750,36 @@ class HorizonPainter extends CustomPainter {
       old.ridgeZone != ridgeZone ||
       old.seed != seed ||
       old.trailX != trailX ||
-      old.trailWidth != trailWidth;
+      old.trailWidth != trailWidth ||
+      old.scale != scale ||
+      old.foreground != foreground;
 }
 
-/// The meadow at the foot of a scene fading into the page's mist, with
-/// the cloud bank along it.
+/// Where prayer flags hang over a scene of [size], or none.
+List<(Offset, Offset, double)> flagStringsFor(
+  Biome biome,
+  Size size,
+  double ridgeZone,
+) {
+  final w = size.width, h = size.height, z = ridgeZone;
+  return switch (biome) {
+    // One long line across the lake shore.
+    Biome.lake => [
+      (Offset(w * 0.03, h - z * 0.2), Offset(w * 0.97, h - z * 0.16), 22),
+    ],
+    // From the chorten's knoll across to a pole.
+    Biome.valley => [
+      (Offset(w * 0.46, h - z * 0.16), Offset(w * 0.98, h - z * 0.22), 12),
+    ],
+    Biome.monastery => [
+      (Offset(w * 0.02, h - z * 0.12), Offset(w * 0.34, h - z * 0.06), 10),
+    ],
+    _ => const [],
+  };
+}
+
+/// The page under a short header: the near meadow fading into the mist,
+/// with the cloud bank along it.
 class MistFloorPainter extends CustomPainter {
   const MistFloorPainter({required this.palette, this.seed = 0});
 
@@ -609,25 +792,17 @@ class MistFloorPainter extends CustomPainter {
     final rect = Offset.zero & size;
     canvas.drawRect(
       rect,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [p.ground, p.mist],
-        ).createShader(rect),
+      vertical(rect, [p.ground, Color.lerp(p.ground, p.mist, 0.5)!, p.mist]),
     );
-    final r = math.Random(seed);
-    final puff = _fill(p.mist);
-    var x = -10.0;
-    while (x < size.width + 40) {
-      final rr = 14 + r.nextDouble() * 20;
-      canvas.drawCircle(
-        Offset(x, size.height - 4 - r.nextDouble() * 8),
-        rr,
-        puff,
-      );
-      x += rr * 1.3;
-    }
+    paintCloudBank(
+      canvas,
+      size.width,
+      size.height - 18,
+      p,
+      seed,
+      hangDown: false,
+      scale: 0.8,
+    );
   }
 
   @override
@@ -635,72 +810,67 @@ class MistFloorPainter extends CustomPainter {
       old.palette != palette || old.seed != seed;
 }
 
-/// A few clouds, tiled twice across the width so a translation of up to
-/// one width loops seamlessly.
+/// A few painterly clouds, tiled twice across the width so a translation
+/// of up to one width loops seamlessly.
 class CloudPainter extends CustomPainter {
   const CloudPainter({
-    required this.dark,
+    required this.palette,
     required this.seed,
     required this.top,
     required this.bottom,
   });
 
-  final bool dark;
+  final BiomePalette palette;
   final int seed;
 
   /// The band (fractions of the height) the clouds float in.
   final double top;
   final double bottom;
 
+  bool get dark => palette.dark;
+
   @override
   void paint(Canvas canvas, Size size) {
+    final p = palette;
     final w = size.width / 2;
     final r = math.Random(seed);
-    final paint = _fill(
-      dark
-          ? const Color(0xFF2B3A5C).withValues(alpha: 0.55)
-          : const Color(0xFFFFFFFF).withValues(alpha: 0.85),
-    );
-    final count = 2 + (w / 260).floor();
-    for (var i = 0; i < count; i++) {
-      final cx = (i + r.nextDouble() * 0.8) * w / count;
+    final (count, minW, maxW, flat) = switch (p.biome) {
+      Biome.pasture => (2, 80.0, 130.0, 0.35),
+      Biome.plateau => (2, 150.0, 240.0, 0.9),
+      Biome.forest => (1, 110.0, 150.0, 0.75),
+      Biome.pass => (1, 70.0, 100.0, 0.55),
+      _ => (2, 70.0, 120.0, 0.6),
+    };
+    final n = count + (w > 600 ? count : 0);
+    for (var i = 0; i < n; i++) {
+      final cw = minW + r.nextDouble() * (maxW - minW);
+      final cx = (i + 0.2 + r.nextDouble() * 0.6) * w / n;
       final cy = size.height * (top + r.nextDouble() * (bottom - top));
-      final cw = 50 + r.nextDouble() * 60;
+      final cs = r.nextInt(9999);
       for (final dx in [0.0, w]) {
-        final cloud = Path();
-        final base = Offset(cx + dx, cy);
-        for (var k = 0; k < 4; k++) {
-          final rr = cw * (0.18 + 0.1 * math.sin(k * 1.7 + i));
-          cloud.addOval(
-            Rect.fromCircle(
-              center: base.translate(
-                -cw / 2 + k * cw / 3.2,
-                -rr * 0.4 - (k == 1 || k == 2 ? rr * 0.35 : 0),
-              ),
-              radius: rr,
-            ),
-          );
-        }
-        canvas.save();
-        canvas.clipRect(
-          Rect.fromLTRB(base.dx - cw, base.dy - cw, base.dx + cw, base.dy),
+        paintCloud(
+          canvas,
+          Offset(cx + dx, cy),
+          cw,
+          p,
+          cs,
+          opacity: p.dark ? 0.7 : 0.92,
+          flat: flat,
         );
-        canvas.drawPath(cloud, paint);
-        canvas.restore();
       }
     }
   }
 
   @override
   bool shouldRepaint(CloudPainter old) =>
-      old.dark != dark ||
+      old.palette != palette ||
       old.seed != seed ||
       old.top != top ||
       old.bottom != bottom;
 }
 
-/// Prayer flag strings on the near slope that stir in the wind. With no
-/// [wind] they hang still.
+/// Prayer flag strings that stir in the wind. With no [wind] they hang
+/// still.
 class WindFlagsPainter extends CustomPainter {
   WindFlagsPainter({required this.palette, required this.strings, this.wind})
     : super(repaint: wind);
@@ -714,6 +884,15 @@ class WindFlagsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final phase = wind == null ? 0.0 : wind!.value * math.pi * 2 * 24;
+    final pole =
+        Paint()
+          ..color = palette.tone(const Color(0xFF5E4630), 0.5)
+          ..strokeWidth = 2
+          ..strokeCap = StrokeCap.round;
+    for (final (a, b, _) in strings) {
+      canvas.drawLine(a.translate(0, -4), a.translate(0, 46), pole);
+      canvas.drawLine(b.translate(0, -4), b.translate(0, 46), pole);
+    }
     for (final (a, b, sag) in strings) {
       drawFlagString(
         canvas,
@@ -722,17 +901,8 @@ class WindFlagsPainter extends CustomPainter {
         sag,
         palette,
         phase: phase == 0 ? 0 : phase + 0.001,
-        size: 1.1,
+        size: 1.15,
       );
-    }
-    // The poles.
-    final pole =
-        Paint()
-          ..color = palette.tone(const Color(0xFF6B5136), 0.5)
-          ..strokeWidth = 1.8;
-    for (final (a, b, _) in strings) {
-      canvas.drawLine(a, a.translate(0, 34), pole);
-      canvas.drawLine(b, b.translate(0, 34), pole);
     }
   }
 
@@ -787,6 +957,7 @@ class TrailLayout {
   @override
   int get hashCode => Object.hash(
     Object.hashAll(centers),
+    Object.hashAll(keepClear),
     walked,
     trailWidth,
     columnLeft,
@@ -796,8 +967,9 @@ class TrailLayout {
   );
 }
 
-/// The valley floor: ground texture, the trail through every step, props
-/// beside it, and the cloud bank at the bottom leading to the next unit.
+/// The valley floor: gentle swells of ground with a little grain, the
+/// worn trail through every step, a handful of small things beside it,
+/// and the cloud bank at the bottom leading to the next unit.
 class GroundPainter extends CustomPainter {
   const GroundPainter({
     required this.biome,
@@ -820,120 +992,185 @@ class GroundPainter extends CustomPainter {
     final p = palette;
     final w = size.width, h = size.height;
     final rect = Offset.zero & size;
+    final floorEnd = h - fade;
     canvas.drawRect(
       rect,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [p.ground, Color.lerp(p.ground, p.groundShade, 0.6)!],
-        ).createShader(rect),
+      vertical(
+        rect,
+        [p.ground, Color.lerp(p.ground, p.groundShade, 0.7)!, p.groundShade],
+        [0, (floorEnd / h * 0.6).clamp(0.0, 1.0), 1],
+      ),
     );
     final cx = w / 2;
     final points = [Offset(cx, -4), ...layout.centers, Offset(cx, h + 4)];
     final samples = _sampleTrail(points);
     final r = math.Random(seed);
 
-    final taken = <Rect>[];
-    bool clear(Offset o, double pad) {
-      for (final k in taken) {
-        if (k.inflate(pad).contains(o)) return false;
-      }
-      for (final k in layout.keepClear) {
-        if (k.inflate(pad).contains(o)) return false;
-      }
+    bool nearTrail(Offset o, double pad) {
       for (final s in samples) {
         if ((s - o).distanceSquared <
             math.pow(layout.trailWidth / 2 + pad, 2)) {
-          return false;
+          return true;
         }
       }
-      return o.dy < h - fade * 0.7;
+      return false;
     }
 
-    _texture(canvas, size, r, clear, taken);
+    bool clear(Offset o, double pad) {
+      for (final k in layout.keepClear) {
+        if (k.inflate(pad).contains(o)) return false;
+      }
+      return !nearTrail(o, pad) && o.dy < floorEnd - 30;
+    }
+
+    _swells(canvas, w, floorEnd, r);
+    _texture(canvas, w, floorEnd, (o) => !nearTrail(o, 4));
     _trail(canvas, points);
-
-    // Landmarks beside each step, on the side the trail is not.
-    final props = <(Offset, int, double)>[];
-    final s = layout.propScale;
-    final primaryCount = _primary.length;
-    for (var i = 0; i < layout.centers.length; i++) {
-      final c = layout.centers[i];
-      final dx = c.dx - cx;
-      final sides = dx.abs() < layout.swing * 0.3 ? [-1.0, 1.0] : [-dx.sign];
-      for (final side in sides) {
-        final x = (cx + side * (layout.swing + 60 * s)).clamp(
-          34.0 * s,
-          w - 34 * s,
-        );
-        final o = Offset(x, c.dy + 26 * s);
-        if (!clear(o, 18 * s)) continue;
-        props.add((o, (i + seed + (side > 0 ? 1 : 0)) % primaryCount, s));
-      }
-    }
-    // Wide screens: more of the valley beyond the column.
-    final margin = layout.columnLeft;
-    if (margin > 70) {
-      for (var y = 70.0; y < h - fade; y += 130 + r.nextDouble() * 70) {
-        for (final left in [true, false]) {
-          final x =
-              left
-                  ? 30 + r.nextDouble() * (margin - 60)
-                  : w - 30 - r.nextDouble() * (margin - 60);
-          final o = Offset(x, y);
-          if (!clear(o, 10) ||
-              props.any((pr) => (pr.$1 - o).distance < 80 * s)) {
-            continue;
-          }
-          props.add((
-            Offset(x, y),
-            r.nextInt(primaryCount),
-            s * (0.9 + r.nextDouble() * 0.35),
-          ));
-        }
-      }
-    }
-    // Small details: tufts, flowers, stones.
-    final details = <Offset>[];
-    final n = (w * h / (biome == Biome.forest ? 3000 : 5200)).round();
-    for (var i = 0; i < n; i++) {
-      final o = Offset(r.nextDouble() * w, 10 + r.nextDouble() * (h - fade));
-      if (!clear(o, 8)) continue;
-      if (props.any((pr) => (pr.$1 - o).distance < 46 * s)) continue;
-      details.add(o);
-    }
-    details.sort((a, b) => a.dy.compareTo(b.dy));
-    for (final o in details) {
-      _detail(canvas, o, r);
-    }
-    props.sort((a, b) => a.$1.dy.compareTo(b.$1.dy));
-    for (final (o, kind, sc) in props) {
-      _primary[kind](canvas, o, sc, kind + o.dx.round());
-    }
+    _details(canvas, w, floorEnd, r, clear);
 
     // The cloud bank down to the next valley.
-    final fr = Rect.fromLTRB(0, h - fade, w, h);
+    final fr = Rect.fromLTRB(0, floorEnd, w, h);
     canvas.drawRect(
       fr,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            p.mist.withValues(alpha: 0),
-            p.mist.withValues(alpha: 0.85),
-            p.mist,
-          ],
-          stops: const [0, 0.65, 1],
-        ).createShader(fr),
+      vertical(
+        fr,
+        [
+          p.mist.withValues(alpha: 0),
+          Color.lerp(p.mist, p.haze, 0.3)!.withValues(alpha: 0.7),
+          p.mist,
+        ],
+        const [0, 0.55, 1],
+      ),
     );
-    final puff = _fill(p.mist);
-    var x = -10.0;
-    while (x < w + 40) {
-      final rr = 18 + r.nextDouble() * 26;
-      canvas.drawCircle(Offset(x, h - 8 - r.nextDouble() * 10), rr, puff);
-      x += rr * 1.25;
+    paintCloudBank(canvas, w, h - 26, p, seed + 41, hangDown: false);
+  }
+
+  /// Rolling ground: each swell has a lit crest fading down its face and a
+  /// shadowed dip before the next one.
+  void _swells(Canvas canvas, double w, double floorEnd, math.Random r) {
+    final p = palette;
+    final noise = Noise1D(seed * 3 + 11);
+    final gap = switch (biome) {
+      Biome.plateau => 360.0,
+      Biome.pass => 300.0,
+      _ => 260.0,
+    };
+    var y = 90.0 + r.nextDouble() * 60;
+    while (y < floorEnd - 40) {
+      final amp = 22 + r.nextDouble() * 26;
+      final phase = r.nextDouble() * 100;
+      final crest = Path()..moveTo(-10, y + 200);
+      final line = <Offset>[];
+      for (var x = -10.0; x <= w + 10; x += 8) {
+        final yy = y + noise.fbm(x / 210 + phase, octaves: 3) * amp * 2;
+        line.add(Offset(x, yy));
+      }
+      for (final o in line) {
+        crest.lineTo(o.dx, o.dy);
+      }
+      crest
+        ..lineTo(w + 10, y + 200)
+        ..close();
+      // Shadow in the dip just before the crest.
+      final dip = Path()..moveTo(-10, y - 90);
+      for (final o in line) {
+        dip.lineTo(o.dx, o.dy);
+      }
+      dip
+        ..lineTo(w + 10, y - 90)
+        ..close();
+      final dipRect = Rect.fromLTRB(0, y - 90, w, y + amp);
+      canvas.drawPath(
+        dip,
+        vertical(dipRect, [
+          p.groundShade.withValues(alpha: 0),
+          p.groundShade.withValues(alpha: p.dark ? 0.26 : 0.2),
+        ]),
+      );
+      final litRect = Rect.fromLTRB(0, y - amp * 2, w, y + 150);
+      canvas.drawPath(
+        crest,
+        vertical(
+          litRect,
+          [
+            p.groundLight.withValues(alpha: p.dark ? 0.22 : 0.3),
+            p.groundLight.withValues(alpha: 0.1),
+            p.groundLight.withValues(alpha: 0),
+          ],
+          const [0, 0.35, 1],
+        ),
+      );
+      y += gap * (0.8 + r.nextDouble() * 0.45);
+    }
+  }
+
+  void _texture(
+    Canvas canvas,
+    double w,
+    double floorEnd,
+    bool Function(Offset) keep,
+  ) {
+    final p = palette;
+    final area = Rect.fromLTRB(0, 0, w, floorEnd);
+    final light = p.groundLight.withValues(alpha: p.dark ? 0.35 : 0.5);
+    final dark = p.groundShade.withValues(alpha: p.dark ? 0.6 : 0.45);
+    switch (biome) {
+      case Biome.valley:
+      case Biome.pasture:
+      case Biome.forest:
+        paintGrain(
+          canvas,
+          area,
+          seed,
+          light: light,
+          dark: dark,
+          density: 2.2,
+          length: 4,
+          spread: 0.35,
+          keep: keep,
+        );
+      case Biome.lake:
+      case Biome.monastery:
+        paintGrain(
+          canvas,
+          area,
+          seed,
+          light: light,
+          dark: dark,
+          density: 1.8,
+          length: 3.4,
+          spread: 0.6,
+          keep: keep,
+        );
+      case Biome.plateau:
+        // Wind-combed: long, low strokes.
+        paintGrain(
+          canvas,
+          area,
+          seed,
+          light: light,
+          dark: dark,
+          density: 1.4,
+          length: 9,
+          angle: 0,
+          spread: 0.08,
+          width: 1.4,
+          keep: keep,
+        );
+      case Biome.pass:
+        paintGrain(
+          canvas,
+          area,
+          seed,
+          light: p.groundLight.withValues(alpha: 0.7),
+          dark: p.groundShade.withValues(alpha: 0.5),
+          density: 1.2,
+          length: 12,
+          angle: 0.05,
+          spread: 0.1,
+          width: 1.6,
+          keep: keep,
+        );
     }
   }
 
@@ -974,6 +1211,8 @@ class GroundPainter extends CustomPainter {
     return path;
   }
 
+  /// A worn path: soft dusty edges, beaten earth, a paler line down the
+  /// middle where most feet go. Unwalked, only a faint track.
   void _trail(Canvas canvas, List<Offset> pts) {
     final p = palette;
     final tw = layout.trailWidth;
@@ -985,272 +1224,158 @@ class GroundPainter extends CustomPainter {
           ..strokeWidth = width
           ..strokeCap = StrokeCap.round
           ..strokeJoin = StrokeJoin.round;
-    // Unwalked: a faint track. Walked: beaten earth with a worn centre.
-    canvas.drawPath(all, stroke(p.trailEdge.withValues(alpha: 0.55), tw + 5));
-    canvas.drawPath(all, stroke(p.trail.withValues(alpha: 0.6), tw));
+    final dust = Color.lerp(p.groundShade, p.trailEdge, 0.5)!;
+    canvas.drawPath(all, stroke(dust.withValues(alpha: 0.14), tw + 12));
+    canvas.drawPath(all, stroke(dust.withValues(alpha: 0.22), tw + 5));
+    canvas.drawPath(
+      all,
+      stroke(p.trail.withValues(alpha: p.dark ? 0.35 : 0.42), tw - 2),
+    );
     if (layout.walked > 0) {
       final walked = _trailPath(pts, layout.walked);
-      canvas.drawPath(walked, stroke(p.trailEdge, tw + 5));
-      canvas.drawPath(walked, stroke(p.trail, tw));
+      canvas.drawPath(
+        walked,
+        stroke(p.trailEdge.withValues(alpha: 0.3), tw + 8),
+      );
+      canvas.drawPath(
+        walked,
+        stroke(p.trailEdge.withValues(alpha: 0.55), tw + 2),
+      );
+      canvas.drawPath(walked, stroke(p.trail, tw - 2));
       canvas.drawPath(
         walked,
         stroke(
-          Color.lerp(p.trail, const Color(0xFFFFFFFF), p.dark ? 0.12 : 0.45)!,
-          tw * 0.28,
+          Color.lerp(
+            p.trail,
+            p.light,
+            p.dark ? 0.12 : 0.45,
+          )!.withValues(alpha: 0.8),
+          tw * 0.32,
         ),
       );
     }
   }
 
-  void _texture(
+  /// A handful of small things beside the trail: never more than one in
+  /// each stretch of floor, always in the margins.
+  void _details(
     Canvas canvas,
-    Size size,
+    double w,
+    double floorEnd,
     math.Random r,
     bool Function(Offset, double) clear,
-    List<Rect> taken,
   ) {
     final p = palette;
-    final w = size.width, h = size.height;
-    switch (biome) {
-      case Biome.valley:
-        for (var i = 0; i < w * h / 9000; i++) {
-          final c = Offset(
-            r.nextDouble() * w,
-            20 + r.nextDouble() * (h - fade - 20),
-          );
-          final fw = 54 + r.nextDouble() * 70, fh = 16 + r.nextDouble() * 12;
-          final rect = Rect.fromCenter(center: c, width: fw, height: fh);
-          if (![
-            rect.center,
-            rect.topLeft,
-            rect.topRight,
-            rect.bottomLeft,
-            rect.bottomRight,
-          ].every((o) => clear(o, 6))) {
-            continue;
-          }
-          drawField(canvas, rect, p, ripe: r.nextBool());
-        }
-      case Biome.pasture:
-      case Biome.monastery:
-        final band = _fill(p.groundShade.withValues(alpha: 0.35));
-        for (var y = 80.0; y < h - fade; y += 150 + r.nextDouble() * 80) {
-          canvas.drawOval(
-            Rect.fromCenter(
-              center: Offset(r.nextDouble() * w, y),
-              width: w * 0.9,
-              height: 46,
-            ),
-            band,
-          );
-        }
-      case Biome.lake:
-        for (var i = 0; i < layout.centers.length; i++) {
-          final c = layout.centers[i];
-          if (c.dx - w / 2 < layout.swing * 0.5) continue;
-          final pond = Offset(
-            math.max(40, c.dx - layout.swing * 2.6),
-            c.dy + 10,
-          );
-          if (!clear(pond.translate(50, 0), 0) || !clear(pond, 0)) continue;
-          canvas.drawOval(
-            Rect.fromCenter(center: pond, width: 120, height: 46),
-            _fill(p.water),
-          );
-          canvas.drawOval(
-            Rect.fromCenter(
-              center: pond.translate(4, 4),
-              width: 80,
-              height: 22,
-            ),
-            _fill(p.waterDeep.withValues(alpha: 0.5)),
-          );
-          taken.add(Rect.fromCenter(center: pond, width: 130, height: 60));
-          break;
-        }
-      case Biome.forest:
-        final shade = _fill(p.groundShade.withValues(alpha: 0.5));
-        for (var i = 0; i < w * h / 16000; i++) {
-          canvas.drawOval(
-            Rect.fromCenter(
-              center: Offset(r.nextDouble() * w, r.nextDouble() * (h - fade)),
-              width: 90,
-              height: 30,
-            ),
-            shade,
-          );
-        }
-      case Biome.plateau:
-        final pan = _fill(
-          p.tone(const Color(0xFFEDE9DD), 0.6).withValues(alpha: 0.7),
+    final s = layout.propScale;
+    final cx = w / 2;
+    final margin = layout.columnLeft;
+    final placed = <Offset>[];
+    var side = r.nextBool() ? 1.0 : -1.0;
+    final stretch = 340.0;
+    var k = 0;
+    for (
+      var y = 120.0;
+      y < floorEnd - 60;
+      y += stretch * (0.85 + r.nextDouble() * 0.4)
+    ) {
+      for (final extra in margin > 90 ? [false, true] : [false]) {
+        final sd = extra ? -side : side;
+        final reach =
+            extra
+                ? cx - margin * (0.35 + r.nextDouble() * 0.3)
+                : layout.swing + 64 * s + r.nextDouble() * 20;
+        final x = (cx + sd * reach).clamp(30.0 * s, w - 30 * s);
+        final o = Offset(x, y + r.nextDouble() * 60);
+        if (!clear(o, 26 * s)) continue;
+        if (placed.any((q) => (q - o).distance < 120 * s)) continue;
+        placed.add(o);
+        _detail(canvas, o, s * (extra ? 1.1 : 1), k++);
+      }
+      side = -side;
+    }
+    // Small clusters of flowers or stones near the details, never alone.
+    final tuft = p.groundShade.withValues(alpha: p.dark ? 0.8 : 0.7);
+    for (final o in placed) {
+      for (var i = 0; i < 3; i++) {
+        final q = o.translate(
+          (r.nextDouble() - 0.5) * 70 * s,
+          10 + r.nextDouble() * 14 * s,
         );
-        for (var i = 0; i < w * h / 30000; i++) {
-          final c = Offset(
-            r.nextDouble() * w,
-            40 + r.nextDouble() * (h - fade - 40),
-          );
-          if (!clear(c, 40)) continue;
-          canvas.drawOval(
-            Rect.fromCenter(center: c, width: 100, height: 26),
-            pan,
-          );
+        if (!clear(q, 6)) continue;
+        switch (biome) {
+          case Biome.valley:
+          case Biome.pasture:
+            i == 0
+                ? drawFlowers(canvas, q, 0.9 * s, p, k * 7 + i)
+                : drawTuft(canvas, q, 0.9 * s, tuft);
+          case Biome.forest:
+            drawTuft(canvas, q, s, tuft);
+          case Biome.pass:
+            if (i == 0) drawRock(canvas, q, 0.5 * s, p, snowy: true);
+          default:
+            i == 0
+                ? drawRock(canvas, q, 0.4 * s, p)
+                : drawTuft(canvas, q, 0.8 * s, tuft);
         }
-      case Biome.pass:
-        final drift = _fill(p.snow.withValues(alpha: 0.75));
-        final scree = _fill(
-          p.tone(const Color(0xFF9AA4B1), 0.6).withValues(alpha: 0.28),
-        );
-        for (var i = 0; i < w * h / 12000; i++) {
-          final c = Offset(r.nextDouble() * w, r.nextDouble() * (h - fade));
-          canvas.drawOval(
-            Rect.fromCenter(
-              center: c,
-              width: 70 + r.nextDouble() * 60,
-              height: 18,
-            ),
-            i.isEven ? drift : scree,
-          );
-        }
+      }
     }
   }
 
-  void _detail(Canvas canvas, Offset o, math.Random r) {
+  void _detail(Canvas canvas, Offset o, double s, int k) {
     final p = palette;
-    final tuft = p.tone(
-      Color.lerp(p.groundShade, const Color(0xFF2E4A22), 0.3)!,
-      0.0,
-    );
-    final roll = r.nextDouble();
     switch (biome) {
-      case Biome.pasture:
-        roll < 0.45
-            ? drawFlowers(canvas, o, 1, p, r.nextInt(999))
-            : drawTuft(canvas, o, 1, tuft);
       case Biome.valley:
-        roll < 0.25
-            ? drawFlowers(canvas, o, 0.9, p, r.nextInt(999))
-            : drawTuft(canvas, o, 1, tuft);
-      case Biome.forest:
-        roll < 0.6
-            ? drawConifer(
+        switch (k % 3) {
+          case 0:
+            for (var i = 0; i < 3; i++) {
+              drawPoplar(
+                canvas,
+                o.translate((i - 1) * 11 * s, (i.isEven ? 0 : -3) * s),
+                s * (0.9 + i * 0.08),
+                p,
+                hue: i / 3,
+              );
+            }
+          case 1:
+            drawManiPile(canvas, o, s * 0.85, p, k);
+          default:
+            drawHouse(canvas, o, s * 0.85, p, flip: k.isOdd);
+        }
+      case Biome.pasture:
+        k.isEven
+            ? drawYak(
               canvas,
               o,
-              0.5 + r.nextDouble() * 0.4,
+              s,
               p,
-              tone: r.nextDouble(),
+              facing: k % 4 == 0 ? 1 : -1,
+              white: k % 4 == 2,
             )
-            : drawTuft(canvas, o, 1, tuft);
-      case Biome.pass:
-        roll < 0.5
-            ? drawRock(canvas, o, 0.6, p, snowy: true)
-            : drawTuft(canvas, o, 0.8, p.groundShade);
-      case Biome.plateau:
+            : drawFlowers(canvas, o, s * 1.2, p, k);
       case Biome.lake:
+        k.isEven
+            ? drawManiPile(canvas, o, s * 0.85, p, k)
+            : drawRock(canvas, o, s * 0.8, p);
+      case Biome.forest:
+        drawConifer(
+          canvas,
+          o.translate(-10 * s, -4 * s),
+          s * 1.05,
+          p,
+          tone: 0.3,
+        );
+        drawConifer(canvas, o.translate(9 * s, 2 * s), s * 0.85, p, tone: 0.8);
       case Biome.monastery:
-        roll < 0.2
-            ? drawRock(canvas, o, 0.45, p)
-            : drawTuft(canvas, o, 0.9, tuft);
+        k.isEven
+            ? drawChorten(canvas, o, s * 0.75, p)
+            : drawSangBurner(canvas, o, s * 0.9, p);
+      case Biome.plateau:
+        k.isEven
+            ? drawKiang(canvas, o, s * 0.95, p, facing: k % 4 == 0 ? 1 : -1)
+            : drawRock(canvas, o, s * 0.9, p);
+      case Biome.pass:
+        drawRock(canvas, o, s * 1.1, p, snowy: true);
     }
-  }
-
-  List<void Function(Canvas, Offset, double, int)> get _primary {
-    final p = palette;
-    return switch (biome) {
-      Biome.valley => [
-        (c, o, s, k) => drawHouse(c, o, s, p, flip: k.isOdd),
-        (c, o, s, k) => drawChorten(c, o, s, p),
-        (c, o, s, k) {
-          drawHouse(c, o.translate(-16 * s, -8 * s), s * 0.85, p);
-          drawHouse(c, o.translate(18 * s, 2 * s), s, p, flip: true);
-        },
-        (c, o, s, k) {
-          for (var i = 0; i < 3; i++) {
-            drawPoplar(
-              c,
-              o.translate((i - 1) * 12 * s, (i.isEven ? 0 : -4) * s),
-              s * (0.9 + i * 0.08),
-              p,
-              hue: i / 3,
-            );
-          }
-        },
-      ],
-      Biome.pasture => [
-        (c, o, s, k) => drawTent(c, o, s, p),
-        (c, o, s, k) {
-          drawYak(c, o.translate(-18 * s, -6 * s), s * 0.9, p, facing: 1);
-          drawYak(
-            c,
-            o.translate(14 * s, 2 * s),
-            s,
-            p,
-            facing: -1,
-            white: k.isEven,
-          );
-        },
-        (c, o, s, k) {
-          drawTent(c, o.translate(-8 * s, 0), s * 0.9, p);
-          drawYak(c, o.translate(30 * s, 8 * s), s * 0.8, p, facing: -1);
-        },
-        (c, o, s, k) => drawYak(c, o, s, p, facing: k.isEven ? 1 : -1),
-      ],
-      Biome.lake => [
-        (c, o, s, k) => drawManiPile(c, o, s, p, k),
-        (c, o, s, k) => drawDarchen(c, o, s, p, color: k),
-        (c, o, s, k) {
-          drawManiPile(c, o.translate(-10 * s, 0), s * 0.9, p, k);
-          drawDarchen(c, o.translate(18 * s, 2 * s), s * 0.9, p, color: k + 2);
-        },
-        (c, o, s, k) => drawLhatse(c, o, s * 0.8, p),
-      ],
-      Biome.forest => [
-        (c, o, s, k) {
-          drawConifer(c, o.translate(-14 * s, -6 * s), s * 1.1, p);
-          drawConifer(c, o.translate(10 * s, 0), s * 1.3, p, tone: 0.5);
-          drawConifer(c, o.translate(26 * s, 6 * s), s * 0.9, p, tone: 1);
-        },
-        (c, o, s, k) => drawTimberHouse(c, o, s, p),
-        (c, o, s, k) {
-          drawConifer(c, o.translate(-12 * s, -4 * s), s * 1.2, p, tone: 0.3);
-          drawRhododendron(c, o.translate(12 * s, 4 * s), s, p, k);
-        },
-        (c, o, s, k) => drawRhododendron(c, o, s * 1.1, p, k),
-      ],
-      Biome.monastery => [
-        (c, o, s, k) {
-          for (var i = -1; i <= 1; i++) {
-            drawChorten(c, o.translate(i * 20 * s, 0), s * 0.6, p);
-          }
-        },
-        (c, o, s, k) => drawSangBurner(c, o, s, p),
-        (c, o, s, k) => drawChorten(c, o, s, p),
-        (c, o, s, k) => drawHouse(c, o, s * 0.85, p, flip: k.isOdd),
-      ],
-      Biome.plateau => [
-        (c, o, s, k) {
-          drawKiang(c, o.translate(-14 * s, -4 * s), s, p, facing: 1);
-          drawKiang(c, o.translate(14 * s, 3 * s), s * 0.95, p, facing: 1);
-        },
-        (c, o, s, k) => drawTent(c, o, s * 0.9, p),
-        (c, o, s, k) => drawKiang(c, o, s, p, facing: k.isEven ? 1 : -1),
-        (c, o, s, k) {
-          drawRock(c, o.translate(-10 * s, 0), s, p);
-          drawRock(c, o.translate(10 * s, 3 * s), s * 0.7, p);
-        },
-      ],
-      Biome.pass => [
-        (c, o, s, k) => drawLhatse(c, o, s, p),
-        (c, o, s, k) {
-          drawRock(c, o.translate(-12 * s, 0), s * 1.2, p, snowy: true);
-          drawRock(c, o.translate(12 * s, 4 * s), s * 0.8, p, snowy: true);
-        },
-        (c, o, s, k) {
-          drawYak(c, o.translate(-16 * s, -4 * s), s * 0.9, p, facing: -1);
-          drawYak(c, o.translate(16 * s, 2 * s), s * 0.9, p, facing: -1);
-        },
-        (c, o, s, k) => drawRock(c, o, s * 1.3, p, snowy: true),
-      ],
-    };
   }
 
   @override
@@ -1263,7 +1388,7 @@ class GroundPainter extends CustomPainter {
 }
 
 /// A strip of lake shore to close a page: a low rise out of the mist with
-/// a chorten, mani stones, a flag pole and a grazing yak.
+/// a chorten, a mani pile, a flag pole and a grazing yak.
 class ShorePainter extends CustomPainter {
   const ShorePainter({required this.palette});
 
@@ -1273,12 +1398,13 @@ class ShorePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final p = palette;
     final w = size.width, h = size.height;
-    final hill = MountainRange.generate(
+    final hill = RidgeLine.generate(
       seed: 5,
       width: w,
-      spacing: 260,
-      smooth: true,
-      minHeight: 0.5,
+      wavelength: 320,
+      sharpness: 0,
+      detail: 0.25,
+      floor: 0.35,
     );
     final base = h;
     final amp = h * 0.55;
@@ -1286,23 +1412,18 @@ class ShorePainter extends CustomPainter {
     final rect = Rect.fromLTRB(0, h - amp, w, h);
     canvas.drawPath(
       shape,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color.lerp(p.ground, p.mist, 0.35)!, p.ground],
-        ).createShader(rect),
+      vertical(rect, [Color.lerp(p.ground, p.mist, 0.35)!, p.ground]),
     );
     double groundAt(double x) => hill.yAt(x, base, amp) + 10;
     final s = (h / 110).clamp(1.0, 1.6);
     drawFlagString(
       canvas,
-      Offset(w * 0.18, groundAt(w * 0.18) - 54 * s),
+      Offset(w * 0.18, groundAt(w * 0.18) - 58 * s),
       Offset(w * 0.46, groundAt(w * 0.46) - 30 * s),
       12,
       p,
     );
-    drawChorten(canvas, Offset(w * 0.18, groundAt(w * 0.18)), s, p);
+    drawChortenHero(canvas, Offset(w * 0.18, groundAt(w * 0.18)), s * 0.85, p);
     drawManiPile(canvas, Offset(w * 0.32, groundAt(w * 0.32)), s * 0.9, p, 4);
     drawDarchen(
       canvas,
@@ -1311,8 +1432,7 @@ class ShorePainter extends CustomPainter {
       p,
       color: 2,
     );
-    drawYak(canvas, Offset(w * 0.66, groundAt(w * 0.66)), s, p, facing: -1);
-    drawManiPile(canvas, Offset(w * 0.86, groundAt(w * 0.86)), s * 0.7, p, 9);
+    drawYak(canvas, Offset(w * 0.68, groundAt(w * 0.68)), s, p, facing: -1);
   }
 
   @override

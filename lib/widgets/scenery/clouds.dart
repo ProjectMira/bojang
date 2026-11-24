@@ -1,13 +1,14 @@
 import 'package:flutter/widgets.dart';
 
+import 'biome.dart';
 import 'landscape.dart';
 
-/// Clouds in the upper sky. At full motion they drift (a translation of a
+/// Painterly clouds in the sky. At full motion they drift (a translation of a
 /// cached picture); otherwise they hold still.
 class DriftingClouds extends StatelessWidget {
   const DriftingClouds({
     super.key,
-    required this.dark,
+    required this.palette,
     required this.seed,
     this.ambient,
     this.top = 0.18,
@@ -18,7 +19,7 @@ class DriftingClouds extends StatelessWidget {
   final double top;
   final double bottom;
 
-  final bool dark;
+  final BiomePalette palette;
   final int seed;
   final Animation<double>? ambient;
 
@@ -26,7 +27,12 @@ class DriftingClouds extends StatelessWidget {
   Widget build(BuildContext context) {
     final picture = RepaintBoundary(
       child: CustomPaint(
-        painter: CloudPainter(dark: dark, seed: seed, top: top, bottom: bottom),
+        painter: CloudPainter(
+          palette: palette,
+          seed: seed,
+          top: top,
+          bottom: bottom,
+        ),
       ),
     );
     return ClipRect(

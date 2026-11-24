@@ -343,10 +343,17 @@ class _GamesHeader extends StatelessWidget {
                       palette: palette,
                       ridgeZone: ridgeZone,
                       seed: 11,
+                      seam: false,
+                      mistDepth: topInset + (tablet ? 190 : 170),
                     ),
                   ),
                 ),
-                DriftingClouds(dark: dark, seed: 11, top: 0.45, bottom: 0.6),
+                DriftingClouds(
+                  palette: palette,
+                  seed: 11,
+                  top: 0.42,
+                  bottom: 0.52,
+                ),
                 RepaintBoundary(
                   child: CustomPaint(
                     painter: HorizonPainter(
@@ -356,6 +363,7 @@ class _GamesHeader extends StatelessWidget {
                       seed: 11,
                       trailX: 0,
                       trailWidth: 0,
+                      foreground: false,
                     ),
                   ),
                 ),
