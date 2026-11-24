@@ -477,7 +477,7 @@ class HorizonPainter extends CustomPainter {
   void _river(Canvas canvas, double w, double h, double z) {
     final p = palette;
     final y0 = h - z * 0.11, y1 = h + 4;
-    final x0 = w * 0.34, x1 = w * 0.06;
+    final x0 = w * 0.38, x1 = w * 0.02;
     Offset at(double t) {
       final y = y0 + (y1 - y0) * t;
       final x =
@@ -617,7 +617,7 @@ class HorizonPainter extends CustomPainter {
   ) {
     final x = ridge.highest(w * 0.56, w * 0.86);
     final y = _yOn(ridge, l, x, h, z);
-    final s = (z / 200).clamp(0.9, 1.4) * scale;
+    final s = (z / 185).clamp(0.9, 1.5) * scale;
     drawMonasteryHero(
       canvas,
       Offset(x, y + 6 * s),
@@ -642,11 +642,18 @@ class HorizonPainter extends CustomPainter {
     double y(double x) => _yOn(ridge, l, x, h, z) + 3 * s;
     switch (biome) {
       case Biome.valley:
-        // Two farmhouses down the slope, lamp-lit at night.
-        for (final (fx, k, flip) in [(0.1, 0.5, false), (0.17, 0.44, true)]) {
-          final xx = w * fx;
-          drawHouse(canvas, Offset(xx, y(xx) + 4), s * k, p, flip: flip);
-        }
+        // A farmstead across the river: two whitewashed homes, lamp-lit
+        // at night.
+        final h1 = w * 0.22, h2 = w * 0.1;
+        drawTibetanHome(
+          canvas,
+          Offset(h1, y(h1) + 5),
+          s * 0.62,
+          p,
+          floors: 1,
+          flip: true,
+        );
+        drawTibetanHome(canvas, Offset(h2, y(h2) + 6), s * 0.82, p);
         final x = w * 0.72;
         drawChortenHero(canvas, Offset(x, y(x) + 6), s * 1.05, p);
       case Biome.pasture:
@@ -654,6 +661,18 @@ class HorizonPainter extends CustomPainter {
         drawTentHero(canvas, Offset(x + 44 * s, y(x + 44 * s) + 3), s * 0.8, p);
         drawTentHero(canvas, Offset(x, y(x) + 7), s * 1.15, p);
       case Biome.plateau:
+        // A lone nomad camp far out on the plain.
+        drawTentHero(canvas, Offset(w * 0.16, h - z * 0.07), s * 0.5, p);
+        for (final (fx, f) in [(0.25, -1.0), (0.29, 1.0)]) {
+          drawYakHero(
+            canvas,
+            Offset(w * fx, h - z * 0.065),
+            s * 0.4,
+            p,
+            facing: f,
+            grazing: f < 0,
+          );
+        }
         for (final (fx, k, dy) in [
           (0.6, 0.85, 0.0),
           (0.665, 0.8, 3.0),
@@ -685,6 +704,14 @@ class HorizonPainter extends CustomPainter {
     final s = (z / 210).clamp(0.85, 1.35) * scale;
     switch (biome) {
       case Biome.forest:
+        // A farmhouse in the clearing at the edge of the trees.
+        drawTibetanHome(
+          canvas,
+          Offset(w * 0.73, h - z * 0.015),
+          s * 0.95,
+          p,
+          flip: true,
+        );
         // A few tall firs framing the scene.
         for (final (fx, k, tone) in [
           (0.06, 1.0, 0.2),
@@ -701,26 +728,50 @@ class HorizonPainter extends CustomPainter {
           );
         }
       case Biome.pasture:
-        // A few yaks grazing on the near slope.
-        for (final (fx, fy, k, f, white) in [
-          (0.58, 0.035, 0.95, -1.0, false),
-          (0.67, 0.012, 0.85, 1.0, true),
-          (0.86, 0.045, 1.0, -1.0, false),
-        ]) {
-          drawYak(
-            canvas,
-            Offset(w * fx, h - z * fy),
-            s * k,
-            p,
-            facing: f,
-            white: white,
-          );
-        }
+        // The herd grazing on the near slope: black yaks and a pied one.
+        _herd(canvas, w, h, z, s, const [
+          (0.64, 0.035, 0.92, -1.0, YakCoat.black, true),
+          (0.74, 0.012, 0.95, 1.0, YakCoat.pied, false),
+          (0.83, 0.045, 0.8, -1.0, YakCoat.black, true),
+          (0.93, 0.02, 1.0, -1.0, YakCoat.black, false),
+        ]);
+      case Biome.pass:
+        // Two pack yaks crossing the snow below the pass.
+        _herd(canvas, w, h, z, s, const [
+          (0.76, 0.03, 0.8, -1.0, YakCoat.black, false),
+          (0.86, 0.045, 0.74, -1.0, YakCoat.pied, false),
+        ]);
       case Biome.lake:
         // Mani stones on the near shore.
         drawManiPile(canvas, Offset(w * 0.12, h - z * 0.03), s * 0.9, p, 4);
+        // Yaks come down to the water.
+        _herd(canvas, w, h, z, s, const [
+          (0.25, 0.004, 0.78, 1.0, YakCoat.black, true),
+          (0.34, 0.018, 0.7, -1.0, YakCoat.pied, false),
+        ]);
       default:
         break;
+    }
+  }
+
+  void _herd(
+    Canvas canvas,
+    double w,
+    double h,
+    double z,
+    double s,
+    List<(double, double, double, double, YakCoat, bool)> yaks,
+  ) {
+    for (final (fx, fy, k, facing, coat, grazing) in yaks) {
+      drawYakHero(
+        canvas,
+        Offset(w * fx, h - z * fy),
+        s * k,
+        palette,
+        facing: facing,
+        coat: coat,
+        grazing: grazing,
+      );
     }
   }
 

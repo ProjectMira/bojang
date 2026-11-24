@@ -20,7 +20,10 @@ Paint vertical(Rect rect, List<Color> colors, [List<double>? stops]) =>
         colors,
         stops ??
             (colors.length > 2
-                ? [for (var i = 0; i < colors.length; i++) i / (colors.length - 1)]
+                ? [
+                  for (var i = 0; i < colors.length; i++)
+                    i / (colors.length - 1),
+                ]
                 : null),
       );
 

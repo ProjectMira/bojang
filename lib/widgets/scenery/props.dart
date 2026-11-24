@@ -10,6 +10,7 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 
 import 'biome.dart';
+import 'landmarks.dart';
 
 /// The five flag colours in their traditional order: blue, white, red,
 /// green, yellow.
@@ -21,7 +22,6 @@ const List<Color> kLungtaColors = [
   Color(0xFFF2B807),
 ];
 
-const Color _maroon = Color(0xFF7A2E22);
 const Color _gold = Color(0xFFE0A526);
 const Color _yak = Color(0xFF2B2420);
 
@@ -45,103 +45,14 @@ void contactShadow(Canvas c, Offset b, double w, BiomePalette p) {
   );
 }
 
-/// A whitewashed house: tapering walls, a dark parapet, black trapezoid
-/// window frames (lamp-lit at night) and a prayer flag on the roof corner.
+/// A whitewashed house, as drawn for the valley: see [drawTibetanHome].
 void drawHouse(
   Canvas c,
   Offset b,
   double s,
   BiomePalette p, {
   bool flip = false,
-}) {
-  final w = 52 * s, h = 30 * s;
-  contactShadow(c, b, w * 1.2, p);
-  final wall =
-      Path()
-        ..moveTo(b.dx - w / 2, b.dy)
-        ..lineTo(b.dx + w / 2, b.dy)
-        ..lineTo(b.dx + w / 2 - 3 * s, b.dy - h)
-        ..lineTo(b.dx - w / 2 + 3 * s, b.dy - h)
-        ..close();
-  c.drawPath(wall, _fill(p.wall));
-  // The shaded side wall.
-  c.drawPath(
-    Path()
-      ..moveTo(b.dx + w * 0.18, b.dy)
-      ..lineTo(b.dx + w / 2, b.dy)
-      ..lineTo(b.dx + w / 2 - 3 * s, b.dy - h)
-      ..lineTo(b.dx + w * 0.18 - 1.5 * s, b.dy - h)
-      ..close(),
-    _fill(const Color(0xFF2A3040).withValues(alpha: p.dark ? 0.25 : 0.10)),
-  );
-  // Parapet.
-  c.drawRect(
-    Rect.fromLTRB(
-      b.dx - w / 2 + 2 * s,
-      b.dy - h - 4 * s,
-      b.dx + w / 2 - 2 * s,
-      b.dy - h + 1 * s,
-    ),
-    _fill(p.tone(_maroon, 0.5)),
-  );
-  // Windows: black frames wider at the bottom, a red lintel strip on top.
-  void window(double cx, double top, double ww, double wh) {
-    final frame =
-        Path()
-          ..moveTo(cx - ww / 2 - 2.2 * s, top + wh)
-          ..lineTo(cx + ww / 2 + 2.2 * s, top + wh)
-          ..lineTo(cx + ww / 2 + 0.8 * s, top)
-          ..lineTo(cx - ww / 2 - 0.8 * s, top)
-          ..close();
-    c.drawPath(frame, _fill(p.frame));
-    c.drawRect(
-      Rect.fromLTWH(
-        cx - ww / 2 + 0.6 * s,
-        top + 1.2 * s,
-        ww - 1.2 * s,
-        wh - 2.4 * s,
-      ),
-      _fill(p.window),
-    );
-    c.drawRect(
-      Rect.fromLTWH(cx - ww / 2 - 1 * s, top - 2 * s, ww + 2 * s, 1.6 * s),
-      _fill(p.tone(const Color(0xFFC0392B), 0.45)),
-    );
-  }
-
-  final dir = flip ? -1.0 : 1.0;
-  window(b.dx - dir * w * 0.25, b.dy - h + 8 * s, 6 * s, 7 * s);
-  window(b.dx + dir * w * 0.02, b.dy - h + 8 * s, 6 * s, 7 * s);
-  // Door.
-  final dx = b.dx + dir * w * 0.3;
-  c.drawRect(
-    Rect.fromLTWH(dx - 4.5 * s, b.dy - 12 * s, 9 * s, 12 * s),
-    _fill(p.frame),
-  );
-  c.drawRect(
-    Rect.fromLTWH(dx - 3 * s, b.dy - 10.5 * s, 6 * s, 10.5 * s),
-    _fill(p.tone(const Color(0xFF8C3B2A), 0.5)),
-  );
-  // Roof flag.
-  final px = b.dx - dir * (w / 2 - 5 * s);
-  final top = b.dy - h - 18 * s;
-  c.drawLine(
-    Offset(px, b.dy - h - 4 * s),
-    Offset(px, top),
-    _stroke(p.frame, 1.2 * s),
-  );
-  for (var i = 0; i < 3; i++) {
-    c.drawRect(
-      Rect.fromLTWH(
-        px + (flip ? -7 * s : 0.6 * s),
-        top + i * 3 * s,
-        6.4 * s,
-        3 * s,
-      ),
-      _fill(p.tone(kLungtaColors[(i * 2) % 5], 0.35)),
-    );
-  }
-}
+}) => drawTibetanHome(c, b, s * 0.9, p, flip: flip, floors: 1);
 
 /// A chorten: stepped white base, the dome, a gold spire of rings, and the
 /// sun and moon on top.
@@ -334,8 +245,7 @@ void drawTent(Canvas c, Offset b, double s, BiomePalette p) {
   );
 }
 
-/// A yak: shaggy skirt, hump, pale curved horns. [facing] is 1 (right) or
-/// -1 (left).
+/// A yak, as a small prop: see [drawYakHero].
 void drawYak(
   Canvas c,
   Offset b,
@@ -343,84 +253,15 @@ void drawYak(
   BiomePalette p, {
   double facing = 1,
   bool white = false,
-}) {
-  contactShadow(c, b, 34 * s, p);
-  c.save();
-  c.translate(b.dx, b.dy);
-  c.scale(facing * s, s);
-  final body =
-      p.dark
-          ? const Color(0xFF14110E)
-          : (white ? const Color(0xFFEDE6DA) : _yak);
-  final paint = _fill(body);
-  final legs = _stroke(body, 3.2);
-  for (final x in [-10.0, -6.0, 6.0, 10.0]) {
-    c.drawLine(Offset(x, -8), Offset(x, -0.5), legs);
-  }
-  final torso =
-      Path()
-        ..moveTo(-15, -10)
-        ..cubicTo(-16, -17, -10, -21, -2, -20)
-        ..cubicTo(4, -24, 10, -22, 13, -17)
-        ..lineTo(15, -10)
-        // Shaggy skirt.
-        ..lineTo(13, -6)
-        ..lineTo(11, -9)
-        ..lineTo(9, -5)
-        ..lineTo(6, -8.5)
-        ..lineTo(3, -5)
-        ..lineTo(0, -8.5)
-        ..lineTo(-3, -5)
-        ..lineTo(-6, -8.5)
-        ..lineTo(-9, -5)
-        ..lineTo(-12, -8.5)
-        ..lineTo(-15, -6)
-        ..close();
-  c.drawPath(torso, paint);
-  // Light along the hump and back, from the sun's side.
-  final sunward = (p.lightFromLeft ? -1.0 : 1.0) * facing;
-  c.drawPath(
-    Path()
-      ..moveTo(-14.5, -12)
-      ..cubicTo(-15.5, -17, -10, -20.5, -2, -19.6)
-      ..cubicTo(4, -23.4, 9.5, -21.6, 12.5, -17),
-    _stroke(
-      (white
-              ? const Color(0xFFFFFFFF)
-              : p.dark
-              ? const Color(0xFF6D7DA6)
-              : const Color(0xFF7A6656))
-          .withValues(alpha: sunward < 0 ? 0.55 : 0.35),
-      1.3,
-    ),
-  );
-  // Head, low and forward.
-  c.drawPath(
-    Path()
-      ..moveTo(12, -18)
-      ..cubicTo(17, -19, 21, -15, 20, -11)
-      ..cubicTo(19, -8, 15, -9, 13, -11)
-      ..close(),
-    paint,
-  );
-  final horn = _stroke(
-    p.dark ? const Color(0xFF7D8699) : const Color(0xFFE9DFC9),
-    1.6,
-  );
-  c.drawPath(
-    Path()
-      ..moveTo(16, -17)
-      ..quadraticBezierTo(15, -22, 19, -23),
-    horn,
-  );
-  // Tail.
-  c.drawLine(
-    const Offset(-15, -16),
-    const Offset(-18, -10),
-    _stroke(body, 1.6),
-  );
-  c.restore();
-}
+}) => drawYakHero(
+  c,
+  b,
+  s * 0.85,
+  p,
+  facing: facing,
+  coat: white ? YakCoat.pied : YakCoat.black,
+  grazing: facing < 0,
+);
 
 /// A kiang, the wild ass of the Changtang: chestnut back, white belly and
 /// legs, a dark stripe down the back.
