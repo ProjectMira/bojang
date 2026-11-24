@@ -843,8 +843,10 @@ class GroundPainter extends CustomPainter {
         if (k.inflate(pad).contains(o)) return false;
       }
       for (final s in samples) {
-        if ((s - o).distanceSquared < math.pow(layout.trailWidth / 2 + pad, 2))
+        if ((s - o).distanceSquared <
+            math.pow(layout.trailWidth / 2 + pad, 2)) {
           return false;
+        }
       }
       return o.dy < h - fade * 0.7;
     }
@@ -1024,8 +1026,9 @@ class GroundPainter extends CustomPainter {
             rect.topRight,
             rect.bottomLeft,
             rect.bottomRight,
-          ].every((o) => clear(o, 6)))
+          ].every((o) => clear(o, 6))) {
             continue;
+          }
           drawField(canvas, rect, p, ripe: r.nextBool());
         }
       case Biome.pasture:

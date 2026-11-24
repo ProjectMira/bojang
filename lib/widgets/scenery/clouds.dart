@@ -6,6 +6,7 @@ import 'landscape.dart';
 /// cached picture); otherwise they hold still.
 class DriftingClouds extends StatelessWidget {
   const DriftingClouds({
+    super.key,
     required this.dark,
     required this.seed,
     this.ambient,
