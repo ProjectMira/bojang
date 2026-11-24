@@ -486,8 +486,9 @@ void main() {
       expect(find.text(title), findsOneWidget, reason: title);
     }
     expect(find.textContaining('8 games'), findsOneWidget);
-    expect(find.text('Listening'), findsOneWidget);
-    expect(find.text('Spelling'), findsOneWidget);
+    expect(find.text("Today's game"), findsOneWidget);
+    expect(find.text('Listening and reading'), findsOneWidget);
+    expect(find.text('Spelling and speed'), findsOneWidget);
   });
 
   testWidgets('the games kill switch hides the Games tab content', (
