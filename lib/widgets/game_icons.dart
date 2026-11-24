@@ -63,49 +63,60 @@ class GameIconPainter extends CustomPainter {
 
     switch (glyph) {
       case GameGlyph.conch:
-        // A dungkar, the white conch: pointed spire, swelling whorl, the
-        // long siphon below, and its sound to the right.
-        final shell =
-            Path()
-              ..moveTo(0.14 * s, 0.12 * s)
-              ..cubicTo(
-                0.46 * s,
-                0.14 * s,
-                0.7 * s,
-                0.26 * s,
-                0.66 * s,
-                0.5 * s,
-              )
-              ..cubicTo(0.64 * s, 0.62 * s, 0.54 * s, 0.7 * s, 0.5 * s, 0.9 * s)
-              ..cubicTo(0.4 * s, 0.72 * s, 0.24 * s, 0.6 * s, 0.2 * s, 0.44 * s)
-              ..cubicTo(
-                0.17 * s,
-                0.32 * s,
-                0.14 * s,
-                0.22 * s,
-                0.14 * s,
-                0.12 * s,
-              )
-              ..close();
+        // A dungkar, the white conch: the stepped spire at the top left,
+        // the great flared lip on the right with its mouth shaded in, and
+        // the canal at the foot.
+        Path p(List<double> v) {
+          final path = Path()..moveTo(v[0] * s, v[1] * s);
+          for (var i = 2; i + 5 < v.length; i += 6) {
+            path.cubicTo(
+              v[i] * s,
+              v[i + 1] * s,
+              v[i + 2] * s,
+              v[i + 3] * s,
+              v[i + 4] * s,
+              v[i + 5] * s,
+            );
+          }
+          return path;
+        }
+
+        final shell = p([
+          0.12, 0.14, //
+          0.3, 0.12, 0.48, 0.16, 0.6, 0.2, // spire to shoulder
+          0.78, 0.18, 0.94, 0.3, 0.9, 0.48, // the lip flares out
+          0.88, 0.62, 0.78, 0.72, 0.68, 0.78, // and back in
+          0.7, 0.84, 0.72, 0.9, 0.74, 0.94, // the canal
+          0.62, 0.9, 0.56, 0.84, 0.5, 0.8, //
+          0.34, 0.72, 0.18, 0.56, 0.14, 0.38, // the body's underside
+          0.12, 0.28, 0.11, 0.2, 0.12, 0.14, //
+        ])..close();
+        final mouth = p([
+          0.6, 0.26, //
+          0.72, 0.34, 0.74, 0.56, 0.66, 0.74, //
+          0.76, 0.68, 0.86, 0.6, 0.86, 0.46, //
+          0.88, 0.32, 0.74, 0.24, 0.6, 0.26, //
+        ])..close();
+        canvas.drawPath(mouth, Paint()..color = color.withValues(alpha: 0.28));
         canvas.drawPath(shell, line);
         canvas.drawPath(
-          Path()
-            ..moveTo(0.2 * s, 0.3 * s)
-            ..quadraticBezierTo(0.4 * s, 0.26 * s, 0.56 * s, 0.34 * s),
+          p([0.6, 0.26, 0.72, 0.34, 0.74, 0.56, 0.66, 0.74]),
           line,
         );
-        canvas.drawPath(
-          Path()
-            ..moveTo(0.24 * s, 0.48 * s)
-            ..quadraticBezierTo(0.44 * s, 0.44 * s, 0.64 * s, 0.52 * s),
-          line,
-        );
-        for (final r in [0.12, 0.24]) {
-          canvas.drawArc(
-            Rect.fromCircle(center: o(0.68, 0.7), radius: r * s),
-            -0.9,
-            1.3,
-            false,
+        // Whorls stepping down the spire.
+        for (final (x0, y0, x1, y1) in [
+          (0.13, 0.26, 0.36, 0.18),
+          (0.18, 0.42, 0.5, 0.24),
+        ]) {
+          canvas.drawPath(
+            Path()
+              ..moveTo(x0 * s, y0 * s)
+              ..quadraticBezierTo(
+                (x0 + x1) / 2 * s + 0.02 * s,
+                (y0 + y1) / 2 * s + 0.06 * s,
+                x1 * s,
+                y1 * s,
+              ),
             line,
           );
         }
