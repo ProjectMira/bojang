@@ -1,8 +1,13 @@
 import 'package:bojang/models/learning_path.dart';
+import 'dart:ui' as ui;
+
 import 'package:bojang/screens/extra_games_screen.dart';
+import 'package:bojang/widgets/game_icons.dart';
 import 'package:bojang/widgets/learning_path_view.dart';
 import 'package:bojang/widgets/scenery/biome.dart';
 import 'package:bojang/widgets/scenery/landscape.dart';
+import 'package:bojang/widgets/scenery/ridges.dart';
+import 'package:bojang/widgets/scenery/signboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -47,6 +52,56 @@ void main() {
       }
     });
 
+    test('each biome has its own light, and night is indigo, not grey', () {
+      final suns = {
+        for (final b in Biome.values) BiomePalette.of(b, dark: false).sunAt,
+      };
+      expect(suns.length, greaterThan(4));
+      for (final b in Biome.values) {
+        final day = BiomePalette.of(b, dark: false);
+        final night = BiomePalette.of(b, dark: true);
+        // Five ranges, each farther one lighter (aerial perspective) up to
+        // the near slope.
+        expect(day.ridges, hasLength(5));
+        expect(
+          day.ridges.first.computeLuminance(),
+          greaterThan(day.ridges[2].computeLuminance()),
+          reason: b.name,
+        );
+        // The night sky leans blue, never neutral grey.
+        final zenith = night.skyHigh;
+        expect(zenith.b, greaterThan(zenith.r + 0.1), reason: b.name);
+        // Night ground is blue-green: its blue and green beat its red.
+        final g = night.ground;
+        expect(g.g, greaterThan(g.r), reason: b.name);
+        expect(g.b, greaterThan(g.r), reason: b.name);
+      }
+    });
+
+    test('palettes are equal by biome and mode, and cached', () {
+      expect(
+        BiomePalette.of(Biome.lake, dark: false),
+        same(BiomePalette.of(Biome.lake, dark: false)),
+      );
+      expect(
+        BiomePalette.of(Biome.lake, dark: false),
+        isNot(BiomePalette.of(Biome.lake, dark: true)),
+      );
+    });
+
+    test('ridgelines are seeded, stay in range and keep their scale', () {
+      RidgeLine r(double width) =>
+          RidgeLine.generate(seed: 4, width: width, wavelength: 200);
+      final phone = r(390), pad = r(1024);
+      for (var x = 0.0; x < 390; x += 7) {
+        expect(phone.at(x), inInclusiveRange(0, 1));
+        expect(phone.at(x), r(390).at(x));
+      }
+      expect(phone.peaks(390), isNotEmpty);
+      // An iPad sees more of the range, not a stretched one.
+      expect(pad.peaks(1024).length, greaterThan(phone.peaks(390).length));
+    });
+
     test('night palettes are darker than day and keep lamp-lit windows', () {
       for (final b in Biome.values) {
         final day = BiomePalette.of(b, dark: false);
@@ -62,6 +117,67 @@ void main() {
         );
       }
     });
+  });
+
+  test('every biome paints, day and night, phone and iPad', () {
+    for (final dark in [false, true]) {
+      for (final w in [390.0, 1024.0]) {
+        for (final b in Biome.values) {
+          final p = BiomePalette.of(b, dark: dark);
+          final centers = [
+            for (var i = 0; i < 4; i++)
+              Offset(w / 2 + (i.isEven ? 60 : -60), 80.0 + i * 170),
+          ];
+          final rec = ui.PictureRecorder();
+          final c = Canvas(rec);
+          SkyPainter(
+            biome: b,
+            palette: p,
+            ridgeZone: 250,
+            seed: 2,
+            overscan: 28,
+          ).paint(c, Size(w, 456));
+          HorizonPainter(
+            biome: b,
+            palette: p,
+            ridgeZone: 250,
+            seed: 2,
+            trailX: w / 2,
+            trailWidth: 24,
+          ).paint(c, Size(w, 400));
+          CloudPainter(
+            palette: p,
+            seed: 2,
+            top: 0.3,
+            bottom: 0.4,
+          ).paint(c, Size(w * 2, 400));
+          GroundPainter(
+            biome: b,
+            palette: p,
+            layout: TrailLayout(
+              centers: centers,
+              keepClear: [
+                for (final o in centers)
+                  Rect.fromCenter(center: o, width: 200, height: 150),
+              ],
+              walked: 2,
+              trailWidth: 24,
+              columnLeft: (w - 390) / 2,
+              columnRight: (w + 390) / 2,
+              swing: 70,
+              propScale: 1,
+            ),
+            seed: 2,
+            fade: 130,
+          ).paint(c, Size(w, 900));
+          WindFlagsPainter(
+            palette: p,
+            strings: flagStringsFor(b, Size(w, 400), 250),
+          ).paint(c, Size(w, 400));
+          rec.endRecording().dispose();
+        }
+      }
+    }
   });
 
   group('painters repaint only when their input changes', () {
@@ -142,6 +258,55 @@ void main() {
     });
   });
 
+  group('more repaint rules', () {
+    final day = BiomePalette.of(Biome.valley, dark: false);
+    final night = BiomePalette.of(Biome.valley, dark: true);
+    HorizonPainter h({BiomePalette? palette, double trailX = 195}) =>
+        HorizonPainter(
+          biome: Biome.valley,
+          palette: palette ?? day,
+          ridgeZone: 250,
+          seed: 1,
+          trailX: trailX,
+          trailWidth: 24,
+        );
+    CloudPainter c({BiomePalette? palette, int seed = 1}) => CloudPainter(
+      palette: palette ?? day,
+      seed: seed,
+      top: 0.3,
+      bottom: 0.4,
+    );
+
+    test('horizon', () {
+      expect(h().shouldRepaint(h()), isFalse);
+      expect(h().shouldRepaint(h(palette: night)), isTrue);
+      expect(h().shouldRepaint(h(trailX: 200)), isTrue);
+    });
+
+    test('clouds', () {
+      expect(c().shouldRepaint(c()), isFalse);
+      expect(c().shouldRepaint(c(palette: night)), isTrue);
+      expect(c().shouldRepaint(c(seed: 2)), isTrue);
+    });
+
+    test('flags', () {
+      final strings = flagStringsFor(Biome.lake, const Size(390, 400), 250);
+      final a = WindFlagsPainter(palette: day, strings: strings);
+      expect(
+        a.shouldRepaint(WindFlagsPainter(palette: day, strings: [...strings])),
+        isFalse,
+      );
+      expect(
+        a.shouldRepaint(WindFlagsPainter(palette: night, strings: strings)),
+        isTrue,
+      );
+      expect(
+        a.shouldRepaint(WindFlagsPainter(palette: day, strings: const [])),
+        isTrue,
+      );
+    });
+  });
+
   Future<List<String>> pumpPath(
     WidgetTester tester, {
     Size size = const Size(390, 844),
@@ -194,6 +359,54 @@ void main() {
     expect(grounds[2].layout.walked, 0);
     expect(find.text('Unit 7'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('on a phone the signboard is slim and the ranges show', (
+    tester,
+  ) async {
+    await pumpPath(tester);
+    final board = tester.getRect(find.byType(Signboard).first);
+    expect(board.height, lessThan(110));
+    // Below the board there is at least 220 px of sky and ranges before
+    // the valley floor begins.
+    final sky = tester.getRect(
+      find
+          .ancestor(
+            of: find.byType(Signboard).first,
+            matching: find.byType(SizedBox),
+          )
+          .first,
+    );
+    expect(sky.bottom - board.bottom, greaterThan(220));
+  });
+
+  testWidgets('signboard text reads at 4.5:1 or more, day and night', (
+    tester,
+  ) async {
+    double ratio(Color a, Color b) {
+      final la = a.computeLuminance(), lb = b.computeLuminance();
+      final hi = la > lb ? la : lb, lo = la > lb ? lb : la;
+      return (hi + 0.05) / (lo + 0.05);
+    }
+
+    for (final mode in [ThemeMode.light, ThemeMode.dark]) {
+      late SignboardColors c;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          themeMode: mode,
+          home: Builder(
+            builder: (context) {
+              c = SignboardColors.of(context);
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      expect(ratio(c.ink, c.panel), greaterThanOrEqualTo(4.5));
+      expect(ratio(c.inkSoft, c.panel), greaterThanOrEqualTo(4.5));
+    }
   });
 
   testWidgets('steps stay tappable on the scenery, 48 px or more', (
@@ -307,6 +520,39 @@ void main() {
         final data = (e.widget as Text).data ?? '';
         expect(emoji.hasMatch(data), isFalse, reason: data);
       }
+    });
+
+    test('every game icon paints, the conch included', () {
+      for (final g in GameGlyph.values) {
+        final rec = ui.PictureRecorder();
+        GameIconPainter(
+          g,
+          const Color(0xFF2174C8),
+        ).paint(Canvas(rec), const Size(28, 28));
+        rec.endRecording().dispose();
+      }
+      expect(
+        const GameIconPainter(GameGlyph.conch, Color(0xFF000000)).shouldRepaint(
+          const GameIconPainter(GameGlyph.conch, Color(0xFF000000)),
+        ),
+        isFalse,
+      );
+    });
+
+    testWidgets('night Games tab renders', (tester) async {
+      tester.view.physicalSize = const Size(390, 2600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          themeMode: ThemeMode.dark,
+          home: const ExtraGamesScreen(enabled: true),
+        ),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('iPad lays the shelves side by side', (tester) async {
