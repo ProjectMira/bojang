@@ -182,11 +182,12 @@ class PracticeScreenState extends State<PracticeScreen> {
     return RefreshIndicator(
       onRefresh: reload,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.gutter,
           AppSpacing.sm,
           AppSpacing.gutter,
-          AppSpacing.xxxl,
+          // Clear the floating tab bar the page runs under.
+          AppSpacing.xxxl + MediaQuery.paddingOf(context).bottom,
         ),
         children: [
           if (fsrs)

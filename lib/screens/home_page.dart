@@ -215,7 +215,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           body: ContentWidth(
             // The scenery runs edge to edge; the path keeps its own column.
             maxWidth: path != null ? double.infinity : ContentWidth.standard,
+            // The page runs under the floating tab bar; the scroll view's
+            // bottom padding carries the bar's height instead.
             child: SafeArea(
+              bottom: false,
               child: FadeTransition(
                 opacity: _fadeAnimation,
                 child: RefreshIndicator(
@@ -225,9 +228,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   },
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: path != null ? 0 : AppSpacing.gutter,
-                      vertical: AppSpacing.lg,
+                    padding: EdgeInsets.fromLTRB(
+                      path != null ? 0 : AppSpacing.gutter,
+                      AppSpacing.lg,
+                      path != null ? 0 : AppSpacing.gutter,
+                      AppSpacing.lg + MediaQuery.paddingOf(context).bottom,
                     ),
                     child:
                         path != null

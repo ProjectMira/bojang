@@ -242,6 +242,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           body: ContentWidth(
             child: SingleChildScrollView(
+              // Clear the floating tab bar the page runs under.
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.paddingOf(context).bottom,
+              ),
               child: Column(
                 children: [
                   // Profile Header

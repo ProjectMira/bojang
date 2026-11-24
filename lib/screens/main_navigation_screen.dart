@@ -136,9 +136,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             TickerMode(enabled: i == _currentIndex, child: _screens[i]),
         ],
       ),
-      // A floating capsule over the page background, like the iOS tab bar.
-      // The body stays above it (no extendBody), so no screen's last row
-      // hides underneath.
+      // A floating glass capsule. The page runs underneath it (extendBody),
+      // so content shows through below and around the bar; Scaffold adds the
+      // bar's height to MediaQuery.padding.bottom, which each tab's scroll
+      // view uses as its bottom inset so the last row can scroll clear.
+      extendBody: true,
       bottomNavigationBar: _FloatingTabBar(
         tabs: _tabs,
         currentIndex: _currentIndex,
@@ -184,8 +186,8 @@ class _FloatingTabBar extends StatelessWidget {
             ? AppColors.surfaceDark.withValues(alpha: 0.82)
             : Colors.white.withValues(alpha: 0.86);
 
-    return ColoredBox(
-      color: AppTokens.background(context),
+    return Material(
+      type: MaterialType.transparency,
       child: SafeArea(
         top: false,
         minimum: const EdgeInsets.only(bottom: 12),
