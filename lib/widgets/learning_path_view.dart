@@ -312,7 +312,12 @@ class _UnitScene extends StatelessWidget {
       label: biome.label,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [ClipRect(child: sky), ground],
+        children: [
+          ClipRect(child: sky),
+          // Tuck the floor a pixel under the sky so no hairline of page
+          // shows between the two layers on any renderer.
+          Transform.translate(offset: const Offset(0, -1), child: ground),
+        ],
       ),
     );
   }

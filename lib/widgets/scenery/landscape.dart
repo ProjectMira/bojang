@@ -733,7 +733,7 @@ class HorizonPainter extends CustomPainter {
           (0.64, 0.035, 0.92, -1.0, YakCoat.black, true),
           (0.74, 0.012, 0.95, 1.0, YakCoat.pied, false),
           (0.83, 0.045, 0.8, -1.0, YakCoat.black, true),
-          (0.93, 0.02, 1.0, -1.0, YakCoat.black, false),
+          (0.9, 0.02, 0.92, -1.0, YakCoat.black, false),
         ]);
       case Biome.pass:
         // Two pack yaks crossing the snow below the pass.
@@ -816,7 +816,7 @@ List<(Offset, Offset, double)> flagStringsFor(
   return switch (biome) {
     // One long line across the lake shore.
     Biome.lake => [
-      (Offset(w * 0.03, h - z * 0.2), Offset(w * 0.97, h - z * 0.16), 22),
+      (Offset(w * 0.03, h - z * 0.27), Offset(w * 0.97, h - z * 0.23), 20),
     ],
     // From the chorten's knoll across to a pole.
     Biome.valley => [
