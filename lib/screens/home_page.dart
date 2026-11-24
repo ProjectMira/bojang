@@ -20,6 +20,7 @@ import '../widgets/cultural_tip_card.dart';
 import '../widgets/earn_back_card.dart';
 import '../widgets/home_top_bar.dart';
 import '../widgets/learning_path_view.dart';
+import '../widgets/scenery/biome.dart';
 import '../widgets/section_header.dart';
 import '../widgets/shortcut_card.dart';
 import '../widgets/stat_strip.dart';
@@ -206,10 +207,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       builder: (context, progressService, child) {
         final path = _pathEnabled ? _path : null;
         return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          // With the path, the page is the mist the valleys sit in.
+          backgroundColor:
+              path != null
+                  ? BiomePalette.mistFor(AppTokens.isDark(context))
+                  : Theme.of(context).scaffoldBackgroundColor,
           body: ContentWidth(
-            // iPad: the path is a centred column, not the full width.
-            maxWidth: path != null ? 640 : ContentWidth.standard,
+            // The scenery runs edge to edge; the path keeps its own column.
+            maxWidth: path != null ? double.infinity : ContentWidth.standard,
             child: SafeArea(
               child: FadeTransition(
                 opacity: _fadeAnimation,
@@ -220,8 +225,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   },
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.gutter,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: path != null ? 0 : AppSpacing.gutter,
                       vertical: AppSpacing.lg,
                     ),
                     child:
@@ -239,7 +244,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 const SizedBox(height: AppSpacing.xl),
 
                                 const AnnouncementBanner(),
-        const OfflineLessonsBanner(),
+                                const OfflineLessonsBanner(),
                                 const OfflineLessonsBanner(),
 
                                 _buildStatsStrip(context, progressService),
@@ -308,11 +313,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HomeTopBar(daily: path.daily),
-        const SizedBox(height: AppSpacing.lg),
-        const AnnouncementBanner(),
-        _buildEarnBack(context, progressService),
-        const SizedBox(height: AppSpacing.lg),
+        ContentWidth(
+          maxWidth: LearningPathView.columnWidth,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                HomeTopBar(daily: path.daily),
+                const SizedBox(height: AppSpacing.lg),
+                const AnnouncementBanner(),
+                _buildEarnBack(context, progressService),
+              ],
+            ),
+          ),
+        ),
         LearningPathView(
           path: path,
           activeKey: _activeKey,

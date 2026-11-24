@@ -54,7 +54,7 @@ void main() {
 
       expect(find.byType(LearningPathView), findsOneWidget);
       expect(find.text('Tibetan Basics'), findsOneWidget);
-      expect(find.text('UNIT 2'), findsOneWidget);
+      expect(find.text('Unit 2'), findsOneWidget);
       expect(find.byKey(const ValueKey('path_start_button')), findsOneWidget);
       expect(
         find.descendant(
@@ -70,10 +70,19 @@ void main() {
 
       final button = tester.widget<PathNodeButton>(find.byType(PathNodeButton).first);
       expect(button.size, nodeSize);
-      // Centred column with a max width.
+      // The scenery runs edge to edge; the steps keep to a centred column.
       final view = tester.getRect(find.byType(LearningPathView));
-      expect(view.width, lessThanOrEqualTo(640));
-      expect((view.center.dx - size.width / 2).abs(), lessThan(1));
+      expect(view.width, size.width);
+      final column = Rect.fromCenter(
+        center: Offset(size.width / 2, 0),
+        width: LearningPathView.columnWidth,
+        height: double.infinity,
+      );
+      for (final e in find.byType(PathNodeButton).evaluate()) {
+        final r = tester.getRect(find.byWidget(e.widget));
+        expect(r.left, greaterThanOrEqualTo(column.left - 1));
+        expect(r.right, lessThanOrEqualTo(column.right + 1));
+      }
       expect(tester.takeException(), isNull);
     });
   }
@@ -158,6 +167,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600));
       await tester.pump(const Duration(milliseconds: 600));
       expect(find.byIcon(Icons.forum_rounded), findsOneWidget);
+      // The scenery puts the step below the fold: scroll to it first.
+      await tester.ensureVisible(find.byIcon(Icons.forum_rounded));
+      await tester.pump();
       await tester.tap(find.byIcon(Icons.forum_rounded));
       await tester.pump(const Duration(milliseconds: 600));
       await tester.pump(const Duration(milliseconds: 600));

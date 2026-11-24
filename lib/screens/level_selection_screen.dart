@@ -106,7 +106,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   Widget _buildPath(BuildContext context, LearningPath path) {
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      padding: const EdgeInsets.only(top: 8, bottom: 32),
       children: [
         LearningPathView(
           path: path,

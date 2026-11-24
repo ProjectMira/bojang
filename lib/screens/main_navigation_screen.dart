@@ -127,7 +127,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      // Hidden tabs keep their state but stop their tickers (the path's
+      // drifting clouds and flags, the yak's idle loop).
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          for (var i = 0; i < _screens.length; i++)
+            TickerMode(enabled: i == _currentIndex, child: _screens[i]),
+        ],
+      ),
       // A floating capsule over the page background, like the iOS tab bar.
       // The body stays above it (no extendBody), so no screen's last row
       // hides underneath.
