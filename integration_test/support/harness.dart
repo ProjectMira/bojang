@@ -9,9 +9,12 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:bojang/main.dart' as app;
 import 'package:bojang/services/api_service.dart';
+import 'package:bojang/services/google_auth_service.dart';
+import 'package:bojang/services/offline_mode.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -22,7 +25,6 @@ import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqflite.dart';
 
 /// Where the app's API points (BOJANG_API_BASE_URL).
 const String apiBase = ApiService.baseUrl;
@@ -32,17 +34,6 @@ bool _servicesReady = false;
 
 /// Platform calls the app made, by channel, since the last [resetSpies].
 final Map<String, List<MethodCall>> channelCalls = {};
-
-/// Bytes returned by the mocked photo picker (a 2x2 PNG).
-final Uint8List fakePhotoPng = Uint8List.fromList(const [
-  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, //
-  0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02,
-  0x08, 0x02, 0x00, 0x00, 0x00, 0xFD, 0xD4, 0x9A, 0x73, 0x00, 0x00, 0x00,
-  0x16, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x62, 0xF8, 0xCF, 0xC0, 0xF0,
-  0x9F, 0x81, 0xE1, 0x3F, 0x03, 0x03, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x03,
-  0x00, 0x27, 0xFC, 0x05, 0xFB, 0x8E, 0xD6, 0x16, 0x86, 0x00, 0x00, 0x00,
-  0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
-]);
 
 IntegrationTestWidgetsFlutterBinding initBinding() {
   binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -186,11 +177,29 @@ void installSpies() {
   });
 }
 
+/// A real 64x64 PNG (the backend refuses broken or tiny images).
+Future<Uint8List> fakePhotoPng() async {
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder);
+  canvas.drawRect(
+    const Rect.fromLTWH(0, 0, 64, 64),
+    Paint()..color = const Color(0xFF2C97DD),
+  );
+  canvas.drawCircle(
+    const Offset(32, 32),
+    20,
+    Paint()..color = const Color(0xFFFFC107),
+  );
+  final image = await recorder.endRecording().toImage(64, 64);
+  final data = await image.toByteData(format: ui.ImageByteFormat.png);
+  return data!.buffer.asUint8List();
+}
+
 /// Writes [fakePhotoPng] to a temp file the mocked picker returns.
 Future<void> preparePickedPhoto() async {
   final dir = await getTemporaryDirectory();
   final file = File('${dir.path}/e2e_photo.png');
-  await file.writeAsBytes(fakePhotoPng);
+  await file.writeAsBytes(await fakePhotoPng());
   _pickedPhotoPath = file.path;
 }
 
@@ -203,9 +212,9 @@ Future<void> wipeState() async {
       await FirebaseAuth.instance.signOut();
     } catch (_) {}
   }
-  try {
-    await deleteDatabase('offline_queue.db');
-  } catch (_) {}
+  // The app's own clear: deleting offline_queue.db would close the handle
+  // the app keeps open (DatabaseException(database_closed) later).
+  await OfflineMode.instance.clear();
 }
 
 /// Starts the app as main() does. [fresh] wipes everything first.
@@ -223,6 +232,13 @@ Future<void> launchApp(
   if (!_servicesReady) {
     await app.initServices();
     _servicesReady = true;
+    if (fresh) {
+      // iOS keeps the Firebase user in the keychain across reinstalls, and
+      // Firebase was not up yet when wipeState ran: sign that user out now.
+      await GoogleAuthService().signOut();
+      await wipeState();
+      if (seed != null) await seed(await SharedPreferences.getInstance());
+    }
   }
   resetSpies();
   await tester.pumpWidget(app.MyApp(key: UniqueKey()));
@@ -326,10 +342,10 @@ Future<void> scrollTo(
   await wait(tester, 0.3);
 }
 
-String _slug(String s) => s
-    .replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-')
-    .toLowerCase()
-    .substring(0, s.length.clamp(0, 60));
+String _slug(String s) {
+  final slug = s.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-').toLowerCase();
+  return slug.length > 60 ? slug.substring(0, 60) : slug;
+}
 
 /// Asks ci/scripts/e2e.sh to capture the simulator screen now.
 /// The script watches the log for SHOT:name lines.
