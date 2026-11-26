@@ -76,22 +76,20 @@ class LessonCompleteScreen extends StatefulWidget {
   /// The asks, in priority order. Add new ones here, not as extra
   /// pop-ups elsewhere, so a lesson never ends with more than one.
   ///
-  /// 1. The notification primer, at a streak moment (started, extended or
-  ///    saved by a freeze): at most 3 asks, 3+ days apart.
+  /// 1. The notification primer, at the first finished lesson or a streak
+  ///    moment (started, extended or saved by a freeze): at most 3 asks,
+  ///    3+ days apart, and never once the OS prompt has been answered.
   /// 2. "Save your progress", for a learner without a real account, from
   ///    the first lesson or a 3-day streak: at most 3 asks, 4+ days apart.
   /// 3. Location, once, from the first lesson on; it waits for a session
   ///    end the primer does not take.
   /// 4. "Turn off reading help?", once, after 20 right in a row with it on.
   static final List<SessionEndAsk> asks = [
-    (context, end) async {
-      final streak = end.streak;
-      if (streak == null) return false;
-      return NotificationPrimer.instance.afterStreakCelebration(
-        context,
-        streak,
-      );
-    },
+    (context, end) => NotificationPrimer.instance.afterLesson(
+      context,
+      lessonsCompleted: end.lessonsCompleted,
+      celebration: end.streak,
+    ),
     (context, end) => SaveProgressPrompt.instance.maybeAsk(
       context,
       lessonsCompleted: end.lessonsCompleted,

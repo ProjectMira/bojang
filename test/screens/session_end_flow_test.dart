@@ -117,7 +117,7 @@ void main() {
     expect(find.text('open'), findsOneWidget);
   });
 
-  testWidgets('a streak moment asks for notifications, and only that', (
+  testWidgets('the first lesson asks for notifications, and only that', (
     tester,
   ) async {
     installPrimer(canPrompt: true);
@@ -130,9 +130,12 @@ void main() {
     await settle(tester);
 
     // The primer takes the one ask slot, ahead of location.
-    expect(find.text('Want a nudge from Norbu?'), findsOneWidget);
+    expect(
+      find.text('Get a daily reminder to keep your streak?'),
+      findsOneWidget,
+    );
     expect(find.text('Where are you learning from?'), findsNothing);
-    await tester.tap(find.text('Maybe later'));
+    await tester.tap(find.byKey(const ValueKey('notification_primer_not_now')));
     await settle(tester);
 
     expect(find.text('Where are you learning from?'), findsNothing);
@@ -144,7 +147,21 @@ void main() {
     expect(saved.getBool('location_prompted'), isNot(true));
   });
 
-  testWidgets('"Turn on reminders" goes to the OS prompt, then nothing else', (
+  testWidgets('first lesson, OS prompt already answered: no primer', (
+    tester,
+  ) async {
+    // canPrompt false: the learner allowed or refused in an older build.
+    await pumpResult(tester, lessonsCompleted: 1, practisedToday: false);
+    await tester.tap(primary('Continue'));
+    await settle(tester);
+    expect(
+      find.text('Get a daily reminder to keep your streak?'),
+      findsNothing,
+    );
+    expect(permissionRequests, isEmpty);
+  });
+
+  testWidgets('"Allow" goes to the OS prompt, then nothing else', (
     tester,
   ) async {
     installPrimer(canPrompt: true);
@@ -153,7 +170,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.text('Not now'));
     await settle(tester);
-    await tester.tap(find.text('Turn on reminders'));
+    await tester.tap(find.text('Allow'));
     await settle(tester);
     expect(permissionRequests, ['primer_streak']);
     expect(find.text('Where are you learning from?'), findsNothing);

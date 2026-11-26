@@ -36,14 +36,31 @@ class PushService {
 
   bool get _available => !kIsWeb && Firebase.apps.isNotEmpty;
 
+  /// Message ids already handled by [handleOpened], so a push is counted
+  /// once even if FCM reports it twice (getInitialMessage after a restart).
+  final Set<String> _openedIds = {};
+
   /// Call after runApp. It does not ask for notification permission: that
   /// happens at a moment that matters (NotificationPrimer, after the first
-  /// streak or freeze) or from the Settings switches ([requestPermission]).
+  /// lesson or a streak) or from the Settings switches ([requestPermission]).
   /// The token is registered either way, so pushes work once allowed.
   Future<void> init() async {
     if (_started || !_available) return;
     _started = true;
     final messaging = FirebaseMessaging.instance;
+    // Taps first, each on its own: a failure in the setup below used to skip
+    // these listeners, and the push that launched the app was never counted.
+    try {
+      FirebaseMessaging.onMessageOpenedApp.listen(
+        (m) => handleOpened(m.data, messageId: m.messageId, launch: 'background'),
+      );
+      final initial = await messaging.getInitialMessage();
+      if (initial != null) {
+        handleOpened(initial.data, messageId: initial.messageId, launch: 'cold');
+      }
+    } catch (e) {
+      debugPrint('Push open handling skipped: $e');
+    }
     try {
       // iOS: show pushes as banners while the app is open too.
       await messaging.setForegroundNotificationPresentationOptions(
@@ -58,9 +75,6 @@ class PushService {
       });
 
       FirebaseMessaging.onMessage.listen(_onForeground);
-      FirebaseMessaging.onMessageOpenedApp.listen(_onOpened);
-      final initial = await messaging.getInitialMessage();
-      if (initial != null) _onOpened(initial);
 
       messaging.onTokenRefresh.listen((token) => unawaited(_register(token: token)));
       FirebaseAuth.instance.authStateChanges().listen((user) {
@@ -158,33 +172,81 @@ class PushService {
     });
     // iOS shows the banner itself (presentation options above); Android
     // does not show notification messages while the app is open.
+    // The push's data rides along as the payload, so tapping that local
+    // notification is counted like any other push (handleOpened).
     final n = message.notification;
     if (!kIsWeb && Platform.isAndroid && n != null) {
-      unawaited(NotificationService().showNow(n.title ?? 'Bojang', n.body ?? ''));
+      unawaited(NotificationService().showNow(
+        n.title ?? 'Bojang',
+        n.body ?? '',
+        pushData: message.data,
+      ));
     }
   }
 
-  void _onOpened(RemoteMessage message) {
-    final data = message.data;
-    final screen = data['screen'];
+  /// A push was tapped. [launch] says how it reached the app: `cold` (it
+  /// started the app, getInitialMessage), `background` (onMessageOpenedApp)
+  /// or `foreground` (the local copy Android shows while the app is open).
+  /// Records `push_opened` and `notification_opened` with the push's data,
+  /// tells the backend (`POST /notifications/opened`), and asks
+  /// MainNavigationScreen for the tab in `data.screen`. NotificationService
+  /// calls it for taps on local notifications.
+  void handleOpened(
+    Map<String, dynamic> data, {
+    String? messageId,
+    required String launch,
+  }) {
+    if (messageId != null && !_openedIds.add(messageId)) return;
+    String? field(String key) {
+      final value = data[key];
+      if (value == null) return null;
+      final text = value.toString();
+      return text.isEmpty ? null : text;
+    }
+
+    final screen = field('screen');
     Analytics.track('push_opened', {
-      'campaign': data['campaign'],
+      'kind': field('kind'),
       'screen': screen,
+      'campaign': field('campaign'),
+      'state': field('state'),
+      'line_id': field('line_id'),
+      'notification_id': field('notification_id'),
+      'launch': launch,
     });
     // Streak pushes carry the copy line they used, so PostHog can compare
     // open rates per line (backend logs each send as server_push_sent).
     Analytics.track('notification_opened', {
-      'campaign': data['campaign'],
-      'kind': data['kind'],
-      'state': data['state'],
-      'line_id': data['line_id'],
-      'notification_id': data['notification_id'],
+      'campaign': field('campaign'),
+      'kind': field('kind'),
+      'state': field('state'),
+      'line_id': field('line_id'),
+      'notification_id': field('notification_id'),
     });
     // Tells the backend this push was opened, so no streak saver follows.
-    final id = data['notification_id'];
-    if (id != null && id.isNotEmpty) {
-      unawaited(ApiService().reportPushOpened(id, lineId: data['line_id']));
+    final id = field('notification_id');
+    if (id != null) unawaited(_reportOpened(id, lineId: field('line_id')));
+    if (screen != null) requestedScreen.value = screen;
+  }
+
+  /// Sends the open once someone is signed in. A push that launches the app
+  /// arrives before the session is restored (or, for a new anonymous
+  /// learner, created), and the request then went out without a token and
+  /// was refused, so `opened_at` stayed empty.
+  Future<void> _reportOpened(String id, {String? lineId}) async {
+    if (!_available) return;
+    try {
+      if (FirebaseAuth.instance.currentUser == null) {
+        await FirebaseAuth.instance
+            .authStateChanges()
+            .firstWhere((user) => user != null)
+            .timeout(const Duration(seconds: 30));
+      }
+      final ok = await ApiService().reportPushOpened(id, lineId: lineId);
+      if (!ok) Analytics.track('push_open_report_failed', {'notification_id': id});
+    } catch (e) {
+      debugPrint('Push open report skipped: $e');
+      Analytics.track('push_open_report_failed', {'notification_id': id});
     }
-    if (screen != null && screen.isNotEmpty) requestedScreen.value = screen;
   }
 }

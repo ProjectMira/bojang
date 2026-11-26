@@ -62,6 +62,26 @@ void main() {
       );
       expect(PrimerPolicy.momentFor(const StreakCelebration(streak: 0, goal: 0)), isNull);
     });
+
+    test('lesson end: the first finished lesson asks, with or without a streak', () {
+      const started = StreakCelebration(streak: 1, goal: 0);
+      expect(
+        PrimerPolicy.momentForLessonEnd(lessonsCompleted: 1),
+        PrimerMoment.firstLesson,
+      );
+      expect(
+        PrimerPolicy.momentForLessonEnd(lessonsCompleted: 1, celebration: started),
+        PrimerMoment.firstLesson,
+      );
+      // Later lessons fall back to the streak moments.
+      expect(
+        PrimerPolicy.momentForLessonEnd(lessonsCompleted: 2, celebration: started),
+        PrimerMoment.streak,
+      );
+      expect(PrimerPolicy.momentForLessonEnd(lessonsCompleted: 2), isNull);
+      // Unknown count (storage failed): not taken for a first lesson.
+      expect(PrimerPolicy.momentForLessonEnd(lessonsCompleted: 0), isNull);
+    });
   });
 
   group('NotificationPrimer', () {
@@ -182,7 +202,52 @@ void main() {
       );
     });
 
-    testWidgets('the pre-prompt offers "Turn on reminders" and "Maybe later"', (tester) async {
+    testWidgets('after the first lesson: asks once; an OS answer is kept', (tester) async {
+      final context = await pumpContext(tester);
+      expect(await primer().afterLesson(context, lessonsCompleted: 1), isTrue);
+      expect(shown, [PrimerMoment.firstLesson]);
+      expect(requested, isEmpty, reason: '"Not now": no OS prompt');
+
+      // Learners who already answered the OS prompt are never asked again.
+      shown.clear();
+      canPrompt = false;
+      clock = clock.add(const Duration(days: 10));
+      expect(await primer().afterLesson(context, lessonsCompleted: 1), isFalse);
+      expect(shown, isEmpty);
+    });
+
+    testWidgets('"Allow" after the first lesson shows the OS prompt', (tester) async {
+      final context = await pumpContext(tester);
+      answer = true;
+      expect(await primer().afterLesson(context, lessonsCompleted: 1), isTrue);
+      expect(requested, ['primer_firstLesson']);
+    });
+
+    testWidgets('the first-lesson pre-prompt offers "Allow" and "Not now"', (tester) async {
+      tester.view.physicalSize = const Size(1170, 2532);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      final context = await pumpContext(tester);
+      final p = NotificationPrimer(
+        canPrompt: () async => true,
+        requestPermission: (source) async {
+          requested.add(source);
+          return true;
+        },
+        clock: () => clock,
+      );
+      final result = p.afterLesson(context, lessonsCompleted: 1);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('Get a daily reminder to keep your streak?'), findsOneWidget);
+      await tester.tap(find.text('Allow'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(await result, isTrue);
+      expect(requested, ['primer_firstLesson']);
+    });
+
+    testWidgets('the pre-prompt offers "Allow" and "Not now"', (tester) async {
       tester.view.physicalSize = const Size(1170, 2532);
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
@@ -199,8 +264,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(find.text('Want a nudge from Norbu?'), findsOneWidget);
-      expect(find.text('Turn on reminders'), findsOneWidget);
-      await tester.tap(find.text('Maybe later'));
+      expect(find.text('Allow'), findsOneWidget);
+      await tester.tap(find.text('Not now'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(await result, isTrue);
