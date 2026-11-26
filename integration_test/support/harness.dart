@@ -331,12 +331,12 @@ Future<void> waitGone(
 
 /// Taps the first hit-testable match of [finder] and pumps a little.
 Future<void> tapIt(WidgetTester tester, Finder finder, {double settle = 0.6}) async {
-  await waitFor(tester, finder, reason: '$finder');
+  await waitFor(tester, finder, reason: finder.toString(describeSelf: true));
   // Scroll it into view first: off-screen widgets are not hit-testable.
   await tester.ensureVisible(finder.first);
   await tester.pump(const Duration(milliseconds: 300));
   final target = finder.hitTestable();
-  await waitFor(tester, target, reason: 'tappable $finder');
+  await waitFor(tester, target, reason: 'tappable ${finder.toString(describeSelf: true)}');
   await tester.tap(target.first, warnIfMissed: false);
   await wait(tester, settle);
 }

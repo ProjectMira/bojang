@@ -45,6 +45,8 @@ void main() {
   initBinding();
 
   testWidgets('crawl every screen', (tester) async {
+    // The coverage table, even when a screen fails part-way.
+    addTearDown(printCrawlReport);
     await launchApp(tester, seed: seedExistingLearner);
     // share_plus opens a native sheet over the app.
     binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -101,12 +103,13 @@ void main() {
     }, maxTaps: 30);
     await crawlPushed('Streak', () async {
       await tab('Home');
+      final semantics = tester.ensureSemantics();
       await tapIt(tester, find.bySemanticsLabel(RegExp('^Streak')).first);
+      semantics.dispose();
       final details = find.text('Streak details');
       if (details.evaluate().isNotEmpty) await tapIt(tester, details);
     }, maxTaps: 25);
 
-    printCrawlReport();
     final errors = [
       for (final r in crawlReports)
         for (final t in r.taps.where((t) => t.outcome == 'error')) '${r.screen}: ${t.label}: ${t.detail}',
