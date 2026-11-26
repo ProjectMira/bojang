@@ -39,6 +39,11 @@ def _args() -> argparse.Namespace:
     p.add_argument("--port", type=int, default=8787)
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--vocab-db", default=None, help="old local SQLite with vocab levels")
+    p.add_argument(
+        "--media-dir",
+        default=os.environ.get("BOJANG_MEDIA_DIR"),
+        help="real word pictures: <dir>/<level-id>/<english word>.jpg|png (for App Store shots)",
+    )
     return p.parse_args()
 
 
@@ -299,7 +304,13 @@ async def _media_fixtures() -> None:
     from sqlalchemy import select
 
     from database.engine import get_sessionmaker
-    from database.sql_models import LexemeORM
+    from database.sql_models import LexemeORM, TranslationORM
+
+    real: dict[tuple[str, str], Path] = {}
+    if ARGS.media_dir:
+        for f in Path(ARGS.media_dir).glob("*/*"):
+            if f.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp"):
+                real[(f.parent.name, f.stem.strip().lower())] = f
 
     media = UPLOADS / "e2e-media"
     media.mkdir(parents=True, exist_ok=True)
@@ -309,16 +320,26 @@ async def _media_fixtures() -> None:
     n = 0
     async with get_sessionmaker()() as session:
         rows = (await session.execute(select(LexemeORM))).scalars().all()
+        english = dict((await session.execute(
+            select(TranslationORM.lexeme_id, TranslationORM.text).where(TranslationORM.language_code == "en")
+        )).all())
+        used_real = 0
         for i, lex in enumerate(rows):
             if not lex.audio_url:
                 lex.audio_url = f"{base}/silence.wav"
-            if lex.level_id in MEDIA_LEVELS and not lex.image_url:
+            photo = real.get((lex.level_id or "", (english.get(lex.id) or "").strip().lower()))
+            if photo is not None:
+                name = f"real-{i}{photo.suffix.lower()}"
+                (media / name).write_bytes(photo.read_bytes())
+                lex.image_url = f"{base}/{name}"
+                used_real += 1
+            elif lex.level_id in MEDIA_LEVELS and not lex.image_url:
                 name = f"pic-{i}.png"
                 (media / name).write_bytes(_png(palette[i % len(palette)]))
                 lex.image_url = f"{base}/{name}"
                 n += 1
         await session.commit()
-    print(f"media fixtures: {n} pictures, silent audio for every word", flush=True)
+    print(f"media fixtures: {n} placeholder + {used_real} real pictures, silent audio for every word", flush=True)
 
 
 RIVALS = [("e2e-rival-1", "Rival One", 400), ("e2e-rival-2", "Rival Two", 250), ("e2e-rival-3", "Rival Three", 90)] + [

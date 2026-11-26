@@ -27,6 +27,6 @@ PY="${BOJANG_BACKEND_PY:-$BACKEND/functions/venv/bin/python}"
 mkdir -p "$STATE"
 trap 'kill 0' EXIT
 "$PY" "$ROOT/ci/e2e/local_backend.py" --backend "$BACKEND/functions" --state-dir "$STATE" \
-  --vocab-db "${BOJANG_VOCAB_DB:-$COMMON/functions/bojang_local.db}" &
+  ${BOJANG_MEDIA_DIR:+--media-dir "$BOJANG_MEDIA_DIR"} --vocab-db "${BOJANG_VOCAB_DB:-$COMMON/functions/bojang_local.db}" &
 (cd "$ROOT/ci/e2e" && exec firebase emulators:start --only auth --project demo-bojang-e2e --config firebase.json) &
 wait

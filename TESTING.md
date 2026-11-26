@@ -14,6 +14,7 @@ Results land in `build/e2e/<timestamp>/`:
 |---|---|
 | `report.md` | Crawler coverage table, accessibility results, screenshot flags |
 | `shots/*.png` | Simulator screenshots: every journey step, every crawled route, every main screen per device and theme |
+| `store/<device>/*.png` | The App Store set (home, picture and listening questions, games, streak) at 6.9" iPhone 1320×2868 and 13" iPad 2064×2752, status bar at 9:41 |
 | `<test>.log` | Full `flutter test` output per test |
 | `backend.log`, `emulator.log` | Local backend and Auth emulator |
 
@@ -44,6 +45,7 @@ Exit code 0 means everything passed.
 | `integration_test/crawler_test.dart` | Visits every main screen and taps every enabled tappable in the semantics tree. After each tap: no exception, no overflow, something changed or a route was pushed; then goes back. Coverage table in `report.md` |
 | `integration_test/accessibility_test.dart` | `iOSTapTargetGuideline`, `androidTapTargetGuideline`, `labeledTapTargetGuideline`, `textContrastGuideline` on every main screen |
 | `integration_test/screens_test.dart` | Screenshots of every main screen, light and dark, on iPhone SE, iPhone 16 Pro Max and iPad Pro 13"; flags overflow and text cut short |
+| `integration_test/store_screenshots_test.dart` | App Store screenshots on the two sizes App Store Connect asks for (`E2E_STORE_DEVICES` to change) |
 
 Run a subset by naming files:
 
@@ -71,6 +73,20 @@ Each run uses its own anonymous learner, and the "server down" switch is
 per learner, so parallel runs don't affect each other. Run each in its own
 checkout or worktree: `e2e.sh` swaps `ios/Runner/GoogleService-Info.plist`
 while it runs.
+
+## App Store screenshots
+
+Every full run saves the App Store set to `build/e2e/<run>/store/`. On the
+local backend the word pictures are solid-colour placeholders, so the picture
+question and Listen & Tap shots are not publishable as they are. Either:
+
+- put real pictures in a folder as `<level-id>/<english word>.jpg` (e.g.
+  `vocab-fruits/apple.jpg`) and run with `BOJANG_MEDIA_DIR=<folder>`, or
+- for the final set, use `ci/scripts/store_screenshots.sh <udid> <out>`,
+  which reads the live backend's words and pictures (lessons and games
+  only; it pumps screens directly and never signs in).
+
+Only this set is meant for publishing; the `shots/` folder is for review.
 
 ## How it works
 

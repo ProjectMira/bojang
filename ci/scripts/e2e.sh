@@ -66,12 +66,15 @@ boot "$DEVICE"
 
 # screens_test.dart runs on each of these (name or udid, ';'-separated).
 IFS=';' read -r -a SCREEN_DEVICES <<<"${E2E_SCREEN_DEVICES:-iPhone SE 2nd Gen Test;iPhone 16 Pro Max;iPad Pro 13-inch (M4)}"
+# store_screenshots_test.dart (App Store set) runs on the sizes App Store
+# Connect asks for: 6.9" iPhone (1320x2868) and 13" iPad (2064x2752).
+IFS=';' read -r -a STORE_DEVICES <<<"${E2E_STORE_DEVICES:-iPhone 16 Pro Max;iPad Pro 13-inch (M4)}"
 
 if [ ${#TESTS[@]} -eq 0 ]; then
   TESTS=(integration_test/smoke_test.dart)
   for f in "$ROOT"/integration_test/journeys_*_test.dart; do TESTS+=("integration_test/$(basename "$f")"); done
   TESTS+=(integration_test/crawler_test.dart integration_test/accessibility_test.dart
-          integration_test/screens_test.dart)
+          integration_test/screens_test.dart integration_test/store_screenshots_test.dart)
 fi
 
 RUN="$OUT/$(date +%Y%m%d-%H%M%S)"
@@ -98,7 +101,7 @@ wait_http() { # url seconds
 echo "backend: ${EXTERNAL:+external (already running)}${EXTERNAL:-$BACKEND}  device: $DEVICE  out: $RUN"
 if [ -z "$EXTERNAL" ]; then
 "$PY" "$ROOT/ci/e2e/local_backend.py" --backend "$BACKEND/functions" --state-dir "$STATE" \
-  --vocab-db "${BOJANG_VOCAB_DB:-$(git -C "$BACKEND" rev-parse --path-format=absolute --git-common-dir)/../functions/bojang_local.db}" \
+  ${BOJANG_MEDIA_DIR:+--media-dir "$BOJANG_MEDIA_DIR"} --vocab-db "${BOJANG_VOCAB_DB:-$(git -C "$BACKEND" rev-parse --path-format=absolute --git-common-dir)/../functions/bojang_local.db}" \
   >"$RUN/backend.log" 2>&1 &
 PIDS+=($!)
 (cd "$ROOT/ci/e2e" && firebase emulators:start --only auth --project demo-bojang-e2e \
@@ -123,9 +126,12 @@ DEFINES=(--dart-define=BOJANG_E2E=true --dart-define=ENABLE_IOS_FIREBASE=true
          --dart-define=BOJANG_AUTH_EMULATOR=127.0.0.1:9099)
 
 FAILED=()
-run_test() { # test device label
-  local t="$1" dev="$2" name
+run_test() { # test device label [shots-dir]
+  local t="$1" dev="$2" name shots="${4:-$RUN/shots}" prefix
   name="$(basename "$t" .dart)${3:+-$3}"
+  prefix="$(basename "$t" .dart)--"
+  [ -n "${4:-}" ] && prefix=""
+  mkdir -p "$shots"
   local log="$RUN/$name.log"
   echo "=== $t on $dev"
   (cd "$ROOT" && flutter test "$t" -d "$dev" "${DEFINES[@]}" ${E2E_FLUTTER_ARGS:-}) >"$log" 2>&1 &
@@ -135,7 +141,9 @@ run_test() { # test device label
     while [ "$seen" -lt "${total:-0}" ]; do
       seen=$((seen + 1))
       shot=$(tr '\r' '\n' <"$log" | grep "SHOT:" | sed -n "${seen}p" | sed 's/.*SHOT://' | tr -d '[:space:]')
-      xcrun simctl io "$dev" screenshot "$RUN/shots/$(basename "$t" .dart)--$shot.png" >/dev/null 2>&1 || true
+      [ "$shot" = "done" ] && continue
+      [ -n "${4:-}" ] && sleep 1.5 # store shots: let the screen settle
+      xcrun simctl io "$dev" screenshot "$shots/$prefix$shot.png" >/dev/null 2>&1 || true
     done
     sleep 0.3
   done
@@ -143,8 +151,20 @@ run_test() { # test device label
   tr '\r' '\n' <"$log" | grep "REPORT:" | sed 's/.*REPORT://' >>"$RUN/report.md" || true
 }
 
+slug() { echo "$1" | tr -cs 'A-Za-z0-9' '-' | tr 'A-Z' 'a-z' | sed 's/-$//'; }
+
 for t in "${TESTS[@]}"; do
-  if [[ "$t" == *screens_test.dart ]]; then
+  if [[ "$t" == *store_screenshots_test.dart ]]; then
+    for d in "${STORE_DEVICES[@]}"; do
+      udid="$(resolve_device "$d")"
+      [ -n "$udid" ] || { echo "skip store screenshots on $d: not available"; continue; }
+      boot "$udid"
+      xcrun simctl status_bar "$udid" override --time "9:41" --batteryState charged \
+        --batteryLevel 100 --wifiBars 3 --cellularBars 4 2>/dev/null || true
+      run_test "$t" "$udid" "$(slug "$d")" "$RUN/store/$(slug "$d")"
+      [ "$udid" = "$DEVICE" ] || xcrun simctl shutdown "$udid" 2>/dev/null || true
+    done
+  elif [[ "$t" == *screens_test.dart ]]; then
     for d in "${SCREEN_DEVICES[@]}"; do
       udid="$(resolve_device "$d")"
       [ -n "$udid" ] || { echo "skip screens on $d: not available"; continue; }
@@ -161,6 +181,7 @@ done
 
 echo
 echo "screenshots: $RUN/shots"
+[ -d "$RUN/store" ] && echo "App Store screenshots: $RUN/store/<device>/"
 [ -f "$RUN/report.md" ] && echo "report: $RUN/report.md"
 if [ ${#FAILED[@]} -gt 0 ]; then echo "failed: ${FAILED[*]}"; exit 1; fi
 echo "all passed"

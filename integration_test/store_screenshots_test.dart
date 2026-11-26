@@ -4,11 +4,16 @@
 //
 // It pumps the screens directly instead of going through main(), so no
 // notification prompt appears, and it seeds a few days of progress so the
-// streak and XP are not all zeros. Lessons and games load real words from the
-// live backend.
+// streak and XP are not all zeros. Lessons and games load words from
+// whichever backend BOJANG_API_BASE_URL points at.
 //
-// Run through the script, not by hand:
+// Run through a script, not by hand:
+//   ci/scripts/e2e.sh ... integration_test/store_screenshots_test.dart
+//     local backend; part of every full e2e run; saves build/e2e/<run>/store/
+//     <device>/ for iPhone 16 Pro Max (6.9") and iPad Pro 13". Pictures are
+//     placeholders unless BOJANG_MEDIA_DIR has real ones.
 //   ci/scripts/store_screenshots.sh <simulator-udid> <output-dir>
+//     the live backend's real words and pictures.
 
 import 'dart:convert';
 
