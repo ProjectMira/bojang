@@ -123,9 +123,20 @@ void main() {
 
     Future<void> tapText(String text) => tapFound(find.text(text));
 
+    /// Home scrolls itself down to the current lesson; show it from the top
+    /// (the streak and goal chips, the unit header).
+    Future<void> homeFromTop() async {
+      final list = find.byType(Scrollable).hitTestable();
+      if (list.evaluate().isNotEmpty) {
+        await tester.fling(list.first, const Offset(0, 3000), 4000);
+        await wait(1.5);
+      }
+    }
+
     // 1. Home
     await open(const MainNavigationScreen());
     await wait(6);
+    await homeFromTop();
     await shot('01-home');
 
     // 2. A picture question
@@ -191,6 +202,7 @@ void main() {
     // Streak tab any more).
     await open(const MainNavigationScreen());
     await wait(4);
+    await homeFromTop();
     final semantics = tester.ensureSemantics();
     await tapFound(find.bySemanticsLabel(RegExp('day streak')));
     semantics.dispose();
