@@ -76,17 +76,19 @@ while it runs.
 
 ## App Store screenshots
 
-Every full run saves the App Store set to `build/e2e/<run>/store/`. On the
-local backend the word pictures are solid-colour placeholders, so the picture
-question and Listen & Tap shots are not publishable as they are. Either:
+Every full run saves the App Store set to `build/e2e/<run>/store/`, made
+against the local backend. On the local backend the word pictures are
+solid-colour placeholders, so the picture question and Listen & Tap shots
+are only publishable with real pictures: put them in a folder as
+`<level-id>/<english word>.jpg` (e.g. `vocab-fruits/apple.jpg`) and run with
+`BOJANG_MEDIA_DIR=<folder>`. The other shots don't need pictures.
 
-- put real pictures in a folder as `<level-id>/<english word>.jpg` (e.g.
-  `vocab-fruits/apple.jpg`) and run with `BOJANG_MEDIA_DIR=<folder>`, or
-- for the final set, use `ci/scripts/store_screenshots.sh <udid> <out>`,
-  which reads the live backend's words and pictures (lessons and games
-  only; it pumps screens directly and never signs in).
+`ci/scripts/store_screenshots.sh --uses-production <udid> <out>` captures the
+same set from the live backend's words and pictures. It never signs in, but
+each lesson or game it opens creates a learning session in production, so it
+refuses to run without that flag; use it only with the owner's OK.
 
-Only this set is meant for publishing; the `shots/` folder is for review.
+Only the `store/` set is meant for publishing; `shots/` is for review.
 
 ## How it works
 

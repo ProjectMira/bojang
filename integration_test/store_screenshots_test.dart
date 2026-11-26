@@ -12,8 +12,9 @@
 //     local backend; part of every full e2e run; saves build/e2e/<run>/store/
 //     <device>/ for iPhone 16 Pro Max (6.9") and iPad Pro 13". Pictures are
 //     placeholders unless BOJANG_MEDIA_DIR has real ones.
-//   ci/scripts/store_screenshots.sh <simulator-udid> <output-dir>
-//     the live backend's real words and pictures.
+//   ci/scripts/store_screenshots.sh --uses-production <udid> <output-dir>
+//     the live backend's real words and pictures. Creates learning sessions
+//     in production; only with the owner's OK.
 
 import 'dart:convert';
 
