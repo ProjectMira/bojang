@@ -141,6 +141,8 @@ class ApiService {
   }) async {
     if (token == null || token.isEmpty) return null;
 
+    final synced = Completer<void>();
+    _accountReady = synced.future;
     try {
       _authToken = token;
       await _storeAuthToken(token);
@@ -150,6 +152,7 @@ class ApiService {
         nativeLang: 'en',
         targetLang: 'bo',
       );
+      if (!synced.isCompleted) synced.complete();
       if (profile == null) {
         print('$authProvider auth: POST auth/sync returned no profile');
         return null;
@@ -174,6 +177,8 @@ class ApiService {
     } catch (e) {
       print('$authProvider auth sync error: $e');
       return null;
+    } finally {
+      if (!synced.isCompleted) synced.complete();
     }
   }
 
@@ -196,6 +201,9 @@ class ApiService {
   /// Progress stats. The device's local day lets the server count Earn
   /// Back's days left by the learner's calendar, not UTC.
   Future<Map<String, dynamic>?> getUserProgress() async {
+    // Asked before /auth/sync has made the account, the server answers 404.
+    await accountReady();
+    if (!isAuthenticated) return null;
     final now = DateTime.now();
     String two(int n) => n.toString().padLeft(2, '0');
     final localDate = '${now.year.toString().padLeft(4, '0')}-${two(now.month)}-${two(now.day)}';
@@ -644,6 +652,13 @@ class ApiService {
   }
 
   bool get isAuthenticated => _authToken != null;
+
+  /// Done once the latest sign-in's POST /auth/sync has answered (or after
+  /// [timeout]); calls about the account wait for it.
+  static Future<void> _accountReady = Future.value();
+  Future<void> accountReady({
+    Duration timeout = const Duration(seconds: 12),
+  }) => _accountReady.timeout(timeout, onTimeout: () {});
 
   Future<void> setAuthToken(String token) async {
     _authToken = token;
