@@ -121,13 +121,47 @@ Console: done 2026-11-21.
   empty; upload the same `.p8` there to get pushes on debug builds run from Xcode.
 - `CRON_SECRET` and the hourly Cloud Scheduler job (see above).
 
+## Analytics (Google Analytics for Firebase)
+
+- Code: the `_firebase*` helpers in `lib/services/analytics.dart` and
+  `lib/models/firebase_event_rules.dart`; what is sent is in ANALYTICS_EVENTS.md, "Firebase
+  Analytics". Named product events, screen views and app sessions, never taps or scrolls; user
+  id = Firebase uid; no names, emails, coordinates, IDFA or ad signals.
+- Follows Settings > Privacy > "Share usage analytics" (`setAnalyticsCollectionEnabled`). Debug
+  builds send nothing unless run with `--dart-define=FIREBASE_ANALYTICS_IN_DEBUG=true`.
+
+Console (not done yet):
+1. Project settings > Integrations > Google Analytics > Enable. Create a new GA4 property in a
+   Google Analytics account owned by ta3tsering@gmail.com (not an OpenPecha one), e.g. "Bojang",
+   reporting time zone of Tashi's choice, currency USD.
+2. Turn off data sharing that the app does not need: in Analytics admin > Data collection, leave
+   Google signals off; Admin > Account settings: uncheck the "Google products & services" and
+   "Modeling contributions" sharing options; Data retention 14 months.
+3. Re-download `GoogleService-Info.plist` for `com.bojang.app` (it now carries the Analytics
+   settings) and update the `GOOGLE_SERVICE_INFO_PLIST` repo secret if its contents changed.
+   The `GOOGLE_APP_ID` stays the same, so an old plist also works.
+4. DebugView: build from Xcode with the scheme argument `-FIRDebugEnabled` (Product > Scheme >
+   Edit Scheme > Run > Arguments) and `--dart-define=FIREBASE_ANALYTICS_IN_DEBUG=true
+   --dart-define=ENABLE_IOS_FIREBASE=true` in the Dart defines, with the real plist. Then Firebase
+   console > Analytics > DebugView should show `first_open`, `session_start`, `screen_view` and
+   `app_launched` within seconds (`app_session_started` too when POSTHOG_IN_DEBUG=true).
+5. Register custom definitions in GA4 (Admin > Custom definitions) for the parameters and user
+   properties to report on, e.g. event-scoped `level_id`, `correct`, `bojang_session_id`; user-scoped
+   `auth_provider`, `current_streak`, `league`, `lesson_style`, `voice`.
+
 ## App Store privacy label
 
 Firebase adds data the current label (Name, Email, User ID, Product Interaction, Crash Data,
 Other Diagnostic Data) does not list. Add these, as App Functionality + Analytics:
 - **Performance Data** (Performance Monitoring)
 - **Device ID** (Firebase installation IDs used by Crashlytics, Performance, Remote Config and
-  FCM tokens), not used for tracking.
+  FCM tokens, and the Analytics app instance id), not used for tracking.
+
+Firebase Analytics adds nothing beyond that list for the label: it collects User ID, Product
+Interaction and Device ID (above), and infers **Coarse Location** from the IP address. Coarse
+Location should be on the label in any case if it is not yet (Settings approximate location, `LocationService`); mark it
+Analytics, linked to the user, not tracking. Keep "Used for tracking" at No: no IDFA, ad signals
+off, no data linked with other companies' data for ads.
 
 ## Privacy policy
 

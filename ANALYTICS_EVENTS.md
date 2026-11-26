@@ -1,6 +1,6 @@
 # Bojang analytics events
 
-Events go to two places:
+Events go to three places:
 
 - **PostHog** (project "Bojang", id 754455, US Cloud): named events, `$screen`, person profiles,
   session replay and error tracking. Code: `lib/services/analytics.dart`.
@@ -8,12 +8,18 @@ Events go to two places:
   every tap, long press, swipe, scroll, screen dwell time and app session, with device context.
   Code: `lib/services/event_tracker.dart` and `lib/widgets/interaction_capture.dart`. Taps and other
   gesture events go only to the backend, not to PostHog (event volume).
+- **Google Analytics for Firebase** (GA4, Firebase project `bojang-backend`, iOS only): every named
+  event in the Events table, screen views, `app_session_started` / `app_session_ended`, user id
+  and user properties. Not taps, scrolls, swipes, dwell time or `$exception`. Code: the
+  `_firebase*` helpers in `lib/services/analytics.dart`, limits in
+  `lib/models/firebase_event_rules.dart`. See "Firebase Analytics" below.
 
 - Release builds send events. Debug builds and tests send nothing unless they are run with
   `--dart-define=POSTHOG_IN_DEBUG=true`. Add `--dart-define=LOG_EVENTS=true` to print each backend
   event in a debug run, and `--dart-define=POSTHOG_KEY=` to keep PostHog off.
-- Settings > Privacy > "Share usage analytics" turns both off (`Analytics.setOptOut`). While it is
-  off nothing is sent, and the unsent backend queue is deleted.
+- Settings > Privacy > "Share usage analytics" turns all three off (`Analytics.setOptOut`). While it
+  is off nothing is sent, the unsent backend queue is deleted, and Firebase Analytics collection is
+  disabled and its device data reset (`resetAnalyticsData`).
 - Calls are fire-and-forget (`Analytics.track(name, {...})`). They never throw, and null property
   values are dropped.
 - Naming: `object_action`, snake_case. Properties are snake_case as well.
@@ -321,3 +327,46 @@ learner's streak-reminder cap; their push data carries `campaign`
 ## PostHog mirror (2.21)
 
 `tap`, `long_press`, `swipe`, `scroll`, `rage_tap`, `multi_touch`, `screen_exit` (`duration_ms` = time on that screen), `app_session_started`, `app_session_ended` (`duration_s`, `taps`, `screens`), `app_backgrounded` and `app_foregrounded` now go to PostHog as well as `app_events`, with a `screen` property. Every PostHog event carries `install_id`, a random id made on first launch (the `install_id` event records it in `app_events` too). Person properties `name` and `avatar` are set when the learner saves the profile sheet.
+
+## Firebase Analytics (GA4)
+
+Added next to PostHog; PostHog stays the main tool (funnels, replay, experiments). GA4 gives the
+Firebase console's standard reports (active users, retention, engagement by screen) and audiences
+for Remote Config and FCM targeting.
+
+- **Where it runs:** only where Firebase is initialised (`AppConfig.firebaseEnabled`: iOS builds
+  with `ENABLE_IOS_FIREBASE=true` and a real `GoogleService-Info.plist`). Elsewhere every call is a
+  no-op. Collection is off in `Info.plist` (`FIREBASE_ANALYTICS_COLLECTION_ENABLED` false) and is
+  switched on by `Analytics.init` only for release builds of learners who have not opted out, so
+  nothing is sent before the switch is read. Debug builds send only with
+  `--dart-define=FIREBASE_ANALYTICS_IN_DEBUG=true` (or `POSTHOG_IN_DEBUG=true`).
+- **Events:** every `Analytics.track` event that passes the server blocklist and sampling, under the
+  same name. The mirror also sends `app_session_started` and `app_session_ended` from the tracker.
+  `$`-prefixed PostHog events are not sent. A name GA4 reserves (`error`, `session_start`,
+  `app_update`, `screen_view`, ...) or that starts with `firebase_` / `google_` / `ga_` gets a `bj_`
+  prefix; none of today's events needs it. Names are cut to 40 characters (all current ones fit).
+- **Parameters:** at most 25 per event (in the order the code passes them); booleans become 1/0;
+  lists and maps become JSON strings; strings are cut to 100 characters. Left out: any key
+  containing `email`, and `name`, `display_name`, `avatar`, `photo_url`, `phone`, `approx_lat`,
+  `approx_lon`, `location_approx_lat/lon`, `location_city`, `lat`, `lon`. Every event also carries
+  the default parameter `bojang_session_id`, to join GA4 with `app_events`.
+- **Screens:** `logScreenView` (`screen_view`, `screen_class` `Flutter`) for every screen the
+  tracker sees: named route pushes and `Analytics.screen` tabs and sheets. The SDK's own
+  UIViewController screen reporting is off (`FirebaseAutomaticScreenReportingEnabled` false), which
+  would only ever report `FlutterViewController`.
+- **Identity:** `identify` sets the GA4 user id to the Firebase uid, plus user properties
+  `auth_provider`, `is_anonymous` and `backend_user_id` (no email or name). `reset` clears the user
+  id. Person properties become user properties when the name fits GA4's 24 characters and is not
+  one of the left-out keys above (`location_country`, `location_country_code` and
+  `location_region` are sent; `location_city` and coordinates are not); values are strings cut to
+  36 characters. GA4 shows a user property only once it is registered as a custom dimension.
+- **Automatic GA4 events** (from the SDK, not our code): `first_open`, `session_start`,
+  `user_engagement`, `app_update`, `os_update`, `app_remove`, `screen_view`.
+- **No advertising:** the pod is `Firebase/AnalyticsWithoutAdIdSupport`
+  (`$FirebaseAnalyticsWithoutAdIdSupport` in `ios/Podfile`), so the IDFA is never read and no ATT
+  prompt is needed. `Info.plist` turns off ad id and IDFV collection, ad personalization signals
+  and SKAdNetwork registration, and the app sets consent: analytics storage granted; ad storage,
+  ad user data and ad personalization denied.
+- **Limits to keep in mind:** 500 distinct event names per app (we have about 160), 25 user
+  properties, 50 custom event-scoped dimensions in the GA4 property.
+
