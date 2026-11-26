@@ -117,6 +117,12 @@ class ProgressService extends ChangeNotifier {
     return c;
   }
 
+  /// Puts back a celebration taken with [takeStreakCelebration] that the
+  /// taker decided not to show itself.
+  void restoreStreakCelebration(StreakCelebration celebration) {
+    _pendingCelebration ??= celebration;
+  }
+
   Future<void> setStreakGoal(int days) async {
     _streakGoal = days;
     final prefs = await SharedPreferences.getInstance();

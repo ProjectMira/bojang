@@ -138,10 +138,11 @@ deletes its rows.
 | `dialogue_completed` | dialogue player | `dialogue_id`, `correct`, `total`, `graded`, `submitted`, `translations_opened`, `duration_s` |
 | `dialogue_load_failed` | dialogue player | `dialogue_id` (missing, not reviewed, or offline) |
 | `dialogue_disabled` | dialogue player | `dialogue_id` (`dialogues` kill switch on) |
-| `lesson_result_shown` | lesson complete | `topic`, `celebration` (`big` for the first lesson and lesson milestones, `normal`, `quiet` below 70%), `lessons_completed`, `accuracy`, `recycled`, `fixed` |
-| `lesson_complete_action` | lesson complete | `action` (continue/practice_again) |
+| `lesson_result_shown` | lesson complete | `topic`, `celebration` (`big` for the first lesson and lesson milestones, `normal`, `quiet` below 70%), `lessons_completed`, `accuracy`, `recycled`, `fixed`, `beginner` (short session end, see below), `streak_inline` (the streak shown on this screen instead of its own) |
+| `lesson_complete_action` | lesson complete | `action` (continue/practice_again; a beginner's "Next lesson" is `continue`), `beginner` |
 | `lesson_goal_closed` | lesson goal (after a lessons-finished milestone) | `lessons_completed`, `next_goal` |
-| `session_end_completed` | lesson complete | `steps` (in order, from `result`, `streak`, `goal`, `ask`), `celebration`, `lessons_completed` |
+| `session_end_completed` | lesson complete | `steps` (in order, from `result`, `streak`, `goal`, `ask`), `celebration`, `lessons_completed`, `beginner`, `streak_inline`, `next_lesson` (Home was asked to open the next lesson) |
+| `beginner_next_lesson` | home | A beginner's session end closed: `opened` (the path's next step opened; false when the path is off, did not load or the next step is locked), `node_id`, `beginner`. The lesson then starts with `path_step_started` `source: beginner_next` |
 | `game_selected` | games tab | `game`, `skill` |
 | `game_topic_selected` | game host | `game`, `topic`, `random` |
 | `game_started` | game host / memory / speed | `game`, `topic`, `word_count` |
@@ -210,7 +211,7 @@ deletes its rows.
 | `experiment_exposed` | `Experiments.exposed` / `ExperimentExposure` (any screen) | `experiment` (`exp_*` key or PostHog flag), `arm`, `surface` (where it was shown), `source` (`remote_config`/`posthog`) |
 | `path_loaded` | home (learning path) | `ms` (since Home asked), `refresh` (a path was already shown), `units`, `active_node_id`, `daily_sessions`, `daily_goal` |
 | `path_cache_shown` | home | `ms`: the path saved on the device painted before the server answered |
-| `path_step_started` | home / learn path | `node_id` (`lesson:<level>`, `practice:<unit>`, `unit_review:<unit>`, `alphabet_gate:script`, ...), `type`, `state` (active/unlocked/passed), `unit`, `session` (1-based), `total_sessions`, `source` (home_path/learn_path) |
+| `path_step_started` | home / learn path | `node_id` (`lesson:<level>`, `practice:<unit>`, `unit_review:<unit>`, `alphabet_gate:script`, ...), `type`, `state` (active/unlocked/passed), `unit`, `session` (1-based), `total_sessions`, `source` (home_path/learn_path/beginner_next) |
 | `path_locked_tapped` | home / learn path | `node_id`, `type`, `active_node_id`, `source` |
 | `learn_mode_switched` | learn screen | `mode` (path/topics) |
 | `streak_sheet_opened` | home top bar flame, classic stats strip | `source` (home_top_bar/home_stats) |
@@ -227,6 +228,7 @@ deletes its rows.
 | `offline_banner_viewed` | home offline banner | `state` (`offline`/`ready`), `lessons_ready`, `pending` |
 | `leaderboard_opened` | Games header trophy, Profile card, weekly result sheet | `source` (`games`/`profile`/`weekly_result`) |
 | `profile_setup_opened` | profile tab, leaderboard, edit button, avatar | `source`, `prompted` (opened by itself rather than tapped) |
+| `profile_setup_deferred` | profile tab, leaderboard | The name + picture ask was due but skipped for a beginner: `source`, `beginner` |
 | `profile_setup_saved` | name + picture sheet | `source`, `figure`, `colour`, `name_length` |
 | `profile_setup_dismissed` | name + picture sheet | `source` |
 | `avatar_option_tapped` | name + picture sheet | `figure`, `colour` |
@@ -378,3 +380,21 @@ for Remote Config and FCM targeting.
 - `question_answered` also carries `options`, `option_ids`, `chosen_index`, `correct_index`, `answer_text` (built syllable / tracing score), `exercise_id`, `session_id`, alongside `chosen`, `correct_answer`, `correct` and `response_ms`.
 - `lesson_quit` adds `session_id`, `exercise_id` and `answered_current`.
 - Order and timing: every row in `app_events` has `session_id`, `seq` (order within the app session) and `client_ts`; together with `response_ms` that gives the full sequence and time per answer for each learner.
+## Beginners: fewer taps (2.21)
+
+`Beginner.check` (`lib/services/beginner.dart`) is the one place that decides
+it: at most `beginner_max_lessons` lessons finished on this device (3) and
+under `beginner_max_xp` XP (300), both Remote Config. Set
+`beginner_max_lessons` to 0 to turn the short flow off. For a beginner:
+
+- the result screen shows the streak line itself (no separate streak screen,
+  except for an Earn Back restore) and its button reads "Next lesson";
+- the only ask is the notification primer; save progress, location and the
+  reading-help wean-off wait;
+- after the session end, Home opens the path's next step
+  (`beginner_next_lesson`, then `path_step_started` `source: beginner_next`);
+- the name + picture sheet does not open by itself (`profile_setup_deferred`).
+
+Compare `beginner: true` and `false` on `lesson_result_shown` and
+`session_end_completed`, and lesson 2 starts per lesson-1 finisher before and
+after 2.21.

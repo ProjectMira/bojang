@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../services/analytics.dart';
+import '../services/beginner.dart';
 import '../services/learner_profile.dart';
 import '../theme/app_tokens.dart';
 import 'app_text_style.dart';
@@ -13,6 +14,14 @@ import 'learner_avatar.dart';
 Future<bool> maybeAskForProfile(BuildContext context, String source) async {
   final profile = LearnerProfile.instance;
   if (!await profile.shouldAsk()) return false;
+  // Beginners are not asked yet: the Edit button on Profile still works.
+  if (await Beginner.now()) {
+    Analytics.track('profile_setup_deferred', {
+      'source': source,
+      'beginner': true,
+    });
+    return false;
+  }
   if (!context.mounted) return false;
   if (ModalRoute.of(context)?.isCurrent == false) return false;
   await profile.markAsked();
