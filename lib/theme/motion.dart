@@ -134,3 +134,33 @@ class Motion {
     }
   }
 }
+
+/// [AnimatedSize] that becomes a plain child when [duration] is zero
+/// (Animations off or Reduce Motion). A zero-length AnimatedSize finishes
+/// inside its own layout and trips "RenderAnimatedSize was mutated in its
+/// own performLayout".
+class MotionAnimatedSize extends StatelessWidget {
+  const MotionAnimatedSize({
+    super.key,
+    required this.duration,
+    required this.child,
+    this.curve = Curves.linear,
+    this.alignment = Alignment.center,
+  });
+
+  final Duration duration;
+  final Curve curve;
+  final AlignmentGeometry alignment;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (duration == Duration.zero) return child;
+    return AnimatedSize(
+      duration: duration,
+      curve: curve,
+      alignment: alignment,
+      child: child,
+    );
+  }
+}
