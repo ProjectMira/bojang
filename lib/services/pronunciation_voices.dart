@@ -7,7 +7,7 @@ enum TibetanDialect {
   /// Kham, spoken in eastern Tibet.
   kham('Kham', 'Eastern Tibet'),
 
-  /// Amdo, spoken in north-eastern Tibet. No voice published yet.
+  /// Amdo, spoken in north-eastern Tibet.
   amdo('Amdo', 'North-eastern Tibet');
 
   final String label;
@@ -46,6 +46,7 @@ class PronunciationVoices {
   static const List<PronunciationVoice> all = [
     PronunciationVoice('lhasa_female', TibetanDialect.lhasa, 'female'),
     PronunciationVoice('kham_male', TibetanDialect.kham, 'male'),
+    PronunciationVoice('amdo_male', TibetanDialect.amdo, 'male'),
   ];
 
   /// Voice id -> label shown in Settings, in display order.

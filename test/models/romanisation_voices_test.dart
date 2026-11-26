@@ -50,6 +50,11 @@ void main() {
       expect(PronunciationVoices.resolve(both, 'kham_male'), 'kham_male');
     });
 
+    test('an Amdo word without Amdo audio plays the default voice', () {
+      expect(PronunciationVoices.resolve(both, 'amdo_male'), 'lhasa_female');
+      expect(PronunciationVoices.pick({...both, 'amdo_male': 'a.mp3'}, 'amdo_male'), 'a.mp3');
+    });
+
     test('falls back to the default voice, then any recording', () {
       expect(PronunciationVoices.pick({'lhasa_female': 'l.mp3'}, 'kham_male'), 'l.mp3');
       expect(PronunciationVoices.pick({'other': 'o.mp3'}, 'kham_male'), 'o.mp3');
@@ -64,6 +69,10 @@ void main() {
         expect(voice.shortLabel, startsWith(voice.dialect.label));
       }
       expect(TibetanDialect.values.map((d) => d.label), contains('Amdo'));
+      // Every dialect has a voice to pick.
+      for (final dialect in TibetanDialect.values) {
+        expect(PronunciationVoices.all.where((v) => v.dialect == dialect), isNotEmpty);
+      }
     });
   });
 
