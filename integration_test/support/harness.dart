@@ -214,19 +214,23 @@ Future<void> launchApp(
   bool fresh = true,
   Future<void> Function(SharedPreferences prefs)? seed,
 }) async {
+  debugPrint('E2E: launchApp (fresh=$fresh)');
   installSpies();
   if (fresh) {
     await wipeState();
     pushStatus = -1;
   }
   if (seed != null) await seed(await SharedPreferences.getInstance());
+  debugPrint('E2E: state ready');
   if (!_servicesReady) {
     await app.initServices();
     _servicesReady = true;
+    debugPrint('E2E: services ready');
   }
   resetSpies();
   await tester.pumpWidget(app.MyApp(key: UniqueKey()));
   app.startBackgroundServices();
+  debugPrint('E2E: app pumped');
 }
 
 /// Pumps frames for [seconds] of real time.

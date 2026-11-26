@@ -51,19 +51,27 @@ fi
 PY="${BOJANG_BACKEND_PY:-$BACKEND/functions/venv/bin/python}"
 [ -x "$PY" ] || PY="$(git -C "$BACKEND" rev-parse --path-format=absolute --git-common-dir)/../functions/venv/bin/python"
 
-if [ -z "$DEVICE" ]; then
-  DEVICE="$(xcrun simctl list devices available | grep -m1 'iPhone 16 Pro Max' | grep -oE '[0-9A-F-]{36}')"
-elif ! [[ "$DEVICE" =~ ^[0-9A-F-]{36}$ ]]; then
-  DEVICE="$(xcrun simctl list devices available | grep -m1 "$DEVICE (" | grep -oE '[0-9A-F-]{36}')"
-fi
-[ -n "$DEVICE" ] || { echo "no simulator found"; exit 2; }
-xcrun simctl boot "$DEVICE" 2>/dev/null || true
-xcrun simctl bootstatus "$DEVICE" -b >/dev/null
+resolve_device() { # udid or name -> udid of an available simulator
+  if [[ "$1" =~ ^[0-9A-F-]{36}$ ]]; then
+    xcrun simctl list devices available | grep -q "$1" && echo "$1"
+  else
+    xcrun simctl list devices available | grep -F -m1 "    $1 (" | grep -oE '[0-9A-F-]{36}'
+  fi
+}
+boot() { xcrun simctl boot "$1" 2>/dev/null || true; xcrun simctl bootstatus "$1" -b >/dev/null; }
+
+DEVICE="$(resolve_device "${DEVICE:-iPhone 16 Pro Max}")"
+[ -n "$DEVICE" ] || { echo "simulator not found or unavailable"; exit 2; }
+boot "$DEVICE"
+
+# screens_test.dart runs on each of these (name or udid, ';'-separated).
+IFS=';' read -r -a SCREEN_DEVICES <<<"${E2E_SCREEN_DEVICES:-iPhone SE 2nd Gen Test;iPhone 16 Pro Max;iPad Pro 13-inch (M4)}"
 
 if [ ${#TESTS[@]} -eq 0 ]; then
-  TESTS=(integration_test/smoke_test.dart integration_test/journeys_test.dart
-         integration_test/crawler_test.dart integration_test/accessibility_test.dart
-         integration_test/screens_test.dart)
+  TESTS=(integration_test/smoke_test.dart)
+  for f in "$ROOT"/integration_test/journeys_*_test.dart; do TESTS+=("integration_test/$(basename "$f")"); done
+  TESTS+=(integration_test/crawler_test.dart integration_test/accessibility_test.dart
+          integration_test/screens_test.dart)
 fi
 
 RUN="$OUT/$(date +%Y%m%d-%H%M%S)"
@@ -115,24 +123,40 @@ DEFINES=(--dart-define=BOJANG_E2E=true --dart-define=ENABLE_IOS_FIREBASE=true
          --dart-define=BOJANG_AUTH_EMULATOR=127.0.0.1:9099)
 
 FAILED=()
-for t in "${TESTS[@]}"; do
-  name="$(basename "$t" .dart)"
-  log="$RUN/$name.log"
-  echo "=== $t"
-  (cd "$ROOT" && flutter test "$t" -d "$DEVICE" "${DEFINES[@]}" ${E2E_FLUTTER_ARGS:-}) >"$log" 2>&1 &
-  tp=$!
-  seen=0
+run_test() { # test device label
+  local t="$1" dev="$2" name
+  name="$(basename "$t" .dart)${3:+-$3}"
+  local log="$RUN/$name.log"
+  echo "=== $t on $dev"
+  (cd "$ROOT" && flutter test "$t" -d "$dev" "${DEFINES[@]}" ${E2E_FLUTTER_ARGS:-}) >"$log" 2>&1 &
+  local tp=$! seen=0 total shot
   while kill -0 "$tp" 2>/dev/null; do
-    total=$(grep -c "SHOT:" "$log" 2>/dev/null || true)
+    total=$(tr '\r' '\n' <"$log" | grep -c "SHOT:" || true)
     while [ "$seen" -lt "${total:-0}" ]; do
       seen=$((seen + 1))
-      shot=$(grep "SHOT:" "$log" | sed -n "${seen}p" | sed 's/.*SHOT://' | tr -d '[:space:]')
-      xcrun simctl io "$DEVICE" screenshot "$RUN/shots/$name--$shot.png" >/dev/null 2>&1 || true
+      shot=$(tr '\r' '\n' <"$log" | grep "SHOT:" | sed -n "${seen}p" | sed 's/.*SHOT://' | tr -d '[:space:]')
+      xcrun simctl io "$dev" screenshot "$RUN/shots/$(basename "$t" .dart)--$shot.png" >/dev/null 2>&1 || true
     done
     sleep 0.3
   done
-  if wait "$tp"; then echo "PASS $t"; else echo "FAIL $t (log: $log)"; FAILED+=("$t"); fi
-  grep -E "^REPORT:" "$log" | sed 's/^REPORT://' >>"$RUN/report.md" || true
+  if wait "$tp"; then echo "PASS $name"; else echo "FAIL $name (log: $log)"; FAILED+=("$name"); fi
+  tr '\r' '\n' <"$log" | grep "REPORT:" | sed 's/.*REPORT://' >>"$RUN/report.md" || true
+}
+
+for t in "${TESTS[@]}"; do
+  if [[ "$t" == *screens_test.dart ]]; then
+    for d in "${SCREEN_DEVICES[@]}"; do
+      udid="$(resolve_device "$d")"
+      [ -n "$udid" ] || { echo "skip screens on $d: not available"; continue; }
+      boot "$udid"
+      xcrun simctl status_bar "$udid" override --time "9:41" --batteryState charged \
+        --batteryLevel 100 --wifiBars 3 --cellularBars 4 2>/dev/null || true
+      run_test "$t" "$udid" "$(echo "$d" | tr -cs 'A-Za-z0-9' '-' | tr 'A-Z' 'a-z' | sed 's/-$//')"
+      [ "$udid" = "$DEVICE" ] || xcrun simctl shutdown "$udid" 2>/dev/null || true
+    done
+  else
+    run_test "$t" "$DEVICE"
+  fi
 done
 
 echo

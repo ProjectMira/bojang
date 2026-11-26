@@ -244,6 +244,7 @@ Future<ScreenReport> crawlScreen(
       final before = _fingerprint();
       final errorsBefore = _errors.length;
       final audioBefore = _audioCalls;
+      debugPrint('E2E: crawl $screen tap "${t.label}"');
       await tester.tapAt(t.rect.center);
       await wait(tester, 1.2);
       final routes = _routeCount();
