@@ -117,6 +117,9 @@ void main() {
       for (var i = 0; i < 200 && finder.evaluate().isEmpty; i++) {
         await tester.pump(const Duration(milliseconds: 100));
       }
+      // Long topic lists put some topics below the fold on a phone.
+      await tester.ensureVisible(finder.first);
+      await wait(0.5);
       await tester.tap(finder.first);
       await wait(0.5);
     }
