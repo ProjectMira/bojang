@@ -647,6 +647,17 @@ class _LineBubble extends StatelessWidget {
     final accent = _speakerColor(context, speaker.color);
     final align = leading ? CrossAxisAlignment.start : CrossAxisAlignment.end;
     final textAlign = leading ? TextAlign.start : TextAlign.end;
+    final Widget translation =
+        translated && line.english.isNotEmpty
+            ? Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                line.english,
+                textAlign: textAlign,
+                style: AppTextStyles.body(context),
+              ),
+            )
+            : const SizedBox(width: double.infinity);
     final bubble = Flexible(
       child: Material(
         color: AppTokens.surface(context),
@@ -683,24 +694,20 @@ class _LineBubble extends StatelessWidget {
                         textAlign: textAlign,
                         alignment: align,
                       ),
-                      AnimatedSize(
-                        duration: motion.scale(
-                          const Duration(milliseconds: 200),
+                      // AnimatedSize asserts with a zero duration
+                      // (Settings > Animations > Off).
+                      if (motion.scale(const Duration(milliseconds: 200)) ==
+                          Duration.zero)
+                        translation
+                      else
+                        AnimatedSize(
+                          duration: motion.scale(
+                            const Duration(milliseconds: 200),
+                          ),
+                          curve: Curves.easeOut,
+                          alignment: Alignment.topCenter,
+                          child: translation,
                         ),
-                        curve: Curves.easeOut,
-                        alignment: Alignment.topCenter,
-                        child:
-                            translated && line.english.isNotEmpty
-                                ? Padding(
-                                  padding: const EdgeInsets.only(top: 6),
-                                  child: Text(
-                                    line.english,
-                                    textAlign: textAlign,
-                                    style: AppTextStyles.body(context),
-                                  ),
-                                )
-                                : const SizedBox(width: double.infinity),
-                      ),
                     ],
                   ),
                 ),

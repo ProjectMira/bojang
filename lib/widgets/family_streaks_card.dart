@@ -146,7 +146,9 @@ class _FamilyBodyState extends State<_FamilyBody> {
                 onPressed: () => Navigator.pop(dialog, true),
                 child: Text(
                   'Unlink',
-                  style: TextStyle(color: AppTokens.accent(AppPalette.red, dialog)),
+                  style: TextStyle(
+                    color: AppTokens.accent(AppPalette.red, dialog),
+                  ),
                 ),
               ),
             ],
@@ -170,7 +172,10 @@ class _FamilyBodyState extends State<_FamilyBody> {
         Row(
           children: [
             Expanded(
-              child: Text('Family streaks', style: AppTextStyles.title(context)),
+              child: Text(
+                'Family streaks',
+                style: AppTextStyles.title(context),
+              ),
             ),
             if (family != null)
               Text(
@@ -185,9 +190,8 @@ class _FamilyBodyState extends State<_FamilyBody> {
           style: AppTextStyles.caption(context),
         ),
         const SizedBox(height: AppSpacing.lg),
-        AnimatedSize(
+        _maybeAnimatedSize(
           duration: Motion.of(context).scale(const Duration(milliseconds: 220)),
-          alignment: Alignment.topCenter,
           child: Column(
             children: [
               if (!_loaded)
@@ -343,7 +347,9 @@ class _MemberRow extends StatelessWidget {
             icon: Icon(Icons.more_vert, color: AppTokens.inkSoft(context)),
             onSelected: (_) => onRemove(),
             itemBuilder:
-                (_) => const [PopupMenuItem(value: 'remove', child: Text('Unlink'))],
+                (_) => const [
+                  PopupMenuItem(value: 'remove', child: Text('Unlink')),
+                ],
           ),
         ],
       ),
@@ -509,3 +515,17 @@ class _EnterCodeSheetState extends State<_EnterCodeSheet> {
     );
   }
 }
+
+/// AnimatedSize asserts ("mutated in its own performLayout") when its
+/// duration is zero, which it is with Settings > Animations > Off.
+Widget _maybeAnimatedSize({
+  required Duration duration,
+  required Widget child,
+}) =>
+    duration == Duration.zero
+        ? child
+        : AnimatedSize(
+          duration: duration,
+          alignment: Alignment.topCenter,
+          child: child,
+        );
