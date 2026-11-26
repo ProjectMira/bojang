@@ -1,6 +1,10 @@
 # Uncomment this line to define a global platform for your project
 platform :ios, '15.0'
 
+# Firebase Analytics without the AdSupport / IDFA code path: Bojang shows no
+# ads and never asks for App Tracking Transparency.
+$FirebaseAnalyticsWithoutAdIdSupport = true
+
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
