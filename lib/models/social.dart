@@ -8,6 +8,7 @@ int _int(Object? v) => v is num ? v.toInt() : int.tryParse('$v') ?? 0;
 int? _intOrNull(Object? v) => v == null ? null : _int(v);
 bool _bool(Object? v, [bool fallback = false]) => v is bool ? v : fallback;
 DateTime? _date(Object? v) => v is String ? DateTime.tryParse(v) : null;
+String? _url(Object? v) => v is String && v.startsWith('https://') ? v : null;
 
 class WeeklyEntry {
   const WeeklyEntry({
@@ -16,6 +17,8 @@ class WeeklyEntry {
     required this.xp,
     this.isMe = false,
     this.avatar,
+    this.photoUrl,
+    this.token = '',
   });
 
   final int rank;
@@ -23,8 +26,19 @@ class WeeklyEntry {
   final int xp;
   final bool isMe;
 
-  /// Drawn avatar key (see LearnerAvatar), null for the default yak.
+  /// Drawn avatar key (see LearnerAvatar). The server always sends one
+  /// (the learner's pick, else one derived from them); null on old servers.
   final String? avatar;
+
+  /// An uploaded photo, drawn instead of [avatar]. Null when the learner has
+  /// none, or reports have hidden it.
+  final String? photoUrl;
+
+  /// Opaque weekly handle the server takes back to report or hide this
+  /// person (never their uid). Empty for the learner's own pinned row.
+  final String token;
+
+  bool get canReport => !isMe && token.isNotEmpty;
 
   factory WeeklyEntry.fromJson(Map<String, dynamic> json) => WeeklyEntry(
     rank: _int(json['rank']),
@@ -32,7 +46,22 @@ class WeeklyEntry {
     xp: _int(json['xp']),
     isMe: _bool(json['is_me']),
     avatar: json['avatar'] as String?,
+    photoUrl: _url(json['photo_url']),
+    token: (json['token'] ?? '').toString(),
   );
+}
+
+/// Why a learner reports a photo or name (the server takes the same keys).
+enum ReportReason {
+  inappropriate('inappropriate', 'Inappropriate or sexual'),
+  offensive('offensive', 'Hateful or offensive'),
+  impersonation('impersonation', 'Pretending to be someone else'),
+  spam('spam', 'Spam or advertising'),
+  other('other', 'Something else');
+
+  const ReportReason(this.key, this.label);
+  final String key;
+  final String label;
 }
 
 class WeeklyMe {
@@ -43,6 +72,8 @@ class WeeklyMe {
     this.inTop = false,
     this.displayName = '',
     this.avatar,
+    this.photoUrl,
+    this.photoHidden = false,
   });
 
   /// Null with no XP this week, or when the learner is hidden.
@@ -53,6 +84,12 @@ class WeeklyMe {
   final String displayName;
   final String? avatar;
 
+  /// The photo other learners see (null when none or hidden by reports).
+  final String? photoUrl;
+
+  /// True when reports have hidden the learner's photo pending review.
+  final bool photoHidden;
+
   factory WeeklyMe.fromJson(Map<String, dynamic> json) => WeeklyMe(
     rank: _intOrNull(json['rank']),
     xp: _int(json['xp']),
@@ -60,6 +97,8 @@ class WeeklyMe {
     inTop: _bool(json['in_top']),
     displayName: (json['display_name'] ?? '').toString(),
     avatar: json['avatar'] as String?,
+    photoUrl: _url(json['photo_url']),
+    photoHidden: _bool(json['photo_hidden']),
   );
 }
 
@@ -90,8 +129,30 @@ class WeeklyBoard {
       xp: me.xp,
       isMe: true,
       avatar: me.avatar,
+      photoUrl: me.photoUrl,
     );
   }
+
+  /// The learner's own entry in [entries], if they are in the top 50.
+  WeeklyEntry? get ownEntry {
+    for (final e in entries) {
+      if (e.isMe) return e;
+    }
+    return null;
+  }
+
+  /// A copy without the entry behind [token] (after hiding someone), so the
+  /// board updates before the next fetch. Ranks don't shift.
+  WeeklyBoard without(String token) => WeeklyBoard(
+    weekStart: weekStart,
+    weekEnd: weekEnd,
+    entries: [
+      for (final e in entries)
+        if (e.token != token || token.isEmpty) e,
+    ],
+    me: me,
+    totalLearners: totalLearners,
+  );
 
   /// Time left until the reset, never negative.
   Duration timeLeft(DateTime now) {

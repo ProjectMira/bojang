@@ -53,6 +53,8 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Bojang uses your approximate location (about 10 km) to see which regions learners are in, so we can plan lessons, dialects and voices for them. Bojang works the same if you say no.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Pick a photo for your profile picture. It shows next to your name on the weekly leaderboard. Bojang only sees the photo you choose.</string>
 	<key>NSLocationDefaultAccuracyReduced</key>
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>

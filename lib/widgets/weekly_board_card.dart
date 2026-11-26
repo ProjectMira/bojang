@@ -198,6 +198,7 @@ class WeeklyBoardCardState extends State<WeeklyBoardCard> {
                           ),
                           LearnerAvatar(
                             avatar: e.avatar,
+                            photoUrl: e.photoUrl,
                             size: 30,
                             border: true,
                           ),

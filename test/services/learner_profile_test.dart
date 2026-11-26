@@ -55,4 +55,83 @@ void main() {
     expect(p.name, 'Tenzin');
     expect(p.avatar, 'conch:red');
   });
+
+  group('profile photo', () {
+    test('upload shows the photo; server errors map to reasons', () async {
+      final p = LearnerProfile.instance;
+      p.fetch = () async => null;
+      var status = 200;
+      p.uploader =
+          (bytes, name) async => (
+            status,
+            status == 200
+                ? {'photo_url': 'https://s.example/profile-photos/a.jpg'}
+                : null,
+          );
+      expect(await p.uploadPhoto([1, 2, 3], 'a.jpg'), PhotoUploadResult.ok);
+      expect(p.photoUrl, 'https://s.example/profile-photos/a.jpg');
+      for (final (code, want) in [
+        (413, PhotoUploadResult.tooLarge),
+        (415, PhotoUploadResult.notAPhoto),
+        (429, PhotoUploadResult.tooMany),
+        (500, PhotoUploadResult.failed),
+      ]) {
+        status = code;
+        expect(await p.uploadPhoto([1], 'a.jpg'), want);
+      }
+      p.uploader = (bytes, name) async => (null, null);
+      expect(await p.uploadPhoto([1], 'a.jpg'), PhotoUploadResult.offline);
+      // A failed upload keeps the photo that was there.
+      expect(p.photoUrl, 'https://s.example/profile-photos/a.jpg');
+    });
+
+    test('over 5 MB is refused before uploading', () async {
+      final p = LearnerProfile.instance;
+      var called = false;
+      p.uploader = (bytes, name) async {
+        called = true;
+        return (200, null);
+      };
+      final big = List<int>.filled(5 * 1024 * 1024 + 1, 0);
+      expect(await p.uploadPhoto(big, 'big.jpg'), PhotoUploadResult.tooLarge);
+      expect(called, isFalse);
+    });
+
+    test('remove clears it only when the server took it', () async {
+      final p = LearnerProfile.instance;
+      p.uploader =
+          (bytes, name) async => (
+            200,
+            {'photo_url': 'https://s.example/profile-photos/a.jpg'},
+          );
+      await p.uploadPhoto([1], 'a.jpg');
+      p.remover = () async => false;
+      expect(await p.removePhoto(), isFalse);
+      expect(p.photoUrl, isNotNull);
+      p.remover = () async => true;
+      expect(await p.removePhoto(), isTrue);
+      expect(p.photoUrl, isNull);
+    });
+
+    test('refresh takes the photo, review state and default avatar', () async {
+      final p = LearnerProfile.instance;
+      p.fetch =
+          () async => {
+            'display_name': 'Pema',
+            'avatar': null,
+            'default_avatar': 'conch:green',
+            'photo_url': 'https://s.example/profile-photos/b.jpg',
+            'photo_hidden': true,
+          };
+      await p.refresh();
+      expect(p.photoUrl, 'https://s.example/profile-photos/b.jpg');
+      expect(p.photoHidden, isTrue);
+      expect(p.avatar, isNull);
+      expect(p.shownAvatar, 'conch:green');
+      // An admin removed it: the server's answer wins.
+      p.fetch = () async => {'display_name': 'Pema', 'photo_url': null};
+      await p.refresh();
+      expect(p.photoUrl, isNull);
+    });
+  });
 }

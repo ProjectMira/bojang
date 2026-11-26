@@ -135,4 +135,102 @@ void main() {
       }
     });
   });
+
+  group('Photos and safety', () {
+    final json = {
+      'week_start': '2026-11-23T00:00:00Z',
+      'week_end': '2026-11-30T00:00:00Z',
+      'entries': [
+        {
+          'rank': 1,
+          'display_name': 'Pema',
+          'xp': 420,
+          'avatar': 'conch:gold',
+          'photo_url': 'https://storage.example/profile-photos/a.jpg',
+          'token': 'tok-pema',
+        },
+        {
+          'rank': 2,
+          'display_name': 'Tashi',
+          'xp': 380,
+          'is_me': true,
+          'avatar': 'yak_love:red',
+          'token': 'tok-me',
+        },
+        {'rank': 3, 'display_name': 'Dolma', 'xp': 300, 'token': 'tok-dolma'},
+      ],
+      'me': {
+        'rank': 2,
+        'xp': 380,
+        'in_top': true,
+        'display_name': 'Tashi',
+        'avatar': 'yak_love:red',
+        'photo_url': null,
+        'photo_hidden': true,
+      },
+      'total_learners': 3,
+    };
+
+    test('entries carry photo, avatar and an opaque token', () {
+      final board = WeeklyBoard.fromJson(json)!;
+      final pema = board.entries.first;
+      expect(pema.photoUrl, 'https://storage.example/profile-photos/a.jpg');
+      expect(pema.avatar, 'conch:gold');
+      expect(pema.token, 'tok-pema');
+      expect(pema.canReport, isTrue);
+      expect(board.entries[2].photoUrl, isNull);
+      expect(board.me.photoHidden, isTrue);
+    });
+
+    test('only https photo URLs are used', () {
+      final e = WeeklyEntry.fromJson({
+        'rank': 1,
+        'display_name': 'X',
+        'xp': 1,
+        'photo_url': 'http://insecure.example/p.jpg',
+      });
+      expect(e.photoUrl, isNull);
+    });
+
+    test('the learner cannot report themselves', () {
+      final board = WeeklyBoard.fromJson(json)!;
+      expect(board.ownEntry!.displayName, 'Tashi');
+      expect(board.ownEntry!.canReport, isFalse);
+      expect(board.ownRowBelow, isNull);
+    });
+
+    test('hiding drops one entry and keeps everyone\'s rank', () {
+      final board = WeeklyBoard.fromJson(json)!.without('tok-pema');
+      expect(board.entries.map((e) => e.rank), [2, 3]);
+      expect(board.totalLearners, 3);
+      expect(WeeklyBoard.fromJson(json)!.without('').entries, hasLength(3));
+    });
+
+    test('pinned row outside the top 50 carries my photo', () {
+      final board =
+          WeeklyBoard.fromJson({
+            ...json,
+            'me': {
+              'rank': 73,
+              'xp': 12,
+              'in_top': false,
+              'display_name': 'Tashi',
+              'photo_url': 'https://storage.example/profile-photos/me.jpg',
+            },
+          })!;
+      final row = board.ownRowBelow!;
+      expect(row.photoUrl, 'https://storage.example/profile-photos/me.jpg');
+      expect(row.canReport, isFalse);
+    });
+
+    test('report reasons match the server', () {
+      expect(ReportReason.values.map((r) => r.key), [
+        'inappropriate',
+        'offensive',
+        'impersonation',
+        'spam',
+        'other',
+      ]);
+    });
+  });
 }

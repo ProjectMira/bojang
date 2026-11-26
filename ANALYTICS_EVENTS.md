@@ -230,8 +230,16 @@ deletes its rows.
 | `profile_setup_saved` | name + picture sheet | `source`, `figure`, `colour`, `name_length` |
 | `profile_setup_dismissed` | name + picture sheet | `source` |
 | `avatar_option_tapped` | name + picture sheet | `figure`, `colour` |
+| `profile_photo_uploaded` | name + picture sheet, "Upload a photo" (server took it) | `source`, `kb` (bytes sent, after the picker's 1024px resize) |
+| `profile_photo_upload_failed` | name + picture sheet | `source`, `reason` (`tooLarge`/`notAPhoto`/`tooMany`/`offline`/`failed`) |
+| `profile_photo_removed` | name + picture sheet, "Remove" | `source` |
 | `profile_board_card_tapped` | profile leaderboard card | `rank`, `xp` |
 | `leaderboard_viewed` | leaderboard screen (first load) | `source`, `rank` (null: no XP or hidden), `xp`, `in_top` (top 50), `visible`, `learners` |
+| `leaderboard_my_rank_tapped` | leaderboard, pinned "Your rank #N · XP" bar | `rank`, `in_top` |
+| `leaderboard_entry_menu_opened` | leaderboard, long-press or ⋯ on another learner's row | `rank` |
+| `leaderboard_report_sent` | leaderboard report sheet | `kind` (`photo`/`name`), `reason` (`inappropriate`/`offensive`/`impersonation`/`spam`/`other`), `hide`, `rank`, `success` |
+| `leaderboard_hidden` | leaderboard, "Hide from my board" or report with "Also hide" | `rank`, `via` (`menu`/`report`), `success` (menu only) |
+| `leaderboard_unhidden` | leaderboard, "Show learners I hid" | `count` (null offline) |
 | `leaderboard_result_shown` | Profile, first launch of a new week ("You finished #12") | `rank`, `xp`, `learners` (last week) |
 | `setting_changed` (`setting`: `show_on_leaderboard`) | Settings > Privacy | `value` |
 | `family_invite_created` | Profile > Family streaks | `members` (already linked) |

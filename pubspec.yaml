@@ -45,6 +45,7 @@ dependencies:
   
   # Backend and API integration
   http: ^1.1.0
+  image_picker: ^1.2.2
   path_provider: ^2.1.1
   connectivity_plus: ^5.0.2
   
