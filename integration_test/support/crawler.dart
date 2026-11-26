@@ -122,8 +122,11 @@ String _widgetLabel(Element e) {
     } else if (cw is RichText) {
       final t = cw.text.toPlainText().trim();
       if (t.isNotEmpty && texts.isEmpty) texts.add(t);
-    } else if (cw is Icon && icon == null && cw.icon != null) {
-      icon = 'icon ${cw.icon!.codePoint.toRadixString(16)}';
+    } else if (cw is Icon) {
+      // Don't read the glyph character an Icon draws as text.
+      if (icon == null && cw.icon != null)
+        icon = 'icon ${cw.icon!.codePoint.toRadixString(16)}';
+      return;
     } else if (cw is Tooltip && texts.isEmpty) {
       texts.add(cw.message ?? '');
     }
@@ -131,7 +134,11 @@ String _widgetLabel(Element e) {
   }
 
   e.visitChildren(visit);
-  var s = texts.where((t) => t.isNotEmpty).take(2).join(' / ').replaceAll('\n', ' ');
+  var s = texts
+      .where((t) => t.isNotEmpty)
+      .take(2)
+      .join(' / ')
+      .replaceAll('\n', ' ');
   if (s.isEmpty) s = icon ?? '(${w.runtimeType})';
   return s.length > 60 ? '${s.substring(0, 57)}...' : s;
 }
@@ -139,7 +146,11 @@ String _widgetLabel(Element e) {
 /// Every enabled tappable widget whose centre is on screen and actually
 /// receives a tap there (not covered, not off-stage). Nested ones that share
 /// a centre (a button and its InkWell) count once.
-List<_Tappable> _tappables(WidgetTester tester, Size screen, Set<String> skipLabels) {
+List<_Tappable> _tappables(
+  WidgetTester tester,
+  Size screen,
+  Set<String> skipLabels,
+) {
   final out = <_Tappable>[];
   final seen = <String, int>{};
   final centres = <String>{};
@@ -151,11 +162,15 @@ List<_Tappable> _tappables(WidgetTester tester, Size screen, Set<String> skipLab
     if (ro is! RenderBox || !ro.hasSize || !ro.attached) continue;
     final rect = ro.localToGlobal(Offset.zero) & ro.size;
     final c = rect.center;
-    if (c.dx <= 0 || c.dy <= 0 || c.dx >= screen.width || c.dy >= screen.height) continue;
+    if (c.dx <= 0 || c.dy <= 0 || c.dx >= screen.width || c.dy >= screen.height)
+      continue;
     final centreKey = '${(c.dx / 6).round()}:${(c.dy / 6).round()}';
     if (!centres.add(centreKey)) continue;
     final label = _widgetLabel(e);
-    if (skipLabels.any((s) => s == 'Back' ? label == 'Back' : label.contains(s))) continue;
+    if (skipLabels.any(
+      (s) => _exactSkips.contains(s) ? label == s : label.contains(s),
+    ))
+      continue;
     final n = seen[label] = (seen[label] ?? 0) + 1;
     out.add(_Tappable('$label#$n', label, rect));
   }
@@ -203,7 +218,14 @@ Future<void> _popTo(WidgetTester tester, int count) async {
 }
 
 /// Labels the crawler never taps: they act on the account or leave the app.
+/// Skip labels that must match the whole label, not a part of it.
+const _exactSkips = {'Back', 'Home', 'Practice', 'Games', 'Profile'};
+
 const defaultSkip = <String>{
+  // The bottom tabs: the crawler switches tabs itself.
+  'Home', 'Practice', 'Games', 'Profile',
+  // Replaces the whole app with the sign-in screen (journeys cover it).
+  'Create an account or sign in',
   'Back', // the app bar's back button closes the screen being crawled
 
   'Sign out',
