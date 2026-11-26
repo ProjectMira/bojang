@@ -1,4 +1,5 @@
 import 'package:bojang/screens/lesson_complete_screen.dart';
+import 'package:bojang/services/beginner.dart';
 import 'package:bojang/services/notification_primer.dart';
 import 'package:bojang/services/progress_service.dart';
 import 'package:bojang/theme/app_tokens.dart';
@@ -39,6 +40,8 @@ void main() {
     required bool practisedToday,
     bool dark = false,
     Map<String, Object> prefs = const {},
+    // The standard session end unless a test is about beginners.
+    bool? beginner = false,
   }) async {
     SharedPreferences.setMockInitialValues(prefs);
     final progress = ProgressService(
@@ -71,6 +74,7 @@ void main() {
                                     streak: 1,
                                     topicFilePath: 'api://level/basics_1',
                                     lessonsCompleted: lessonsCompleted,
+                                    beginner: beginner,
                                   ),
                             ),
                           ),
@@ -284,7 +288,10 @@ void main() {
         ask('location', true),
         ask('wean_off', true),
       ];
-      expect(await LessonCompleteScreen.showFirstAsk(context, end, asks: all), 0);
+      expect(
+        await LessonCompleteScreen.showFirstAsk(context, end, asks: all),
+        0,
+      );
       expect(called, ['primer']);
 
       // The primer passes: the next one takes the slot, the rest wait.
@@ -303,12 +310,93 @@ void main() {
 
       // None due: nothing shows.
       called.clear();
-      final none = [for (final n in ['a', 'b', 'c', 'd']) ask(n, false)];
+      final none = [
+        for (final n in ['a', 'b', 'c', 'd']) ask(n, false),
+      ];
       expect(
         await LessonCompleteScreen.showFirstAsk(context, end, asks: none),
         isNull,
       );
       expect(called, hasLength(4));
+    });
+  });
+
+  group('beginners: fewer taps', () {
+    tearDown(() {
+      Beginner.debugMaxLessons = null;
+      Beginner.debugMaxXp = null;
+    });
+
+    test('a beginner has at most 3 lessons and under 300 XP', () {
+      Beginner.debugMaxLessons = 3;
+      Beginner.debugMaxXp = 300;
+      expect(Beginner.check(lessonsCompleted: 1, xp: 40), isTrue);
+      expect(Beginner.check(lessonsCompleted: 3, xp: 240), isTrue);
+      expect(Beginner.check(lessonsCompleted: 4, xp: 240), isFalse);
+      expect(Beginner.check(lessonsCompleted: 2, xp: 300), isFalse);
+      // Count unknown: XP alone decides.
+      expect(Beginner.check(lessonsCompleted: 0, xp: 0), isTrue);
+      // Turned off from Remote Config.
+      Beginner.debugMaxLessons = 0;
+      expect(Beginner.check(lessonsCompleted: 1, xp: 0), isFalse);
+    });
+
+    testWidgets('streak on the result screen, one tap to the next lesson', (
+      tester,
+    ) async {
+      Beginner.debugMaxLessons = 3;
+      Beginner.debugMaxXp = 300;
+      var requests = 0;
+      void count() => requests++;
+      Beginner.nextLessonRequests.addListener(count);
+      addTearDown(() => Beginner.nextLessonRequests.removeListener(count));
+
+      // Worked out from the lesson count and XP (40 XP after one lesson).
+      await pumpResult(
+        tester,
+        lessonsCompleted: 2,
+        practisedToday: true,
+        beginner: null,
+      );
+      expect(find.byKey(const ValueKey('inline_streak')), findsOneWidget);
+      await tester.tap(primary('Next lesson'));
+      await settle(tester);
+      // No streak screen, no location or save-progress ask: straight back.
+      expect(find.text('Your streak has started!'), findsNothing);
+      expect(find.text('Where are you learning from?'), findsNothing);
+      expect(find.text('open'), findsOneWidget);
+      expect(requests, 1);
+    });
+
+    testWidgets('the notification primer still asks after the first lesson', (
+      tester,
+    ) async {
+      installPrimer(canPrompt: true);
+      await pumpResult(
+        tester,
+        lessonsCompleted: 1,
+        practisedToday: true,
+        beginner: true,
+      );
+      await tester.tap(primary('Next lesson'));
+      await settle(tester);
+      expect(
+        find.text('Get a daily reminder to keep your streak?'),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('notification_primer_not_now')),
+      );
+      await settle(tester);
+      expect(find.text('open'), findsOneWidget);
+    });
+
+    test('beginners only get the primer ask', () {
+      expect(LessonCompleteScreen.beginnerAsks, hasLength(1));
+      expect(
+        LessonCompleteScreen.beginnerAsks.first,
+        same(LessonCompleteScreen.asks.first),
+      );
     });
   });
 }

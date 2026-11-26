@@ -28,6 +28,11 @@ class RemoteSettings {
     'home_announcement_title': '',
     'home_announcement_body': '',
     'home_announcement_url': '',
+    // Beginners get the short session end (see Beginner): while they have
+    // finished at most this many lessons and have under this much XP. Set
+    // beginner_max_lessons to 0 to turn the short flow off.
+    'beginner_max_lessons': 3,
+    'beginner_max_xp': 300,
   };
 
   /// Bumps whenever new values are activated (widgets listen to it).
@@ -76,6 +81,16 @@ class RemoteSettings {
     }
     final value = defaults[key];
     return value is bool ? value : false;
+  }
+
+  static int getInt(String key) {
+    if (_ready) {
+      try {
+        return FirebaseRemoteConfig.instance.getInt(key);
+      } catch (_) {}
+    }
+    final value = defaults[key];
+    return value is int ? value : 0;
   }
 
   static String getString(String key) {

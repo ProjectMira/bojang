@@ -6,6 +6,7 @@ import '../models/learning_path.dart';
 import '../models/level_models.dart';
 import '../services/analytics.dart';
 import '../services/api_service.dart';
+import '../services/beginner.dart';
 import '../services/feature_flags.dart';
 import '../services/learning_path_repository.dart';
 import '../services/levels_repository.dart';
@@ -77,6 +78,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _loadShortcutTopics();
     _loadPath();
     FeatureFlags.instance.changes.addListener(_onFlagsChanged);
+    Beginner.nextLessonRequests.addListener(_openNextLesson);
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _refreshServerProgress(),
     );
@@ -154,17 +156,31 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
-  Future<void> _openNode(PathNode node) async {
+  Future<void> _openNode(PathNode node, {String source = 'home_path'}) async {
     final path = _path;
-    await openPathNode(
-      context,
-      node,
-      source: 'home_path',
-      unit: path?.unitOf(node),
-    );
+    await openPathNode(context, node, source: source, unit: path?.unitOf(node));
     if (!mounted) return;
     await _loadPath();
     await _refreshServerProgress();
+  }
+
+  /// A beginner's session end closed with "Next lesson": open the path's
+  /// next step, so they don't have to find it on Home. Does nothing when
+  /// the path is off or did not load (the learner simply sees Home).
+  Future<void> _openNextLesson() async {
+    if (!mounted || !_pathEnabled) return;
+    await _loadPath();
+    if (!mounted) return;
+    final next = _path?.activeNode;
+    final opens = next != null && !next.isLocked;
+    Analytics.track('beginner_next_lesson', {
+      'opened': opens,
+      if (next != null) 'node_id': next.id,
+      'beginner': true,
+    });
+    // Only when nothing else is on top of Home (a sheet, another screen).
+    if (!opens || ModalRoute.of(context)?.isCurrent == false) return;
+    await _openNode(next, source: 'beginner_next');
   }
 
   void _showLocked(PathNode node) {
@@ -217,6 +233,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void dispose() {
     FeatureFlags.instance.changes.removeListener(_onFlagsChanged);
+    Beginner.nextLessonRequests.removeListener(_openNextLesson);
     _animationController.dispose();
     super.dispose();
   }
