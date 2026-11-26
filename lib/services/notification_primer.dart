@@ -9,7 +9,10 @@ import 'push_service.dart';
 import '../widgets/yak_mascot.dart';
 
 /// The moment that just mattered, which the primer's copy refers to.
-enum PrimerMoment { streak, freeze }
+/// [firstLesson]: the learner's first finished lesson, the first time a
+/// reminder means something (the 20–26 Nov report: asking at launch lost
+/// 21% before they had seen a lesson).
+enum PrimerMoment { firstLesson, streak, freeze }
 
 /// When the primer may be shown: at most [maxAsks] times in total, at least
 /// [minGap] apart, and only while the OS prompt can still be shown.
@@ -45,6 +48,16 @@ class PrimerPolicy {
     return true;
   }
 
+  /// A lesson end's moment: the first finished lesson on this device, or
+  /// else the streak celebration's moment ([momentFor]), if any.
+  static PrimerMoment? momentForLessonEnd({
+    required int lessonsCompleted,
+    StreakCelebration? celebration,
+  }) {
+    if (lessonsCompleted == 1) return PrimerMoment.firstLesson;
+    return celebration == null ? null : momentFor(celebration);
+  }
+
   /// The celebration's moment: a freeze used, or the streak started or
   /// extended (the first practice of the day).
   static PrimerMoment? momentFor(StreakCelebration celebration) {
@@ -55,9 +68,11 @@ class PrimerPolicy {
 }
 
 /// Asks for notification permission at a moment that matters, never at
-/// launch: after the streak celebration of a lesson that starts or extends
-/// the streak, or that used a freeze. A soft pre-prompt comes first ("Turn
-/// on reminders" / "Maybe later"); only "Turn on" shows the OS prompt.
+/// launch or in onboarding: at the end of the learner's first lesson, and
+/// later after the streak celebration of a lesson that starts or extends
+/// the streak, or that used a freeze. A soft pre-prompt comes first
+/// ("Allow" / "Not now"); only "Allow" shows the OS prompt. Learners who
+/// already answered the OS prompt are never asked again ([PrimerPolicy]).
 ///
 /// It is the first of the session end's asks (`LessonCompleteScreen.asks`),
 /// ahead of the location prompt, so a lesson never ends with both. Games
@@ -91,6 +106,22 @@ class NotificationPrimer {
     if (kIsWeb) return false;
     final status = await PushService.instance.permissionStatus();
     return PrimerPolicy.canPromptFor(status, defaultTargetPlatform);
+  }
+
+  /// The session end of a lesson ([lessonsCompleted] counts it, 0 if
+  /// unknown): asks at the first lesson, otherwise at a streak moment.
+  /// Returns whether the pre-prompt was shown.
+  Future<bool> afterLesson(
+    BuildContext context, {
+    required int lessonsCompleted,
+    StreakCelebration? celebration,
+  }) async {
+    final moment = PrimerPolicy.momentForLessonEnd(
+      lessonsCompleted: lessonsCompleted,
+      celebration: celebration,
+    );
+    if (moment == null) return false;
+    return maybeAsk(context, moment);
   }
 
   /// Shows the pre-prompt if this celebration is a primer moment and the cap
@@ -155,47 +186,26 @@ class NotificationPrimer {
     }
   }
 
-  /// Whether the OS prompt can still be shown, for onboarding's own primer
-  /// screen (it is skipped when there is nothing to ask). Never throws.
-  Future<bool> canAskDuringOnboarding() async {
-    try {
-      return await _canPrompt();
-    } catch (_) {
-      return false;
-    }
-  }
-
-  /// Onboarding's soft primer was answered "Turn on reminders": shows the
-  /// OS prompt. It does not count against [PrimerPolicy.maxAsks] or start
-  /// the [PrimerPolicy.minGap], so the session-end primer keeps all three
-  /// asks for a learner who said "Maybe later". A refusal at the OS level
-  /// stops the session-end primer, as it does there. Returns whether
-  /// notifications are allowed.
-  Future<bool> requestDuringOnboarding() async {
-    try {
-      final allowed = await _requestPermission('onboarding');
-      if (!allowed) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(asksKey, PrimerPolicy.maxAsks);
-      }
-      return allowed;
-    } catch (e) {
-      debugPrint('Onboarding notification request skipped: $e');
-      return false;
-    }
-  }
-
   static Future<bool?> _showPrePrompt(BuildContext context, PrimerMoment moment) {
-    final title = moment == PrimerMoment.freeze
-        ? 'Want a heads-up next time?'
-        : 'Want a nudge from Norbu?';
-    final body = moment == PrimerMoment.freeze
-        ? 'A freeze kept your streak safe. Norbu can send one friendly '
+    final title = switch (moment) {
+      PrimerMoment.firstLesson => 'Get a daily reminder to keep your streak?',
+      PrimerMoment.freeze => 'Want a heads-up next time?',
+      PrimerMoment.streak => 'Want a nudge from Norbu?',
+    };
+    final body = switch (moment) {
+      PrimerMoment.firstLesson =>
+        'You finished your first lesson! Norbu can send one friendly '
+            'reminder on days you haven\'t practised yet. Never after '
+            'midnight, and you can turn it off any time in Settings.',
+      PrimerMoment.freeze =>
+        'A freeze kept your streak safe. Norbu can send one friendly '
             'reminder on evenings you haven\'t practised yet, so your freezes '
-            'can stay in reserve.'
-        : 'Your streak is under way! Norbu can send one friendly reminder on '
+            'can stay in reserve.',
+      PrimerMoment.streak =>
+        'Your streak is under way! Norbu can send one friendly reminder on '
             'evenings you haven\'t practised yet. Never after midnight, and '
-            'you can turn it off any time in Settings.';
+            'you can turn it off any time in Settings.',
+    };
     return showModalBottomSheet<bool>(
       context: context,
       routeSettings: const RouteSettings(name: 'notification_primer'),
@@ -224,16 +234,18 @@ class NotificationPrimer {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
+                  key: const ValueKey('notification_primer_allow'),
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Turn on reminders'),
+                  child: const Text('Allow'),
                 ),
               ),
               const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
+                  key: const ValueKey('notification_primer_not_now'),
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Maybe later'),
+                  child: const Text('Not now'),
                 ),
               ),
             ],

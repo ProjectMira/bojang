@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:bojang/models/level_models.dart';
 import 'package:bojang/models/onboarding.dart';
 import 'package:bojang/screens/onboarding_screen.dart';
-import 'package:bojang/services/notification_primer.dart';
 import 'package:bojang/services/onboarding_service.dart';
 import 'package:bojang/services/user_kv.dart';
 import 'package:flutter/material.dart';
@@ -54,19 +53,16 @@ List<Level> _levels() {
 
 void main() {
   late _Kv kv;
-  late List<String> permissionRequests;
   late OnboardingResult? result;
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     kv = _Kv();
-    permissionRequests = [];
     result = null;
   });
 
   Future<void> pump(
     WidgetTester tester, {
-    bool canPrompt = true,
     bool dark = false,
     Size size = const Size(390, 844),
   }) async {
@@ -84,13 +80,6 @@ void main() {
                 UserKv(transport: kv.call, uid: () => 'u'),
               ),
               enabled: () => true,
-            ),
-            primer: NotificationPrimer(
-              canPrompt: () async => canPrompt,
-              requestPermission: (source) async {
-                permissionRequests.add(source);
-                return true;
-              },
             ),
             loadLevels: () async => _levels(),
             onFinished: (r) => result = r,
@@ -126,14 +115,11 @@ void main() {
 
     await tap(tester, 'knowledge_can_read');
     expect(find.text('Which Tibetan do you want to hear?'), findsOneWidget);
-    expect(find.textContaining('coming soon'), findsOneWidget, reason: 'Amdo');
-    await tap(tester, 'voice_amdo'); // not available: nothing happens
-    expect(find.text('Which Tibetan do you want to hear?'), findsOneWidget);
     await tap(tester, 'voice_kham_male');
 
+    // The daily goal is the last step: no notification ask in onboarding,
+    // it waits for the end of the first lesson (NotificationPrimer).
     await tap(tester, 'goal_2');
-    expect(find.text('Maybe later'), findsOneWidget);
-    await tap(tester, 'onboarding_notify_later');
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
 
@@ -141,12 +127,11 @@ void main() {
     expect(result!.skipped, isFalse);
     expect(result!.startLevelId, 'basics-numbers');
     expect(result!.startLevel?.levelId, 'basics-numbers');
-    expect(permissionRequests, isEmpty);
     expect(kv.stored, containsPair('motivation', 'buddhist'));
     expect(kv.stored, containsPair('prior_knowledge', 'can_read'));
     expect(kv.stored, containsPair('voice', 'kham_male'));
     expect(kv.stored, containsPair('daily_goal', 2));
-    expect(kv.stored, containsPair('notifications', 'maybe_later'));
+    expect(kv.stored.containsKey('notifications'), isFalse);
     expect(
       kv.stored,
       containsPair(OnboardingKeys.startLevel, 'basics-numbers'),
@@ -169,41 +154,22 @@ void main() {
     expect(prefs.getString(OnboardingService.statusKey), 'skipped');
   });
 
-  testWidgets('the primer step is left out when the OS cannot ask', (
-    tester,
-  ) async {
-    await pump(tester, canPrompt: false);
-    await tap(tester, 'onboarding_start');
-    await tap(tester, 'motivation_travel');
-    await tap(tester, 'knowledge_speak_some');
-    await tap(tester, 'voice_lhasa_female');
-    await tap(tester, 'goal_1');
-    await tester.pump(const Duration(seconds: 2));
-    await tester.pumpAndSettle();
-    expect(find.text('Maybe later'), findsNothing);
-    expect(result!.startLevelId, 'vocab-action');
-  });
-
-  testWidgets('turning reminders on asks the OS once, outside the primer cap', (
-    tester,
-  ) async {
+  testWidgets('onboarding never asks about notifications', (tester) async {
     await pump(tester);
     for (final key in [
       'onboarding_start',
       'motivation_curious',
       'knowledge_none',
       'voice_lhasa_female',
-      'goal_5',
-      'onboarding_notify_on',
     ]) {
       await tap(tester, key);
     }
+    await tap(tester, 'goal_5');
+    expect(find.byKey(const ValueKey('onboarding_notify_on')), findsNothing);
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
-    expect(permissionRequests, ['onboarding']);
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getInt(NotificationPrimer.asksKey), isNull);
     expect(result!.startLevelId, 'basics-letters-1');
+    expect(OnboardingStep.values.map((s) => s.name), isNot(contains('notifications')));
   });
 
   testWidgets('offline answers wait on the device for the next launch', (

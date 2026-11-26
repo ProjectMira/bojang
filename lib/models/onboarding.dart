@@ -69,8 +69,9 @@ enum DailyGoal {
   }
 }
 
-/// The onboarding screens, in order.
-enum OnboardingStep { hello, motivation, knowledge, voice, goal, notifications }
+/// The onboarding screens, in order. The notification primer used to be the
+/// last; it now follows the first finished lesson (NotificationPrimer).
+enum OnboardingStep { hello, motivation, knowledge, voice, goal }
 
 T? _byName<T extends Enum>(List<T> values, Object? id) {
   for (final value in values) {
@@ -88,6 +89,8 @@ class OnboardingKeys {
   static const String priorKnowledge = 'prior_knowledge';
   static const String voice = 'voice';
   static const String dailyGoal = 'daily_goal';
+  /// The old onboarding primer's answer (`allowed`/`refused`/`maybe_later`),
+  /// kept on installs that saw it. No longer written.
   static const String notifications = 'notifications';
 
   /// The level id the path starts at (`onboarding/start_level`).

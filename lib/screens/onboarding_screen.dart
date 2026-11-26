@@ -7,7 +7,6 @@ import '../models/level_models.dart';
 import '../models/onboarding.dart';
 import '../services/analytics.dart';
 import '../services/levels_repository.dart';
-import '../services/notification_primer.dart';
 import '../services/onboarding_service.dart';
 import '../services/pronunciation_voices.dart';
 import '../services/theme_service.dart';
@@ -39,8 +38,10 @@ class OnboardingResult {
 
 /// Onboarding for new installs (plan items #8 and #9): Norbu says hello,
 /// then one-tap questions (why, how much Tibetan, which voice, daily goal),
-/// a soft notification primer, and straight into the first lesson at the
-/// level the knowledge answer placed the learner at.
+/// and straight into the first lesson at the level the knowledge answer
+/// placed the learner at. It does not ask about notifications: the
+/// NotificationPrimer asks once the first lesson is finished, when a
+/// reminder means something.
 ///
 /// Back and Skip always work: Back returns one step with the answer kept,
 /// Skip leaves for Home with the answers given so far. No paywall, no
@@ -49,13 +50,11 @@ class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({
     super.key,
     this.service,
-    this.primer,
     this.loadLevels,
     this.onFinished,
   });
 
   final OnboardingService? service;
-  final NotificationPrimer? primer;
 
   /// Loads the level tree (tests pass a stub).
   final Future<List<Level>> Function()? loadLevels;
@@ -71,14 +70,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     with WidgetsBindingObserver {
   late final OnboardingService _service =
       widget.service ?? OnboardingService.instance;
-  late final NotificationPrimer _primer =
-      widget.primer ?? NotificationPrimer.instance;
   late final Future<List<Level>> _levels;
   final Stopwatch _elapsed = Stopwatch()..start();
 
-  /// Until the OS check answers, the primer step is assumed present, so the
-  /// progress bar does not jump back.
-  List<OnboardingStep> _steps = OnboardingStep.values;
+  final List<OnboardingStep> _steps = OnboardingStep.values;
   int _index = 0;
   bool _forward = true;
   bool _finishing = false;
@@ -100,16 +95,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     unawaited(_service.setStatus(OnboardingStatus.inProgress));
     Analytics.track('onboarding_started', {});
     _trackView();
-    _primer.canAskDuringOnboarding().then((canAsk) {
-      if (!mounted || canAsk) return;
-      setState(() {
-        _steps = [
-          for (final s in OnboardingStep.values)
-            if (s != OnboardingStep.notifications) s,
-        ];
-        if (_index >= _steps.length) _index = _steps.length - 1;
-      });
-    });
   }
 
   @override
@@ -194,23 +179,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       // Built on its own (tests).
     }
     _answer(OnboardingKeys.voice, voice.id, () => _voice = voice.id);
-  }
-
-  Future<void> _answerNotifications(bool turnOn) async {
-    if (_finishing) return;
-    Analytics.track('onboarding_answered', {
-      'step': OnboardingStep.notifications.name,
-      'answer': turnOn ? 'turn_on' : 'maybe_later',
-    });
-    var allowed = false;
-    if (turnOn) allowed = await _primer.requestDuringOnboarding();
-    unawaited(
-      _service.remember(
-        OnboardingKeys.notifications,
-        turnOn ? (allowed ? 'allowed' : 'refused') : 'maybe_later',
-      ),
-    );
-    if (mounted) _next();
   }
 
   Future<void> _finish({required bool skipped}) async {
@@ -432,11 +400,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ),
       ],
     ),
-    OnboardingStep.notifications => _PrimerStep(
-      busy: _finishing,
-      onTurnOn: () => _answerNotifications(true),
-      onLater: () => _answerNotifications(false),
-    ),
   };
 
   List<Widget> _voiceCards(TibetanDialect dialect) {
@@ -593,25 +556,19 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-/// A step with Norbu, a message and one or two pinned buttons.
+/// A step with Norbu, a message and a pinned button.
 class _PinnedStep extends StatelessWidget {
   const _PinnedStep({
     required this.children,
     required this.primaryLabel,
     required this.onPrimary,
     this.primaryKey,
-    this.secondaryLabel,
-    this.onSecondary,
-    this.secondaryKey,
   });
 
   final List<Widget> children;
   final String primaryLabel;
   final VoidCallback? onPrimary;
   final Key? primaryKey;
-  final String? secondaryLabel;
-  final VoidCallback? onSecondary;
-  final Key? secondaryKey;
 
   @override
   Widget build(BuildContext context) {
@@ -665,26 +622,8 @@ class _PinnedStep extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 48,
-                  child:
-                      secondaryLabel == null
-                          ? null
-                          : Center(
-                            child: TextButton(
-                              key: secondaryKey,
-                              onPressed: onSecondary,
-                              child: Text(
-                                secondaryLabel!,
-                                style: AppTextStyles.poppins(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTokens.inkSoft(context),
-                                ),
-                              ),
-                            ),
-                          ),
-                ),
+                // Keeps the button where the other steps have theirs.
+                const SizedBox(height: 48),
               ],
             ),
           ),
@@ -734,57 +673,6 @@ class _HelloStep extends StatelessWidget {
         Text(
           'I\'ll help you read, hear and speak Tibetan. A few quick taps to '
           'set things up, then your first lesson.',
-          textAlign: TextAlign.center,
-          style: AppTextStyles.body(
-            context,
-            color: AppTokens.inkSoft(context),
-          ).copyWith(fontSize: 16, height: 1.45),
-        ),
-      ],
-    );
-  }
-}
-
-class _PrimerStep extends StatelessWidget {
-  const _PrimerStep({
-    required this.onTurnOn,
-    required this.onLater,
-    required this.busy,
-  });
-
-  final VoidCallback onTurnOn;
-  final VoidCallback onLater;
-  final bool busy;
-
-  @override
-  Widget build(BuildContext context) {
-    final tablet = Breakpoints.isTablet(context);
-    return _PinnedStep(
-      primaryKey: const ValueKey('onboarding_notify_on'),
-      primaryLabel: 'Turn on reminders',
-      onPrimary: busy ? null : onTurnOn,
-      secondaryKey: const ValueKey('onboarding_notify_later'),
-      secondaryLabel: 'Maybe later',
-      onSecondary: busy ? null : onLater,
-      children: [
-        YakMascot(
-          mood: YakMood.happy,
-          size: tablet ? 220 : 160,
-          semanticLabel: '${YakLines.name} the yak',
-        ),
-        const SizedBox(height: 20),
-        Semantics(
-          header: true,
-          child: Text(
-            'Want a nudge from ${YakLines.name}?',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.display(context),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'One friendly reminder on evenings you haven\'t practised yet. '
-          'Never after midnight, and you can turn it off in Settings.',
           textAlign: TextAlign.center,
           style: AppTextStyles.body(
             context,
