@@ -53,6 +53,22 @@ class StreakCelebration {
 }
 
 class ProgressService extends ChangeNotifier {
+  // Server responses (stats, activity sync) can land after the provider that
+  // owns this service is gone; they are dropped instead of notifying a
+  // disposed notifier.
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
+
   // Streak tracking
   int _currentStreak = 0;
   int _longestStreak = 0;
