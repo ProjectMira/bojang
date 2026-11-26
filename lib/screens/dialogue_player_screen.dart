@@ -683,7 +683,7 @@ class _LineBubble extends StatelessWidget {
                         textAlign: textAlign,
                         alignment: align,
                       ),
-                      AnimatedSize(
+                      MotionAnimatedSize(
                         duration: motion.scale(
                           const Duration(milliseconds: 200),
                         ),

@@ -185,7 +185,7 @@ class _FamilyBodyState extends State<_FamilyBody> {
           style: AppTextStyles.caption(context),
         ),
         const SizedBox(height: AppSpacing.lg),
-        AnimatedSize(
+        MotionAnimatedSize(
           duration: Motion.of(context).scale(const Duration(milliseconds: 220)),
           alignment: Alignment.topCenter,
           child: Column(

@@ -71,6 +71,20 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     }
   }
 
+  bool _ownRowCheckScheduled = false;
+
+  /// Scroll notifications can arrive mid-layout (e.g. when the list's
+  /// content size changes after a row is hidden), where reading a row's
+  /// size asserts. Check once the frame is done instead.
+  void _scheduleOwnRowCheck() {
+    if (_ownRowCheckScheduled) return;
+    _ownRowCheckScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ownRowCheckScheduled = false;
+      if (mounted) _checkOwnRow();
+    });
+  }
+
   Future<void> _scrollToOwnRow(WeeklyBoard board) async {
     Analytics.track('leaderboard_my_rank_tapped', {
       'rank': board.me.rank,
@@ -395,7 +409,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       children: [
         NotificationListener<ScrollNotification>(
           onNotification: (_) {
-            _checkOwnRow();
+            _scheduleOwnRowCheck();
             return false;
           },
           child: ListView(
