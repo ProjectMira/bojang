@@ -367,6 +367,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 HomeTopBar(daily: path.daily),
                 const SizedBox(height: AppSpacing.lg),
                 const AnnouncementBanner(),
+                const OfflineLessonsBanner(),
                 _buildEarnBack(context, progressService),
               ],
             ),
