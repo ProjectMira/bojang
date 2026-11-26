@@ -370,3 +370,11 @@ for Remote Config and FCM targeting.
 - **Limits to keep in mind:** 500 distinct event names per app (we have about 160), 25 user
   properties, 50 custom event-scoped dimensions in the GA4 property.
 
+
+
+## Every answer, per learner (2.22)
+
+- `question_shown`: each question as it appears: `exercise_id`, `session_id`, `question_index`, `question_type`, `role`/`attempt`, `tibetan`, `options` (in the order shown), `option_ids`, `correct_index`, `style`. Questions left unanswered (a quit) are on record.
+- `question_answered` also carries `options`, `option_ids`, `chosen_index`, `correct_index`, `answer_text` (built syllable / tracing score), `exercise_id`, `session_id`, alongside `chosen`, `correct_answer`, `correct` and `response_ms`.
+- `lesson_quit` adds `session_id`, `exercise_id` and `answered_current`.
+- Order and timing: every row in `app_events` has `session_id`, `seq` (order within the app session) and `client_ts`; together with `response_ms` that gives the full sequence and time per answer for each learner.

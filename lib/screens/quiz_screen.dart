@@ -100,6 +100,32 @@ class _QuizScreenState extends State<QuizScreen>
   String get _topicName =>
       widget.title ?? _getDisplayNameFromFilePath(widget.topicFilePath);
 
+  int? _shownLoggedIndex;
+
+  /// Every question as it appears, with its options in the order shown, so
+  /// questions left unanswered (a quit) are on record too.
+  void _logShown(LessonItem item, LessonQueue lesson) {
+    if (_shownLoggedIndex == currentQuestionIndex) return;
+    _shownLoggedIndex = currentQuestionIndex;
+    final q = item.question;
+    Analytics.track('question_shown', {
+      'topic': _topicName,
+      'topic_path': widget.topicFilePath,
+      'session_id': _remoteSessionId,
+      'exercise_id': q.exerciseId,
+      'question_index': currentQuestionIndex,
+      'question_count': lesson.length,
+      'question_type': q.type,
+      'role': item.role.name,
+      'attempt': item.attempt,
+      'tibetan': q.wordTibetan,
+      'options': q.options,
+      'option_ids': q.optionIds,
+      'correct_index': q.correctAnswerIndex,
+      'style': _style.name,
+    });
+  }
+
   void _trackQuit() {
     if (_completed || _questionCount == 0) return;
     Analytics.track('lesson_quit', {
@@ -111,6 +137,9 @@ class _QuizScreenState extends State<QuizScreen>
       'topic_path': widget.topicFilePath,
       'question_index': currentQuestionIndex,
       'question_count': _questionCount,
+      'session_id': _remoteSessionId,
+      'exercise_id': _lesson?.current.question.exerciseId,
+      'answered_current': _lesson?.answeredCurrent,
       'score': score,
       'style': _style.name,
       'duration_s': DateTime.now().difference(_startedAt).inSeconds,
@@ -441,6 +470,14 @@ class _QuizScreenState extends State<QuizScreen>
       'english': answered.englishGloss,
       'chosen': answered.options[answerIndex],
       'correct_answer': answered.options[answered.correctAnswerIndex],
+      // Every option in the order shown, the pick and the right one.
+      'options': answered.options,
+      'option_ids': answered.optionIds,
+      'chosen_index': answerIndex,
+      'correct_index': answered.correctAnswerIndex,
+      'answer_text': answerText,
+      'exercise_id': answered.exerciseId,
+      'session_id': _remoteSessionId,
       'response_ms': responseMs,
       'role': item.role.name,
       'attempt': item.attempt,
@@ -817,6 +854,7 @@ class _QuizScreenState extends State<QuizScreen>
               final item = lesson.current;
               final question = item.question;
               _autoPlayPrompt(question);
+              _logShown(item, lesson);
 
               return Stack(
                 children: [
