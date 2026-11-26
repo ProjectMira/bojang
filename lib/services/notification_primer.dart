@@ -33,18 +33,19 @@ class PrimerPolicy {
     return true;
   }
 
-  /// Whether the OS prompt can still change anything. iOS shows it only
-  /// while undecided. Android 13+ reports "denied" until it is granted and
-  /// shows the prompt again unless the learner refused it twice.
+  /// Whether the OS prompt can still change anything. iOS shows it while
+  /// undecided, and once more over the provisional (quiet) authorization
+  /// PushService takes at first launch, to upgrade it to banners. Android
+  /// 13+ reports "denied" until it is granted and shows the prompt again
+  /// unless the learner refused it twice.
   static bool canPromptFor(AuthorizationStatus? status, TargetPlatform platform) {
     if (status == null) return false;
-    if (status == AuthorizationStatus.authorized ||
-        status == AuthorizationStatus.provisional) {
-      return false;
-    }
+    if (status == AuthorizationStatus.authorized) return false;
     if (platform == TargetPlatform.iOS) {
-      return status == AuthorizationStatus.notDetermined;
+      return status == AuthorizationStatus.notDetermined ||
+          status == AuthorizationStatus.provisional;
     }
+    if (status == AuthorizationStatus.provisional) return false;
     return true;
   }
 

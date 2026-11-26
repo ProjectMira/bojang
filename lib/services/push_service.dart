@@ -13,8 +13,15 @@ import 'api_service.dart';
 import 'notification_service.dart';
 
 /// Push notifications from the Bojang backend through Firebase Cloud
-/// Messaging: streak-at-risk reminders (the backend's hourly job) and
-/// announcements sent from the admin endpoint.
+/// Messaging: the daily 10 AM morning reminder and streak-at-risk reminders
+/// (the backend's hourly job), and announcements sent from the admin
+/// endpoint.
+///
+/// iOS: at first launch the app asks for *provisional* authorization
+/// (no prompt; pushes arrive quietly in Notification Centre), so every
+/// install gets a token and the morning reminder from day one. The full
+/// prompt (banners and sound) comes later, after the first lesson
+/// (NotificationPrimer) or from Settings.
 ///
 /// The FCM token is registered with the backend (`POST /notifications/devices`)
 /// for whoever is signed in, including anonymous learners, and again when the
@@ -27,6 +34,13 @@ class PushService {
   /// SharedPreferences key of the "Streak reminders" switch (default on).
   static const streakRemindersKey = 'push_streak_reminders';
 
+  /// SharedPreferences key of the "Daily reminder (10 AM)" switch (default
+  /// on). Sent as `morning_reminder`; the backend sends that push.
+  static const morningReminderKey = 'push_morning_reminder';
+
+  /// The old local daily reminder (NotificationService, time picked in
+  /// Settings). Retired once by [init]: the backend's 10 AM push replaces it.
+  static const _legacyLocalReminderKey = 'notifications_enabled';
   /// The tab a tapped notification asked for; MainNavigationScreen follows it.
   static final ValueNotifier<String?> requestedScreen = ValueNotifier(null);
 
@@ -68,11 +82,22 @@ class PushService {
         badge: true,
         sound: true,
       );
-      final settings = await messaging.getNotificationSettings();
+      var settings = await messaging.getNotificationSettings();
       Analytics.track('push_permission', {
         'status': settings.authorizationStatus.name,
         'source': 'launch',
       });
+      if (!kIsWeb &&
+          Platform.isIOS &&
+          settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+        // Quiet delivery, no prompt: the token registers for everyone.
+        settings = await messaging.requestPermission(provisional: true);
+        Analytics.track('push_permission', {
+          'status': settings.authorizationStatus.name,
+          'source': 'provisional',
+        });
+      }
+      await _retireLocalDailyReminder();
 
       FirebaseMessaging.onMessage.listen(_onForeground);
 
@@ -83,6 +108,23 @@ class PushService {
       await _register();
     } catch (e) {
       debugPrint('Push setup skipped: $e');
+    }
+  }
+
+  /// Two daily reminders would be one too many: an older build's local
+  /// daily reminder is cancelled once (the 10 AM push takes over).
+  Future<void> _retireLocalDailyReminder() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool(_legacyLocalReminderKey) != true) return;
+      await NotificationService().cancelAllNotifications();
+      await prefs.setBool(_legacyLocalReminderKey, false);
+      Analytics.track('local_daily_reminder_retired', {
+        'hour': prefs.getInt('notification_hour'),
+        'minute': prefs.getInt('notification_minute'),
+      });
+    } catch (e) {
+      debugPrint('Local reminder cleanup skipped: $e');
     }
   }
 
@@ -152,6 +194,7 @@ class PushService {
         'utc_offset_minutes': DateTime.now().timeZoneOffset.inMinutes,
         'app_version': info.version,
         'reminders_enabled': prefs.getBool(streakRemindersKey) ?? true,
+        'morning_reminder': prefs.getBool(morningReminderKey) ?? true,
       });
       if (ok) {
         _registeredToken = token;

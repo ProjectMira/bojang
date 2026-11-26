@@ -1,71 +1,61 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/analytics.dart';
-import '../services/notification_service.dart';
 import '../services/push_service.dart';
 import '../widgets/content_width.dart';
 
+/// Settings > Notifications: the two pushes the backend sends.
+///
+/// - Daily reminder (10 AM): the backend's morning push at 10:00 local time
+///   on days the learner has not practised yet (`morning_reminder`).
+/// - Streak reminders: the evening nudge and late streak saver when the
+///   streak would end at midnight (`reminders_enabled`).
+///
+/// Each switch is stored locally and re-sent with the FCM token
+/// (`POST /notifications/devices`), so it follows the learner to the server.
 class NotificationSettingsScreen extends StatefulWidget {
-  const NotificationSettingsScreen({Key? key}) : super(key: key);
+  const NotificationSettingsScreen({super.key});
 
   @override
-  _NotificationSettingsScreenState createState() =>
+  State<NotificationSettingsScreen> createState() =>
       _NotificationSettingsScreenState();
 }
 
 class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
-  bool _notificationsEnabled = false;
+  bool _morningReminder = true;
   bool _streakReminders = true;
-  TimeOfDay _selectedTime = const TimeOfDay(hour: 11, minute: 30);
-  final NotificationService _notificationService = NotificationService();
+  AuthorizationStatus? _permission;
 
   @override
   void initState() {
     super.initState();
-    _initializeNotifications();
     _loadSettings();
-  }
-
-  Future<void> _initializeNotifications() async {
-    await _notificationService.init();
   }
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final permission = await PushService.instance.permissionStatus();
     if (!mounted) return;
     setState(() {
-      _notificationsEnabled = prefs.getBool('notifications_enabled') ?? false;
+      _morningReminder = prefs.getBool(PushService.morningReminderKey) ?? true;
       _streakReminders = prefs.getBool(PushService.streakRemindersKey) ?? true;
-      final hour = prefs.getInt('notification_hour') ?? 11;
-      final minute = prefs.getInt('notification_minute') ?? 30;
-      _selectedTime = TimeOfDay(hour: hour, minute: minute);
+      _permission = permission;
     });
   }
 
-  Future<void> _saveSettings() async {
+  Future<void> _toggleMorningReminder(bool value) async {
+    setState(() => _morningReminder = value);
+    Analytics.track('setting_changed', {
+      'setting': 'morning_reminder',
+      'value': value,
+    });
+    Analytics.setPersonProperties({'morning_reminder': value});
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('notifications_enabled', _notificationsEnabled);
-    await prefs.setInt('notification_hour', _selectedTime.hour);
-    await prefs.setInt('notification_minute', _selectedTime.minute);
-  }
-
-  Future<void> _toggleNotifications(bool value) async {
-    setState(() {
-      _notificationsEnabled = value;
-    });
-    Analytics.track('notifications_toggled', {'enabled': value});
-    Analytics.setPersonProperties({'notifications_enabled': value});
-
-    if (value) {
-      // The app no longer asks at launch: switching a reminder on asks.
-      await _askPermission(exactAlarms: true);
-      await _notificationService.scheduleDailyNotification(_selectedTime);
-    } else {
-      await _notificationService.cancelAllNotifications();
-    }
-    
-    await _saveSettings();
+    await prefs.setBool(PushService.morningReminderKey, value);
+    if (value) await _askPermission();
+    await PushService.instance.syncSettings();
   }
 
   Future<void> _toggleStreakReminders(bool value) async {
@@ -74,69 +64,29 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       'setting': 'streak_reminders',
       'value': value,
     });
-    if (value) await _askPermission();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(PushService.streakRemindersKey, value);
+    if (value) await _askPermission();
     await PushService.instance.syncSettings();
   }
 
-  Future<void> _askPermission({bool exactAlarms = false}) async {
+  /// Turning a reminder on asks for banners if iOS can still show the
+  /// prompt (undecided, or only quiet provisional delivery so far).
+  Future<void> _askPermission() async {
     if (kIsWeb) return;
-    try {
-      await _notificationService.requestPermissions(exactAlarms: exactAlarms);
-    } catch (e) {
-      debugPrint('Notification permission request failed: $e');
+    final status = _permission;
+    if (status == AuthorizationStatus.authorized ||
+        status == AuthorizationStatus.denied) {
+      return;
     }
+    await PushService.instance.requestPermission(source: 'settings');
+    final after = await PushService.instance.permissionStatus();
+    if (mounted) setState(() => _permission = after);
   }
-
-  Future<void> _selectTime() async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: _selectedTime,
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != _selectedTime) {
-      setState(() {
-        _selectedTime = picked;
-      });
-      Analytics.track('reminder_time_changed', {
-        'hour': picked.hour,
-        'minute': picked.minute,
-        'notifications_enabled': _notificationsEnabled,
-      });
-      Analytics.setPersonProperties({
-        'reminder_time':
-            '${picked.hour.toString().padLeft(2, '0')}:'
-            '${picked.minute.toString().padLeft(2, '0')}',
-      });
-      
-      await _saveSettings();
-      
-      // If notifications are enabled, reschedule with new time
-      if (_notificationsEnabled) {
-        await _notificationService.scheduleDailyNotification(_selectedTime);
-      }
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Reminder time updated to ${_selectedTime.format(context)}'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-  }
-
 
   @override
   Widget build(BuildContext context) {
+    final blocked = _permission == AuthorizationStatus.denied;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notification Settings'),
@@ -154,18 +104,19 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Get reminded to learn Tibetan every day at ${_selectedTime.format(context)}',
-              style: const TextStyle(
+            const Text(
+              'Norbu sends a nudge at 10 AM your time to learn a little '
+              'Tibetan. Days you have already practised are skipped.',
+              style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
               ),
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('Enable Daily Reminder'),
-              value: _notificationsEnabled,
-              onChanged: _toggleNotifications,
+              title: const Text('Daily reminder (10 AM)'),
+              value: _morningReminder,
+              onChanged: _toggleMorningReminder,
             ),
             SwitchListTile(
               title: const Text('Streak reminders'),
@@ -175,18 +126,17 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               value: _streakReminders,
               onChanged: _toggleStreakReminders,
             ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _selectTime,
-              icon: const Icon(Icons.access_time),
-              label: Text('Change Time (${_selectedTime.format(context)})'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
+            if (blocked) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Notifications are turned off for Bojang. To get reminders, '
+                'allow them in the iPhone Settings app under Notifications.',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
-            ),
+            ],
           ],
         ),
       ),),
     );
   }
-} 
+}
