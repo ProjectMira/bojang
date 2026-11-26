@@ -168,17 +168,18 @@ deletes its rows.
 | `achievements_viewed` | settings | |
 | `rate_app_tapped` / `about_opened` / `privacy_opened` / `made_by_opened` | settings / profile | |
 | `api_error` | api service | `endpoint`, `method`, `status`, `error` |
-| `push_permission` | push service | `status` (authorized/denied/provisional/notDetermined), `source` (`launch`: read without asking; `primer_streak` / `primer_freeze`: OS prompt after the primer; `settings`) |
+| `push_permission` | push service | `status` (authorized/denied/provisional/notDetermined), `source` (`launch`: read without asking; `primer_firstLesson` / `primer_streak` / `primer_freeze`: OS prompt after the primer's "Allow"; `settings`). Never asked at launch or in onboarding (`onboarding` is from older builds) |
 | `push_token_registered` | push service | `refresh` |
 | `push_token_unavailable` | push service | `reason` |
 | `push_received` | push service (app open) | `campaign`, `screen`, `line_id`, `foreground` |
-| `push_opened` | push service | `campaign`, `screen` |
+| `push_opened` | push service, any tapped notification: the push that started the app (`getInitialMessage`), one tapped while it was in the background (`onMessageOpenedApp`), and local notifications (Android's copy of a push shown while the app was open, the daily reminder) | `kind` (`reminder`/`streak_saver` from the push's data, `daily_reminder`, or `local`), `screen` (tab it opens: `home`/`streak`/`games`/`profile`), `campaign`, `state`, `line_id`, `notification_id`, `launch` (`cold`/`background`). Counted once per FCM message id |
+| `push_open_report_failed` | push service | `notification_id` — `POST /notifications/opened` failed (it waits up to 30 s for the session to be restored first), so `push_notifications.opened_at` stays empty for that push |
 | `notification_opened` | push service (any push tapped) | `campaign` (`streak_at_risk`, `streak_saver`, or an admin campaign), `kind` (`reminder`/`streak_saver`), `state` (`not_started`/`evening`/`late`/`frozen`/`earn_back`), `line_id` (copy line, e.g. `ev_03`), `notification_id`. Compare open rates per `line_id` against the backend's `server_push_sent` |
-| `notification_primer_shown` | notification primer (the first session-end ask, after the streak celebration; games and speed quiz call it directly) | `moment` (`streak`/`freeze`), `ask` (1-3; at most 3 asks, 3+ days apart, only while the OS prompt can still be shown) |
-| `notification_primer_answered` | notification primer | `moment`, `ask`, `choice` (`turn_on`/`maybe_later`) |
+| `notification_primer_shown` | notification primer, the in-app explanation before the OS prompt: the first session-end ask after the learner's first finished lesson (`firstLesson`, "Get a daily reminder to keep your streak?"), later after a streak celebration; games and speed quiz call it directly | `moment` (`firstLesson`/`streak`/`freeze`), `ask` (1-3; at most 3 asks, 3+ days apart, only while the OS prompt can still be shown) |
+| `notification_primer_answered` | notification primer | `moment`, `ask`, `choice` (`turn_on` = "Allow", then the OS prompt / `maybe_later` = "Not now" or dismissed) |
 | `onboarding_started` | onboarding (new installs only; kill switch `onboarding`) | — |
-| `onboarding_step_viewed` | onboarding, each step shown (funnel and drop-off) | `step` (`hello`/`motivation`/`knowledge`/`voice`/`goal`/`notifications`), `index`, `count`, `ms` since start |
-| `onboarding_answered` | onboarding, one-tap answer | `step`, `answer` (motivation `heritage`/`buddhist`/`travel`/`curious`; knowledge `none`/`speak_some`/`can_read`/`conversational`; voice id; goal lessons a day 1/2/3/5; notifications `turn_on`/`maybe_later`; hello `start`) |
+| `onboarding_step_viewed` | onboarding, each step shown (funnel and drop-off) | `step` (`hello`/`motivation`/`knowledge`/`voice`/`goal`; `notifications` only in older builds), `index`, `count`, `ms` since start |
+| `onboarding_answered` | onboarding, one-tap answer | `step`, `answer` (motivation `heritage`/`buddhist`/`travel`/`curious`; knowledge `none`/`speak_some`/`can_read`/`conversational`; voice id; goal lessons a day 1/2/3/5; hello `start`; notifications `turn_on`/`maybe_later` only in older builds) |
 | `onboarding_back` | onboarding, Back (button or system back) | `step` left, `index`, `count`, `ms` |
 | `onboarding_skipped` | onboarding, Skip (leaves for Home with defaults) | `step`, `index`, `count`, `ms` |
 | `onboarding_backgrounded` | onboarding, app left the foreground mid-flow (drop-off) | `step`, `index`, `count`, `ms` |

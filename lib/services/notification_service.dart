@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'dart:convert';
 import 'dart:io';
 import '../utils/yak_lines.dart';
 import 'analytics.dart';
+import 'push_service.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -38,7 +40,20 @@ class NotificationService {
 
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
+      onDidReceiveNotificationResponse: (response) =>
+          _onTapped(response.payload, launch: 'background'),
     );
+    // A local notification (the daily reminder, or a push Android showed
+    // while the app was open) that started the app.
+    try {
+      final launch =
+          await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+      if (launch?.didNotificationLaunchApp ?? false) {
+        _onTapped(launch!.notificationResponse?.payload, launch: 'cold');
+      }
+    } catch (e) {
+      debugPrint('Notification launch details unavailable: $e');
+    }
 
     // Channel for pushes from the backend (FCM android channel_id).
     if (Platform.isAndroid) {
@@ -90,9 +105,33 @@ class NotificationService {
     importance: Importance.high,
   );
 
+  /// The daily reminder's payload, so its taps are counted as push opens.
+  static const dailyReminderPayload = '{"kind":"daily_reminder","screen":"home"}';
+
+  /// A tapped local notification: its payload is the push's data (or the
+  /// daily reminder's), handed to [PushService.handleOpened].
+  static void _onTapped(String? payload, {required String launch}) {
+    var data = <String, dynamic>{};
+    if (payload != null && payload.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(payload);
+        if (decoded is Map<String, dynamic>) data = decoded;
+      } catch (_) {
+        // Not ours: still an open.
+      }
+    }
+    data.putIfAbsent('kind', () => 'local');
+    PushService.instance.handleOpened(data, launch: launch);
+  }
+
   /// Shows a push that arrived while the app is open (Android only; iOS
-  /// shows it itself).
-  Future<void> showNow(String title, String body) async {
+  /// shows it itself). [pushData] is the push's data, kept as the payload
+  /// so a tap is recorded like a tap on the push itself.
+  Future<void> showNow(
+    String title,
+    String body, {
+    Map<String, dynamic> pushData = const {},
+  }) async {
     await flutterLocalNotificationsPlugin.show(
       DateTime.now().millisecondsSinceEpoch ~/ 1000 % 100000 + 1000,
       title,
@@ -106,6 +145,7 @@ class NotificationService {
           priority: Priority.high,
         ),
       ),
+      payload: jsonEncode(pushData),
     );
   }
 
@@ -155,6 +195,7 @@ class NotificationService {
       platformChannelSpecifics,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
+      payload: dailyReminderPayload,
     );
   }
 
