@@ -207,6 +207,7 @@ async def _seed() -> None:
     vocab = Path(ARGS.vocab_db) if ARGS.vocab_db else BACKEND / "bojang_local.db"
     if vocab.exists():
         await _copy_vocab(vocab)
+    await _media_fixtures()
 
 
 async def _copy_vocab(path: Path) -> None:
@@ -266,6 +267,60 @@ async def _copy_vocab(path: Path) -> None:
     print(f"copied {n} vocabulary words from {path}", flush=True)
 
 
+def _png(rgb: tuple[int, int, int], size: int = 64) -> bytes:
+    """A solid-colour PNG (test fixture, not content)."""
+    import struct
+    import zlib
+
+    raw = b"".join(b"\x00" + bytes(rgb) * size for _ in range(size))
+
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+
+    return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", size, size, 8, 2, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b""))
+
+
+def _silent_wav(ms: int = 300) -> bytes:
+    import struct
+
+    rate, n = 8000, 8000 * ms // 1000
+    data = b"\x80" * n
+    return (b"RIFF" + struct.pack("<I", 36 + n) + b"WAVEfmt " + struct.pack("<IHHIIHH", 16, 1, 1, rate, rate, 1, 8)
+            + b"data" + struct.pack("<I", n) + data)
+
+
+MEDIA_LEVELS = ("vocab-animals", "vocab-fruits", "vocab-colors", "vocab-family")
+
+
+async def _media_fixtures() -> None:
+    """Pictures and (silent) audio for a few topics, served locally, so the
+    picture and listening games have something to play with."""
+    from sqlalchemy import select
+
+    from database.engine import get_sessionmaker
+    from database.sql_models import LexemeORM
+
+    media = UPLOADS / "e2e-media"
+    media.mkdir(parents=True, exist_ok=True)
+    (media / "silence.wav").write_bytes(_silent_wav())
+    base = f"http://{ARGS.host}:{ARGS.port}/e2e-uploads/e2e-media"
+    palette = [(231, 76, 60), (46, 204, 113), (52, 152, 219), (241, 196, 15), (155, 89, 182), (230, 126, 34)]
+    n = 0
+    async with get_sessionmaker()() as session:
+        rows = (await session.execute(select(LexemeORM))).scalars().all()
+        for i, lex in enumerate(rows):
+            if not lex.audio_url:
+                lex.audio_url = f"{base}/silence.wav"
+            if lex.level_id in MEDIA_LEVELS and not lex.image_url:
+                name = f"pic-{i}.png"
+                (media / name).write_bytes(_png(palette[i % len(palette)]))
+                lex.image_url = f"{base}/{name}"
+                n += 1
+        await session.commit()
+    print(f"media fixtures: {n} pictures, silent audio for every word", flush=True)
+
+
 RIVALS = [("e2e-rival-1", "Rival One", 400), ("e2e-rival-2", "Rival Two", 250), ("e2e-rival-3", "Rival Three", 90)] + [
     (f"e2e-rival-{i}", f"Learner {i:02d}", 80 - i) for i in range(4, 28)
 ]
@@ -317,7 +372,6 @@ def main() -> None:
 
     from main import app
 
-    _seed_rivals(app)
     app.mount("/e2e-uploads", StaticFiles(directory=str(UPLOADS)), name="e2e-uploads")
 
     @app.get("/e2e/health")
@@ -325,20 +379,32 @@ def main() -> None:
         return {"ok": True, "db": str(DB_PATH)}
 
     # --- test-only helpers (this file never runs in production) ---
-    outage = {"on": False}
+    # Outage per learner (Firebase uid), so parallel runs don't see it;
+    # uid "*" takes the whole server down.
+    outage: set[str] = set()
 
     @app.middleware("http")
     async def _outage(request, call_next):
         from fastapi.responses import JSONResponse
 
-        if outage["on"] and not request.url.path.startswith("/e2e"):
-            return JSONResponse({"detail": "e2e outage"}, status_code=503)
+        if outage and not request.url.path.startswith("/e2e"):
+            uid = None
+            auth = request.headers.get("authorization", "")
+            if auth.lower().startswith("bearer "):
+                try:
+                    uid = _decode(auth.split()[1])["uid"]
+                except Exception:  # noqa: BLE001
+                    uid = None
+            if "*" in outage or (uid and uid in outage):
+                return JSONResponse({"detail": "e2e outage"}, status_code=503)
         return await call_next(request)
 
     @app.post("/e2e/outage")
     async def _set_outage(body: dict):
-        outage["on"] = bool(body.get("on"))
-        return outage
+        """{"uid": <firebase uid or "*">, "on": bool}"""
+        uid = body.get("uid") or "*"
+        (outage.add if body.get("on") else outage.discard)(uid)
+        return {"outage": sorted(outage)}
 
     @app.post("/e2e/xp")
     async def _grant_xp(body: dict):
@@ -362,6 +428,7 @@ def main() -> None:
             await session.commit()
         return {"ok": True}
 
+    _seed_rivals(app)
     print(f"E2E backend on http://{ARGS.host}:{ARGS.port} (db {DB_PATH})", flush=True)
     uvicorn.run(app, host=ARGS.host, port=ARGS.port, log_level="warning")
 

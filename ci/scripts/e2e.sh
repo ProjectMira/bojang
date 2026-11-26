@@ -17,6 +17,10 @@
 #      lipo failure of `flutter build ios --simulator` on Xcode 27) and
 #      saves a simulator screenshot at every "SHOT:<name>" the tests print.
 #
+# --external-services (or E2E_EXTERNAL_SERVICES=1): use a backend and
+# emulator that are already running (ci/scripts/e2e_services.sh), e.g. to
+# run several simulators in parallel.
+#
 # Environment: BOJANG_BACKEND (backend checkout, default ../bojang-backend
 # next to this repo), BOJANG_BACKEND_PY (python with the backend's
 # requirements, default <backend>/functions/venv/bin/python).
@@ -24,6 +28,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 DEVICE=""
+EXTERNAL="${E2E_EXTERNAL_SERVICES:-}"
 BACKEND="${BOJANG_BACKEND:-}"
 OUT="$ROOT/build/e2e"
 TESTS=()
@@ -32,6 +37,7 @@ while [ $# -gt 0 ]; do
     --device) DEVICE="$2"; shift 2 ;;
     --backend) BACKEND="$2"; shift 2 ;;
     --out) OUT="$2"; shift 2 ;;
+    --external-services) EXTERNAL=1; shift ;;
     *) TESTS+=("$1"); shift ;;
   esac
 done
@@ -41,7 +47,7 @@ if [ -z "$BACKEND" ]; then
     [ -d "$c/functions" ] && BACKEND="$(cd "$c" && pwd)" && break
   done
 fi
-[ -d "$BACKEND/functions" ] || { echo "backend checkout not found; pass --backend"; exit 2; }
+[ -n "$EXTERNAL" ] || [ -d "$BACKEND/functions" ] || { echo "backend checkout not found; pass --backend"; exit 2; }
 PY="${BOJANG_BACKEND_PY:-$BACKEND/functions/venv/bin/python}"
 [ -x "$PY" ] || PY="$(git -C "$BACKEND" rev-parse --path-format=absolute --git-common-dir)/../functions/venv/bin/python"
 
@@ -69,9 +75,9 @@ PIDS=()
 cleanup() {
   git -C "$ROOT" checkout -- ios/Runner/GoogleService-Info.plist 2>/dev/null || true
   for p in "${PIDS[@]:-}"; do [ -n "$p" ] && kill "$p" 2>/dev/null || true; done
-  # the emulator forks a java process
-  pkill -f "firebase.*emulators:start.*demo-bojang-e2e" 2>/dev/null || true
-  pkill -f "cloud-firestore-emulator|firebase-tools.*auth" 2>/dev/null || true
+  if [ -z "$EXTERNAL" ]; then # the emulator forks a java process
+    pkill -f "firebase.*emulators:start.*demo-bojang-e2e" 2>/dev/null || true
+  fi
   xcrun simctl status_bar "$DEVICE" clear 2>/dev/null || true
 }
 trap cleanup EXIT
@@ -81,7 +87,8 @@ wait_http() { # url seconds
   return 1
 }
 
-echo "backend: $BACKEND  device: $DEVICE  out: $RUN"
+echo "backend: ${EXTERNAL:+external (already running)}${EXTERNAL:-$BACKEND}  device: $DEVICE  out: $RUN"
+if [ -z "$EXTERNAL" ]; then
 "$PY" "$ROOT/ci/e2e/local_backend.py" --backend "$BACKEND/functions" --state-dir "$STATE" \
   --vocab-db "${BOJANG_VOCAB_DB:-$(git -C "$BACKEND" rev-parse --path-format=absolute --git-common-dir)/../functions/bojang_local.db}" \
   >"$RUN/backend.log" 2>&1 &
@@ -89,6 +96,7 @@ PIDS+=($!)
 (cd "$ROOT/ci/e2e" && firebase emulators:start --only auth --project demo-bojang-e2e \
   --config firebase.json >"$RUN/emulator.log" 2>&1) &
 PIDS+=($!)
+fi
 wait_http http://127.0.0.1:8787/e2e/health 90 || { tail -30 "$RUN/backend.log"; exit 1; }
 wait_http http://127.0.0.1:9099/ 90 || { tail -30 "$RUN/emulator.log"; exit 1; }
 

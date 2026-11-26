@@ -49,16 +49,22 @@ void _startCapture() {
   FlutterError.onError = (details) {
     final text = details.exceptionAsString();
     // Network images that 404 in the seeded data are not UI bugs.
-    if (text.contains('HTTP request failed') || text.contains('NetworkImage')) return;
+    if (text.contains('HTTP request failed') || text.contains('NetworkImage'))
+      return;
     _errors.add(text.split('\n').first);
   };
   for (final ch in _audioChannels) {
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(MethodChannel(ch), (call) async {
-      if (call.method == 'play' || call.method == 'resume' || call.method == 'setSourceUrl' ||
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(MethodChannel(ch), (
+      call,
+    ) async {
+      if (call.method == 'play' ||
+          call.method == 'resume' ||
+          call.method == 'setSourceUrl' ||
           call.method == 'setSourceBytes') {
         _audioCalls++;
       }
-      if (call.method == 'getDuration' || call.method == 'getCurrentPosition') return 1000;
+      if (call.method == 'getDuration' || call.method == 'getCurrentPosition')
+        return 1000;
       return null;
     });
   }
@@ -67,7 +73,10 @@ void _startCapture() {
 void _stopCapture() {
   FlutterError.onError = _savedOnError;
   for (final ch in _audioChannels) {
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(MethodChannel(ch), null);
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      MethodChannel(ch),
+      null,
+    );
   }
 }
 
@@ -88,7 +97,8 @@ Rect _globalRect(SemanticsNode node) {
   var rect = node.rect;
   SemanticsNode? n = node;
   while (n != null && n.parent != null) {
-    if (n.transform != null) rect = MatrixUtils.transformRect(n.transform!, rect);
+    if (n.transform != null)
+      rect = MatrixUtils.transformRect(n.transform!, rect);
     n = n.parent;
   }
   return rect;
@@ -99,7 +109,9 @@ String _nodeLabel(SemanticsData d) {
       .where((s) => s.trim().isNotEmpty)
       .map((s) => s.replaceAll('\n', ' ').trim());
   final s = parts.join(' / ');
-  return s.isEmpty ? '(unlabelled)' : (s.length > 60 ? '${s.substring(0, 57)}...' : s);
+  return s.isEmpty
+      ? '(unlabelled)'
+      : (s.length > 60 ? '${s.substring(0, 57)}...' : s);
 }
 
 /// Every enabled node with a tap action that is on screen.
@@ -108,11 +120,16 @@ List<_Tappable> _tappables(Size screen, Set<String> skipLabels) {
   final seen = <String, int>{};
   void visit(SemanticsNode node) {
     final d = node.getSemanticsData();
-    final disabled = d.hasFlag(SemanticsFlag.hasEnabledState) && !d.hasFlag(SemanticsFlag.isEnabled);
+    final disabled =
+        d.hasFlag(SemanticsFlag.hasEnabledState) &&
+        !d.hasFlag(SemanticsFlag.isEnabled);
     if (d.hasAction(SemanticsAction.tap) && !disabled && !node.isInvisible) {
       final rect = _globalRect(node);
-      final onScreen = rect.center.dx > 0 && rect.center.dy > 0 &&
-          rect.center.dx < screen.width && rect.center.dy < screen.height;
+      final onScreen =
+          rect.center.dx > 0 &&
+          rect.center.dy > 0 &&
+          rect.center.dx < screen.width &&
+          rect.center.dy < screen.height;
       final label = _nodeLabel(d);
       if (onScreen && !skipLabels.any((s) => label.contains(s))) {
         final n = seen[label] = (seen[label] ?? 0) + 1;
@@ -202,13 +219,21 @@ Future<ScreenReport> crawlScreen(
     var scrolls = 0;
     while (report.taps.length < maxTaps) {
       await wait(tester, 0.3);
-      final todo = _tappables(size, skipLabels).where((t) => !done.contains(t.key)).toList();
+      final todo =
+          _tappables(
+            size,
+            skipLabels,
+          ).where((t) => !done.contains(t.key)).toList();
       if (todo.isEmpty) {
         if (!scroll || scrolls >= 8) break;
         final scrollables = find.byType(Scrollable).hitTestable();
         if (scrollables.evaluate().isEmpty) break;
         final before = _fingerprint();
-        await tester.drag(scrollables.first, Offset(0, -size.height * 0.6), warnIfMissed: false);
+        await tester.drag(
+          scrollables.first,
+          Offset(0, -size.height * 0.6),
+          warnIfMissed: false,
+        );
         await wait(tester, 0.6);
         scrolls++;
         if (_fingerprint() == before) break;
@@ -264,11 +289,14 @@ void printCrawlReport() {
   ];
   final none = [
     for (final r in crawlReports)
-      for (final t in r.taps.where((t) => t.outcome == 'none')) '- ${r.screen}: "${t.label}"',
+      for (final t in r.taps.where((t) => t.outcome == 'none'))
+        '- ${r.screen}: "${t.label}"',
   ];
   if (none.isNotEmpty) {
     lines
-      ..add('Taps with no observable effect (review: dead button or effect the crawler cannot see):')
+      ..add(
+        'Taps with no observable effect (review: dead button or effect the crawler cannot see):',
+      )
       ..addAll(none)
       ..add('');
   }

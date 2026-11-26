@@ -7,6 +7,7 @@
 // channels are answered by spies here, which also record what the app asked
 // for (e.g. "no notification prompt during onboarding").
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bojang/main.dart' as app;
@@ -17,6 +18,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,6 +69,10 @@ const _imagePickerLegacy = 'plugins.flutter.io/image_picker';
 
 String? _pickedPhotoPath;
 
+/// iOS notification authorization as firebase_messaging encodes it:
+/// -1 not determined, 0 denied, 1 authorized, 2 provisional.
+int pushStatus = -1;
+
 /// Answers the permission-prompting plugins instead of iOS.
 void installSpies() {
   final messenger = binding.defaultBinaryMessenger;
@@ -97,10 +103,14 @@ void installSpies() {
     switch (call.method) {
       case 'Messaging#requestPermission':
       case 'Messaging#getNotificationSettings':
-        final provisional =
-            (call.arguments is Map && call.arguments['provisional'] == true);
+        if (call.method == 'Messaging#requestPermission') {
+          final provisional =
+              call.arguments is Map && call.arguments['provisional'] == true;
+          // A full request "shows the dialog" and the learner allows it.
+          pushStatus = provisional && pushStatus != 1 ? 2 : 1;
+        }
         return {
-          'authorizationStatus': provisional ? 3 : 1,
+          'authorizationStatus': pushStatus,
           'alert': 1,
           'announcement': 0,
           'badge': 1,
@@ -205,7 +215,10 @@ Future<void> launchApp(
   Future<void> Function(SharedPreferences prefs)? seed,
 }) async {
   installSpies();
-  if (fresh) await wipeState();
+  if (fresh) {
+    await wipeState();
+    pushStatus = -1;
+  }
   if (seed != null) await seed(await SharedPreferences.getInstance());
   if (!_servicesReady) {
     await app.initServices();
@@ -335,3 +348,45 @@ String? topRouteName(WidgetTester tester) {
   });
   return name;
 }
+
+// --- local backend helpers (ci/e2e/local_backend.py) ----------------------
+
+/// The signed-in Firebase uid (the anonymous emulator account by default).
+String? myUid() =>
+    Firebase.apps.isEmpty ? null : FirebaseAuth.instance.currentUser?.uid;
+
+Future<Map<String, dynamic>> backendPost(
+  String path,
+  Map<String, Object?> body,
+) async {
+  final res = await http.post(
+    Uri.parse('$apiBase$path'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode(body),
+  );
+  return jsonDecode(res.body) as Map<String, dynamic>;
+}
+
+/// Authenticated GET as the current learner; null on a non-200.
+Future<Map<String, dynamic>?> backendGetAsMe(String path) async {
+  final token = await FirebaseAuth.instance.currentUser?.getIdToken();
+  final res = await http.get(
+    Uri.parse('$apiBase/$path'),
+    headers: {if (token != null) 'Authorization': 'Bearer $token'},
+  );
+  if (res.statusCode != 200) return null;
+  return jsonDecode(res.body) as Map<String, dynamic>;
+}
+
+/// Gives the current learner [xp] this week (for leaderboard journeys).
+Future<void> grantXp(int xp) async {
+  final uid = myUid();
+  if (uid == null) fail('no signed-in learner to give XP to');
+  final r = await backendPost('/e2e/xp', {'uid': uid, 'xp': xp});
+  if (r['ok'] != true) fail('grantXp: $r');
+}
+
+/// Makes the backend answer 503 to the current learner only (or everyone
+/// with [everyone]), as if the server were unreachable.
+Future<void> setOutage(bool on, {bool everyone = false}) =>
+    backendPost('/e2e/outage', {'uid': everyone ? '*' : myUid(), 'on': on});
