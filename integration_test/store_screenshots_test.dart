@@ -111,10 +111,17 @@ void main() {
       await wait(4);
     }
 
-    Future<void> tapText(String text) async {
-      await tester.tap(find.text(text).first);
+    /// Waits (up to 20 s: words come over the network) for [finder], then
+    /// taps it.
+    Future<void> tapFound(Finder finder) async {
+      for (var i = 0; i < 200 && finder.evaluate().isEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.tap(finder.first);
       await wait(0.5);
     }
+
+    Future<void> tapText(String text) => tapFound(find.text(text));
 
     // 1. Home
     await open(const MainNavigationScreen());
@@ -180,10 +187,13 @@ void main() {
     await wait(2);
     await shot('08-flashcards');
 
-    // 9. Streak
+    // 9. Streak: the streak sheet from Home's streak chip (there is no
+    // Streak tab any more).
     await open(const MainNavigationScreen());
     await wait(4);
-    await tapText('Streak');
+    final semantics = tester.ensureSemantics();
+    await tapFound(find.bySemanticsLabel(RegExp('^Streak')));
+    semantics.dispose();
     await wait(1.5);
     await shot('09-streak');
 
