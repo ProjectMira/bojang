@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/event_policy.dart';
 import 'crash_reporting.dart';
@@ -94,7 +95,41 @@ class Analytics {
     // Every PostHog event (autocaptured rage clicks included) carries the
     // screen it happened on.
     tracker.onScreenChanged = (screen) => register('current_screen', screen);
+    // Taps, scrolls, swipes, dwell time and sessions go to PostHog as well as
+    // to the backend's app_events table.
+    tracker.mirror = _mirrorToPosthog;
     await tracker.start();
+  }
+
+  static const String _installKey = 'analytics_install_id';
+  static String? _install;
+
+  /// A random id made on first launch and kept for the life of the install.
+  static Future<String> installId() async {
+    if (_install != null) return _install!;
+    final prefs = await SharedPreferences.getInstance();
+    var id = prefs.getString(_installKey);
+    if (id == null) {
+      id = const Uuid().v4();
+      await prefs.setString(_installKey, id);
+    }
+    return _install = id;
+  }
+
+  static void _mirrorToPosthog(
+    String event,
+    String? screen,
+    Map<String, Object?> properties,
+  ) {
+    if (!_enabled) return;
+    final props = <String, Object>{
+      for (final e in properties.entries)
+        if (e.value != null) e.key: e.value!,
+      if (screen != null) 'screen': screen,
+    };
+    Posthog()
+        .capture(eventName: event, properties: props)
+        .catchError((Object e) => debugPrint('Analytics mirror failed: $e'));
   }
 
   static Future<void> _startPosthog() async {
@@ -134,6 +169,11 @@ class Analytics {
         'platform',
         kIsWeb ? 'web' : defaultTargetPlatform.name,
       );
+      // One id per install, on every event: ties a phone's events together
+      // even before (or without) an account.
+      final install = await installId();
+      await Posthog().register('install_id', install);
+      EventTracker.instance.record('install_id', properties: {'id': install});
     } catch (e) {
       debugPrint('Analytics init skipped: $e');
     }

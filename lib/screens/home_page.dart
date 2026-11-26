@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -53,6 +54,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _levelsLoading = true;
 
   LearningPath? _path;
+  // True until the first fetch has answered; meanwhile Home shows the
+  // path's outline rather than the classic topic page.
+  bool _pathLoading = true;
   bool _pathEnabled = LearningPathRepository.enabled;
   final GlobalKey _activeKey = GlobalKey();
   bool _scrolledToActive = false;
@@ -105,11 +109,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _loadPath() async {
     if (!_pathEnabled) return;
+    final watch = Stopwatch()..start();
+    final hadPath = _path != null;
+    // The copy on the device paints at once; the server's replaces it.
+    if (_path == null) {
+      final cached = await LearningPathRepository.cached();
+      if (cached != null && mounted && _path == null) {
+        Analytics.track('path_cache_shown', {'ms': watch.elapsedMilliseconds});
+        setState(() => _path = cached);
+        _scrollToActiveOnce();
+      }
+    }
     final path = await LearningPathRepository.load();
     if (!mounted) return;
-    setState(() => _path = path);
+    setState(() {
+      _path = path ?? _path;
+      _pathLoading = false;
+    });
     if (path != null) {
       Analytics.track('path_loaded', {
+        'ms': watch.elapsedMilliseconds,
+        'refresh': hadPath,
         'units': path.units.length,
         'active_node_id': path.activeNodeId,
         'daily_sessions': path.daily?.sessions,
@@ -206,6 +226,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Consumer<ProgressService>(
       builder: (context, progressService, child) {
         final path = _pathEnabled ? _path : null;
+        if (_pathEnabled && path == null && _pathLoading) {
+          return const _PathLoadingHome();
+        }
         return Scaffold(
           // With the path, the page is the mist the valleys sit in.
           backgroundColor:
@@ -249,7 +272,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 const SizedBox(height: AppSpacing.xl),
 
                                 const AnnouncementBanner(),
-                                const OfflineLessonsBanner(),
                                 const OfflineLessonsBanner(),
 
                                 _buildStatsStrip(context, progressService),
@@ -715,6 +737,72 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           style: AppTextStyles.poppins(
             fontSize: 15,
             fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Home while the first path is on its way: the same mist and top bar, with
+/// the outline of the trail, so the page never flashes the old topic list.
+class _PathLoadingHome extends StatelessWidget {
+  const _PathLoadingHome();
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = AppTokens.isDark(context);
+    final ghost = (dark ? Colors.white : Colors.black).withValues(alpha: 0.07);
+    return Scaffold(
+      backgroundColor: BiomePalette.mistFor(dark),
+      body: SafeArea(
+        bottom: false,
+        child: ContentWidth(
+          maxWidth: LearningPathView.columnWidth,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.gutter,
+              AppSpacing.lg,
+              AppSpacing.gutter,
+              0,
+            ),
+            // Clipped, not scrolled: the outline is only a placeholder.
+            child: ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              children: [
+                const HomeTopBar(daily: null),
+                const SizedBox(height: AppSpacing.xl),
+                Semantics(
+                  label: 'Loading your path',
+                  child: Container(
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: ghost,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                for (var i = 0; i < 4; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 36),
+                    child: Center(
+                      child: Transform.translate(
+                        offset: Offset(math.sin(i * math.pi / 3) * 70, 0),
+                        child: Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: ghost,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

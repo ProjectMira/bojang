@@ -201,7 +201,8 @@ deletes its rows.
 | `force_update_shown` | update gate (iOS, Android) | `installed_version`, `store_version` (empty for a server wall), `reason` (`storeRelease`: newer App Store version; `belowMinimumBuild`: below `/v1/config` `min_supported_build`) |
 | `force_update_tapped` | update gate (iOS, Android) | `installed_version`, `store_version`, `reason`, `opened` (bool: store app or web page opened) |
 | `experiment_exposed` | `Experiments.exposed` / `ExperimentExposure` (any screen) | `experiment` (`exp_*` key or PostHog flag), `arm`, `surface` (where it was shown), `source` (`remote_config`/`posthog`) |
-| `path_loaded` | home (learning path) | `units`, `active_node_id`, `daily_sessions`, `daily_goal` |
+| `path_loaded` | home (learning path) | `ms` (since Home asked), `refresh` (a path was already shown), `units`, `active_node_id`, `daily_sessions`, `daily_goal` |
+| `path_cache_shown` | home | `ms`: the path saved on the device painted before the server answered |
 | `path_step_started` | home / learn path | `node_id` (`lesson:<level>`, `practice:<unit>`, `unit_review:<unit>`, `alphabet_gate:script`, ...), `type`, `state` (active/unlocked/passed), `unit`, `session` (1-based), `total_sessions`, `source` (home_path/learn_path) |
 | `path_locked_tapped` | home / learn path | `node_id`, `type`, `active_node_id`, `source` |
 | `learn_mode_switched` | learn screen | `mode` (path/topics) |
@@ -218,6 +219,11 @@ deletes its rows.
 | `offline_lesson_started` | api service (lesson start with no network) | `level_id`, `available` (a prefetched session was played), `lessons_left` |
 | `offline_banner_viewed` | home offline banner | `state` (`offline`/`ready`), `lessons_ready`, `pending` |
 | `leaderboard_opened` | Games header trophy, Profile card, weekly result sheet | `source` (`games`/`profile`/`weekly_result`) |
+| `profile_setup_opened` | profile tab, leaderboard, edit button, avatar | `source`, `prompted` (opened by itself rather than tapped) |
+| `profile_setup_saved` | name + picture sheet | `source`, `figure`, `colour`, `name_length` |
+| `profile_setup_dismissed` | name + picture sheet | `source` |
+| `avatar_option_tapped` | name + picture sheet | `figure`, `colour` |
+| `profile_board_card_tapped` | profile leaderboard card | `rank`, `xp` |
 | `leaderboard_viewed` | leaderboard screen (first load) | `source`, `rank` (null: no XP or hidden), `xp`, `in_top` (top 50), `visible`, `learners` |
 | `leaderboard_result_shown` | Profile, first launch of a new week ("You finished #12") | `rank`, `xp`, `learners` (last week) |
 | `setting_changed` (`setting`: `show_on_leaderboard`) | Settings > Privacy | `value` |
@@ -309,3 +315,8 @@ push from `POST /jobs/streak-reminders`. The same sends are in the
 logged in `family_nudges`, not `push_notifications`, so they never use up the
 learner's streak-reminder cap; their push data carries `campaign`
 `family_nudge` and `screen` `profile`.
+
+
+## PostHog mirror (2.21)
+
+`tap`, `long_press`, `swipe`, `scroll`, `rage_tap`, `multi_touch`, `screen_exit` (`duration_ms` = time on that screen), `app_session_started`, `app_session_ended` (`duration_s`, `taps`, `screens`), `app_backgrounded` and `app_foregrounded` now go to PostHog as well as `app_events`, with a `screen` property. Every PostHog event carries `install_id`, a random id made on first launch (the `install_id` event records it in `app_events` too). Person properties `name` and `avatar` are set when the learner saves the profile sheet.

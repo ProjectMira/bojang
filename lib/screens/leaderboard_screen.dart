@@ -5,6 +5,8 @@ import '../services/analytics.dart';
 import '../services/social_service.dart';
 import '../theme/app_tokens.dart';
 import '../theme/motion.dart';
+import '../widgets/learner_avatar.dart';
+import '../widgets/profile_setup_sheet.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/content_width.dart';
 import '../widgets/yak_mascot.dart';
@@ -34,6 +36,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   void initState() {
     super.initState();
     _load(first: true);
+    // Learners see themselves on the board under their own name and picture.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final saved = await maybeAskForProfile(context, 'leaderboard');
+      if (saved && mounted) _load();
+    });
   }
 
   Future<void> _load({bool first = false}) async {
@@ -319,6 +326,8 @@ class _EntryRow extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(width: AppSpacing.sm),
+            LearnerAvatar(avatar: entry.avatar, size: 38),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(

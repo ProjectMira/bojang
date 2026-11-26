@@ -85,6 +85,26 @@ class EventTracker with WidgetsBindingObserver {
   Duration _screenAccum = Duration.zero;
   String? get currentScreen => _screen;
 
+  /// Interaction events that only this tracker records (Analytics.track
+  /// sends its own to PostHog). [mirror] gets each one as it is queued.
+  static const Set<String> mirrored = {
+    'tap',
+    'long_press',
+    'swipe',
+    'scroll',
+    'rage_tap',
+    'multi_touch',
+    'screen_exit',
+    'app_session_started',
+    'app_session_ended',
+    'app_backgrounded',
+    'app_foregrounded',
+  };
+
+  /// Copies [mirrored] events elsewhere (PostHog).
+  void Function(String event, String? screen, Map<String, Object?> properties)?
+  mirror;
+
   /// Called with each new session id (Analytics links it into PostHog).
   void Function(String sessionId)? onSessionStarted;
 
@@ -263,6 +283,9 @@ class EventTracker with WidgetsBindingObserver {
       'screen': screen ?? _screen,
       'properties': _jsonSafe(properties),
     });
+    if (mirror != null && mirrored.contains(event)) {
+      mirror!(event, screen ?? _screen, _jsonSafe(properties));
+    }
     if (_queue.length > _maxQueue) {
       _queue.removeRange(0, _queue.length - _maxQueue);
     }

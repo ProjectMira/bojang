@@ -11,23 +11,39 @@ import '../models/user.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/app_text_style.dart';
 import '../widgets/stat_chip.dart';
-import '../widgets/yak_mascot.dart';
 import 'settings_screen.dart';
 import 'auth_screen.dart';
 import '../widgets/content_width.dart';
 import '../services/feature_flags.dart';
 import '../services/social_service.dart';
 import '../widgets/family_streaks_card.dart';
-import '../widgets/leaderboard_entry_points.dart';
+import '../services/learner_profile.dart';
+import '../widgets/learner_avatar.dart';
+import '../widgets/profile_setup_sheet.dart';
+import '../widgets/weekly_board_card.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class ProfileScreenState extends State<ProfileScreen> {
+  final GlobalKey<WeeklyBoardCardState> _boardKey = GlobalKey();
+
+  /// The tab was opened: fresh board, and the name + picture ask.
+  Future<void> onShown() async {
+    _boardKey.currentState?.reload();
+    final saved = await maybeAskForProfile(context, 'profile_tab');
+    if (saved) _boardKey.currentState?.reload();
+  }
+
+  Future<void> _editProfile(String source) async {
+    final saved = await showProfileSetupSheet(context, source: source);
+    if (saved) _boardKey.currentState?.reload();
+  }
+
   String playerName = 'Tibetan Learner';
   User? currentUser;
   PackageInfo? _packageInfo;
@@ -35,6 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    LearnerProfile.instance.load();
     _loadUserData();
     _loadPackageInfo();
   }
@@ -138,65 +155,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _updatePlayerName() async {
-    final controller = TextEditingController(text: playerName);
-    final result = await showDialog<String>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: Theme.of(context).cardColor,
-            title: Text(
-              'Edit Name',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-            ),
-            content: TextField(
-              controller: controller,
-              style: GoogleFonts.poppins().copyWith(
-                fontFamilyFallback: const ['Jomolhari'],
-              ),
-              decoration: InputDecoration(
-                labelText: 'Your Name',
-                labelStyle: GoogleFonts.poppins().copyWith(
-                  fontFamilyFallback: const ['Jomolhari'],
-                ),
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Cancel',
-                  style: GoogleFonts.poppins().copyWith(
-                    fontFamilyFallback: const ['Jomolhari'],
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, controller.text),
-                child: Text(
-                  'Save',
-                  style: GoogleFonts.poppins(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                ),
-              ),
-            ],
-          ),
-    );
-
-    if (result != null && result.isNotEmpty) {
-      Analytics.track('player_name_changed', {'source': 'profile'});
-      await ApiService().updateUserProfile(displayName: result.trim());
-      setState(() {
-        playerName = result.trim();
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ProgressService>(
@@ -219,7 +177,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit),
-                onPressed: _updatePlayerName,
+                tooltip: 'Edit name and picture',
+                onPressed: () => _editProfile('profile_edit_button'),
               ),
               IconButton(
                 icon: const Icon(Icons.settings),
@@ -271,43 +230,110 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       children: [
                         const SizedBox(height: 20),
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 12,
-                                offset: Offset(0, 4),
+                        ListenableBuilder(
+                          listenable: LearnerProfile.instance,
+                          builder: (context, _) {
+                            final picked = LearnerProfile.instance.avatar;
+                            final photo = currentUser?.profileImageUrl;
+                            return Semantics(
+                              button: true,
+                              label: 'Change your picture',
+                              child: GestureDetector(
+                                key: const Key('profile-avatar'),
+                                onTap: () => _editProfile('profile_avatar'),
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Container(
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black26,
+                                            blurRadius: 12,
+                                            offset: Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child:
+                                          picked == null && photo != null
+                                              ? CircleAvatar(
+                                                radius: 53,
+                                                backgroundColor: Colors.white,
+                                                child: CircleAvatar(
+                                                  radius: 50,
+                                                  backgroundImage: NetworkImage(
+                                                    photo,
+                                                  ),
+                                                ),
+                                              )
+                                              : LearnerAvatar(
+                                                avatar: picked,
+                                                size: 106,
+                                                border: true,
+                                              ),
+                                    ),
+                                    Positioned(
+                                      right: -2,
+                                      bottom: 2,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: AppColors.primary,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.edit_rounded,
+                                          size: 16,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
-                          ),
-                          child: CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.white,
-                            backgroundImage:
-                                currentUser?.profileImageUrl != null
-                                    ? NetworkImage(
-                                      currentUser!.profileImageUrl!,
-                                    )
-                                    : null,
-                            // No photo yet: the yak stands in.
-                            child:
-                                currentUser?.profileImageUrl == null
-                                    ? const YakMascot(size: 86, showBody: false)
-                                    : null,
-                          ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          playerName,
-                          style: AppTextStyles.poppins(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                        ListenableBuilder(
+                          listenable: LearnerProfile.instance,
+                          builder: (context, _) {
+                            final name = LearnerProfile.instance.name;
+                            if (name == null &&
+                                playerName == 'Tibetan Learner') {
+                              return TextButton.icon(
+                                key: const Key('profile-add-name'),
+                                onPressed:
+                                    () => _editProfile('profile_add_name'),
+                                icon: const Icon(
+                                  Icons.add_rounded,
+                                  color: Colors.white,
+                                ),
+                                label: Text(
+                                  'Add your name',
+                                  style: AppTextStyles.poppins(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              );
+                            }
+                            return Text(
+                              name ?? playerName,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.poppins(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 8),
                         if (currentUser?.email != null)
@@ -384,6 +410,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
 
+                  // This week's board, first thing under the header.
+                  ValueListenableBuilder<int>(
+                    valueListenable: FeatureFlags.instance.changes,
+                    builder: (context, _, child) {
+                      if (!SocialService.leaderboardEnabled) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+                        child: WeeklyBoardCard(key: _boardKey),
+                      );
+                    },
+                  ),
+
                   // Stats Section
                   Padding(
                     padding: const EdgeInsets.all(20),
@@ -437,24 +477,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
 
                         const SizedBox(height: 16),
-
-                        ValueListenableBuilder<int>(
-                          valueListenable: FeatureFlags.instance.changes,
-                          builder: (context, _, child) {
-                            if (!SocialService.leaderboardEnabled) {
-                              return const SizedBox.shrink();
-                            }
-                            return _buildSettingsCard(
-                              context,
-                              'Weekly leaderboard',
-                              'See where your XP puts you this week',
-                              Icons.emoji_events,
-                              () => openLeaderboard(context, 'profile'),
-                            );
-                          },
-                        ),
-
-                        const SizedBox(height: 32),
 
                         const FamilyStreaksCard(),
 

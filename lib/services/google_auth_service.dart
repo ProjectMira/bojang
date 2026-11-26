@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,7 @@ import 'analytics.dart';
 import 'app_config.dart';
 import 'api_service.dart';
 import 'apple_sign_in.dart';
+import 'learner_profile.dart';
 import 'firebase_account_link.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -342,6 +344,7 @@ class GoogleAuthService {
 
   // Sign out
   Future<void> signOut() async {
+    unawaited(LearnerProfile.instance.clear());
     try {
       if (_isInitialized) {
         await _googleSignIn?.signOut();

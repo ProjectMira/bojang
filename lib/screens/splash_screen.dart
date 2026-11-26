@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/learning_path_repository.dart';
 import '../services/onboarding_service.dart';
 import '../services/reading_help.dart';
 import 'onboarding_screen.dart';
@@ -143,6 +144,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         'auth_provider': user?.authProvider.name,
         'is_anonymous': user == null ? anonymous : null,
       });
+      // Home opens on the path: start fetching it while the splash fades.
+      LearningPathRepository.prefetch();
       // Onboarding answers given offline (or before the account existed).
       unawaited(OnboardingService.instance.syncPending());
     } catch (e) {

@@ -27,8 +27,24 @@ class LearningPathRepository {
   static bool get enabled =>
       FeatureFlags.instance.config.flagBool(flag, fallback: true);
 
+  /// A fetch the splash started, so Home finds the path already on its way.
+  static Future<LearningPath?>? _inFlight;
+
+  /// Starts fetching the path now (splash, once sign-in is done). The next
+  /// [load] picks the result up instead of starting its own request.
+  static void prefetch() {
+    _inFlight ??= _fetchFresh();
+  }
+
   /// The path from the server, else the cached one, else null.
   static Future<LearningPath?> load() async {
+    final pending = _inFlight;
+    _inFlight = null;
+    final fresh = await (pending ?? _fetchFresh());
+    return fresh ?? cached();
+  }
+
+  static Future<LearningPath?> _fetchFresh() async {
     try {
       final json = await fetchPath();
       if (json != null && json['units'] is List) {
@@ -41,7 +57,7 @@ class LearningPathRepository {
     } catch (e) {
       debugPrint('Learning path fetch failed: $e');
     }
-    return cached();
+    return null;
   }
 
   static Future<LearningPath?> cached() async {
@@ -78,6 +94,7 @@ class LearningPathRepository {
 
   @visibleForTesting
   static void debugReset() {
+    _inFlight = null;
     fetchPath = () => ApiService().getLearningPath();
     fetchReview = () => ApiService().getReviewSummary();
   }

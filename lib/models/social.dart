@@ -15,6 +15,7 @@ class WeeklyEntry {
     required this.displayName,
     required this.xp,
     this.isMe = false,
+    this.avatar,
   });
 
   final int rank;
@@ -22,11 +23,15 @@ class WeeklyEntry {
   final int xp;
   final bool isMe;
 
+  /// Drawn avatar key (see LearnerAvatar), null for the default yak.
+  final String? avatar;
+
   factory WeeklyEntry.fromJson(Map<String, dynamic> json) => WeeklyEntry(
     rank: _int(json['rank']),
     displayName: (json['display_name'] ?? '').toString(),
     xp: _int(json['xp']),
     isMe: _bool(json['is_me']),
+    avatar: json['avatar'] as String?,
   );
 }
 
@@ -37,6 +42,7 @@ class WeeklyMe {
     this.visible = true,
     this.inTop = false,
     this.displayName = '',
+    this.avatar,
   });
 
   /// Null with no XP this week, or when the learner is hidden.
@@ -45,6 +51,7 @@ class WeeklyMe {
   final bool visible;
   final bool inTop;
   final String displayName;
+  final String? avatar;
 
   factory WeeklyMe.fromJson(Map<String, dynamic> json) => WeeklyMe(
     rank: _intOrNull(json['rank']),
@@ -52,6 +59,7 @@ class WeeklyMe {
     visible: _bool(json['visible'], true),
     inTop: _bool(json['in_top']),
     displayName: (json['display_name'] ?? '').toString(),
+    avatar: json['avatar'] as String?,
   );
 }
 
@@ -81,6 +89,7 @@ class WeeklyBoard {
       displayName: me.displayName,
       xp: me.xp,
       isMe: true,
+      avatar: me.avatar,
     );
   }
 

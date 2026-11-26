@@ -33,6 +33,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   static const _tabNames = ['home', 'practice', 'games', 'profile'];
 
   final GlobalKey<PracticeScreenState> _practiceKey = GlobalKey();
+  final GlobalKey<ProfileScreenState> _profileKey = GlobalKey();
 
   @override
   void initState() {
@@ -103,13 +104,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     if (changed && _tabNames[index] == 'practice') {
       _practiceKey.currentState?.reload();
     }
+    if (changed && _tabNames[index] == 'profile') {
+      _profileKey.currentState?.onShown();
+    }
   }
 
   late final List<Widget> _screens = [
     const HomePage(),
     PracticeScreen(key: _practiceKey),
     const ExtraGamesScreen(),
-    const ProfileScreen(),
+    ProfileScreen(key: _profileKey),
   ];
 
   static const List<_TabSpec> _tabs = [

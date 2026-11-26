@@ -218,9 +218,11 @@ class ApiService {
     String? displayName,
     String? nativeLang,
     String? targetLang,
+    String? avatar,
   }) async {
     final body = <String, dynamic>{
       if (displayName != null) 'display_name': displayName,
+      if (avatar != null) 'avatar': avatar,
       if (nativeLang != null) 'native_lang': nativeLang,
       if (targetLang != null) 'target_lang': targetLang,
     };
