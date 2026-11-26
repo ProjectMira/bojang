@@ -93,15 +93,17 @@ SemanticsNode? _root() {
   return view.owner?.semanticsOwner?.rootSemanticsNode;
 }
 
-Rect _globalRect(SemanticsNode node) {
+/// The node's rect in logical screen coordinates: every transform up to and
+/// including the root's (which scales to physical pixels), then back to
+/// logical pixels.
+Rect _globalRect(SemanticsNode node, double dpr) {
   var rect = node.rect;
   SemanticsNode? n = node;
-  while (n != null && n.parent != null) {
-    if (n.transform != null)
-      rect = MatrixUtils.transformRect(n.transform!, rect);
+  while (n != null) {
+    if (n.transform != null) rect = MatrixUtils.transformRect(n.transform!, rect);
     n = n.parent;
   }
-  return rect;
+  return Rect.fromLTRB(rect.left / dpr, rect.top / dpr, rect.right / dpr, rect.bottom / dpr);
 }
 
 String _nodeLabel(SemanticsData d) {
@@ -115,7 +117,7 @@ String _nodeLabel(SemanticsData d) {
 }
 
 /// Every enabled node with a tap action that is on screen.
-List<_Tappable> _tappables(Size screen, Set<String> skipLabels) {
+List<_Tappable> _tappables(Size screen, double dpr, Set<String> skipLabels) {
   final out = <_Tappable>[];
   final seen = <String, int>{};
   void visit(SemanticsNode node) {
@@ -124,14 +126,14 @@ List<_Tappable> _tappables(Size screen, Set<String> skipLabels) {
         d.hasFlag(SemanticsFlag.hasEnabledState) &&
         !d.hasFlag(SemanticsFlag.isEnabled);
     if (d.hasAction(SemanticsAction.tap) && !disabled && !node.isInvisible) {
-      final rect = _globalRect(node);
+      final rect = _globalRect(node, dpr);
       final onScreen =
           rect.center.dx > 0 &&
           rect.center.dy > 0 &&
           rect.center.dx < screen.width &&
           rect.center.dy < screen.height;
       final label = _nodeLabel(d);
-      if (onScreen && !skipLabels.any((s) => label.contains(s))) {
+      if (onScreen && !skipLabels.any((s) => s == 'Back' ? label == 'Back' : label.contains(s))) {
         final n = seen[label] = (seen[label] ?? 0) + 1;
         out.add(_Tappable('$label#$n', label, rect, node.id));
       }
@@ -189,6 +191,8 @@ Future<void> _popTo(WidgetTester tester, int count) async {
 
 /// Labels the crawler never taps: they act on the account or leave the app.
 const defaultSkip = <String>{
+  'Back', // the app bar's back button closes the screen being crawled
+
   'Sign out',
   'Log out',
   'Delete account',
@@ -222,6 +226,7 @@ Future<ScreenReport> crawlScreen(
       final todo =
           _tappables(
             size,
+            tester.view.devicePixelRatio,
             skipLabels,
           ).where((t) => !done.contains(t.key)).toList();
       if (todo.isEmpty) {
