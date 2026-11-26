@@ -326,10 +326,10 @@ Future<void> scrollTo(
   await wait(tester, 0.3);
 }
 
-String _slug(String s) => s
-    .replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-')
-    .toLowerCase()
-    .substring(0, s.length.clamp(0, 60));
+String _slug(String s) {
+  final slug = s.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-').toLowerCase();
+  return slug.substring(0, slug.length.clamp(0, 60));
+}
 
 /// Asks ci/scripts/e2e.sh to capture the simulator screen now.
 /// The script watches the log for SHOT:name lines.
