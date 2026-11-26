@@ -227,10 +227,14 @@ class ApiService {
     String? nativeLang,
     String? targetLang,
     String? avatar,
+    bool? showPlace,
+    Map<String, String?>? place,
   }) async {
     final body = <String, dynamic>{
       if (displayName != null) 'display_name': displayName,
       if (avatar != null) 'avatar': avatar,
+      if (showPlace != null) 'show_place': showPlace,
+      if (place != null) 'place': place,
       if (nativeLang != null) 'native_lang': nativeLang,
       if (targetLang != null) 'target_lang': targetLang,
     };

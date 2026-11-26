@@ -134,4 +134,54 @@ void main() {
       expect(p.photoUrl, isNull);
     });
   });
+
+  group('show my city', () {
+    test('off by default; on sends only city and country', () async {
+      final p = LearnerProfile.instance;
+      p.fetch = () async => null;
+      expect(p.showPlace, isFalse);
+      Map<String, String?>? sent;
+      bool? sentShow;
+      p.locate = ({bool ask = true}) async =>
+          {'city': 'Dharamsala', 'country_code': 'IN', 'country': 'India'};
+      p.pushPlace = (show, place) async {
+        sentShow = show;
+        sent = place;
+        return {'show_place': show, 'place': place};
+      };
+      expect(await p.setShowPlace(true), PlaceResult.ok);
+      expect(sentShow, isTrue);
+      expect(sent!.keys.toSet(), {'city', 'country_code', 'country'});
+      expect(p.place, 'Dharamsala, India');
+      expect(await p.setShowPlace(false), PlaceResult.ok);
+      expect(sentShow, isFalse);
+      expect(sent, isNull);
+      expect(p.place, isNull);
+    });
+
+    test('no location: stays off and sends nothing', () async {
+      final p = LearnerProfile.instance;
+      var pushed = false;
+      p.locate = ({bool ask = true}) async => null;
+      p.pushPlace = (show, place) async {
+        pushed = true;
+        return {};
+      };
+      expect(await p.setShowPlace(true), PlaceResult.noLocation);
+      expect(p.showPlace, isFalse);
+      expect(pushed, isFalse);
+    });
+
+    test('refresh follows the server opt-in', () async {
+      final p = LearnerProfile.instance;
+      p.fetch = () async => {
+        'show_place': true,
+        'place': {'city': 'Delhi', 'country_code': 'IN', 'country': 'India'},
+        'place_hidden': false,
+      };
+      await p.refresh();
+      expect(p.showPlace, isTrue);
+      expect(p.place, 'Delhi, India');
+    });
+  });
 }

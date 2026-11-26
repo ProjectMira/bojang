@@ -7,6 +7,7 @@ import '../services/learner_profile.dart';
 import '../theme/app_tokens.dart';
 import 'app_text_style.dart';
 import 'learner_avatar.dart';
+import 'show_place_switch.dart';
 
 /// Opens the name + picture sheet if the learner has not set them (and has
 /// not said "Later" recently). [source] is where it was opened from. True
@@ -298,6 +299,40 @@ class _ProfileSetupSheetState extends State<ProfileSetupSheet> {
                         ),
                       ),
                   ],
+                ),
+                const SizedBox(height: 16),
+                ListenableBuilder(
+                  listenable: LearnerProfile.instance,
+                  builder:
+                      (context, _) => Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Show my city on the leaderboard',
+                                  style: AppTextStyles.poppins(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: ink,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  showPlaceSubtitle(LearnerProfile.instance),
+                                  style: AppTextStyles.poppins(
+                                    fontSize: 13,
+                                    color: AppTokens.inkSoft(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const ShowPlaceSwitch(source: 'profile_setup'),
+                        ],
+                      ),
                 ),
                 const SizedBox(height: 24),
                 FilledButton(

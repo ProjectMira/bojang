@@ -204,16 +204,38 @@ class WeeklyBoardCardState extends State<WeeklyBoardCard> {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(
-                              e.isMe ? '${e.displayName} (you)' : e.displayName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.poppins(
-                                fontSize: 14,
-                                fontWeight:
-                                    e.isMe ? FontWeight.w700 : FontWeight.w500,
-                                color: Colors.white,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  e.isMe
+                                      ? '${e.displayName} (you)'
+                                      : e.displayName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.poppins(
+                                    fontSize: 14,
+                                    fontWeight:
+                                        e.isMe
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                if (e.place != null)
+                                  Text(
+                                    e.place!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyles.poppins(
+                                      fontSize: 11,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                           Text(

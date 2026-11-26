@@ -8,6 +8,8 @@ int _int(Object? v) => v is num ? v.toInt() : int.tryParse('$v') ?? 0;
 int? _intOrNull(Object? v) => v == null ? null : _int(v);
 bool _bool(Object? v, [bool fallback = false]) => v is bool ? v : fallback;
 DateTime? _date(Object? v) => v is String ? DateTime.tryParse(v) : null;
+String? _text(Object? v) =>
+    v is String && v.trim().isNotEmpty ? v.trim() : null;
 String? _url(Object? v) => v is String && v.startsWith('https://') ? v : null;
 
 class WeeklyEntry {
@@ -18,6 +20,7 @@ class WeeklyEntry {
     this.isMe = false,
     this.avatar,
     this.photoUrl,
+    this.place,
     this.token = '',
   });
 
@@ -34,6 +37,9 @@ class WeeklyEntry {
   /// none, or reports have hidden it.
   final String? photoUrl;
 
+  /// "Dharamsala, India" for learners who chose to show their city.
+  final String? place;
+
   /// Opaque weekly handle the server takes back to report or hide this
   /// person (never their uid). Empty for the learner's own pinned row.
   final String token;
@@ -47,6 +53,7 @@ class WeeklyEntry {
     isMe: _bool(json['is_me']),
     avatar: json['avatar'] as String?,
     photoUrl: _url(json['photo_url']),
+    place: _text(json['place']),
     token: (json['token'] ?? '').toString(),
   );
 }
@@ -74,6 +81,7 @@ class WeeklyMe {
     this.avatar,
     this.photoUrl,
     this.photoHidden = false,
+    this.place,
   });
 
   /// Null with no XP this week, or when the learner is hidden.
@@ -90,6 +98,9 @@ class WeeklyMe {
   /// True when reports have hidden the learner's photo pending review.
   final bool photoHidden;
 
+  /// The learner's own city line as others see it (null when not shown).
+  final String? place;
+
   factory WeeklyMe.fromJson(Map<String, dynamic> json) => WeeklyMe(
     rank: _intOrNull(json['rank']),
     xp: _int(json['xp']),
@@ -99,6 +110,7 @@ class WeeklyMe {
     avatar: json['avatar'] as String?,
     photoUrl: _url(json['photo_url']),
     photoHidden: _bool(json['photo_hidden']),
+    place: _text(json['place']),
   );
 }
 
@@ -130,6 +142,7 @@ class WeeklyBoard {
       isMe: true,
       avatar: me.avatar,
       photoUrl: me.photoUrl,
+      place: me.place,
     );
   }
 

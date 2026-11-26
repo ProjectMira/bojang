@@ -233,4 +233,28 @@ void main() {
       ]);
     });
   });
+
+  group('Board place', () {
+    test('entries and me carry the city line when shown', () {
+      final e = WeeklyEntry.fromJson({
+        'rank': 1,
+        'display_name': 'Pema',
+        'xp': 10,
+        'place': 'Dharamsala, India',
+        'token': 't',
+      });
+      expect(e.place, 'Dharamsala, India');
+      expect(
+        WeeklyEntry.fromJson({'rank': 1, 'display_name': 'X', 'xp': 1, 'place': '  '}).place,
+        isNull,
+      );
+      final board = WeeklyBoard.fromJson({
+        'week_start': '2026-11-23T00:00:00Z',
+        'week_end': '2026-11-30T00:00:00Z',
+        'entries': [],
+        'me': {'rank': 80, 'xp': 5, 'in_top': false, 'display_name': 'T', 'place': 'Delhi, India'},
+      })!;
+      expect(board.ownRowBelow!.place, 'Delhi, India');
+    });
+  });
 }

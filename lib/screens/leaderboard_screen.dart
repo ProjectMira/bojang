@@ -149,6 +149,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 title: const Text('Report name'),
                 onTap: () => Navigator.of(context).pop('name'),
               ),
+              if (entry.place != null)
+                ListTile(
+                  key: const Key('board-report-place'),
+                  leading: const Icon(Icons.flag_outlined),
+                  title: const Text('Report city'),
+                  onTap: () => Navigator.of(context).pop('place'),
+                ),
               ListTile(
                 key: const Key('board-hide'),
                 leading: const Icon(Icons.visibility_off_outlined),
@@ -187,12 +194,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
-                      child: Text(
-                        kind == 'photo'
-                            ? "What's wrong with this photo?"
-                            : "What's wrong with this name?",
-                        style: AppTextStyles.title(context),
-                      ),
+                      child: Text(switch (kind) {
+                        'photo' => "What's wrong with this photo?",
+                        'place' => "What's wrong with this city?",
+                        _ => "What's wrong with this name?",
+                      }, style: AppTextStyles.title(context)),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -446,8 +452,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               ],
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Everyone shares one board. Only your display name, picture '
-                'and XP are shown. Press and hold anyone to report or hide '
+                'Everyone shares one board. Only your display name, picture, '
+                'XP and (if you turn it on) your city are shown. Press and hold anyone to report or hide '
                 'them. You can hide yourself in Settings.',
                 textAlign: TextAlign.center,
                 style: AppTextStyles.caption(context),
@@ -646,7 +652,8 @@ class _EntryRow extends StatelessWidget {
     final accent = AppTokens.accent(AppPalette.blue, context);
     return Semantics(
       label:
-          'Rank ${entry.rank}, ${me ? 'you, ' : ''}${entry.displayName}, ${entry.xp} XP',
+          'Rank ${entry.rank}, ${me ? 'you, ' : ''}${entry.displayName}, '
+          '${entry.place != null ? '${entry.place}, ' : ''}${entry.xp} XP',
       excludeSemantics: true,
       customSemanticsActions:
           onActions == null
@@ -719,24 +726,41 @@ class _EntryRow extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Flexible(
-                      child: Text(
-                        entry.displayName,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            entry.displayName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.poppins(
+                              fontSize: me ? 16 : 15,
+                              fontWeight:
+                                  me ? FontWeight.w800 : FontWeight.w500,
+                              color: AppTokens.ink(context),
+                            ),
+                          ),
+                        ),
+                        if (me) ...[
+                          const SizedBox(width: AppSpacing.sm),
+                          const _YouChip(),
+                        ],
+                      ],
+                    ),
+                    if (entry.place != null)
+                      Text(
+                        entry.place!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.poppins(
-                          fontSize: me ? 16 : 15,
-                          fontWeight: me ? FontWeight.w800 : FontWeight.w500,
-                          color: AppTokens.ink(context),
+                          fontSize: 12,
+                          color: AppTokens.inkSoft(context),
                         ),
                       ),
-                    ),
-                    if (me) ...[
-                      const SizedBox(width: AppSpacing.sm),
-                      const _YouChip(),
-                    ],
                   ],
                 ),
               ),

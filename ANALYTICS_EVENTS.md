@@ -237,8 +237,9 @@ deletes its rows.
 | `leaderboard_viewed` | leaderboard screen (first load) | `source`, `rank` (null: no XP or hidden), `xp`, `in_top` (top 50), `visible`, `learners` |
 | `leaderboard_my_rank_tapped` | leaderboard, pinned "Your rank #N · XP" bar | `rank`, `in_top` |
 | `leaderboard_entry_menu_opened` | leaderboard, long-press or ⋯ on another learner's row | `rank` |
-| `leaderboard_report_sent` | leaderboard report sheet | `kind` (`photo`/`name`), `reason` (`inappropriate`/`offensive`/`impersonation`/`spam`/`other`), `hide`, `rank`, `success` |
+| `leaderboard_report_sent` | leaderboard report sheet | `kind` (`photo`/`name`/`place`), `reason` (`inappropriate`/`offensive`/`impersonation`/`spam`/`other`), `hide`, `rank`, `success` |
 | `leaderboard_hidden` | leaderboard, "Hide from my board" or report with "Also hide" | `rank`, `via` (`menu`/`report`), `success` (menu only) |
+| `leaderboard_place_toggled` | "Show my city on the leaderboard" (name + picture sheet, Settings › Privacy) | `enabled`, `source` (`profile_setup`/`settings`), `result` (`ok`/`noLocation`/`offline`) |
 | `leaderboard_unhidden` | leaderboard, "Show learners I hid" | `count` (null offline) |
 | `leaderboard_result_shown` | Profile, first launch of a new week ("You finished #12") | `rank`, `xp`, `learners` (last week) |
 | `setting_changed` (`setting`: `show_on_leaderboard`) | Settings > Privacy | `value` |

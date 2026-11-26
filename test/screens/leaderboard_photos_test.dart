@@ -152,4 +152,20 @@ void main() {
     expect(find.text('Report name'), findsNothing);
     expect(find.byTooltip('Report or hide'), findsNWidgets(2));
   });
+
+  testWidgets('a shown city is a second line and can be reported', (
+    tester,
+  ) async {
+    final board = _board(myRank: 2, count: 3);
+    (board['entries'] as List)[0]['place'] = 'Dharamsala, India';
+    final api = await _pump(tester, board);
+    expect(find.text('Dharamsala, India'), findsOneWidget);
+    await tester.longPress(find.text('Learner 1'));
+    await _settle(tester);
+    await tester.tap(find.byKey(const Key('board-report-place')));
+    await _settle(tester);
+    await tester.tap(find.byKey(const Key('board-reason-spam')));
+    await _settle(tester);
+    expect(api.reports.single['kind'], 'place');
+  });
 }
