@@ -58,11 +58,19 @@ enum AnswerOutcome { autoAdvanced, needsContinue, finished }
 /// Answers the question on screen. [right] picks the right option, otherwise
 /// a wrong one. Does not tap Continue.
 Future<void> answer(WidgetTester tester, {required bool right}) async {
-  final q = await waitForQuestion(tester);
-  if (find.byType(TracePad).evaluate().isNotEmpty && q.options.isEmpty) {
+  await waitForQuestion(tester);
+  // Decide from what is on screen, not from debugCurrentQuestion alone: just
+  // after Continue it can still be the previous question for a frame or two.
+  final shown = await waitForAny(tester, [
+    find.byType(TracePad),
+    find.byKey(const ValueKey('quiz-option-0')).hitTestable(),
+  ], timeout: 15);
+  if (shown == 0) {
     await _trace(tester);
     return;
   }
+  await wait(tester, 0.3);
+  final q = currentQuestion!;
   final n = q.options.length;
   final index = right ? q.correctAnswerIndex : (q.correctAnswerIndex + 1) % n;
   await tapIt(tester, find.byKey(ValueKey('quiz-option-$index')), settle: 0.2);
