@@ -87,7 +87,8 @@ deletes its rows.
 - **Person properties** (set after each lesson or game, and on load): `xp`, `level`,
   `current_streak`, `longest_streak`, `completed_levels`, `accuracy`, `dark_mode`, `language`,
   `voice`, `lesson_style`, `sound_effects`, `haptics`, `daily_target`, `weekly_goal`,
-  `notifications_enabled`, `reminder_time`.
+  `notifications_enabled`, `reminder_time` (both from the retired local daily reminder; older
+  builds), `morning_reminder` (Settings > Daily reminder (10 AM)).
 
 ## Events
 
@@ -165,22 +166,23 @@ deletes its rows.
 | `earn_back_completed` | progress | `streak` (restored), `previous_streak`, `repaired_days` |
 | `earn_back_expired` | progress | `streak`, `sessions_done` — the window ran out before enough lessons |
 | `earn_back_card_tapped` | home / streak screen | `source` (home/streak), `streak`, `sessions_done`, `days_left` |
-| `setting_changed` | settings / theme service | `setting`, `value` |
-| `notifications_toggled` | notification settings | `enabled` |
-| `reminder_time_changed` | notification settings | `hour`, `minute` |
+| `setting_changed` | settings / theme service; notification settings send `setting` `morning_reminder` (Daily reminder (10 AM)) and `streak_reminders` | `setting`, `value` |
+| `notifications_toggled` | notification settings, older builds (local daily reminder switch; removed in 2.21) | `enabled` |
+| `reminder_time_changed` | notification settings, older builds (local reminder time picker; removed in 2.21) | `hour`, `minute` |
+| `local_daily_reminder_retired` | push service, once per install that had the old local daily reminder on: it is cancelled because the backend's 10 AM push replaces it | `hour`, `minute` (the time it was set to) |
 | `notification_permission_result` | notification service (Settings reminder switches; never at launch) | `granted` |
 | `player_name_changed` | profile | |
 | `progress_exported` | settings | `success`, `reason` |
 | `achievements_viewed` | settings | |
 | `rate_app_tapped` / `about_opened` / `privacy_opened` / `made_by_opened` | settings / profile | |
 | `api_error` | api service | `endpoint`, `method`, `status`, `error` |
-| `push_permission` | push service | `status` (authorized/denied/provisional/notDetermined), `source` (`launch`: read without asking; `primer_firstLesson` / `primer_streak` / `primer_freeze`: OS prompt after the primer's "Allow"; `settings`). Never asked at launch or in onboarding (`onboarding` is from older builds) |
+| `push_permission` | push service | `status` (authorized/denied/provisional/notDetermined), `source` (`launch`: read without asking; `provisional`: iOS first launch, quiet provisional authorization requested with no prompt so every install registers a token; `primer_firstLesson` / `primer_streak` / `primer_freeze`: OS prompt after the primer's "Allow"; `settings`). Never asked at launch or in onboarding (`onboarding` is from older builds) |
 | `push_token_registered` | push service | `refresh` |
 | `push_token_unavailable` | push service | `reason` |
 | `push_received` | push service (app open) | `campaign`, `screen`, `line_id`, `foreground` |
-| `push_opened` | push service, any tapped notification: the push that started the app (`getInitialMessage`), one tapped while it was in the background (`onMessageOpenedApp`), and local notifications (Android's copy of a push shown while the app was open, the daily reminder) | `kind` (`reminder`/`streak_saver` from the push's data, `daily_reminder`, or `local`), `screen` (tab it opens: `home`/`streak`/`games`/`profile`), `campaign`, `state`, `line_id`, `notification_id`, `launch` (`cold`/`background`). Counted once per FCM message id |
+| `push_opened` | push service, any tapped notification: the push that started the app (`getInitialMessage`), one tapped while it was in the background (`onMessageOpenedApp`), and local notifications (Android's copy of a push shown while the app was open, the daily reminder) | `kind` (`morning_reminder`/`reminder`/`streak_saver` from the push's data, `daily_reminder`, or `local`), `screen` (tab it opens: `home`/`streak`/`games`/`profile`), `campaign`, `state`, `line_id`, `notification_id`, `launch` (`cold`/`background`). Counted once per FCM message id |
 | `push_open_report_failed` | push service | `notification_id` — `POST /notifications/opened` failed (it waits up to 30 s for the session to be restored first), so `push_notifications.opened_at` stays empty for that push |
-| `notification_opened` | push service (any push tapped) | `campaign` (`streak_at_risk`, `streak_saver`, or an admin campaign), `kind` (`reminder`/`streak_saver`), `state` (`not_started`/`evening`/`late`/`frozen`/`earn_back`), `line_id` (copy line, e.g. `ev_03`), `notification_id`. Compare open rates per `line_id` against the backend's `server_push_sent` |
+| `notification_opened` | push service (any push tapped) | `campaign` (`morning_reminder`, `streak_at_risk`, `streak_saver`, or an admin campaign), `kind` (`morning_reminder`/`reminder`/`streak_saver`), `state` (`morning`/`not_started`/`evening`/`late`/`frozen`/`earn_back`), `line_id` (copy line, e.g. `mo_05`, `ev_03`), `notification_id`. Compare open rates per `line_id` against the backend's `server_push_sent` |
 | `notification_primer_shown` | notification primer, the in-app explanation before the OS prompt: the first session-end ask after the learner's first finished lesson (`firstLesson`, "Get a daily reminder to keep your streak?"), later after a streak celebration; games and speed quiz call it directly | `moment` (`firstLesson`/`streak`/`freeze`), `ask` (1-3; at most 3 asks, 3+ days apart, only while the OS prompt can still be shown) |
 | `notification_primer_answered` | notification primer | `moment`, `ask`, `choice` (`turn_on` = "Allow", then the OS prompt / `maybe_later` = "Not now" or dismissed) |
 | `onboarding_started` | onboarding (new installs only; kill switch `onboarding`) | — |
@@ -309,10 +311,14 @@ Every answer of a graded lesson is also a row in the backend's
 (lexeme) id, answer, correct, the app's own verdict, `graded_by`
 (`server`/`client`), attempt, role, label and response time.
 
-`server_push_sent` (`notification_id`, `kind` reminder/streak_saver, `state`,
+`server_push_sent` (`notification_id`, `kind` morning_reminder/reminder/streak_saver, `state`,
 `line_id`, `streak`, `devices`, `delivered`, `ttl_s` seconds until the
-learner's local midnight, when the push expires): one per automated streak
-push from `POST /jobs/streak-reminders`. The same sends are in the
+push expires: the learner's local midnight, or 6 h for the morning push):
+one per automated push from `POST /jobs/streak-reminders`. The morning
+reminder (`kind` `morning_reminder`, data `screen` `home`) goes at 10:00
+local to every install that has not practised yet that day and has
+Settings > Daily reminder (10 AM) on; at most 3 automated pushes per local
+day (morning, streak reminder, streak saver). The same sends are in the
 `push_notifications` table with `opened_at`, set by the app's
 `POST /notifications/opened`.
 

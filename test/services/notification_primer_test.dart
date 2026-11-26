@@ -45,7 +45,8 @@ void main() {
       expect(PrimerPolicy.canPromptFor(AuthorizationStatus.notDetermined, ios), isTrue);
       expect(PrimerPolicy.canPromptFor(AuthorizationStatus.denied, ios), isFalse);
       expect(PrimerPolicy.canPromptFor(AuthorizationStatus.authorized, ios), isFalse);
-      expect(PrimerPolicy.canPromptFor(AuthorizationStatus.provisional, ios), isFalse);
+      // Provisional (quiet) at launch: the primer still upgrades it to banners.
+      expect(PrimerPolicy.canPromptFor(AuthorizationStatus.provisional, ios), isTrue);
       expect(PrimerPolicy.canPromptFor(AuthorizationStatus.denied, android), isTrue);
       expect(PrimerPolicy.canPromptFor(AuthorizationStatus.authorized, android), isFalse);
       expect(PrimerPolicy.canPromptFor(null, android), isFalse);
