@@ -39,45 +39,23 @@ final List<String> _errors = [];
 FlutterExceptionHandler? _savedOnError;
 int _audioCalls = 0;
 
-const _audioChannels = [
-  'xyz.luan/audioplayers',
-  'xyz.luan/audioplayers.global',
-];
-
+// Audio is not mocked: faking the audioplayers channel breaks its
+// per-player event channels. Clips are silent fixtures, so taps that only
+// play a sound show up as "none" in the report.
 void _startCapture() {
   _savedOnError = FlutterError.onError;
   FlutterError.onError = (details) {
     final text = details.exceptionAsString();
     // Network images that 404 in the seeded data are not UI bugs.
-    if (text.contains('HTTP request failed') || text.contains('NetworkImage'))
+    if (text.contains('HTTP request failed') || text.contains('NetworkImage')) {
       return;
+    }
     _errors.add(text.split('\n').first);
   };
-  for (final ch in _audioChannels) {
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(MethodChannel(ch), (
-      call,
-    ) async {
-      if (call.method == 'play' ||
-          call.method == 'resume' ||
-          call.method == 'setSourceUrl' ||
-          call.method == 'setSourceBytes') {
-        _audioCalls++;
-      }
-      if (call.method == 'getDuration' || call.method == 'getCurrentPosition')
-        return 1000;
-      return null;
-    });
-  }
 }
 
 void _stopCapture() {
   FlutterError.onError = _savedOnError;
-  for (final ch in _audioChannels) {
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(
-      MethodChannel(ch),
-      null,
-    );
-  }
 }
 
 class _Tappable {
@@ -161,6 +139,12 @@ List<_Tappable> _tappables(
     final ro = e.renderObject;
     if (ro is! RenderBox || !ro.hasSize || !ro.attached) continue;
     final rect = ro.localToGlobal(Offset.zero) & ro.size;
+    // A detector covering most of the screen (tap to dismiss the keyboard)
+    // is background, not a control.
+    if (e.widget is GestureDetector &&
+        rect.width * rect.height > screen.width * screen.height * 0.6) {
+      continue;
+    }
     final c = rect.center;
     if (c.dx <= 0 || c.dy <= 0 || c.dx >= screen.width || c.dy >= screen.height)
       continue;
