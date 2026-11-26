@@ -339,7 +339,8 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
         crossAxisCount: columns,
         crossAxisSpacing: 14,
         mainAxisSpacing: 14,
-        childAspectRatio: 1.18,
+        // Room for two-line names ("Syllables and the tsheg").
+        childAspectRatio: 1.05,
       ),
       itemCount: level.sublevels.length,
       itemBuilder: (context, index) {
@@ -435,47 +436,61 @@ class _TopicCardState extends State<_TopicCard> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: AppTokens.surface(context),
-                                borderRadius: BorderRadius.circular(14),
+                        // Shrinks rather than overflows with large text.
+                        child: LayoutBuilder(
+                          builder:
+                              (context, box) => FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: SizedBox(
+                                  width: box.maxWidth,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 44,
+                                        height: 44,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: AppTokens.surface(context),
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          topicEmoji(widget.sublevel.name),
+                                          style: const TextStyle(fontSize: 26),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        widget.sublevel.name,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                        style: AppTextStyles.poppins(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              isLocked
+                                                  ? AppTokens.inkSoft(context)
+                                                  : AppTokens.ink(context),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        widget.sublevel.wordCount > 0
+                                            ? '${widget.sublevel.wordCount} words'
+                                            : 'Lesson',
+                                        textAlign: TextAlign.center,
+                                        style: AppTextStyles.caption(context),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              child: Text(
-                                topicEmoji(widget.sublevel.name),
-                                style: const TextStyle(fontSize: 26),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              widget.sublevel.name,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.poppins(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    isLocked
-                                        ? AppTokens.inkSoft(context)
-                                        : AppTokens.ink(context),
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              widget.sublevel.wordCount > 0
-                                  ? '${widget.sublevel.wordCount} words'
-                                  : 'Lesson',
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.caption(context),
-                            ),
-                          ],
                         ),
                       ),
                       const SizedBox(height: 8),

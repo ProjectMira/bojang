@@ -263,14 +263,13 @@ class _LessonIntroScreenState extends State<LessonIntroScreen> {
               onAction: () => _startPractice(null),
             );
           }
+          // The sounds are the lesson (like a listening question), so
+          // they play even with sound effects (chimes) off.
           if (!_toured) {
             _toured = true;
-            final theme = context.read<ThemeService>();
-            if (theme.soundEffectsEnabled) {
-              WidgetsBinding.instance.addPostFrameCallback(
-                (_) => _startTour(lesson, via: 'auto'),
-              );
-            }
+            WidgetsBinding.instance.addPostFrameCallback(
+              (_) => _startTour(lesson, via: 'auto'),
+            );
           }
           return Column(
             children: [
