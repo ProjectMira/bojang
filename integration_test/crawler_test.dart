@@ -104,7 +104,7 @@ void main() {
     await crawlPushed('Streak', () async {
       await tab('Home');
       final semantics = tester.ensureSemantics();
-      await tapIt(tester, find.bySemanticsLabel(RegExp('^Streak')));
+      await tapIt(tester, find.bySemanticsLabel(RegExp('day streak')));
       semantics.dispose();
       final details = find.text('Streak details');
       if (details.evaluate().isNotEmpty) await tapIt(tester, details);

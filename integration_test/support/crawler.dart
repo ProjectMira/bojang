@@ -145,6 +145,10 @@ List<_Tappable> _tappables(
         rect.width * rect.height > screen.width * screen.height * 0.6) {
       continue;
     }
+    // The status bar strip (iOS "tap to scroll to top"), not a control.
+    if (e.widget is GestureDetector && rect.top <= 0 && rect.height < 80 && rect.width >= screen.width - 1) {
+      continue;
+    }
     final c = rect.center;
     if (c.dx <= 0 || c.dy <= 0 || c.dx >= screen.width || c.dy >= screen.height)
       continue;

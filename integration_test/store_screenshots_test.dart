@@ -192,7 +192,7 @@ void main() {
     await open(const MainNavigationScreen());
     await wait(4);
     final semantics = tester.ensureSemantics();
-    await tapFound(find.bySemanticsLabel(RegExp('^Streak')));
+    await tapFound(find.bySemanticsLabel(RegExp('day streak')));
     semantics.dispose();
     await wait(1.5);
     await shot('09-streak');
