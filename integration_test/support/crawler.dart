@@ -81,11 +81,10 @@ void _stopCapture() {
 }
 
 class _Tappable {
-  _Tappable(this.key, this.label, this.rect, this.id);
+  _Tappable(this.key, this.label, this.rect);
   final String key;
   final String label;
   final Rect rect;
-  final int id;
 }
 
 SemanticsNode? _root() {
@@ -93,59 +92,73 @@ SemanticsNode? _root() {
   return view.owner?.semanticsOwner?.rootSemanticsNode;
 }
 
-/// The node's rect in logical screen coordinates: every transform up to and
-/// including the root's (which scales to physical pixels), then back to
-/// logical pixels.
-Rect _globalRect(SemanticsNode node, double dpr) {
-  var rect = node.rect;
-  SemanticsNode? n = node;
-  while (n != null) {
-    if (n.transform != null) rect = MatrixUtils.transformRect(n.transform!, rect);
-    n = n.parent;
+/// Enabled widgets that react to a tap.
+bool _isTappable(Widget w) =>
+    (w is InkResponse && (w.onTap != null || w.onLongPress != null)) ||
+    (w is GestureDetector && w.onTap != null) ||
+    (w is ButtonStyleButton && w.onPressed != null) ||
+    (w is IconButton && w.onPressed != null) ||
+    (w is FloatingActionButton && w.onPressed != null) ||
+    (w is ListTile && w.onTap != null) ||
+    (w is Switch && w.onChanged != null) ||
+    (w is SwitchListTile && w.onChanged != null) ||
+    (w is Checkbox && w.onChanged != null) ||
+    (w is CheckboxListTile && w.onChanged != null) ||
+    (w is ActionChip && w.onPressed != null) ||
+    (w is ChoiceChip && w.onSelected != null) ||
+    (w is FilterChip && w.onSelected != null);
+
+/// A readable name: tooltip, the texts inside, an icon, or the type.
+String _widgetLabel(Element e) {
+  final w = e.widget;
+  if (w is IconButton && w.tooltip != null) return w.tooltip!;
+  final texts = <String>[];
+  String? icon;
+  void visit(Element c) {
+    final cw = c.widget;
+    if (cw is Text) {
+      final t = (cw.data ?? cw.textSpan?.toPlainText() ?? '').trim();
+      if (t.isNotEmpty) texts.add(t);
+    } else if (cw is RichText) {
+      final t = cw.text.toPlainText().trim();
+      if (t.isNotEmpty && texts.isEmpty) texts.add(t);
+    } else if (cw is Icon && icon == null && cw.icon != null) {
+      icon = 'icon ${cw.icon!.codePoint.toRadixString(16)}';
+    } else if (cw is Tooltip && texts.isEmpty) {
+      texts.add(cw.message ?? '');
+    }
+    if (texts.length < 3) c.visitChildren(visit);
   }
-  return Rect.fromLTRB(rect.left / dpr, rect.top / dpr, rect.right / dpr, rect.bottom / dpr);
+
+  e.visitChildren(visit);
+  var s = texts.where((t) => t.isNotEmpty).take(2).join(' / ').replaceAll('\n', ' ');
+  if (s.isEmpty) s = icon ?? '(${w.runtimeType})';
+  return s.length > 60 ? '${s.substring(0, 57)}...' : s;
 }
 
-String _nodeLabel(SemanticsData d) {
-  final parts = [d.label, d.value, d.tooltip, d.hint]
-      .where((s) => s.trim().isNotEmpty)
-      .map((s) => s.replaceAll('\n', ' ').trim());
-  final s = parts.join(' / ');
-  return s.isEmpty
-      ? '(unlabelled)'
-      : (s.length > 60 ? '${s.substring(0, 57)}...' : s);
-}
-
-/// Every enabled node with a tap action that is on screen.
-List<_Tappable> _tappables(Size screen, double dpr, Set<String> skipLabels) {
+/// Every enabled tappable widget whose centre is on screen and actually
+/// receives a tap there (not covered, not off-stage). Nested ones that share
+/// a centre (a button and its InkWell) count once.
+List<_Tappable> _tappables(WidgetTester tester, Size screen, Set<String> skipLabels) {
   final out = <_Tappable>[];
   final seen = <String, int>{};
-  void visit(SemanticsNode node) {
-    final d = node.getSemanticsData();
-    final disabled =
-        d.hasFlag(SemanticsFlag.hasEnabledState) &&
-        !d.hasFlag(SemanticsFlag.isEnabled);
-    if (d.hasAction(SemanticsAction.tap) && !disabled && !node.isInvisible) {
-      final rect = _globalRect(node, dpr);
-      final onScreen =
-          rect.center.dx > 0 &&
-          rect.center.dy > 0 &&
-          rect.center.dx < screen.width &&
-          rect.center.dy < screen.height;
-      final label = _nodeLabel(d);
-      if (onScreen && !skipLabels.any((s) => s == 'Back' ? label == 'Back' : label.contains(s))) {
-        final n = seen[label] = (seen[label] ?? 0) + 1;
-        out.add(_Tappable('$label#$n', label, rect, node.id));
-      }
-    }
-    node.visitChildren((c) {
-      visit(c);
-      return true;
-    });
+  final centres = <String>{};
+  final candidates = find.byWidgetPredicate(_isTappable).hitTestable();
+  for (final e in candidates.evaluate()) {
+    // The app bar's back button closes the screen being crawled.
+    if (e.findAncestorWidgetOfExactType<BackButton>() != null) continue;
+    final ro = e.renderObject;
+    if (ro is! RenderBox || !ro.hasSize || !ro.attached) continue;
+    final rect = ro.localToGlobal(Offset.zero) & ro.size;
+    final c = rect.center;
+    if (c.dx <= 0 || c.dy <= 0 || c.dx >= screen.width || c.dy >= screen.height) continue;
+    final centreKey = '${(c.dx / 6).round()}:${(c.dy / 6).round()}';
+    if (!centres.add(centreKey)) continue;
+    final label = _widgetLabel(e);
+    if (skipLabels.any((s) => s == 'Back' ? label == 'Back' : label.contains(s))) continue;
+    final n = seen[label] = (seen[label] ?? 0) + 1;
+    out.add(_Tappable('$label#$n', label, rect));
   }
-
-  final root = _root();
-  if (root != null) visit(root);
   return out;
 }
 
@@ -225,8 +238,8 @@ Future<ScreenReport> crawlScreen(
       await wait(tester, 0.3);
       final todo =
           _tappables(
+            tester,
             size,
-            tester.view.devicePixelRatio,
             skipLabels,
           ).where((t) => !done.contains(t.key)).toList();
       if (todo.isEmpty) {
