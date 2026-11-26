@@ -69,6 +69,16 @@ const _imagePickerLegacy = 'plugins.flutter.io/image_picker';
 
 String? _pickedPhotoPath;
 
+/// Whether a Messaging#requestPermission call asked only for quiet
+/// (provisional) authorization, which shows no dialog.
+bool isProvisionalRequest(MethodCall call) {
+  final args = call.arguments;
+  if (args is! Map) return false;
+  final perms = args['permissions'];
+  return (perms is Map && perms['provisional'] == true) ||
+      args['provisional'] == true;
+}
+
 /// iOS notification authorization as firebase_messaging encodes it:
 /// -1 not determined, 0 denied, 1 authorized, 2 provisional.
 int pushStatus = -1;
@@ -104,8 +114,7 @@ void installSpies() {
       case 'Messaging#requestPermission':
       case 'Messaging#getNotificationSettings':
         if (call.method == 'Messaging#requestPermission') {
-          final provisional =
-              call.arguments is Map && call.arguments['provisional'] == true;
+          final provisional = isProvisionalRequest(call);
           // A full request "shows the dialog" and the learner allows it.
           pushStatus = provisional && pushStatus != 1 ? 2 : 1;
         }
@@ -203,8 +212,15 @@ Future<void> wipeState() async {
       await FirebaseAuth.instance.signOut();
     } catch (_) {}
   }
+  // Empty the offline queue without closing it: the app's OfflineQueue keeps
+  // the same (single-instance) handle open, and deleting the file would
+  // close it under the app.
   try {
-    await deleteDatabase('offline_queue.db');
+    final db = await openDatabase('${await getDatabasesPath()}/offline_queue.db');
+    final tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='queued_requests'",
+    );
+    if (tables.isNotEmpty) await db.delete('queued_requests');
   } catch (_) {}
 }
 
@@ -216,17 +232,29 @@ Future<void> launchApp(
 }) async {
   debugPrint('E2E: launchApp (fresh=$fresh)');
   installSpies();
+  // Let the previous test's app finish its requests while still mounted,
+  // then unmount it: a late response would otherwise write progress into
+  // the wiped prefs (making this "fresh" install look like an existing one)
+  // or into its disposed ProgressService.
+  if (_servicesReady) {
+    await wait(tester, 2);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await wait(tester, 1);
+  }
+  // Firebase first: a user persisted in the Keychain by an earlier run can
+  // only be signed out once Firebase is up (else it counts as an existing
+  // install and onboarding is skipped).
+  if (!_servicesReady) {
+    await app.initServices();
+    _servicesReady = true;
+    debugPrint('E2E: services ready');
+  }
   if (fresh) {
     await wipeState();
     pushStatus = -1;
   }
   if (seed != null) await seed(await SharedPreferences.getInstance());
   debugPrint('E2E: state ready');
-  if (!_servicesReady) {
-    await app.initServices();
-    _servicesReady = true;
-    debugPrint('E2E: services ready');
-  }
   resetSpies();
   await tester.pumpWidget(app.MyApp(key: UniqueKey()));
   app.startBackgroundServices();
