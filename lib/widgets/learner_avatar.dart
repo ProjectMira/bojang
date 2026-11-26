@@ -1,6 +1,7 @@
-/// A learner's picture: a drawn figure (a yak face or a Tibetan symbol) on a
-/// coloured disc. Learners pick one instead of uploading a photo, so the
-/// public leaderboard never shows photos of people.
+/// A learner's picture: an uploaded photo when they have one, otherwise a
+/// drawn figure (a yak face or a Tibetan symbol) on a coloured disc. The
+/// drawn avatar is always the fallback: while the photo loads, when it
+/// fails, and when reports have hidden it (the server then sends no URL).
 library;
 
 import 'package:flutter/material.dart';
@@ -79,19 +80,56 @@ class LearnerAvatar extends StatelessWidget {
   const LearnerAvatar({
     super.key,
     required this.avatar,
+    this.photoUrl,
     this.size = 40,
     this.border = false,
   });
 
   /// The key from the server, or null for the default (a yak on blue).
   final String? avatar;
+
+  /// An uploaded photo (https), drawn instead of [avatar] when it loads.
+  final String? photoUrl;
   final double size;
   final bool border;
 
   @override
   Widget build(BuildContext context) {
     final choice = AvatarChoice.parse(avatar) ?? AvatarChoice.fallback;
-    return LearnerAvatarFace(choice: choice, size: size, border: border);
+    final face = LearnerAvatarFace(choice: choice, size: size, border: border);
+    final url = photoUrl;
+    if (url == null || url.isEmpty) return face;
+    final dpr = MediaQuery.maybeDevicePixelRatioOf(context) ?? 2;
+    return Semantics(
+      label: 'Profile photo',
+      image: true,
+      excludeSemantics: true,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border:
+              border
+                  ? Border.all(color: Colors.white, width: size * 0.04)
+                  : null,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Image.network(
+          url,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          cacheWidth: (size * dpr).round(),
+          gaplessPlayback: true,
+          // Drawn avatar until the photo arrives, and if it never does.
+          frameBuilder:
+              (context, child, frame, sync) =>
+                  frame == null && !sync ? face : child,
+          errorBuilder: (context, error, stack) => face,
+        ),
+      ),
+    );
   }
 }
 

@@ -227,15 +227,63 @@ class ApiService {
     String? nativeLang,
     String? targetLang,
     String? avatar,
+    bool? showPlace,
+    Map<String, String?>? place,
   }) async {
     final body = <String, dynamic>{
       if (displayName != null) 'display_name': displayName,
       if (avatar != null) 'avatar': avatar,
+      if (showPlace != null) 'show_place': showPlace,
+      if (place != null) 'place': place,
       if (nativeLang != null) 'native_lang': nativeLang,
       if (targetLang != null) 'target_lang': targetLang,
     };
     return _patch('auth/me', body);
   }
+
+  /// Uploads a profile photo (JPEG/PNG/HEIC bytes, at most 5 MB). The server
+  /// crops it to a 256px square and strips EXIF/GPS. `(status, body)`:
+  /// 200 with `photo_url`; 413 too big, 415 not a photo, 429 too many
+  /// uploads; status null when offline.
+  Future<(int?, Map<String, dynamic>?)> uploadProfilePhoto(
+    List<int> bytes, {
+    required String filename,
+  }) async {
+    await _refreshAuthToken();
+    try {
+      final request =
+          http.MultipartRequest('POST', _uri('auth/me/photo'))
+            ..headers.addAll({
+              'Accept': 'application/json',
+              if (_authToken != null) 'Authorization': 'Bearer $_authToken',
+              if (_appCheckToken != null)
+                'X-Firebase-AppCheck': _appCheckToken!,
+            })
+            ..files.add(
+              http.MultipartFile.fromBytes('photo', bytes, filename: filename),
+            );
+      final streamed = await _client
+          .send(request)
+          .timeout(const Duration(seconds: 45));
+      final response = await http.Response.fromStream(streamed);
+      Map<String, dynamic>? body;
+      try {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map) body = Map<String, dynamic>.from(decoded);
+      } catch (_) {}
+      if (response.statusCode >= 300) {
+        _reportApiError('POST', 'auth/me/photo', status: response.statusCode);
+      }
+      return (response.statusCode, body);
+    } catch (e) {
+      _reportApiError('POST', 'auth/me/photo', error: e);
+      return (null, null);
+    }
+  }
+
+  /// Removes the profile photo. True when the server took it.
+  Future<bool> deleteProfilePhoto() async =>
+      (await _delete('auth/me/photo')) != null;
 
   Future<Map<String, dynamic>?> getUserStats() async {
     return _get('auth/me/stats');
@@ -917,6 +965,37 @@ class ApiService {
       body: {'visible': visible},
     );
     return _okMap(result)?['visible'] == visible;
+  }
+
+  /// Reports another learner's photo or name by the entry's weekly token.
+  /// `kind` is photo|name; `hide` also hides them from this learner's board.
+  /// Returns the HTTP status (null offline).
+  Future<int?> reportLeaderboardEntry({
+    required String token,
+    required String kind,
+    required String reason,
+    bool hide = false,
+  }) async {
+    final (status, _) = await _social(
+      'POST',
+      '/v1/leaderboard/report',
+      body: {'token': token, 'kind': kind, 'reason': reason, 'hide': hide},
+    );
+    return status;
+  }
+
+  /// Hides another learner from this learner's board only.
+  Future<bool> hideLeaderboardEntry(String token) async =>
+      _okMap(
+        await _social('POST', '/v1/leaderboard/hide', body: {'token': token}),
+      )?['hidden_for_me'] ==
+      true;
+
+  /// Shows everyone this learner hid again. Null when offline.
+  Future<int?> unhideLeaderboardEntries() async {
+    final body = _okMap(await _social('DELETE', '/v1/leaderboard/hide'));
+    final n = body?['unhidden'];
+    return n is num ? n.toInt() : null;
   }
 
   Future<Map<String, dynamic>?> getFamily() async => _okMap(

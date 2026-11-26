@@ -31,6 +31,31 @@ class SocialService {
     return board;
   }
 
+  /// Reports another learner's photo or name ([kind] photo|name, [reason]
+  /// one of [ReportReason]). True when the server took it.
+  Future<bool> report(
+    WeeklyEntry entry, {
+    required String kind,
+    required ReportReason reason,
+    bool hide = false,
+  }) async {
+    if (!entry.canReport) return false;
+    final status = await _api.reportLeaderboardEntry(
+      token: entry.token,
+      kind: kind,
+      reason: reason.key,
+      hide: hide,
+    );
+    return status != null && status >= 200 && status < 300;
+  }
+
+  /// Hides [entry]'s person from this learner's board only.
+  Future<bool> hide(WeeklyEntry entry) async =>
+      entry.canReport && await _api.hideLeaderboardEntry(entry.token);
+
+  /// Shows everyone this learner hid again; how many, or null when offline.
+  Future<int?> unhideAll() => _api.unhideLeaderboardEntries();
+
   /// Last-known "Show me on the leaderboard" (default on).
   Future<bool> visible() async {
     try {

@@ -193,6 +193,43 @@ class LocationService {
     }
   }
 
+  /// The learner's city and country for "Show my city on the leaderboard":
+  /// approximate position, looked up on the phone (the platform geocoder),
+  /// and only `{city, country_code, country}` is returned. Coordinates never
+  /// leave this method. Asks for the same approximate-location permission as
+  /// [setSharing] when it hasn't been answered; works whether or not
+  /// analytics location sharing is on. Null with no permission or no fix.
+  Future<Map<String, String?>?> boardPlace({bool ask = true}) async {
+    if (kIsWeb) return null;
+    try {
+      final permission =
+          ask ? await _ensurePermission() : await Geolocator.checkPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        return null;
+      }
+      if (!await Geolocator.isLocationServiceEnabled()) return null;
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+      final place = await _placeFor(position.latitude, position.longitude);
+      final city = place['city'] as String?;
+      final country = place['country'] as String?;
+      if (city == null && country == null) return null;
+      return {
+        'city': city,
+        'country_code': place['country_code'] as String?,
+        'country': country,
+      };
+    } catch (e) {
+      debugPrint('Board place lookup failed: $e');
+      return null;
+    }
+  }
+
   /// Rounds to 0.1 degree, about 10 km.
   @visibleForTesting
   static double roundCoordinate(double value) => (value * 10).round() / 10;

@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/analytics.dart';
 import '../services/feedback.dart';
+import '../services/learner_profile.dart';
 import '../services/location_service.dart';
+import '../widgets/show_place_switch.dart';
 import '../models/romanisation.dart';
 import '../services/reading_help.dart';
 import '../services/theme_service.dart';
@@ -310,6 +312,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             }
                           },
                     activeColor: Theme.of(context).primaryColor,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                ListenableBuilder(
+                  listenable: LearnerProfile.instance,
+                  builder: (context, _) => _buildSettingsCard(
+                    title: 'Show my city on the leaderboard',
+                    subtitle: showPlaceSubtitle(LearnerProfile.instance),
+                    icon: Icons.location_city_outlined,
+                    trailing: const ShowPlaceSwitch(source: 'settings'),
                   ),
                 ),
 

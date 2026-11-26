@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../services/analytics.dart';
 import '../services/beginner.dart';
@@ -7,6 +8,7 @@ import '../services/learner_profile.dart';
 import '../theme/app_tokens.dart';
 import 'app_text_style.dart';
 import 'learner_avatar.dart';
+import 'show_place_switch.dart';
 
 /// Opens the name + picture sheet if the learner has not set them (and has
 /// not said "Later" recently). [source] is where it was opened from. True
@@ -68,13 +70,15 @@ class _ProfileSetupSheetState extends State<ProfileSetupSheet> {
   late final TextEditingController _name;
   late AvatarChoice _choice;
   bool _saving = false;
+  bool _photoBusy = false;
+  String? _photoMessage;
 
   @override
   void initState() {
     super.initState();
     final profile = LearnerProfile.instance;
     _name = TextEditingController(text: profile.name ?? '');
-    _choice = AvatarChoice.parse(profile.avatar) ?? AvatarChoice.fallback;
+    _choice = AvatarChoice.parse(profile.shownAvatar) ?? AvatarChoice.fallback;
     _name.addListener(() => setState(() {}));
   }
 
@@ -98,6 +102,76 @@ class _ProfileSetupSheetState extends State<ProfileSetupSheet> {
       'name_length': _name.text.trim().length,
     });
     if (mounted) Navigator.of(context).pop(true);
+  }
+
+  /// Library picker. On iOS 14+ image_picker uses PHPicker, so with
+  /// [requestFullMetadata] off no photo-library permission is asked and the
+  /// app only ever sees the one photo chosen.
+  Future<void> _pickPhoto() async {
+    if (_photoBusy) return;
+    HapticFeedback.selectionClick();
+    final XFile? file;
+    try {
+      file = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 88,
+        requestFullMetadata: false,
+      );
+    } catch (e) {
+      debugPrint('Photo picker failed: $e');
+      if (mounted) setState(() => _photoMessage = "Couldn't open your photos.");
+      return;
+    }
+    if (file == null || !mounted) return;
+    setState(() {
+      _photoBusy = true;
+      _photoMessage = null;
+    });
+    final bytes = await file.readAsBytes();
+    final result = await LearnerProfile.instance.uploadPhoto(bytes, file.name);
+    if (!mounted) return;
+    if (result == PhotoUploadResult.ok) {
+      Analytics.track('profile_photo_uploaded', {
+        'source': widget.source,
+        'kb': bytes.length ~/ 1024,
+      });
+    } else {
+      Analytics.track('profile_photo_upload_failed', {
+        'source': widget.source,
+        'reason': result.name,
+      });
+    }
+    setState(() {
+      _photoBusy = false;
+      _photoMessage = switch (result) {
+        PhotoUploadResult.ok => null,
+        PhotoUploadResult.tooLarge => 'That photo is too big. Try another.',
+        PhotoUploadResult.notAPhoto => 'Use a JPEG, PNG or HEIC photo.',
+        PhotoUploadResult.tooMany =>
+          'Too many photo changes today. Try tomorrow.',
+        PhotoUploadResult.offline =>
+          "You're offline. Try again with a connection.",
+        PhotoUploadResult.failed => "That didn't upload. Try again.",
+      };
+    });
+  }
+
+  Future<void> _removePhoto() async {
+    if (_photoBusy) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _photoBusy = true;
+      _photoMessage = null;
+    });
+    final ok = await LearnerProfile.instance.removePhoto();
+    if (ok) Analytics.track('profile_photo_removed', {'source': widget.source});
+    if (!mounted) return;
+    setState(() {
+      _photoBusy = false;
+      _photoMessage = ok ? null : "Couldn't remove it. Check your connection.";
+    });
   }
 
   void _pick(AvatarChoice choice) {
@@ -136,7 +210,17 @@ class _ProfileSetupSheetState extends State<ProfileSetupSheet> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Center(child: LearnerAvatarFace(choice: _choice, size: 96)),
+                ListenableBuilder(
+                  listenable: LearnerProfile.instance,
+                  builder:
+                      (context, _) => Center(
+                        child: LearnerAvatar(
+                          avatar: _choice.key,
+                          photoUrl: LearnerProfile.instance.photoUrl,
+                          size: 96,
+                        ),
+                      ),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Make it yours',
@@ -178,6 +262,8 @@ class _ProfileSetupSheetState extends State<ProfileSetupSheet> {
                   ),
                 ),
                 const SizedBox(height: 10),
+                _photoRow(context),
+                const SizedBox(height: 14),
                 Wrap(
                   spacing: 10,
                   runSpacing: 10,
@@ -223,6 +309,40 @@ class _ProfileSetupSheetState extends State<ProfileSetupSheet> {
                       ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                ListenableBuilder(
+                  listenable: LearnerProfile.instance,
+                  builder:
+                      (context, _) => Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Show my city on the leaderboard',
+                                  style: AppTextStyles.poppins(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: ink,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  showPlaceSubtitle(LearnerProfile.instance),
+                                  style: AppTextStyles.poppins(
+                                    fontSize: 13,
+                                    color: AppTokens.inkSoft(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const ShowPlaceSwitch(source: 'profile_setup'),
+                        ],
+                      ),
+                ),
                 const SizedBox(height: 24),
                 FilledButton(
                   key: const Key('profile-setup-save'),
@@ -258,6 +378,86 @@ class _ProfileSetupSheetState extends State<ProfileSetupSheet> {
           ),
         ),
       ),
+    );
+  }
+}
+
+extension on _ProfileSetupSheetState {
+  Widget _photoRow(BuildContext context) {
+    return ListenableBuilder(
+      listenable: LearnerProfile.instance,
+      builder: (context, _) {
+        final profile = LearnerProfile.instance;
+        final has = profile.photoUrl != null;
+        final soft = AppTokens.inkSoft(context);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    key: const Key('profile-setup-photo'),
+                    onPressed: _photoBusy ? null : _pickPhoto,
+                    icon:
+                        _photoBusy
+                            ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Icon(Icons.photo_library_outlined),
+                    label: Text(
+                      has ? 'Change photo' : 'Upload a photo',
+                      style: AppTextStyles.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppTokens.ink(context),
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+                if (has) ...[
+                  const SizedBox(width: 8),
+                  TextButton(
+                    key: const Key('profile-setup-photo-remove'),
+                    onPressed: _photoBusy ? null : _removePhoto,
+                    child: Text(
+                      'Remove',
+                      style: AppTextStyles.poppins(
+                        fontSize: 15,
+                        color: AppColors.red,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              _photoMessage ??
+                  (profile.photoHidden
+                      ? 'Your photo is hidden from others while we review '
+                          'reports. They see your drawing instead.'
+                      : has
+                      ? 'Everyone on the board sees your photo. The drawing '
+                          'below shows if it is removed.'
+                      : 'Or pick a drawing. Photos show to everyone on the '
+                          'board and can be reported.'),
+              style: AppTextStyles.poppins(
+                fontSize: 13,
+                color: _photoMessage != null ? AppColors.red : soft,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

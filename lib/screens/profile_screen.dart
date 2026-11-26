@@ -234,6 +234,8 @@ class ProfileScreenState extends State<ProfileScreen> {
                           listenable: LearnerProfile.instance,
                           builder: (context, _) {
                             final picked = LearnerProfile.instance.avatar;
+                            final drawn = LearnerProfile.instance.shownAvatar;
+                            final uploaded = LearnerProfile.instance.photoUrl;
                             final photo = currentUser?.profileImageUrl;
                             return Semantics(
                               button: true,
@@ -256,7 +258,14 @@ class ProfileScreenState extends State<ProfileScreen> {
                                         ],
                                       ),
                                       child:
-                                          picked == null && photo != null
+                                          uploaded != null
+                                              ? LearnerAvatar(
+                                                avatar: drawn,
+                                                photoUrl: uploaded,
+                                                size: 106,
+                                                border: true,
+                                              )
+                                              : picked == null && photo != null
                                               ? CircleAvatar(
                                                 radius: 53,
                                                 backgroundColor: Colors.white,
@@ -268,7 +277,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                                                 ),
                                               )
                                               : LearnerAvatar(
-                                                avatar: picked,
+                                                avatar: drawn,
                                                 size: 106,
                                                 border: true,
                                               ),
