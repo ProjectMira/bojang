@@ -1,6 +1,11 @@
 import 'package:flutter/foundation.dart';
 
 class AppConfig {
+  /// Set by the end-to-end suite (ci/scripts/e2e.sh): the app runs against a
+  /// local backend and the Firebase Auth emulator with a dummy Firebase
+  /// config, so services that need the real Firebase project stay off.
+  static const bool e2e = bool.fromEnvironment('BOJANG_E2E');
+
   static bool get isIOS =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
