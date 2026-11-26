@@ -118,14 +118,15 @@ void main() {
     expect(find.textContaining('not quite'), findsOneWidget);
     expect(find.textContaining('Answer: ka'), findsOneWidget);
 
-    // The quiz advances instead of waiting for the learner to find the
-    // correct option, and the wrong answer earns no score.
-    await tester.pump(const Duration(seconds: 2));
+    // A wrong answer waits for Continue, so the right answer can be read.
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('ཀ'), findsWidgets);
+    await tester.tap(find.byKey(const Key('answer-continue')));
     await tester.pump();
 
     expect(find.text('ག'), findsOneWidget);
     expect(find.text('ཀ'), findsNothing);
-    expect(find.text('Score: 0'), findsOneWidget);
   });
 
   testWidgets('a lesson with one mistake finishes below 100%', (
@@ -134,9 +135,11 @@ void main() {
     const path = 'assets/quiz_data/level-1/numbers.json';
     await startQuiz(tester, path);
 
-    // First question wrong.
+    // First question wrong, then Continue.
     await tester.tap(find.text('ga'));
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const Key('answer-continue')));
     await tester.pump();
     // Let the next question's entrance animation finish, or the option is
     // still sliding and the tap lands on empty space.

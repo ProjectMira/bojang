@@ -189,6 +189,37 @@ class QuizQuestion {
     return _copyWithType(listening);
   }
 
+  /// The same question with two options, the right one and one other, in
+  /// their order: a lesson's first question, so every lesson starts with a
+  /// win. Null when there is nothing to trim.
+  QuizQuestion? asWarmUp() {
+    if (answersWithoutOptions || type == findRoot) return null;
+    final n = options.length;
+    if (n <= 2 || correctAnswerIndex < 0 || correctAnswerIndex >= n)
+      return null;
+    final keep = [correctAnswerIndex, (correctAnswerIndex + 1) % n]..sort();
+    List<T> pick<T>(List<T> list) =>
+        list.length == n ? [for (final i in keep) list[i]] : list;
+    return QuizQuestion(
+      tibetanText: tibetanText,
+      options: pick(options),
+      correctAnswerIndex: keep.indexOf(correctAnswerIndex),
+      type: type,
+      imageUrl: imageUrl,
+      englishGloss: englishGloss,
+      audioUrl: audioUrl,
+      audioUrls: audioUrls,
+      romanisation: romanisation,
+      isScript: isScript,
+      optionTibetan: pick(optionTibetan),
+      optionRomanisations: pick(optionRomanisations),
+      exerciseId: exerciseId,
+      optionIds: pick(optionIds),
+      label: label,
+      script: script,
+    );
+  }
+
   /// A script question turned around: the reading is shown ("kha") and the
   /// learner picks the Tibetan letter or word. Null unless this is a script
   /// [multipleChoice] question whose options all carry their Tibetan.

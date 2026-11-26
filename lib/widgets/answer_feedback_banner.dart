@@ -9,7 +9,8 @@ import 'yak_mascot.dart';
 
 /// Non-blocking bottom banner shown after answering a quiz question.
 /// Replaces the old AlertDialog so gameplay feels continuous; the caller
-/// still owns the 2-second auto-advance timing via [visible].
+/// shows it via [visible]; Continue (or, after a right answer, a short
+/// timer) moves on.
 ///
 /// A wrong answer ends the question, so [correctAnswerText] is shown with it —
 /// the learner does not get another attempt to discover the answer.
@@ -40,7 +41,11 @@ class AnswerFeedbackBanner extends StatelessWidget {
     this.seed = 0,
     this.tibetan,
     this.romanisation = Romanisation.none,
+    this.onContinue,
   });
+
+  /// The Continue button. A right answer also moves on by itself.
+  final VoidCallback? onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -83,108 +88,140 @@ class AnswerFeedbackBanner extends StatelessWidget {
                 ),
               ],
             ),
-            child: Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // The yak reacts; the badge keeps the right/wrong signal
-                // readable without relying on its expression or on color.
-                SizedBox(
-                  width: 68,
-                  height: 64,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      YakMascot(
-                        // Hidden banners keep a resting yak so the reaction
-                        // plays as the banner slides in.
-                        mood: visible ? line.mood : YakMood.happy,
-                        size: 64,
-                        showBody: false,
-                        controller: Feedback.yak,
+                Row(
+                  children: [
+                    // The yak reacts; the badge keeps the right/wrong signal
+                    // readable without relying on its expression or on color.
+                    SizedBox(
+                      width: 68,
+                      height: 64,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          YakMascot(
+                            // Hidden banners keep a resting yak so the reaction
+                            // plays as the banner slides in.
+                            mood: visible ? line.mood : YakMood.happy,
+                            size: 64,
+                            showBody: false,
+                            controller: Feedback.yak,
+                          ),
+                          Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Container(
+                              width: 24,
+                              height: 24,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: fill, width: 2),
+                              ),
+                              child: Icon(
+                                isCorrect
+                                    ? Icons.check_rounded
+                                    : Icons.close_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      Positioned(
-                        right: -2,
-                        bottom: -2,
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: fill, width: 2),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            line.title,
+                            style: AppTextStyles.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: color,
+                            ),
                           ),
-                          child: Icon(
-                            isCorrect
-                                ? Icons.check_rounded
-                                : Icons.close_rounded,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        line.title,
-                        style: AppTextStyles.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                        ),
-                      ),
-                      if (isCorrect && line.body != null)
-                        Text(
-                          line.body!,
-                          style: AppTextStyles.poppins(
-                            fontSize: 14,
-                            color: AppTokens.inkSoft(context),
-                          ),
-                        ),
-                      if (!isCorrect &&
-                          correctAnswerText != null &&
-                          correctAnswerText!.isNotEmpty)
-                        Text(
-                          'Answer: $correctAnswerText',
-                          style: AppTextStyles.poppins(
-                            fontSize: 14,
-                            color: AppTokens.ink(context),
-                          ),
-                        ),
-                      // Only while shown: the hidden banner stays built
-                      // (off screen) and must not repeat the next word.
-                      if (visible && tibetan != null && tibetan!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 10,
-                          children: [
+                          if (isCorrect && line.body != null)
                             Text(
-                              tibetan!,
+                              line.body!,
                               style: AppTextStyles.poppins(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: AppTokens.inkSoft(context),
+                              ),
+                            ),
+                          if (!isCorrect &&
+                              correctAnswerText != null &&
+                              correctAnswerText!.isNotEmpty)
+                            Text(
+                              'Answer: $correctAnswerText',
+                              style: AppTextStyles.poppins(
+                                fontSize: 14,
                                 color: AppTokens.ink(context),
                               ),
                             ),
-                            RomanisationText(
-                              romanisation,
-                              fontSize: 15,
-                              textAlign: TextAlign.start,
-                              alignment: CrossAxisAlignment.start,
+                          // Only while shown: the hidden banner stays built
+                          // (off screen) and must not repeat the next word.
+                          if (visible &&
+                              tibetan != null &&
+                              tibetan!.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 10,
+                              children: [
+                                Text(
+                                  tibetan!,
+                                  style: AppTextStyles.poppins(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTokens.ink(context),
+                                  ),
+                                ),
+                                RomanisationText(
+                                  romanisation,
+                                  fontSize: 15,
+                                  textAlign: TextAlign.start,
+                                  alignment: CrossAxisAlignment.start,
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                      ],
-                    ],
-                  ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
+                if (onContinue != null) ...[
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: FilledButton(
+                      key: const Key('answer-continue'),
+                      onPressed: visible ? onContinue : null,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: color,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        'Continue',
+                        style: AppTextStyles.poppins(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

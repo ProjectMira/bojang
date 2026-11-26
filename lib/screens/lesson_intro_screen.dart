@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -108,8 +109,52 @@ class _LessonIntroScreenState extends State<LessonIntroScreen> {
 
   @override
   void dispose() {
+    _tour?.cancel();
     PronunciationPlayer.instance.stop();
     super.dispose();
+  }
+
+  /// Plays every card once, in order, each lit while it speaks: learners
+  /// who skip straight to practice have still heard the sounds.
+  Timer? _tour;
+  int _tourIndex = 0;
+  bool _toured = false;
+  static const Duration _tourStep = Duration(milliseconds: 1300);
+
+  void _startTour(LessonContent lesson, {required String via}) {
+    _tour?.cancel();
+    final playable = [
+      for (final i in lesson.items)
+        if (i.hasAudio) i,
+    ];
+    if (playable.isEmpty) return;
+    _toured = true;
+    _tourIndex = 0;
+    Analytics.track('lesson_intro_tour_started', {
+      'level': widget.levelId,
+      'via': via,
+      'items': playable.length,
+    });
+    void step() {
+      if (!mounted) return;
+      if (_tourIndex >= playable.length) {
+        _tour = null;
+        setState(() {});
+        return;
+      }
+      _play(playable[_tourIndex++]);
+      _tour = Timer(_tourStep, step);
+      setState(() {});
+    }
+
+    step();
+  }
+
+  void _stopTour() {
+    if (_tour == null) return;
+    _tour!.cancel();
+    _tour = null;
+    if (mounted) setState(() {});
   }
 
   void _play(LessonItem item) {
@@ -135,6 +180,7 @@ class _LessonIntroScreenState extends State<LessonIntroScreen> {
   /// shows, opens its sheet. The sheet steps through the rest of the lesson
   /// and ends at practice.
   void _openItem(LessonContent lesson, int index) {
+    _stopTour();
     final item = lesson.items[index];
     _play(item);
     final note = LessonNote.parse(item.note);
@@ -161,6 +207,7 @@ class _LessonIntroScreenState extends State<LessonIntroScreen> {
   }
 
   void _startPractice(LessonContent? lesson) {
+    _stopTour();
     Analytics.track('lesson_intro_practice', {
       'level': widget.levelId,
       'items': lesson?.items.length ?? 0,
@@ -216,6 +263,15 @@ class _LessonIntroScreenState extends State<LessonIntroScreen> {
               onAction: () => _startPractice(null),
             );
           }
+          if (!_toured) {
+            _toured = true;
+            final theme = context.read<ThemeService>();
+            if (theme.soundEffectsEnabled) {
+              WidgetsBinding.instance.addPostFrameCallback(
+                (_) => _startTour(lesson, via: 'auto'),
+              );
+            }
+          }
           return Column(
             children: [
               Expanded(child: _buildCards(context, lesson)),
@@ -259,6 +315,20 @@ class _LessonIntroScreenState extends State<LessonIntroScreen> {
                             color: AppTokens.ink(context),
                           ),
                         ),
+                      ),
+                      TextButton.icon(
+                        key: const Key('lesson-intro-hear-all'),
+                        onPressed:
+                            () =>
+                                _tour != null
+                                    ? _stopTour()
+                                    : _startTour(lesson, via: 'button'),
+                        icon: Icon(
+                          _tour != null
+                              ? Icons.stop_rounded
+                              : Icons.play_arrow_rounded,
+                        ),
+                        label: Text(_tour != null ? 'Stop' : 'Hear all'),
                       ),
                       if (lesson.notes.isNotEmpty)
                         _TipsButton(onTap: () => _showTips(lesson)),

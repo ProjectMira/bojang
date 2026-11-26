@@ -241,7 +241,9 @@ class _QuizScreenState extends State<QuizScreen>
           supportedTypes: QuizQuestion.renderableTypes,
         );
         if (session == null) {
-          throw FormatException('Could not start this lesson. Please try again.');
+          throw FormatException(
+            'Could not start this lesson. Please try again.',
+          );
         }
         _remoteSessionId = session['session_id'] as String?;
         _remoteLevelId = session['level_id'] as String?;
@@ -249,7 +251,7 @@ class _QuizScreenState extends State<QuizScreen>
         if (questions.isEmpty) {
           throw FormatException('No exercises found for this lesson yet.');
         }
-        return LessonQueue(questions);
+        return LessonQueue(LessonQueue.easyStart(questions));
       }
 
       // Review (Practice tab, path practice / unit review): words from the
@@ -288,7 +290,12 @@ class _QuizScreenState extends State<QuizScreen>
           for (final q in _parseExercises(session['adaptive_exercises']))
             LessonQueue.harder(q.withLabel('hard')),
         ];
-        return LessonQueue(_style.arrange(questions), bonus: bonus);
+        final arranged = _style.arrange(questions);
+        return LessonQueue(
+          // Reviews are words the learner has met; new lessons start easy.
+          isReview ? arranged : LessonQueue.easyStart(arranged),
+          bonus: bonus,
+        );
       }
 
       // Try to load the JSON file
@@ -365,9 +372,8 @@ class _QuizScreenState extends State<QuizScreen>
   /// options are English, so hearing the Tibetan gives nothing away). Follows
   /// the sound-effects switch; the speaker button always works.
   /// The question's recording in the learner's chosen voice.
-  String? _audioOf(QuizQuestion question) => question.audioFor(
-    Provider.of<ThemeService>(context).pronunciationVoice,
-  );
+  String? _audioOf(QuizQuestion question) =>
+      question.audioFor(Provider.of<ThemeService>(context).pronunciationVoice);
 
   void _autoPlayPrompt(QuizQuestion question) {
     if (_autoPlayedIndex == currentQuestionIndex) return;
@@ -489,35 +495,122 @@ class _QuizScreenState extends State<QuizScreen>
     // quiz moves on, so the score reflects what the learner knew. The word
     // comes back once at the end to fix. The delay is time to read the
     // feedback and see the right answer revealed.
-    final feedbackTime =
+    // A right answer moves on by itself (Continue skips the wait); a wrong
+    // one waits for Continue, so the learner can read the right answer.
+    if (isCorrect) {
+      final generation = _generation;
+      Future.delayed(
         revealAudio
-            ? const Duration(milliseconds: 2800)
-            : const Duration(seconds: 2);
-    final generation = _generation;
-    Future.delayed(feedbackTime, () {
-      if (!mounted || generation != _generation) return;
-      if (!lesson.isDone) {
-        late int bonusAdded;
-        setState(() {
-          bonusAdded = lesson.advance();
-          selectedAnswerIndex = null;
-          showFeedback = false;
-        });
-        if (bonusAdded > 0) {
-          Analytics.track('lesson_bonus_added', {
-            'topic': _topicName,
-            'count': bonusAdded,
-            'first_try_accuracy': (lesson.coreAccuracy * 100).round(),
-          });
-        }
-        _questionShownAt = DateTime.now();
-        if (_scrollController.hasClients) _scrollController.jumpTo(0);
-        _animationController.reset();
-        _animationController.forward();
-      } else {
-        _goToCompletion(lesson.total);
-      }
+            ? const Duration(milliseconds: 2400)
+            : const Duration(milliseconds: 1600),
+        () {
+          if (mounted && generation == _generation) _advance(via: 'auto');
+        },
+      );
+    }
+  }
+
+  /// Leaves the answered question for the next one (or the results).
+  void _advance({required String via}) {
+    final lesson = _lesson;
+    if (!mounted || lesson == null || !showFeedback) return;
+    _generation++;
+    Analytics.track('question_continue', {
+      'via': via,
+      'correct': lastAnswerCorrect,
+      'question_index': currentQuestionIndex,
     });
+    if (!lesson.isDone) {
+      late int bonusAdded;
+      setState(() {
+        bonusAdded = lesson.advance();
+        selectedAnswerIndex = null;
+        showFeedback = false;
+      });
+      if (bonusAdded > 0) {
+        Analytics.track('lesson_bonus_added', {
+          'topic': _topicName,
+          'count': bonusAdded,
+          'first_try_accuracy': (lesson.coreAccuracy * 100).round(),
+        });
+      }
+      _questionShownAt = DateTime.now();
+      if (_scrollController.hasClients) _scrollController.jumpTo(0);
+      _animationController.reset();
+      _animationController.forward();
+    } else {
+      setState(() => showFeedback = false);
+      _goToCompletion(lesson.total);
+    }
+  }
+
+  bool _allowPop = false;
+
+  /// Back in the middle of a lesson: one gentle "stay?" before leaving.
+  Future<void> _confirmQuit() async {
+    final lesson = _lesson;
+    final left = lesson == null ? 0 : lesson.length - lesson.answered;
+    Analytics.track('quit_confirm_shown', {
+      'topic': _topicName,
+      'question_index': currentQuestionIndex,
+      'left': left,
+    });
+    final quit = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Keep going?',
+              style: AppTextStyles.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTokens.ink(context),
+              ),
+            ),
+            content: Text(
+              left <= 1
+                  ? 'Just one question left in this lesson.'
+                  : 'Only $left questions left. Finish to keep your XP and streak.',
+              style: AppTextStyles.body(context),
+            ),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(
+                  'Quit',
+                  style: AppTextStyles.poppins(
+                    fontSize: 15,
+                    color: AppTokens.inkSoft(context),
+                  ),
+                ),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, false),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
+                child: Text(
+                  'Keep learning',
+                  style: AppTextStyles.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+    );
+    if (!mounted) return;
+    Analytics.track(quit == true ? 'quit_confirmed' : 'quit_confirm_stayed', {
+      'topic': _topicName,
+      'question_index': currentQuestionIndex,
+    });
+    if (quit == true) {
+      setState(() => _allowPop = true);
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _goToCompletion(int totalQuestions) async {
@@ -647,97 +740,111 @@ class _QuizScreenState extends State<QuizScreen>
     // Any way out of an unfinished lesson (app bar back, system back gesture)
     // is recorded as a quit; leaving still works exactly as before.
     return PopScope(
+      // Mid-lesson, Back asks once before leaving.
+      canPop: _allowPop || _completed || _lesson == null,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop) _trackQuit();
+        if (didPop) {
+          _trackQuit();
+        } else {
+          _confirmQuit();
+        }
       },
       child: Scaffold(
-      backgroundColor: AppTokens.background(context),
-      appBar: AppBar(
-        title: Text(
-          widget.title ?? _getDisplayNameFromFilePath(widget.topicFilePath),
-          style: GoogleFonts.poppins(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppTokens.ink(context),
-          ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        systemOverlayStyle: AppTokens.statusBar(context),
-        foregroundColor: AppTokens.ink(context),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        actions: [
-          // Bundled offline lessons only have one question kind.
-          if (widget.topicFilePath.startsWith('api://level/'))
-            IconButton(
-              icon: Icon(lessonStyleIcon(_style)),
-              tooltip: 'Lesson style: ${_style.title}',
-              onPressed: _changeStyle,
-            ),
-        ],
-      ),
-      body: ContentWidth(maxWidth: ContentWidth.reading, child: FutureBuilder<LessonQueue>(
-        future: questionsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const YakLoader();
-          }
-
-          if (snapshot.hasError) {
-            // The raw exception is logged, not shown: learners get the yak
-            // and a way forward.
-            debugPrint('Quiz load failed: ${snapshot.error}');
-            return YakNotice.line(
-              YakLines.error,
-              actionLabel: 'Try again',
-              onAction: () => setState(_startLoading),
-            );
-          }
-
-          final lesson = snapshot.data;
-          if (lesson == null || lesson.isEmpty) {
-            return YakNotice(
-              mood: YakMood.thinking,
-              title: 'Nothing here yet',
-              body: "I'm still gathering words for this one. Try another topic.",
-              actionLabel: 'Go back',
-              onAction: () => Navigator.of(context).pop(),
-            );
-          }
-
-          final item = lesson.current;
-          final question = item.question;
-          _autoPlayPrompt(question);
-
-          return Stack(
-            children: [
-              _buildQuizBody(context, item, lesson),
-              AnswerFeedbackBanner(
-                visible: showFeedback,
-                isCorrect: lastAnswerCorrect,
-                combo: _combo,
-                seed: currentQuestionIndex,
-                // Tibetan answers are shown on the word line below instead.
-                correctAnswerText:
-                    !question.hasTibetanOptions &&
-                            !question.answersWithoutOptions &&
-                            question.correctAnswerIndex >= 0 &&
-                            question.correctAnswerIndex <
-                                question.options.length
-                        ? question.options[question.correctAnswerIndex]
-                        : null,
-                tibetan: question.wordTibetan,
-                romanisation: question.romanisation,
+        backgroundColor: AppTokens.background(context),
+        appBar: AppBar(
+          title: Text(
+            widget.title ?? _getDisplayNameFromFilePath(widget.topicFilePath),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppTokens.ink(context),
+            ).copyWith(fontFamilyFallback: const ['Jomolhari']),
+          ),
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          systemOverlayStyle: AppTokens.statusBar(context),
+          foregroundColor: AppTokens.ink(context),
+          leading: IconButton(
+            icon: const Icon(Icons.close_rounded),
+            tooltip: 'Leave lesson',
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
+          actions: [
+            // Bundled offline lessons only have one question kind.
+            if (widget.topicFilePath.startsWith('api://level/'))
+              IconButton(
+                icon: Icon(lessonStyleIcon(_style)),
+                tooltip: 'Lesson style: ${_style.title}',
+                onPressed: _changeStyle,
               ),
-            ],
-          );
-        },
-      ),),
-    ),
+          ],
+        ),
+        body: ContentWidth(
+          maxWidth: ContentWidth.reading,
+          child: FutureBuilder<LessonQueue>(
+            future: questionsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const YakLoader();
+              }
+
+              if (snapshot.hasError) {
+                // The raw exception is logged, not shown: learners get the yak
+                // and a way forward.
+                debugPrint('Quiz load failed: ${snapshot.error}');
+                return YakNotice.line(
+                  YakLines.error,
+                  actionLabel: 'Try again',
+                  onAction: () => setState(_startLoading),
+                );
+              }
+
+              final lesson = snapshot.data;
+              if (lesson == null || lesson.isEmpty) {
+                return YakNotice(
+                  mood: YakMood.thinking,
+                  title: 'Nothing here yet',
+                  body:
+                      "I'm still gathering words for this one. Try another topic.",
+                  actionLabel: 'Go back',
+                  onAction: () => Navigator.of(context).pop(),
+                );
+              }
+
+              final item = lesson.current;
+              final question = item.question;
+              _autoPlayPrompt(question);
+
+              return Stack(
+                children: [
+                  _buildQuizBody(context, item, lesson),
+                  AnswerFeedbackBanner(
+                    visible: showFeedback,
+                    isCorrect: lastAnswerCorrect,
+                    combo: _combo,
+                    seed: currentQuestionIndex,
+                    // Tibetan answers are shown on the word line below instead.
+                    correctAnswerText:
+                        !question.hasTibetanOptions &&
+                                !question.answersWithoutOptions &&
+                                question.correctAnswerIndex >= 0 &&
+                                question.correctAnswerIndex <
+                                    question.options.length
+                            ? question.options[question.correctAnswerIndex]
+                            : null,
+                    tibetan: question.wordTibetan,
+                    romanisation: question.romanisation,
+                    onContinue: () => _advance(via: 'button'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 
@@ -750,90 +857,39 @@ class _QuizScreenState extends State<QuizScreen>
     final label = item.label;
     return Column(
       children: [
-        // Progress and Score
-        Container(
-          padding: const EdgeInsets.all(16.0),
+        // One slim row: progress, what is left to fix, question count.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: (currentQuestionIndex + 1) / lesson.length,
+                    backgroundColor:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey.shade700
+                            : Colors.grey.shade200,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor,
+                    ),
+                    minHeight: 10,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              if (lesson.toFix > 0) ...[
+                _ToFixChip(count: lesson.toFix),
+                const SizedBox(width: 8),
+              ],
               Text(
-                'Question ${currentQuestionIndex + 1} of ${lesson.length}',
+                '${currentQuestionIndex + 1}/${lesson.length}',
                 style: GoogleFonts.poppins(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Colors.grey.shade400
-                          : Colors.grey.shade600,
-                ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Score: $score',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
-                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Progress bar
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: (currentQuestionIndex + 1) / lesson.length,
-                  backgroundColor:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Colors.grey.shade700
-                          : Colors.grey.shade200,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).primaryColor,
-                  ),
-                  minHeight: 8,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Goal gradient: what is left to fix, not only a bar.
-                  if (lesson.toFix > 0)
-                    _ToFixChip(count: lesson.toFix)
-                  else
-                  Text(
-                    '${((currentQuestionIndex + 1) / lesson.length * 100).toInt()}% Complete',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? Colors.grey.shade400
-                              : Colors.grey.shade600,
-                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                  ),
-                  Text(
-                    'Accuracy: ${_accuracySoFar()}%',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w600,
-                    ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                  ),
-                ],
+                  color: AppTokens.inkSoft(context),
+                ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
               ),
             ],
           ),
@@ -845,17 +901,17 @@ class _QuizScreenState extends State<QuizScreen>
             physics: const AlwaysScrollableScrollPhysics(),
             child: Padding(
               // Room under the options for the feedback banner.
-              padding: EdgeInsets.fromLTRB(16, 16, 16, showFeedback ? 180 : 16),
+              padding: EdgeInsets.fromLTRB(16, 12, 16, showFeedback ? 240 : 16),
               child: Column(
                 children: [
                   Card(
-                    elevation: 8,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(24.0),
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
                       child: Column(
                         children: [
                           if (label != null) ...[
@@ -871,133 +927,138 @@ class _QuizScreenState extends State<QuizScreen>
                               color: AppTokens.inkSoft(context),
                             ).copyWith(fontFamilyFallback: const ['Jomolhari']),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
                           ..._buildPrompt(context, question),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
                   if (_scriptBody(question, lesson) case final body?)
                     body
                   else
-                  // Answer options
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: question.options.length,
-                    itemBuilder: (context, index) {
-                      final isSelected = selectedAnswerIndex == index;
-                      final isCorrect = index == question.correctAnswerIndex;
+                    // Answer options
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: question.options.length,
+                      itemBuilder: (context, index) {
+                        final isSelected = selectedAnswerIndex == index;
+                        final isCorrect = index == question.correctAnswerIndex;
 
-                      // During feedback the right answer is always highlighted,
-                      // tapped or not — a wrong pick moves on, so this is the
-                      // learner's one chance to see what it should have been.
-                      Color? buttonColor;
-                      if (showFeedback) {
-                        if (isCorrect) {
-                          buttonColor = Colors.green.shade100;
-                        } else if (isSelected) {
-                          buttonColor = Colors.red.shade100;
+                        // During feedback the right answer is always highlighted,
+                        // tapped or not — a wrong pick moves on, so this is the
+                        // learner's one chance to see what it should have been.
+                        Color? buttonColor;
+                        if (showFeedback) {
+                          if (isCorrect) {
+                            buttonColor = Colors.green.shade100;
+                          } else if (isSelected) {
+                            buttonColor = Colors.red.shade100;
+                          }
                         }
-                      }
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Card(
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: InkWell(
-                            onTap:
-                                showFeedback
-                                    ? null
-                                    : () => _handleAnswer(index, lesson),
-                            borderRadius: BorderRadius.circular(15),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color:
-                                    buttonColor ?? AppTokens.surface(context),
-                              ),
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          showFeedback
-                                              ? (isCorrect
-                                                  ? Colors.green
-                                                  : (isSelected
-                                                      ? Colors.red
-                                                      : Colors.grey))
-                                              : Colors.blue.withValues(
-                                                alpha: 0.1,
-                                              ),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        String.fromCharCode(65 + index),
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              showFeedback
-                                                  ? (isCorrect || isSelected
-                                                      ? Colors.white
-                                                      : Colors.grey)
-                                                  : Colors.blue,
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Card(
+                            elevation: 1.5,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: InkWell(
+                              onTap:
+                                  showFeedback
+                                      ? null
+                                      : () => _handleAnswer(index, lesson),
+                              borderRadius: BorderRadius.circular(15),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color:
+                                      buttonColor ?? AppTokens.surface(context),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color:
+                                            showFeedback
+                                                ? (isCorrect
+                                                    ? Colors.green
+                                                    : (isSelected
+                                                        ? Colors.red
+                                                        : Colors.grey))
+                                                : Colors.blue.withValues(
+                                                  alpha: 0.1,
+                                                ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          String.fromCharCode(65 + index),
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                showFeedback
+                                                    ? (isCorrect || isSelected
+                                                        ? Colors.white
+                                                        : Colors.grey)
+                                                    : Colors.blue,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          question.options[index],
-                                          style: GoogleFonts.poppins(
-                                            // Tibetan script needs more size
-                                            // than Latin to read comfortably.
-                                            fontSize:
-                                                question.hasTibetanOptions
-                                                    ? 24
-                                                    : 18,
-                                          ).copyWith(
-                                            fontFamilyFallback: const [
-                                              'Jomolhari',
-                                            ],
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            question.options[index],
+                                            style: GoogleFonts.poppins(
+                                              // Tibetan script needs more size
+                                              // than Latin to read comfortably.
+                                              fontSize:
+                                                  question.hasTibetanOptions
+                                                      ? 24
+                                                      : 18,
+                                            ).copyWith(
+                                              fontFamilyFallback: const [
+                                                'Jomolhari',
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                        if (question.showsRomanisation(
-                                          answered: showFeedback,
-                                        ))
-                                          RomanisationText(
-                                            question.optionRomanisation(index),
-                                            fontSize: 14,
-                                            textAlign: TextAlign.start,
-                                            alignment:
-                                                CrossAxisAlignment.start,
-                                          ),
-                                      ],
+                                          if (question.showsRomanisation(
+                                            answered: showFeedback,
+                                          ))
+                                            RomanisationText(
+                                              question.optionRomanisation(
+                                                index,
+                                              ),
+                                              fontSize: 14,
+                                              textAlign: TextAlign.start,
+                                              alignment:
+                                                  CrossAxisAlignment.start,
+                                            ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
                 ],
               ),
             ),
@@ -1018,12 +1079,8 @@ class _QuizScreenState extends State<QuizScreen>
           payload: script,
           answered: showFeedback,
           onSubmit:
-              (built, correct) => _handleAnswer(
-                0,
-                lesson,
-                correct: correct,
-                answerText: built,
-              ),
+              (built, correct) =>
+                  _handleAnswer(0, lesson, correct: correct, answerText: built),
         );
       case QuizQuestion.trace:
         return TracePad(
@@ -1162,7 +1219,8 @@ class _QuizScreenState extends State<QuizScreen>
                 color: AppTokens.ink(context),
               ),
             ),
-            if (question.type == QuizQuestion.findRoot) _romanisationOf(question),
+            if (question.type == QuizQuestion.findRoot)
+              _romanisationOf(question),
             if (showFeedback && script.english.isNotEmpty)
               Text(
                 script.english,
@@ -1194,7 +1252,10 @@ class _QuizScreenState extends State<QuizScreen>
             children: [
               Text(
                 question.tibetanText,
-                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               RomanisationText(question.romanisation, fontSize: 18),
@@ -1228,7 +1289,7 @@ class _QuizScreenState extends State<QuizScreen>
           borderRadius: BorderRadius.circular(12),
           child: offlineImage(
             question.imageUrl!,
-            height: 200,
+            height: _pictureHeight(context),
             fit: BoxFit.contain,
             loadingBuilder: (context, child, progress) {
               if (progress == null) return child;
@@ -1264,9 +1325,9 @@ class _QuizScreenState extends State<QuizScreen>
       Text(
         question.tibetanText,
         style: AppTextStyles.poppins(
-          fontSize: Breakpoints.isTablet(context) ? 60 : 52,
+          fontSize: Breakpoints.isTablet(context) ? 60 : 46,
           fontWeight: FontWeight.w600,
-          height: 1.3,
+          height: 1.25,
           color: AppTokens.ink(context),
         ),
         textAlign: TextAlign.center,
@@ -1278,6 +1339,11 @@ class _QuizScreenState extends State<QuizScreen>
       ],
     ];
   }
+
+  /// The question picture: 200 on tall phones, less on short ones so the
+  /// question and its options fit without scrolling.
+  double _pictureHeight(BuildContext context) =>
+      (MediaQuery.sizeOf(context).height * 0.22).clamp(120.0, 200.0);
 
   String _getDisplayNameFromFilePath(String filePath) {
     // Extract the filename without extension

@@ -268,6 +268,24 @@ class LessonQueue {
   /// A bonus question asked the harder way: by ear when it has a recording,
   /// from English (no picture) for picture questions, or from the reading
   /// for script questions.
+  /// A gentle start: the first question is one the learner can answer by
+  /// reading (not by ear, building or drawing), with two options.
+  static List<QuizQuestion> easyStart(List<QuizQuestion> questions) {
+    if (questions.isEmpty) return questions;
+    final list = List.of(questions);
+    bool hard(QuizQuestion q) =>
+        q.type == QuizQuestion.listening ||
+        q.type == QuizQuestion.nearSound ||
+        q.type == QuizQuestion.findRoot ||
+        q.answersWithoutOptions;
+    if (hard(list.first)) {
+      final i = list.indexWhere((q) => !hard(q));
+      if (i > 0) list.insert(0, list.removeAt(i));
+    }
+    list[0] = list[0].asWarmUp() ?? list[0];
+    return list;
+  }
+
   static QuizQuestion harder(QuizQuestion q) =>
       q.asReadingReverse() ?? q.asListening() ?? q.asReverse() ?? q;
 }
