@@ -64,7 +64,6 @@ class _OptionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool selected;
-  final bool enabled;
   final Widget? leading;
   final VoidCallback? onTap;
 
@@ -72,7 +71,6 @@ class _OptionCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.selected,
-    this.enabled = true,
     this.leading,
     this.onTap,
   });
@@ -80,17 +78,17 @@ class _OptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final border = selected ? AppColors.primary : AppTokens.cardBorder(context);
-    final ink = enabled ? AppTokens.ink(context) : AppTokens.inkSoft(context);
+    final ink = AppTokens.ink(context);
     return Semantics(
       selected: selected,
-      enabled: enabled,
+      enabled: true,
       button: true,
       child: Material(
         color: AppTokens.surface(context),
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: enabled ? onTap : null,
+          onTap: onTap,
           child: Container(
             constraints: const BoxConstraints(minHeight: 56),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -220,20 +218,8 @@ Future<void> showVoicePicker(
     for (final dialect in TibetanDialect.values) {
       final voices =
           PronunciationVoices.all.where((v) => v.dialect == dialect).toList();
-      if (voices.isEmpty) {
-        children
-          ..add(
-            _OptionCard(
-              title: dialect.label,
-              subtitle: '${dialect.region} · coming soon',
-              selected: false,
-              enabled: false,
-              leading: const Icon(Icons.schedule),
-            ),
-          )
-          ..add(const SizedBox(height: 10));
-        continue;
-      }
+      // A dialect with no published voice is left out, not shown as a
+      // disabled "coming soon" row: learners kept tapping that dead row.
       for (final voice in voices) {
         var subtitle = '${dialect.region} · ${voice.speaker} voice';
         if (available.isNotEmpty && !available.contains(voice.id)) {

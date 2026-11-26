@@ -445,20 +445,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         if (v.dialect == dialect) v,
     ];
     final tibetan = _dialectTibetan(dialect);
-    if (voices.isEmpty) {
-      return [
-        _ChoiceCard(
-          key: ValueKey('voice_${dialect.name}'),
-          title: dialect.label,
-          tibetan: tibetan,
-          subtitle: '${dialect.region} · coming soon',
-          icon: Icons.schedule,
-          hue: AppPalette.lapis,
-          selected: false,
-          onTap: null,
-        ),
-      ];
-    }
+    // A dialect with no published voice yields no card (an empty list), so
+    // onboarding never offers a dead "coming soon" choice.
     return [
       for (final voice in voices)
         _ChoiceCard(

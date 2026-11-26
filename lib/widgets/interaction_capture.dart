@@ -114,6 +114,10 @@ class _InteractionCaptureState extends State<InteractionCapture> {
 
   void _onDown(PointerDownEvent e) {
     if (!_tracker.enabled || !_tracker.captureTaps) return;
+    // A pointer at exactly the origin is not a finger (one can't land within
+    // a fraction of a pixel of the corner): it is a synthetic event with no
+    // position. Recording it logged dead taps at x=0, y=0 on Home and Topics.
+    if (e.position == Offset.zero) return;
     final down = _Down(e.position, e.timeStamp, _hitStore.last);
     if (_downs.isNotEmpty) {
       down.multiTouch = true;
@@ -133,6 +137,9 @@ class _InteractionCaptureState extends State<InteractionCapture> {
     }
     try {
       final size = _screenSize;
+      // No screen size yet (the view is not laid out, e.g. while the app
+      // resumes): every ratio would read 0, so the tap has no usable position.
+      if (size.isEmpty) return;
       final delta = e.position - down.position;
       final ms = (e.timeStamp - down.time).inMilliseconds;
       final x = _ratio(down.position.dx, size.width);

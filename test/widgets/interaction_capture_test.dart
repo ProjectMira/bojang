@@ -55,6 +55,21 @@ void main() {
     await done(tester);
   });
 
+  testWidgets('a pointer with no position (at the origin) is not a tap', (
+    tester,
+  ) async {
+    await pumpApp(tester, const Center(child: Text('Home')));
+    final before = tracker.queue.where((e) => e['event'] == 'tap').length;
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+    expect(tracker.queue.where((e) => e['event'] == 'tap').length, before);
+
+    await tester.tap(find.text('Home'));
+    await tester.pump();
+    expect(tracker.queue.where((e) => e['event'] == 'tap').length, before + 1);
+    await done(tester);
+  });
+
   testWidgets('a switch reports its state and the row title', (tester) async {
     await pumpApp(
       tester,

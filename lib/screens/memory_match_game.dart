@@ -48,6 +48,9 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
   int _totalPairs = 0;
   DateTime? _startedAt;
   bool _roundFinished = false;
+
+  /// A card back tapped while a pair was being checked; it flips next.
+  int? _queuedTap;
   bool _usedFallback = false;
 
   // Offline fallback: Tibetan alphabet pronunciation pairs.
@@ -241,6 +244,7 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
       _secondCardIndex = null;
       _boardMatches = 0;
       _canFlip = true;
+      _queuedTap = null;
       _phase = _GamePhase.playing;
     });
   }
@@ -273,7 +277,12 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
   }
 
   void _onCardTapped(int index) {
-    if (!_canFlip || _cards[index].isFlipped || _cards[index].isMatched) {
+    if (_cards[index].isFlipped || _cards[index].isMatched) return;
+    if (!_canFlip) {
+      // Two cards are face up and about to be checked. Rather than drop the
+      // tap (it felt broken: learners tapped card backs again and again),
+      // remember it and flip this card as soon as the check is done.
+      setState(() => _queuedTap = index);
       return;
     }
 
@@ -341,6 +350,10 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
       _secondCardIndex = null;
       _canFlip = true;
     });
+
+    final queued = _queuedTap;
+    _queuedTap = null;
+    if (queued != null && queued < _cards.length) _onCardTapped(queued);
   }
 
   void _showCompletionDialog() {
@@ -353,83 +366,38 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
       'moves': _moves,
       'duration_s': _elapsedSeconds(),
     });
+    void finish(String action) {
+      Analytics.track('game_result_action', {
+        'game': 'memory_match',
+        'action': action,
+      });
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder:
-          (context) => AlertDialog(
-            backgroundColor: Theme.of(context).cardColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            title: Text(
-              'ལེགས་སོ། Well done!',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
-              ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-              textAlign: TextAlign.center,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const YakMascot(mood: YakMood.cheering, size: 132),
-                const SizedBox(height: 12),
-                Text(
-                  'You matched all $_totalPairs $_topicName words!',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Moves: $_moves',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Analytics.track('game_result_action', {
-                    'game': 'memory_match',
-                    'action': 'change_topic',
-                  });
-                  Navigator.pop(context);
-                  setState(() {
-                    _phase = _GamePhase.pickingTopic;
-                  });
-                },
-                child: Text(
-                  'Change Topic',
-                  style: GoogleFonts.poppins().copyWith(
-                    fontFamilyFallback: const ['Jomolhari'],
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Analytics.track('game_result_action', {
-                    'game': 'memory_match',
-                    'action': 'play_again',
-                  });
-                  Navigator.pop(context);
-                  _startGame(_topicId, _topicName);
-                },
-                child: Text(
-                  'Play Again',
-                  style: GoogleFonts.poppins(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ).copyWith(fontFamilyFallback: const ['Jomolhari']),
-                ),
-              ),
-            ],
+          (dialogContext) => MemoryMatchResultDialog(
+            topicName: _topicName,
+            totalPairs: _totalPairs,
+            moves: _moves,
+            onPlayAgain: () {
+              finish('play_again');
+              Navigator.pop(dialogContext);
+              _startGame(_topicId, _topicName);
+            },
+            onChangeTopic: () {
+              finish('change_topic');
+              Navigator.pop(dialogContext);
+              setState(() {
+                _phase = _GamePhase.pickingTopic;
+              });
+            },
+            onDone: () {
+              finish('done');
+              Navigator.pop(dialogContext);
+              Navigator.of(context).maybePop();
+            },
           ),
     );
   }
@@ -872,6 +840,9 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
                 border:
                     card.isMatched
                         ? Border.all(color: Colors.green, width: 2)
+                        : index == _queuedTap
+                        // Tapped while a pair was being checked: it flips next.
+                        ? Border.all(color: Colors.white, width: 3)
                         : null,
               ),
               child: Center(
@@ -887,6 +858,111 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// The end-of-round card: the result, then the three next steps as large,
+/// full-width buttons stacked where the thumb already is (the middle of the
+/// screen). Learners used to tap the mascot and text there, which did
+/// nothing, and the small text buttons in the corner drew repeat taps.
+class MemoryMatchResultDialog extends StatelessWidget {
+  const MemoryMatchResultDialog({
+    super.key,
+    required this.topicName,
+    required this.totalPairs,
+    required this.moves,
+    required this.onPlayAgain,
+    required this.onChangeTopic,
+    required this.onDone,
+  });
+
+  final String topicName;
+  final int totalPairs;
+  final int moves;
+  final VoidCallback onPlayAgain;
+  final VoidCallback onChangeTopic;
+  final VoidCallback onDone;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).primaryColor;
+    TextStyle font(TextStyle style) =>
+        style.copyWith(fontFamilyFallback: const ['Jomolhari']);
+    const buttonSize = Size.fromHeight(52);
+    final buttonShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+    );
+
+    return AlertDialog(
+      backgroundColor: Theme.of(context).cardColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+      title: Text(
+        'ལེགས་སོ། Well done!',
+        style: font(
+          GoogleFonts.poppins(fontWeight: FontWeight.bold, color: primary),
+        ),
+        textAlign: TextAlign.center,
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Center(child: YakMascot(mood: YakMood.cheering, size: 96)),
+          const SizedBox(height: 8),
+          Text(
+            'You matched all $totalPairs $topicName words in $moves moves!',
+            style: font(GoogleFonts.poppins(fontSize: 15)),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            key: const ValueKey('memory_match_play_again'),
+            onPressed: onPlayAgain,
+            style: FilledButton.styleFrom(
+              backgroundColor: primary,
+              minimumSize: buttonSize,
+              shape: buttonShape,
+            ),
+            icon: const Icon(Icons.replay),
+            label: Text(
+              'Play again',
+              style: font(
+                GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            key: const ValueKey('memory_match_change_topic'),
+            onPressed: onChangeTopic,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: primary,
+              side: BorderSide(color: primary, width: 1.5),
+              minimumSize: buttonSize,
+              shape: buttonShape,
+            ),
+            icon: const Icon(Icons.grid_view_rounded),
+            label: Text(
+              'Change topic',
+              style: font(
+                GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          TextButton(
+            key: const ValueKey('memory_match_done'),
+            onPressed: onDone,
+            style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            child: Text(
+              'Done',
+              style: font(GoogleFonts.poppins(fontSize: 15)),
+            ),
+          ),
+        ],
       ),
     );
   }

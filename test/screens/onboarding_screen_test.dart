@@ -126,9 +126,9 @@ void main() {
 
     await tap(tester, 'knowledge_can_read');
     expect(find.text('Which Tibetan do you want to hear?'), findsOneWidget);
-    expect(find.textContaining('coming soon'), findsOneWidget, reason: 'Amdo');
-    await tap(tester, 'voice_amdo'); // not available: nothing happens
-    expect(find.text('Which Tibetan do you want to hear?'), findsOneWidget);
+    // Every dialect offered can be picked: no dead "coming soon" choice.
+    expect(find.textContaining('coming soon'), findsNothing);
+    expect(find.byKey(const ValueKey('voice_amdo_male')), findsOneWidget);
     await tap(tester, 'voice_kham_male');
 
     await tap(tester, 'goal_2');
