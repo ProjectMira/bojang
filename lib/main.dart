@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'screens/dialogue_player_screen.dart';
 import 'screens/path_navigation.dart';
 import 'screens/splash_screen.dart';
@@ -24,15 +25,30 @@ import 'services/api_service.dart';
 import 'widgets/interaction_capture.dart';
 import 'widgets/update_gate.dart';
 
+/// `host:port` of a Firebase Auth emulator (end-to-end tests only).
+const String _authEmulator = String.fromEnvironment('BOJANG_AUTH_EMULATOR');
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initServices();
+  runApp(const PostHogWidget(child: MyApp()));
+  startBackgroundServices();
+}
 
+/// Everything main() sets up before the first frame. Split out so the
+/// end-to-end suite (integration_test/) starts the app the same way.
+Future<void> initServices() async {
   // Initialize services
   if (AppConfig.firebaseEnabled) {
     try {
       await Firebase.initializeApp();
     } catch (e) {
       debugPrint('Firebase initialization skipped: $e');
+    }
+    if (_authEmulator.isNotEmpty && Firebase.apps.isNotEmpty) {
+      final parts = _authEmulator.split(':');
+      await firebase_auth.FirebaseAuth.instance
+          .useAuthEmulator(parts[0], int.parse(parts[1]));
     }
   } else {
     debugPrint('Firebase initialization skipped: iOS config disabled');
@@ -60,9 +76,10 @@ void main() async {
   } catch (e) {
     debugPrint('Service initialization failed: $e');
   }
+}
 
-  runApp(const PostHogWidget(child: MyApp()));
-
+/// Work main() starts once the app is on screen.
+void startBackgroundServices() {
   // Set up reminders only once the app is on screen: on a fresh install this
   // shows iOS's notification permission prompt, and awaiting it before
   // runApp left new learners on a blank screen until they answered.

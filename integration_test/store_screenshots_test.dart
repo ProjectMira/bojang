@@ -4,11 +4,17 @@
 //
 // It pumps the screens directly instead of going through main(), so no
 // notification prompt appears, and it seeds a few days of progress so the
-// streak and XP are not all zeros. Lessons and games load real words from the
-// live backend.
+// streak and XP are not all zeros. Lessons and games load words from
+// whichever backend BOJANG_API_BASE_URL points at.
 //
-// Run through the script, not by hand:
-//   ci/scripts/store_screenshots.sh <simulator-udid> <output-dir>
+// Run through a script, not by hand:
+//   ci/scripts/e2e.sh ... integration_test/store_screenshots_test.dart
+//     local backend; part of every full e2e run; saves build/e2e/<run>/store/
+//     <device>/ for iPhone 16 Pro Max (6.9") and iPad Pro 13". Pictures are
+//     placeholders unless BOJANG_MEDIA_DIR has real ones.
+//   ci/scripts/store_screenshots.sh --uses-production <udid> <output-dir>
+//     the live backend's real words and pictures. Creates learning sessions
+//     in production; only with the owner's OK.
 
 import 'dart:convert';
 
@@ -106,14 +112,35 @@ void main() {
       await wait(4);
     }
 
-    Future<void> tapText(String text) async {
-      await tester.tap(find.text(text).first);
+    /// Waits (up to 20 s: words come over the network) for [finder], then
+    /// taps it.
+    Future<void> tapFound(Finder finder) async {
+      for (var i = 0; i < 200 && finder.evaluate().isEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      // Long topic lists put some topics below the fold on a phone.
+      await tester.ensureVisible(finder.first);
       await wait(0.5);
+      await tester.tap(finder.first);
+      await wait(0.5);
+    }
+
+    Future<void> tapText(String text) => tapFound(find.text(text));
+
+    /// Home scrolls itself down to the current lesson; show it from the top
+    /// (the streak and goal chips, the unit header).
+    Future<void> homeFromTop() async {
+      final list = find.byType(Scrollable).hitTestable();
+      if (list.evaluate().isNotEmpty) {
+        await tester.fling(list.first, const Offset(0, 3000), 4000);
+        await wait(1.5);
+      }
     }
 
     // 1. Home
     await open(const MainNavigationScreen());
     await wait(6);
+    await homeFromTop();
     await shot('01-home');
 
     // 2. A picture question
@@ -175,10 +202,14 @@ void main() {
     await wait(2);
     await shot('08-flashcards');
 
-    // 9. Streak
+    // 9. Streak: the streak sheet from Home's streak chip (there is no
+    // Streak tab any more).
     await open(const MainNavigationScreen());
     await wait(4);
-    await tapText('Streak');
+    await homeFromTop();
+    final semantics = tester.ensureSemantics();
+    await tapFound(find.bySemanticsLabel(RegExp('day streak')));
+    semantics.dispose();
     await wait(1.5);
     await shot('09-streak');
 

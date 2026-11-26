@@ -450,7 +450,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             fontSize: 12,
           ),
         ),
-        trailing: trailing,
+        // A switch here has no text of its own: VoiceOver reads it by the
+        // row's title.
+        trailing:
+            trailing == null ? null : Semantics(label: title, child: trailing),
         onTap: onTap,
       ),
     );

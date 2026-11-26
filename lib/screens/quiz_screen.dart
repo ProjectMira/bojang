@@ -58,6 +58,11 @@ class QuizScreen extends StatefulWidget {
     this.source,
   });
 
+  /// The question on screen, so end-to-end tests can pick the right or a
+  /// wrong option (nothing on screen says which is right before answering).
+  @visibleForTesting
+  static QuizQuestion? debugCurrentQuestion;
+
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
@@ -892,6 +897,7 @@ class _QuizScreenState extends State<QuizScreen>
     LessonQueue lesson,
   ) {
     final question = item.question;
+    QuizScreen.debugCurrentQuestion = question;
     final label = item.label;
     return Column(
       children: [
@@ -997,6 +1003,7 @@ class _QuizScreenState extends State<QuizScreen>
                         }
 
                         return Padding(
+                          key: ValueKey('quiz-option-$index'),
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: Card(
                             elevation: 1.5,

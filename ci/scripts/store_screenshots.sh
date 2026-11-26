@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Captures App Store screenshots from a booted iOS simulator.
 #
-#   ci/scripts/store_screenshots.sh <simulator-udid> <output-dir>
+#   ci/scripts/store_screenshots.sh --uses-production <simulator-udid> <output-dir>
 #
 # Runs integration_test/store_screenshots_test.dart on the simulator. The test
 # prints "SHOT:<name>" each time a screen is ready and then holds it; this
@@ -17,6 +17,16 @@
 #   iPhone 16 Pro Max   1320x2868  6.9" iPhone
 #   iPad Pro 13-inch    2064x2752  13" iPad
 set -euo pipefail
+
+# This talks to the PRODUCTION backend (every lesson or game it opens creates
+# a learning session there). Prefer ci/scripts/e2e.sh, which captures the
+# same set against a local backend. Only run this with the owner's OK.
+if [ "${1:-}" != "--uses-production" ]; then
+  echo "store_screenshots.sh hits the production backend. Use ci/scripts/e2e.sh"
+  echo "(local backend) instead, or pass --uses-production as the first argument."
+  exit 2
+fi
+shift
 
 UDID="${1:?simulator udid}"
 OUT="${2:?output directory}"

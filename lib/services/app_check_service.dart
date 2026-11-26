@@ -4,6 +4,8 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
+import 'app_config.dart';
+
 /// Firebase App Check: proves to the backend that a request comes from the
 /// genuine Bojang app on a real device (DeviceCheck on iOS, Play Integrity on
 /// Android). ApiService sends the token as `X-Firebase-AppCheck`; the
@@ -18,7 +20,7 @@ class AppCheckService {
   static bool _active = false;
 
   static Future<void> init() async {
-    if (_active || kIsWeb || Firebase.apps.isEmpty) return;
+    if (_active || kIsWeb || Firebase.apps.isEmpty || AppConfig.e2e) return;
     try {
       await FirebaseAppCheck.instance.activate(
         appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck,

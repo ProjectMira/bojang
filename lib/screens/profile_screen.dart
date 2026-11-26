@@ -182,6 +182,7 @@ class ProfileScreenState extends State<ProfileScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.settings),
+                tooltip: 'Settings',
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -195,6 +196,7 @@ class ProfileScreenState extends State<ProfileScreen> {
               if (currentUser != null)
                 IconButton(
                   icon: const Icon(Icons.logout),
+                  tooltip: 'Sign out',
                   onPressed: _handleLogout,
                 ),
             ],
