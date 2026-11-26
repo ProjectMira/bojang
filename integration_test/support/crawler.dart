@@ -150,7 +150,10 @@ List<_Tappable> _tappables(
       continue;
     final centreKey = '${(c.dx / 6).round()}:${(c.dy / 6).round()}';
     if (!centres.add(centreKey)) continue;
-    final label = _widgetLabel(e);
+    var label = _widgetLabel(e);
+    if (label.startsWith('(')) {
+      label = '${label.substring(0, label.length - 1)} ${rect.width.round()}x${rect.height.round()} at ${rect.left.round()},${rect.top.round()})';
+    }
     if (skipLabels.any(
       (s) => _exactSkips.contains(s) ? label == s : label.contains(s),
     ))
