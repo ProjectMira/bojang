@@ -12,6 +12,7 @@ import '../../services/notification_primer.dart';
 import '../../services/pronunciation_player.dart';
 import '../../services/progress_service.dart';
 import '../../theme/app_tokens.dart';
+import '../../services/game_topic_order.dart';
 import '../../utils/topic_visuals.dart';
 import '../../utils/yak_lines.dart';
 import '../../widgets/app_text_style.dart';
@@ -123,20 +124,21 @@ class _GameHostState extends State<GameHost> {
       debugPrint('Game topics failed to load: $e');
       topics = const [];
     }
+    final usable =
+        topics
+            .where(
+              (topic) =>
+                  topic.wordCount >= widget.minWords &&
+                  (!widget.needsImages || topic.hasImages),
+            )
+            .toList();
+    final ordered = await GameTopicOrder.apply(usable, (t) => t.id);
     if (!mounted) return;
-    setState(() {
-      _topics =
-          topics
-              .where(
-                (topic) =>
-                    topic.wordCount >= widget.minWords &&
-                    (!widget.needsImages || topic.hasImages),
-              )
-              .toList();
-    });
+    setState(() => _topics = ordered);
   }
 
   Future<void> _start(GameTopic topic, {bool random = false}) async {
+    GameTopicOrder.played(topic.id);
     Analytics.track('game_topic_selected', {
       'game': widget.gameId,
       'topic': topic.name,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
+import '../services/game_topic_order.dart';
 import '../services/analytics.dart';
 import '../services/api_service.dart';
 import 'package:provider/provider.dart';
@@ -98,22 +99,28 @@ class _MemoryMatchGameState extends State<MemoryMatchGame>
 
   Future<void> _loadTopics() async {
     final levels = await ApiService().getLearningLevels();
+    // Photo matching needs topics where every word has an illustration.
+    final usable =
+        (levels ?? [])
+            .where(
+              (level) =>
+                  level['has_images'] == true &&
+                  (level['word_count'] as int? ?? 0) >= 4,
+            )
+            .toList();
+    final ordered = await GameTopicOrder.apply(
+      usable,
+      (level) => (level['id'] ?? '').toString(),
+    );
     if (!mounted) return;
     setState(() {
       _topicsLoading = false;
-      // Photo matching needs topics where every word has an illustration.
-      _topics =
-          (levels ?? [])
-              .where(
-                (level) =>
-                    level['has_images'] == true &&
-                    (level['word_count'] as int? ?? 0) >= 4,
-              )
-              .toList();
+      _topics = ordered;
     });
   }
 
   Future<void> _startGame(String? topicId, String topicName) async {
+    GameTopicOrder.played(topicId);
     Analytics.track('game_topic_selected', {
       'game': 'memory_match',
       'topic': topicName,
